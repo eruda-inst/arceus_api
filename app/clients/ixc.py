@@ -1,5 +1,5 @@
-import base64
 import httpx
+import base64
 from fastapi import HTTPException, status
 from app.core.config import settings
 from typing import Dict, Any, List
@@ -51,4 +51,14 @@ class IXCClient:
             "oper": "=",
         }
         data = self._make_request("cliente_contrato", payload)
+        return data
+    
+
+    def get_status_conexao(self, id_login_ixc: int)-> List[Dict[str, Any]]:
+        payload = {
+            "qtype": "radusuarios.id",
+            "query": id_login_ixc,
+            "oper": "=",
+        }
+        data = self._make_request("radusuarios", payload)
         return data

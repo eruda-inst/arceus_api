@@ -1,7 +1,7 @@
 import requests
+from typing import Dict, Any
 from fastapi import HTTPException
 from app.core.config import settings
-from typing import Dict, Any
 
 
 class OpaClient:

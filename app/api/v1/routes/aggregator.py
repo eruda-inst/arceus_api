@@ -9,6 +9,13 @@ service = AggregatorService()
 
 @router.get("/contratos", response_model=ContracListOut)
 def get_contratos_cliente(
-    protocolo_atendimento_opa: str = Query(min_length=12, max_length=12, regex="NWT[\d]{9}", description="Protocolo de atendimento do cliente no OpaSuite.")
+    protocolo_atendimento_opa: str = Query(min_length=12, max_length=12, description="Protocolo de atendimento do cliente no OpaSuite.")
 ):
     return service.get_contratos_cliente(protocolo_atendimento_opa)
+
+
+@router.get("/status_conexao")
+def get_status_conexao(
+    id_login_ixc: int = Query(ge=1, description="")
+):
+    return service.get_status_conexao(id_login_ixc)
