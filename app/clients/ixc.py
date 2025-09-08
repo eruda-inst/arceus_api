@@ -44,11 +44,13 @@ class IXCClient:
             ) from e
 
 
-    def get_contratos_cliente(self, id_cliente_ixc: str) -> List[Dict[str, Any]]:
+    def get_contratos_cliente(self, id_cliente_ixc: str, page: int = 1, per_page: int = 1) -> List[Dict[str, Any]]:
         payload = {
             "qtype": "cliente_contrato.id_cliente",
             "query": id_cliente_ixc,
             "oper": "=",
+            "page": page,
+            "rp": per_page
         }
         data = self._make_request("cliente_contrato", payload)
         return data
