@@ -44,7 +44,7 @@ class IXCClient:
             ) from e
 
 
-    async def get_contratos_cliente(self, id_cliente_ixc: str, page: int = 1, per_page: int = 1) -> List[Dict[str, Any]]:
+    async def get_contratos_ativos_cliente(self, id_cliente_ixc: str, page: int = 1, per_page: int = 1) -> List[Dict[str, Any]]:
         payload = {
             "qtype": "cliente_contrato.id_cliente",
             "query": id_cliente_ixc,
@@ -74,6 +74,7 @@ class IXCClient:
         }
         data = await self._make_request("cliente_contrato", payload)
         return data
+
 
     async def get_status_onu(self, id_login_ixc: int, mac_onu_ixc: str):
         payload = {

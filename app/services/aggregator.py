@@ -12,7 +12,7 @@ class AggregatorService:
         self.ixc_client = IXCClient()
 
 
-    async def get_contratos_cliente(
+    async def get_contratos_ativos_cliente(
         self, protocolo_atendimento_opa: str, page: int = 1, per_page: int = 10
     ) -> ContracListOut:
         try:
@@ -26,14 +26,10 @@ class AggregatorService:
                 raise HTTPException(status_code=404, detail="Cliente não encontrado no IXC")
             id_cliente_ixc = id_cliente_ixc_res["data"][0]["id"]
 
-            contratos_res = await self.ixc_client.get_contratos_cliente(id_cliente_ixc, page, per_page)
+            contratos_res = await self.ixc_client.get_contratos_ativos_cliente(id_cliente_ixc, page, per_page)
             registros = contratos_res.get("registros", [])
-            total_raw = contratos_res.get("total", len(registros))
-
-            try:
-                total = int(total_raw)
-            except (TypeError, ValueError):
-                total = len(registros)
+            registros_ativos = [r for r in registros if r["status"] != "I" and r["status"] != "D"]
+            total = len(registros_ativos)
 
             meta = Meta(total=total, page=page, per_page=per_page)
 
@@ -45,7 +41,7 @@ class AggregatorService:
             )
 
             return ContracListOut(
-                data=[Contract(**c) for c in registros],
+                data=[Contract(**c) for c in registros_ativos],
                 meta=meta,
                 links=links
             )

@@ -10,13 +10,13 @@ router  = APIRouter()
 service = AggregatorService()
 
 
-@router.get("/contratos", response_model=ContracListOut)
-async def get_contratos_cliente(
+@router.get("/contratos_ativos_cliente", response_model=ContracListOut)
+async def get_contratos_ativos_cliente(
     protocolo_atendimento_opa: str = Query(min_length=12, max_length=12, description="Protocolo de atendimento do cliente no OpaSuite."),
     page: int = Query(ge=1, default=1, description="Número da página."),
     per_page: int = Query(ge=1, default=10, description="Itens por página.")
 ):
-    return await service.get_contratos_cliente(protocolo_atendimento_opa, page, per_page)
+    return await service.get_contratos_ativos_cliente(protocolo_atendimento_opa, page, per_page)
 
 
 @router.get("/status_conexao", response_model=StatusConexaoOut)
