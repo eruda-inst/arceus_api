@@ -1,6 +1,7 @@
 from app.clients.ixc import IXCClient
 from app.clients.opa import OpaClient
 from fastapi import HTTPException, status
+from app.schemas.onu import StatusONU, StatusONUOut
 from app.schemas.conexao import StatusConexao, StatusConexaoOut
 from app.schemas.contrato import ContracListOut, Meta, Links, Contract, StatusContratoOut, StatusContrato
 
@@ -94,6 +95,37 @@ class AggregatorService:
             return StatusContratoOut(
                 data=StatusContrato(
                     status_contrato=status_contrato
+                )
+            )
+        except HTTPException:
+            raise
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Erro interno ao processar solicitação: {str(e)}"
+            )
+        
+
+    async def get_status_onu(self, id_login_ixc: int, mac_onu_ixc: int) -> StatusONUOut:
+        try:
+            if not id_login_ixc and not mac_onu_ixc:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="É necessário informar id_login_ixc ou mac_onu_ixc."
+                )
+            status_onu_res = await self.ixc_client.get_status_onu(id_login_ixc, mac_onu_ixc)
+            registros = status_onu_res.get("registros", [])
+            if not registros:
+                raise HTTPException(
+                    status=status.HTTP_404_NOT_FOUND,
+                    detail="Nenhuma ONU."
+                )
+            sinal_rx = registros[0].get("sinal_rx")
+            sinal_tx = registros[0].get("sinal_tx")
+            return StatusONUOut(
+                data=StatusONU(
+                    sinal_rx=sinal_rx,
+                    sinal_tx=sinal_tx
                 )
             )
         except HTTPException:
