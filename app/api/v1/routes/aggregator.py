@@ -1,5 +1,6 @@
 from typing import Optional
 from fastapi import APIRouter, Query
+from app.schemas.onu import StatusONUOut
 from app.schemas.conexao import StatusConexaoOut
 from app.services.aggregator import AggregatorService
 from app.schemas.contrato import ContracListOut, StatusContratoOut
@@ -32,7 +33,7 @@ async def get_status_contrato(
     return await service.get_status_contrato(id_contrato_ixc)
 
 
-@router.get("/status_onu")
+@router.get("/status_onu", response_model=StatusONUOut)
 async def get_status_onu(
     id_login_ixc: Optional[int] = Query(default=None, ge=1, description="ID de login do cliente no IXCSoft."),
     mac_onu_ixc: Optional[str] = Query(default=None, max_length=50, description="MAC Address da ONU.")
