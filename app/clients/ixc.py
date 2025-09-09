@@ -51,11 +51,6 @@ class IXCClient:
             ) from e
 
 
-    async def abrir_atendimento(self, atendimento: AtendimentoIn) -> None:
-        payload = atendimento.model_dump()
-        await self._make_request("su_ticket", payload, include_ixcsoft=False)
-
-
     async def get_contratos_ativos_cliente(self, id_cliente_ixc: str, page: int = 1, per_page: int = 1) -> List[Dict[str, Any]]:
         payload = {
             "qtype": "cliente_contrato.id_cliente",
@@ -99,3 +94,13 @@ class IXCClient:
         }
         data = await self._make_request("radpop_radio_cliente_fibra", payload)
         return data
+    
+
+    async def abrir_atendimento(self, atendimento: AtendimentoIn) -> None:
+        payload = atendimento.model_dump()
+        await self._make_request("su_ticket", payload, include_ixcsoft=False)
+    
+
+    async def enviar_sinal_desconexao(self, id_login_ixc: int) -> None:
+        payload = {"id": id_login_ixc}
+        await self._make_request("desconectar_clientes", payload, include_ixcsoft=False)

@@ -144,3 +144,15 @@ class AggregatorService:
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=f"Erro interno ao processar solicitação: {str(e)}"
             )
+        
+
+    async def enviar_sinal_desconexao(self, id_login_ixc: input):
+        try:
+            await self.ixc_client.enviar_sinal_desconexao(id_login_ixc)
+        except HTTPException:
+            raise
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Erro interno ao processar solicitação: {str(e)}"
+            )

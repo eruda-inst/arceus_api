@@ -45,3 +45,10 @@ async def get_status_onu(
 @router.post("/abrir_atendimento", status_code=status.HTTP_204_NO_CONTENT)
 async def abrir_atendimento(atendimento: AtendimentoIn) -> None:
     return await service.ixc_client.abrir_atendimento(atendimento)
+
+
+@router.post("/enviar_sinal_desconexao", status_code=status.HTTP_204_NO_CONTENT)
+async def enviar_sinal_desconexao(
+    id_login_ixc: int = Query(default=None, ge=1, description="ID de login do cliente no IXCSoft.")
+):
+    return await service.enviar_sinal_desconexao(id_login_ixc)
