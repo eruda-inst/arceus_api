@@ -3,28 +3,35 @@ import base64
 from typing import Dict, Any, List
 from app.core.config import settings
 from fastapi import HTTPException, status
+from app.schemas.atendimento import AtendimentoIn
 
 
 class IXCClient:
     def __init__(self) -> None:
         self.token = settings.IXC_TOKEN
         self.base_url = "https://ixc.newnet.com.br/webservice/v1"
-        self.headers = self._create_headers()
+        self.auth_header = self._create_auth_header()
 
 
-    def _create_headers(self) -> Dict[str, str]:
+    def _create_auth_header(self) -> str:
         token_encoded = base64.b64encode(self.token.encode("utf-8")).decode("utf-8")
-        return {
-            "ixcsoft": "listar",
-            "Authorization": f"Basic {token_encoded}",
-        }
+        return f"Basic {token_encoded}"
 
 
-    async def _make_request(self, endpoint: str, payload: Dict[str, Any]) -> Dict[str, Any]:
+    def _get_headers(self, include_ixcsoft: bool = True) -> Dict[str, str]:
+        headers = {"Authorization": self.auth_header}
+        if include_ixcsoft:
+            headers["ixcsoft"] = "listar"
+        return headers
+
+
+    async def _make_request(self, endpoint: str, payload: Dict[str, Any], include_ixcsoft: bool = True) -> Dict[str, Any]:
         url = f"{self.base_url}/{endpoint}"
+        headers = self._get_headers(include_ixcsoft)
+        
         try:
             async with httpx.AsyncClient(timeout=30.0) as client:
-                res = await client.post(url=url, headers=self.headers, json=payload)
+                res = await client.post(url=url, headers=headers, json=payload)
                 res.raise_for_status()
                 return res.json()
         except httpx.RequestError as e:
@@ -42,6 +49,11 @@ class IXCClient:
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Resposta inválida do servidor IXC"
             ) from e
+
+
+    async def abrir_atendimento(self, atendimento: AtendimentoIn) -> None:
+        payload = atendimento.model_dump()
+        await self._make_request("su_ticket", payload, include_ixcsoft=False)
 
 
     async def get_contratos_ativos_cliente(self, id_cliente_ixc: str, page: int = 1, per_page: int = 1) -> List[Dict[str, Any]]:
@@ -77,9 +89,12 @@ class IXCClient:
 
 
     async def get_status_onu(self, id_login_ixc: int, mac_onu_ixc: str):
+        query_field = "id_login" if id_login_ixc else "mac"
+        query_value = id_login_ixc if id_login_ixc else mac_onu_ixc
+        
         payload = {
-            "qtype": "radpop_radio_cliente_fibra." + "id_login" if id_login_ixc else "mac",
-            "query": id_login_ixc if id_login_ixc else mac_onu_ixc,
+            "qtype": f"radpop_radio_cliente_fibra.{query_field}",
+            "query": query_value,
             "oper": "=",
         }
         data = await self._make_request("radpop_radio_cliente_fibra", payload)

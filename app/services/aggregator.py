@@ -1,9 +1,10 @@
 from app.clients.ixc import IXCClient
 from app.clients.opa import OpaClient
 from fastapi import HTTPException, status
+from app.schemas.atendimento import AtendimentoIn
 from app.schemas.onu import StatusONU, StatusONUOut
 from app.schemas.conexao import StatusConexao, StatusConexaoOut
-from app.schemas.contrato import ContracListOut, Meta, Links, Contract, StatusContratoOut, StatusContrato
+from app.schemas.contrato import ContratoListOut, Meta, Links, Contrato, StatusContratoOut, StatusContrato
 
 
 class AggregatorService:
@@ -14,7 +15,7 @@ class AggregatorService:
 
     async def get_contratos_ativos_cliente(
         self, protocolo_atendimento_opa: str, page: int = 1, per_page: int = 10
-    ) -> ContracListOut:
+    ) -> ContratoListOut:
         try:
             id_cliente_opa_res = self.opa_client.get_id_cliente_opa(protocolo_atendimento_opa)
             if not id_cliente_opa_res.get("data"):
@@ -40,8 +41,8 @@ class AggregatorService:
                 prev=(f"{base_url}&page={page-1}&per_page={per_page}" if page > 1 else None),
             )
 
-            return ContracListOut(
-                data=[Contract(**c) for c in registros_ativos],
+            return ContratoListOut(
+                data=[Contrato(**c) for c in registros_ativos],
                 meta=meta,
                 links=links
             )
@@ -124,6 +125,18 @@ class AggregatorService:
                     sinal_tx=sinal_tx
                 )
             )
+        except HTTPException:
+            raise
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Erro interno ao processar solicitação: {str(e)}"
+            )
+        
+
+    async def abrir_atendimento(self, atendimento: AtendimentoIn) -> None:
+        try:
+            await self.ixc_client.abrir_atendimento(atendimento)
         except HTTPException:
             raise
         except Exception as e:

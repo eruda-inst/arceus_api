@@ -1,0 +1,16 @@
+from typing import Literal, Optional
+from pydantic import BaseModel, Field
+
+
+class AtendimentoIn(BaseModel):
+    id_login: int = Field(default=None, ge=1, description="ID de login do cliente.")
+    id_assunto: int = Field(default=None, ge=1, description="ID do assunto do atendimento.")
+    id_cliente: int = Field(default=None, ge=1, description="ID do cliente.")
+    menssagem: str = Field(default=None, max_length=999, description="Mensagem descritiva.")
+    origem_endereco: Optional[Literal["C", "L", "CC", "M"]] = Field(default="L", description="Origem de endereço.")
+    tipo: Optional[Literal["C", "E"]] = Field(default="C", description="Tipo do atendimento.")
+    titulo: str = Field(default=None, max_length=200, description="Título do atendimento.")
+    prioridade: Optional[Literal["B", "M", "A", "C"]] = Field(default="M", description="Pioridade do atendimento.")
+    su_status: Optional[Literal["N", "P", "EP", "S", "C"]] = Field(default="N", description="Status do atendimento.")
+    id_ticket_setor: int =  Field(default=None, ge=1, description="Setor do atendimento.")
+    id_contrato: int = Field(default=None, ge=1, description="ID de contrato do cliente.")

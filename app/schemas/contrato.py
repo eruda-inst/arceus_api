@@ -13,7 +13,7 @@ class Links(BaseModel):
     next: Optional[str] = Field(default=None, description="URL para a próxima página de resultados, se disponível.")
     prev: Optional[str] = Field(default=None, description="URL para a página anterior de resultados, se disponível.")
 
-
+ # Eu gostaria de poder reaproveitar isto, ao invés de copiar e colar em Contrato
 class StatusContrato(BaseModel):
     status_contrato: Optional[Literal["P", "A", "I", "N", "D"]] = Field(default="P", description="Status atual do contrato.")
 
@@ -22,13 +22,13 @@ class StatusContratoOut(BaseModel):
     data: StatusContrato
 
 
-class Contract(BaseModel):
+class Contrato(BaseModel):
     id: str = Field(default=None, max_length=11, description="ID único do contrato.")
     status: Optional[Literal["P", "A", "I", "N", "D"]] = Field(default="P", description="Status atual do contrato.")
     contrato: str = Field(default=None, max_length=100, description="Número do contrato.")
 
 
-class ContracListOut(BaseModel):
-    data: List[Contract] = Field(default=None, description="Lista de contratos")
+class ContratoListOut(BaseModel):
+    data: List[Contrato] = Field(default=None, description="Lista de contratos")
     meta: Meta
     links: Links
