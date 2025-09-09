@@ -75,7 +75,7 @@ class IXCClient:
         data = await self._make_request("cliente_contrato", payload)
         return data
 
-    async def get_status_onu(self, id_login_ixc: int, mac_onu_ixc: int):
+    async def get_status_onu(self, id_login_ixc: int, mac_onu_ixc: str):
         payload = {
             "qtype": "radpop_radio_cliente_fibra." + "id_login" if id_login_ixc else "mac",
             "query": id_login_ixc if id_login_ixc else mac_onu_ixc,

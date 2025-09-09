@@ -35,6 +35,6 @@ async def get_status_contrato(
 @router.get("/status_onu")
 async def get_status_onu(
     id_login_ixc: Optional[int] = Query(default=None, ge=1, description="ID de login do cliente no IXCSoft."),
-    mac_onu_ixc: Optional[int] = Query(default=None, ge=1, description="MAC Address da ONU.")
+    mac_onu_ixc: Optional[str] = Query(default=None, max_length=50, description="MAC Address da ONU.")
 ):
     return await service.get_status_onu(id_login_ixc, mac_onu_ixc)

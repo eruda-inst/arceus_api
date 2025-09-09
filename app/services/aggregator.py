@@ -106,7 +106,7 @@ class AggregatorService:
             )
         
 
-    async def get_status_onu(self, id_login_ixc: int, mac_onu_ixc: int) -> StatusONUOut:
+    async def get_status_onu(self, id_login_ixc: int, mac_onu_ixc: str) -> StatusONUOut:
         try:
             if not id_login_ixc and not mac_onu_ixc:
                 raise HTTPException(
