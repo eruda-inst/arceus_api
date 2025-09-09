@@ -1,8 +1,8 @@
 import httpx
 import base64
-from fastapi import HTTPException, status
-from app.core.config import settings
 from typing import Dict, Any, List
+from app.core.config import settings
+from fastapi import HTTPException, status
 
 
 class IXCClient:
@@ -20,13 +20,13 @@ class IXCClient:
         }
 
 
-    def _make_request(self, endpoint: str, payload: Dict[str, Any]) -> Dict[str, Any]:
+    async def _make_request(self, endpoint: str, payload: Dict[str, Any]) -> Dict[str, Any]:
         url = f"{self.base_url}/{endpoint}"
         try:
-            with httpx.Client(timeout=30.0) as client:
-                res = client.post(url, headers=self.headers, json=payload)
-            res.raise_for_status()
-            return res.json()
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                res = await client.post(url=url, headers=self.headers, json=payload)
+                res.raise_for_status()
+                return res.json()
         except httpx.RequestError as e:
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
@@ -44,7 +44,7 @@ class IXCClient:
             ) from e
 
 
-    def get_contratos_cliente(self, id_cliente_ixc: str, page: int = 1, per_page: int = 1) -> List[Dict[str, Any]]:
+    async def get_contratos_cliente(self, id_cliente_ixc: str, page: int = 1, per_page: int = 1) -> List[Dict[str, Any]]:
         payload = {
             "qtype": "cliente_contrato.id_cliente",
             "query": id_cliente_ixc,
@@ -52,15 +52,27 @@ class IXCClient:
             "page": page,
             "rp": per_page
         }
-        data = self._make_request("cliente_contrato", payload)
+        data = await self._make_request("cliente_contrato", payload)
         return data
-    
 
-    def get_status_conexao(self, id_login_ixc: int)-> List[Dict[str, Any]]:
+
+    async def get_status_conexao(self, id_login_ixc: int) -> List[Dict[str, Any]]:
         payload = {
             "qtype": "radusuarios.id",
             "query": id_login_ixc,
             "oper": "=",
         }
-        data = self._make_request("radusuarios", payload)
+        data = await self._make_request("radusuarios", payload)
+        return data
+    
+
+    async def get_status_contrato(self, id_contrato_ixc: int):
+        payload = {
+            "qtype": "cliente_contrato.id",
+            "query": id_contrato_ixc,
+            "oper": "=",
+            "page": 1,
+            "rp": 1
+        }
+        data = await self._make_request("cliente_contrato", payload)
         return data

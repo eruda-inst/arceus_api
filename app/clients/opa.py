@@ -1,7 +1,7 @@
 import requests
 from typing import Dict, Any
-from fastapi import HTTPException
 from app.core.config import settings
+from fastapi import HTTPException, status
 
 
 class OpaClient:
@@ -19,7 +19,7 @@ class OpaClient:
             return res.json()
         except requests.exceptions.RequestException as e:
             raise HTTPException(
-                status_code=500,
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=f"Erro na API do OPA: {str(e)}"
             )
 

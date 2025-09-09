@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Query
-from app.schemas.contract import ContracListOut
 from app.services.aggregator import AggregatorService
+from app.schemas.conexao import StatusConexao, StatusConexaoOut
+from app.schemas.contrato import ContracListOut, StatusContrato, StatusContratoOut
 
 
 router  = APIRouter()
@@ -8,16 +9,23 @@ service = AggregatorService()
 
 
 @router.get("/contratos", response_model=ContracListOut)
-def get_contratos_cliente(
+async def get_contratos_cliente(
     protocolo_atendimento_opa: str = Query(min_length=12, max_length=12, description="Protocolo de atendimento do cliente no OpaSuite."),
     page: int = Query(ge=1, default=1, description="Número da página."),
     per_page: int = Query(ge=1, default=10, description="Itens por página.")
 ):
-    return service.get_contratos_cliente(protocolo_atendimento_opa, page, per_page)
+    return await service.get_contratos_cliente(protocolo_atendimento_opa, page, per_page)
 
 
-@router.get("/status_conexao")
-def get_status_conexao(
-    id_login_ixc: int = Query(ge=1, description="")
+@router.get("/status_conexao", response_model=StatusConexaoOut)
+async def get_status_conexao(
+    id_login_ixc: int = Query(ge=1, description="ID de login do cliente no IXCSoft.")
 ):
-    return service.get_status_conexao(id_login_ixc)
+    return await service.get_status_conexao(id_login_ixc)
+
+
+@router.get("/status_contrato", response_model=StatusContratoOut)
+async def get_status_contrato(
+    id_contrato_ixc: int = Query(ge=1, description="ID de contrato do cliente no IXCSoft.")
+):
+    return await service.get_status_contrato(id_contrato_ixc)

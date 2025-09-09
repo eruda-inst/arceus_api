@@ -1,9 +1,8 @@
-from typing import Optional
 from app.clients.ixc import IXCClient
 from app.clients.opa import OpaClient
 from fastapi import HTTPException, status
 from app.schemas.conexao import StatusConexao, StatusConexaoOut
-from app.schemas.contract import ContracListOut, Meta, Links, Contract
+from app.schemas.contrato import ContracListOut, Meta, Links, Contract, StatusContratoOut, StatusContrato
 
 
 class AggregatorService:
@@ -12,9 +11,9 @@ class AggregatorService:
         self.ixc_client = IXCClient()
 
 
-    def get_contratos_cliente(
+    async def get_contratos_cliente(
         self, protocolo_atendimento_opa: str, page: int = 1, per_page: int = 10
-    ) -> Optional[ContracListOut]:
+    ) -> ContracListOut:
         try:
             id_cliente_opa_res = self.opa_client.get_id_cliente_opa(protocolo_atendimento_opa)
             if not id_cliente_opa_res.get("data"):
@@ -26,15 +25,15 @@ class AggregatorService:
                 raise HTTPException(status_code=404, detail="Cliente não encontrado no IXC")
             id_cliente_ixc = id_cliente_ixc_res["data"][0]["id"]
 
-            contratos_res = self.ixc_client.get_contratos_cliente(id_cliente_ixc, page, per_page)
+            contratos_res = await self.ixc_client.get_contratos_cliente(id_cliente_ixc, page, per_page)
             registros = contratos_res.get("registros", [])
-            total = contratos_res.get("total", len(registros))
-
             total_raw = contratos_res.get("total", len(registros))
+
             try:
                 total = int(total_raw)
             except (TypeError, ValueError):
                 total = len(registros)
+
             meta = Meta(total=total, page=page, per_page=per_page)
 
             base_url = f"/contratos?protocolo_atendimento_opa={protocolo_atendimento_opa}"
@@ -58,15 +57,45 @@ class AggregatorService:
             )
         
 
-    def get_status_conexao(self, id_login_ixc: int) -> StatusConexaoOut:
+    async def get_status_conexao(self, id_login_ixc: int) -> StatusConexaoOut:
         try:
-            status_conexao_res = self.ixc_client.get_status_conexao(id_login_ixc)
+            status_conexao_res = await self.ixc_client.get_status_conexao(id_login_ixc)
             registros = status_conexao_res.get("registros", [])
             if not registros:
-                raise HTTPException(status_code=404, detail="Nenhum registro.")
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Nenhum registro."
+                )
             status_conexao = registros[0].get("online")
+            return StatusConexaoOut(
+                data=StatusConexao(
+                    status_conexao=status_conexao
+                )
+            )
+        except HTTPException:
+            raise
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Erro interno ao processar solicitação: {str(e)}"
+            )
 
-            return StatusConexaoOut(data=StatusConexao(status_conexao=status_conexao))
+
+    async def get_status_contrato(self, id_contrato_ixc: int) -> StatusContratoOut:
+        try:
+            status_contrato_res = await self.ixc_client.get_status_contrato(id_contrato_ixc)
+            registros = status_contrato_res.get("registros", [])
+            if not registros:
+                raise HTTPException(
+                    status=status.HTTP_404_NOT_FOUND,
+                    detail="Nenhum contrato."
+                )
+            status_contrato = registros[0].get("status")
+            return StatusContratoOut(
+                data=StatusContrato(
+                    status_contrato=status_contrato
+                )
+            )
         except HTTPException:
             raise
         except Exception as e:

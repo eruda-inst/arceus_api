@@ -1,5 +1,5 @@
-from typing import List, Optional
 from pydantic import BaseModel, Field
+from typing import List, Optional, Literal
 
 
 class Meta(BaseModel):
@@ -156,6 +156,15 @@ class Contract(BaseModel):
     tipo_localidade: Optional[str] = Field(None, description="Tipo de localidade.")
     estrato_social_col: Optional[str] = Field(None, description="Estrato social.")
     agrupar_financeiro_contrato: Optional[str] = Field(None, description="Indicador para agrupar financeiro do contrato.")
+
+
+class StatusContrato(BaseModel):
+    status_contrato: Literal["P", "A", "I", "N", "D"]
+
+
+class StatusContratoOut(BaseModel):
+    data: StatusContrato
+
 
 class ContracListOut(BaseModel):
     data: List[Contract] = Field(..., description="Lista de contratos")
