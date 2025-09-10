@@ -1,18 +1,19 @@
+from typing import List
 from app.clients.ixc import IXCClient
 from app.clients.opa import OpaClient
 from fastapi import HTTPException, status
 from app.schemas.atendimento import AtendimentoIn
 from app.schemas.onu import StatusONU, StatusONUOut
+from app.utils.helpers.rotular import rotular_status_conexao
 from app.schemas.conexao import StatusConexao, StatusConexaoOut
 from app.schemas.contrato import ContratoListOut, Meta, Links, Contrato, StatusContratoOut, StatusContrato
-from app.utils.helpers.rotular import rotular_status_conexao
 
 
 class AggregatorService:
     def __init__(self):
         self.opa_client = OpaClient()
         self.ixc_client = IXCClient()
-
+        
 
     async def get_contratos_ativos_cliente(
         self, protocolo_atendimento_opa: str, page: int = 1, per_page: int = 10
@@ -30,20 +31,36 @@ class AggregatorService:
 
             contratos_res = await self.ixc_client.get_contratos_ativos_cliente(id_cliente_ixc, page, per_page)
             registros = contratos_res.get("registros", [])
-            registros_ativos = [r for r in registros if r["status"] != "I" and r["status"] != "D"]
+
+            registros_ativos = [r for r in registros if r["status"] not in ("I", "D")]
             total = len(registros_ativos)
-
+            for contrato in registros_ativos:
+                a_receber_res = await self.ixc_client.valor_e_data_vencimento(contrato["id"])
+                registros = a_receber_res.get("registros", [])
+                if not registros:
+                    raise HTTPException(
+                        status_code=status.HTTP_404_NOT_FOUND,
+                        detail=f"Dados financeiros não encontrados para o contrato {contrato['id']}"
+                    )
+                contrato["valor"] = registros[0].get("valor")
+                contrato["data_vencimento"] = registros[0].get("data_vencimento")
             meta = Meta(total=total, page=page, per_page=per_page)
-
             base_url = f"/contratos?protocolo_atendimento_opa={protocolo_atendimento_opa}"
             links = Links(
                 self=f"{base_url}&page={page}&per_page={per_page}",
-                next=(f"{base_url}&page={page+1}&per_page={per_page}" if page * per_page < total else None),
-                prev=(f"{base_url}&page={page-1}&per_page={per_page}" if page > 1 else None),
+                next=(
+                    f"{base_url}&page={page + 1}&per_page={per_page}"
+                    if (page * per_page) < total
+                    else None
+                ),
+                prev=(
+                    f"{base_url}&page={page - 1}&per_page={per_page}"
+                    if page > 1
+                    else None
+                ),
             )
-
             return ContratoListOut(
-                data=[Contrato(**c) for c in registros_ativos],
+                data=[Contrato(**contrato) for contrato in registros_ativos],
                 meta=meta,
                 links=links
             )

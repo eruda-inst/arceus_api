@@ -26,6 +26,8 @@ class Contrato(BaseModel):
     id: str = Field(default=None, max_length=11, description="ID único do contrato.")
     status: Optional[Literal["P", "A", "I", "N", "D"]] = Field(default="P", description="Status atual do contrato.")
     contrato: str = Field(default=None, max_length=100, description="Número do contrato.")
+    valor: float = Field(default=None, gt=0, description="Valor do contrato.")
+    data_vencimento: str = Field(default=None, description="Data de vencimento do contrato.")
 
 
 class ContratoListOut(BaseModel):

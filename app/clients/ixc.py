@@ -96,6 +96,16 @@ class IXCClient:
         return data
     
 
+    async def valor_e_data_vencimento(self, id_contrato_ixc: int):
+        payload = {
+            "qtype": "fn_areceber.id_contrato",
+            "query": id_contrato_ixc,
+            "oper": "="
+        }
+        data = await self._make_request("fn_areceber", payload)
+        return data
+    
+
     async def abrir_atendimento(self, atendimento: AtendimentoIn) -> None:
         payload = atendimento.model_dump()
         await self._make_request("su_ticket", payload, include_ixcsoft=False)
