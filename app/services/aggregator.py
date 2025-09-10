@@ -4,8 +4,8 @@ from app.clients.opa import OpaClient
 from fastapi import HTTPException, status
 from app.schemas.atendimento import AtendimentoIn
 from app.schemas.onu import StatusONU, StatusONUOut
-from app.utils.helpers.rotular import rotular_status_conexao
 from app.schemas.conexao import StatusConexao, StatusConexaoOut
+from app.utils.helpers.rotular import rotular_status_conexao, rotular_status_contrato
 from app.schemas.contrato import ContratoListOut, Meta, Links, Contrato, StatusContratoOut, StatusContrato
 
 
@@ -71,6 +71,9 @@ class AggregatorService:
                     ultimo_titulo = max(titulos_nao_quitados, key=lambda x: datetime.strptime(x.get("data_vencimento"), "%Y-%m-%d").date())
                     contrato["valor"] = ultimo_titulo.get("valor")
                     contrato["data_vencimento"] = ultimo_titulo.get("data_vencimento")
+
+            contrato["status"] = rotular_status_contrato(contrato["status"])
+
             meta = Meta(total=total, page=page, per_page=per_page)
             base_url = f"/contratos?protocolo_atendimento_opa={protocolo_atendimento_opa}"
             links = Links(
@@ -109,11 +112,11 @@ class AggregatorService:
                     status_code=status.HTTP_404_NOT_FOUND,
                     detail="Nenhum registro."
                 )
-            status_conexao = registros[0].get("online")
-            status_conexao = rotular_status_conexao(status_conexao)
+            status_conexao_codigo = registros[0].get("online")
+            status_conexao_rotulo = rotular_status_conexao(status_conexao_codigo)
             return StatusConexaoOut(
                 data=StatusConexao(
-                    status_conexao=status_conexao
+                    status_conexao=status_conexao_rotulo
                 )
             )
         except HTTPException:
@@ -134,10 +137,13 @@ class AggregatorService:
                     status=status.HTTP_404_NOT_FOUND,
                     detail="Nenhum contrato."
                 )
-            status_contrato = registros[0].get("status")
+            status_contrato_codigo = registros[0].get("status")
+            status_contrato_rotulo = rotular_status_contrato(status_contrato_codigo)
+            print(status_contrato_codigo)
+            print(status_contrato_rotulo)
             return StatusContratoOut(
                 data=StatusContrato(
-                    status_contrato=status_contrato
+                    status_contrato=status_contrato_rotulo
                 )
             )
         except HTTPException:

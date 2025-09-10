@@ -1,5 +1,6 @@
+from typing import List, Optional
 from pydantic import BaseModel, Field
-from typing import List, Optional, Literal
+from app.utils.helpers.rotular import StatusContratoRotulo
 
 
 class Meta(BaseModel):
@@ -9,13 +10,13 @@ class Meta(BaseModel):
 
 
 class Links(BaseModel):
-    self: Optional[str] = Field(default=None, description="URL da página atual de resultados.")
+    self: str = Field(default=None, description="URL da página atual de resultados.")
     next: Optional[str] = Field(default=None, description="URL para a próxima página de resultados, se disponível.")
     prev: Optional[str] = Field(default=None, description="URL para a página anterior de resultados, se disponível.")
 
 
 class StatusContrato(BaseModel):
-    status_contrato: Optional[Literal["P", "A", "I", "N", "D"]] = Field(default="P", description="Status atual do contrato.")
+    status_contrato: StatusContratoRotulo = Field(description="Status atual do contrato.")
 
 
 class StatusContratoOut(BaseModel):
@@ -24,7 +25,7 @@ class StatusContratoOut(BaseModel):
 
 class Contrato(BaseModel):
     id: str = Field(default=None, max_length=11, description="ID único do contrato.")
-    status: Optional[Literal["P", "A", "I", "N", "D"]] = Field(default="P", description="Status atual do contrato.")
+    status: StatusContratoRotulo = Field(description="Status atual do contrato.")
     contrato: str = Field(default=None, max_length=100, description="Número do contrato.")
     valor: float = Field(default=None, gt=0, description="Valor do contrato.")
     data_vencimento: str = Field(default=None, description="Data de vencimento do contrato.")

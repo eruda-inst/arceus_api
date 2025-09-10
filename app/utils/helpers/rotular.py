@@ -4,6 +4,9 @@ from typing import Literal, Dict
 StatusConexaoCodigo = Literal["S", "SS", "N"]
 StatusConexaoRotulo = Literal["Conectado", "Sem status", "Desconectado"]
 
+StatusContratoCodigo = Literal["P", "A", "I", "N", "D"]
+StatusContratoRotulo = Literal["Pré-contrato", "Ativo", "Inativo", "Negativado", "Desistiu"]
+
 
 def rotular_status_conexao(
     status_conexao_codigo: StatusConexaoCodigo
@@ -14,3 +17,16 @@ def rotular_status_conexao(
         "N": "Desconectado"
     }
     return status_conexao_mapa[status_conexao_codigo]
+
+
+def rotular_status_contrato(
+    sattus_contrato_codigo: StatusContratoCodigo
+) -> StatusContratoRotulo:
+    status_contrato_mapa: Dict[StatusContratoCodigo, StatusContratoRotulo] = {
+        "P": "Pré-contrato",
+        "A": "Ativo",
+        "I": "Inativo",
+        "N": "Negativado",
+        "D": "Desistiu"
+    }
+    return status_contrato_mapa[sattus_contrato_codigo]
