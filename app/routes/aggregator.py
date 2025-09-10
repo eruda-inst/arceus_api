@@ -42,13 +42,6 @@ async def get_status_onu(
     return await service.get_status_onu(id_login_ixc, mac_onu_ixc)
 
 
-@router.get("/valor_e_data_vencimento")
-async def valor_e_data_vencimento(
-    id_contrato_ixc: int = Query(ge=1, description="ID de contrato do cliente no IXCSoft.")
-):
-    return await service.ixc_client.valor_e_data_vencimento(id_contrato_ixc)
-
-
 @router.post("/abrir_atendimento", status_code=status.HTTP_204_NO_CONTENT)
 async def abrir_atendimento(atendimento: AtendimentoIn) -> None:
     return await service.ixc_client.abrir_atendimento(atendimento)

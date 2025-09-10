@@ -1,4 +1,4 @@
-from typing import List
+from datetime import datetime
 from app.clients.ixc import IXCClient
 from app.clients.opa import OpaClient
 from fastapi import HTTPException, status
@@ -13,7 +13,7 @@ class AggregatorService:
     def __init__(self):
         self.opa_client = OpaClient()
         self.ixc_client = IXCClient()
-        
+
 
     async def get_contratos_ativos_cliente(
         self, protocolo_atendimento_opa: str, page: int = 1, per_page: int = 10
@@ -34,16 +34,43 @@ class AggregatorService:
 
             registros_ativos = [r for r in registros if r["status"] not in ("I", "D")]
             total = len(registros_ativos)
+            
             for contrato in registros_ativos:
                 a_receber_res = await self.ixc_client.valor_e_data_vencimento(contrato["id"])
                 registros = a_receber_res.get("registros", [])
-                if not registros:
-                    raise HTTPException(
-                        status_code=status.HTTP_404_NOT_FOUND,
-                        detail=f"Dados financeiros não encontrados para o contrato {contrato['id']}"
-                    )
-                contrato["valor"] = registros[0].get("valor")
-                contrato["data_vencimento"] = registros[0].get("data_vencimento")
+                
+                titulos_nao_quitados = [r for r in registros if r.get("status") != 'Q']
+                
+                if not titulos_nao_quitados:
+                    contrato["valor"] = None
+                    contrato["data_vencimento"] = None
+                    continue
+
+                hoje = datetime.now().date()
+                proximo_vencimento = None
+                menor_diferenca = None
+
+                for titulo in titulos_nao_quitados:
+                    data_vencimento_str = titulo.get("data_vencimento")
+                    if data_vencimento_str:
+                        try:
+                            data_vencimento = datetime.strptime(data_vencimento_str, "%Y-%m-%d").date()
+                            diferenca = (data_vencimento - hoje).days
+                            
+                            if diferenca >= 0:
+                                if menor_diferenca is None or diferenca < menor_diferenca:
+                                    menor_diferenca = diferenca
+                                    proximo_vencimento = titulo
+                        except ValueError:
+                            continue
+
+                if proximo_vencimento:
+                    contrato["valor"] = proximo_vencimento.get("valor")
+                    contrato["data_vencimento"] = proximo_vencimento.get("data_vencimento")
+                else:
+                    ultimo_titulo = max(titulos_nao_quitados, key=lambda x: datetime.strptime(x.get("data_vencimento"), "%Y-%m-%d").date())
+                    contrato["valor"] = ultimo_titulo.get("valor")
+                    contrato["data_vencimento"] = ultimo_titulo.get("data_vencimento")
             meta = Meta(total=total, page=page, per_page=per_page)
             base_url = f"/contratos?protocolo_atendimento_opa={protocolo_atendimento_opa}"
             links = Links(
