@@ -2,8 +2,8 @@ from typing import Optional
 from app.schemas.onu import StatusONUOut
 from fastapi import APIRouter, Query, status
 from app.schemas.conexao import StatusConexaoOut
-from app.schemas.atendimento import AtendimentoIn
 from app.services.aggregator import AggregatorService
+from app.schemas.atendimento import AtendimentoIn, AtendimentoOut
 from app.schemas.contrato import ContratoListOut, StatusContratoOut
 
 
@@ -52,3 +52,10 @@ async def enviar_sinal_desconexao(
     id_login_ixc: int = Query(default=None, ge=1, description="ID de login do cliente no IXCSoft.")
 ):
     return await service.enviar_sinal_desconexao(id_login_ixc)
+
+
+@router.get("/checar_atendimentos_abertos", response_model=AtendimentoOut)
+async def checar_atendimentos_abertos(
+    id_login_ixc: int = Query(default=None, ge=1, description="ID de login do cliente no IXCSoft.")
+):
+    return await service.checar_atendimentos_abertos(id_login_ixc)

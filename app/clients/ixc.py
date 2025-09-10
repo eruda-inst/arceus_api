@@ -114,3 +114,13 @@ class IXCClient:
     async def enviar_sinal_desconexao(self, id_login_ixc: int) -> None:
         payload = {"id": id_login_ixc}
         await self._make_request("desconectar_clientes", payload, include_ixcsoft=False)
+
+
+    async def checar_atendimentos_abertos(self, id_login_ixc: int) -> None:
+        payload = {
+            "qtype": "su_ticket.id_login",
+            "query": id_login_ixc,
+            "oper": "="
+        }
+        data = await self._make_request("su_ticket", payload)
+        return data

@@ -1,5 +1,5 @@
-from typing import Literal, Optional
 from pydantic import BaseModel, Field
+from typing import Literal, Optional, List
 
 
 class AtendimentoIn(BaseModel):
@@ -14,3 +14,16 @@ class AtendimentoIn(BaseModel):
     su_status: Optional[Literal["N", "P", "EP", "S", "C"]] = Field(default="N", description="Status do atendimento.")
     id_ticket_setor: int =  Field(default=None, ge=1, description="Setor do atendimento.")
     id_contrato: int = Field(default=None, ge=1, description="ID de contrato do cliente.")
+
+
+class Atendimento(BaseModel):
+    id: int = Field(ge=1, description="ID do atendimento.")
+    id_assunto: int = Field(ge=1, description="ID do assunto do atendimento.")
+    status: Literal["N", "P"] = Field(description="Status do atendimento.")
+    mensagem: str = Field(max_length=999, description="Mensagem descritiva.")
+    titulo: str = Field(max_length=200, description="Título do atendimento.")
+    data_criacao: str = Field(description="Data de criação do atendimento.")
+
+
+class AtendimentoOut(BaseModel):
+    data: List[Atendimento]

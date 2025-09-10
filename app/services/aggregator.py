@@ -2,9 +2,9 @@ from datetime import datetime
 from app.clients.ixc import IXCClient
 from app.clients.opa import OpaClient
 from fastapi import HTTPException, status
-from app.schemas.atendimento import AtendimentoIn
 from app.schemas.onu import StatusONU, StatusONUOut
 from app.schemas.conexao import StatusConexao, StatusConexaoOut
+from app.schemas.atendimento import AtendimentoIn, Atendimento, AtendimentoOut
 from app.utils.helpers.rotular import rotular_status_conexao, rotular_status_contrato
 from app.schemas.contrato import ContratoListOut, Meta, Links, Contrato, StatusContratoOut, StatusContrato
 
@@ -198,9 +198,45 @@ class AggregatorService:
             )
         
 
-    async def enviar_sinal_desconexao(self, id_login_ixc: input):
+    async def enviar_sinal_desconexao(self, id_login_ixc: int) -> None:
         try:
             await self.ixc_client.enviar_sinal_desconexao(id_login_ixc)
+        except HTTPException:
+            raise
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Erro interno ao processar solicitação: {str(e)}"
+            )
+        
+
+    async def checar_atendimentos_abertos(self, id_login_ixc: int) -> AtendimentoOut:
+        try:
+            res = await self.ixc_client.checar_atendimentos_abertos(id_login_ixc)
+            registros = res.get("registros", [])
+            if not registros:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Sem atendimentos."
+                )
+            atendimentos_abertos = []
+            for r in registros:
+                if r.get("su_status") in ["N", "P"]:
+                    mapeado = {
+                        "id": r["id"],
+                        "id_assunto": r["id_assunto"],
+                        "status": r["su_status"],
+                        "mensagem": r["menssagem"],
+                        "titulo": r["titulo"],
+                        "data_criacao": r["data_criacao"]
+                    }
+                    atendimentos_abertos.append(mapeado)
+            if not atendimentos_abertos:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Sem atendimentos abertos."
+                )
+            return AtendimentoOut(data=[Atendimento(**a) for a in atendimentos_abertos])
         except HTTPException:
             raise
         except Exception as e:
