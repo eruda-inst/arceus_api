@@ -1,12 +1,12 @@
 from datetime import datetime
-from app.clients.ixc import IXCClient
-from app.clients.opa import OpaClient
+from ..clients.ixc import IXCClient
+from ..clients.opa import OpaClient
 from fastapi import HTTPException, status
-from app.schemas.onu import StatusONU, StatusONUOut
-from app.schemas.conexao import StatusConexao, StatusConexaoOut
-from app.schemas.atendimento import AtendimentoIn, Atendimento, AtendimentoOut
-from app.utils.helpers.rotular import rotular_status_conexao, rotular_status_contrato
-from app.schemas.contrato import ContratoListOut, Meta, Links, Contrato, StatusContratoOut, StatusContrato
+from ..schemas.onu import StatusONU, StatusONUOut
+from ..schemas.conexao import StatusConexao, StatusConexaoOut
+from ..schemas.atendimento import AtendimentoIn, Atendimento, AtendimentoOut
+from ..schemas.contrato import ContratoListOut, Meta, Links, Contrato, StatusContratoOut, StatusContrato
+from ..utils.helpers.rotular import rotular_status_conexao, rotular_status_contrato, rotular_status_atendimento
 
 
 class AggregatorService:
@@ -225,7 +225,7 @@ class AggregatorService:
                     mapeado = {
                         "id": r["id"],
                         "id_assunto": r["id_assunto"],
-                        "status": r["su_status"],
+                        "status": rotular_status_atendimento(r["su_status"]),
                         "mensagem": r["menssagem"],
                         "titulo": r["titulo"],
                         "data_criacao": r["data_criacao"]

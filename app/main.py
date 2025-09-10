@@ -1,11 +1,11 @@
 from fastapi import FastAPI
-from app.routes.aggregator import router as aggregator_router
+from .routes.aggregator import router as aggregator_router
 
 
 app = FastAPI(
     title="API do Roberto",
     description="Atua como um aggregator, simplificando integrações entre a API aberta do OpaSuite e a API aberta do IXCSoft.",
-    version="0.38.7"
+    version="0.39.8"
 )
 
 

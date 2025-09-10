@@ -1,9 +1,9 @@
 import httpx
 import base64
 from typing import Dict, Any, List
-from app.core.config import settings
+from ..core.config import settings
 from fastapi import HTTPException, status
-from app.schemas.atendimento import AtendimentoIn
+from ..schemas.atendimento import AtendimentoIn
 
 
 class IXCClient:

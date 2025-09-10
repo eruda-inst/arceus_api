@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field
 from typing import Literal, Optional, List
+from ..utils.helpers.rotular import StatusAtendimentoRotulo
 
 
 class AtendimentoIn(BaseModel):
@@ -19,7 +20,7 @@ class AtendimentoIn(BaseModel):
 class Atendimento(BaseModel):
     id: int = Field(ge=1, description="ID do atendimento.")
     id_assunto: int = Field(ge=1, description="ID do assunto do atendimento.")
-    status: Literal["N", "P"] = Field(description="Status do atendimento.")
+    status: StatusAtendimentoRotulo = Field(description="Status do atendimento.")
     mensagem: str = Field(max_length=999, description="Mensagem descritiva.")
     titulo: str = Field(max_length=200, description="Título do atendimento.")
     data_criacao: str = Field(description="Data de criação do atendimento.")

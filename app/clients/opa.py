@@ -1,6 +1,6 @@
 import requests
 from typing import Dict, Any
-from app.core.config import settings
+from ..core.config import settings
 from fastapi import HTTPException, status
 
 

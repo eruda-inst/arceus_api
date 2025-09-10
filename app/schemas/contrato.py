@@ -1,6 +1,6 @@
 from typing import List, Optional
 from pydantic import BaseModel, Field
-from app.utils.helpers.rotular import StatusContratoRotulo
+from ..utils.helpers.rotular import StatusContratoRotulo
 
 
 class Meta(BaseModel):

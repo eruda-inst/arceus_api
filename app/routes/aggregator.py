@@ -1,10 +1,10 @@
 from typing import Optional
-from app.schemas.onu import StatusONUOut
+from ..schemas.onu import StatusONUOut
 from fastapi import APIRouter, Query, status
-from app.schemas.conexao import StatusConexaoOut
-from app.services.aggregator import AggregatorService
-from app.schemas.atendimento import AtendimentoIn, AtendimentoOut
-from app.schemas.contrato import ContratoListOut, StatusContratoOut
+from ..schemas.conexao import StatusConexaoOut
+from ..services.aggregator import AggregatorService
+from ..schemas.atendimento import AtendimentoIn, AtendimentoOut
+from ..schemas.contrato import ContratoListOut, StatusContratoOut
 
 
 router  = APIRouter()
