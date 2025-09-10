@@ -13,7 +13,7 @@ class Links(BaseModel):
     next: Optional[str] = Field(default=None, description="URL para a próxima página de resultados, se disponível.")
     prev: Optional[str] = Field(default=None, description="URL para a página anterior de resultados, se disponível.")
 
- # Eu gostaria de poder reaproveitar isto, ao invés de copiar e colar em Contrato
+
 class StatusContrato(BaseModel):
     status_contrato: Optional[Literal["P", "A", "I", "N", "D"]] = Field(default="P", description="Status atual do contrato.")
 

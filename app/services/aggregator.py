@@ -5,6 +5,7 @@ from app.schemas.atendimento import AtendimentoIn
 from app.schemas.onu import StatusONU, StatusONUOut
 from app.schemas.conexao import StatusConexao, StatusConexaoOut
 from app.schemas.contrato import ContratoListOut, Meta, Links, Contrato, StatusContratoOut, StatusContrato
+from app.utils.helpers.rotular import rotular_status_conexao
 
 
 class AggregatorService:
@@ -65,6 +66,7 @@ class AggregatorService:
                     detail="Nenhum registro."
                 )
             status_conexao = registros[0].get("online")
+            status_conexao = rotular_status_conexao(status_conexao)
             return StatusConexaoOut(
                 data=StatusConexao(
                     status_conexao=status_conexao

@@ -1,6 +1,6 @@
 from typing import Optional
-from fastapi import APIRouter, Query, status
 from app.schemas.onu import StatusONUOut
+from fastapi import APIRouter, Query, status
 from app.schemas.conexao import StatusConexaoOut
 from app.schemas.atendimento import AtendimentoIn
 from app.services.aggregator import AggregatorService
