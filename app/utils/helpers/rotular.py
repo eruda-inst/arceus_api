@@ -12,7 +12,7 @@ StatusAtendimentoRotulo = Literal["Novo", "Pendente", "Em progresso", "Soluciona
 
 
 def rotular_status_conexao(
-    status_conexao_codigo: StatusConexaoCodigo
+    status_conexao_codigo: StatusConexaoCodigo,
 ) -> StatusConexaoRotulo:
     status_conexao_mapa: Dict[StatusConexaoCodigo, StatusConexaoRotulo] = {
         "S": "Conectado",
@@ -23,7 +23,7 @@ def rotular_status_conexao(
 
 
 def rotular_status_contrato(
-    status_contrato_codigo: StatusContratoCodigo
+    status_contrato_codigo: StatusContratoCodigo,
 ) -> StatusContratoRotulo:
     status_contrato_mapa: Dict[StatusContratoCodigo, StatusContratoRotulo] = {
         "P": "Pré-contrato",
@@ -36,7 +36,7 @@ def rotular_status_contrato(
 
 
 def rotular_status_atendimento(
-    status_contrato_codigo: StatusAtendimentoCodigo
+    status_contrato_codigo: StatusAtendimentoCodigo,
 ):
     status_contrato_mapa: Dict[StatusAtendimentoCodigo, StatusAtendimentoRotulo] = {
         "N": "Novo",

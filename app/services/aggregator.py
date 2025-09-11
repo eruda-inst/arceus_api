@@ -10,13 +10,15 @@ from ..utils.helpers.rotular import rotular_status_conexao, rotular_status_contr
 
 
 class AggregatorService:
-    def __init__(self):
+    def __init__(
+        self,
+    ):
         self.opa_client = OpaClient()
         self.ixc_client = IXCClient()
 
 
     async def get_contratos_ativos_cliente(
-        self, protocolo_atendimento_opa: str, page: int = 1, per_page: int = 10
+        self, protocolo_atendimento_opa: str, page: int = 1, per_page: int = 10,
     ) -> ContratoListOut:
         try:
             id_cliente_opa_res = self.opa_client.get_id_cliente_opa(protocolo_atendimento_opa)
@@ -103,7 +105,9 @@ class AggregatorService:
             )
         
 
-    async def get_status_conexao(self, id_login_ixc: int) -> StatusConexaoOut:
+    async def get_status_conexao(
+        self, id_login_ixc: int,
+    ) -> StatusConexaoOut:
         try:
             status_conexao_res = await self.ixc_client.get_status_conexao(id_login_ixc)
             registros = status_conexao_res.get("registros", [])
@@ -128,7 +132,9 @@ class AggregatorService:
             )
 
 
-    async def get_status_contrato(self, id_contrato_ixc: int) -> StatusContratoOut:
+    async def get_status_contrato(
+        self, id_contrato_ixc: int,
+    ) -> StatusContratoOut:
         try:
             status_contrato_res = await self.ixc_client.get_status_contrato(id_contrato_ixc)
             registros = status_contrato_res.get("registros", [])
@@ -155,7 +161,9 @@ class AggregatorService:
             )
         
 
-    async def get_status_onu(self, id_login_ixc: int, mac_onu_ixc: str) -> StatusONUOut:
+    async def get_status_onu(
+        self, id_login_ixc: int, mac_onu_ixc: str,
+    ) -> StatusONUOut:
         try:
             if not id_login_ixc and not mac_onu_ixc:
                 raise HTTPException(
@@ -186,7 +194,9 @@ class AggregatorService:
             )
         
 
-    async def abrir_atendimento(self, atendimento: AtendimentoIn) -> None:
+    async def abrir_atendimento(
+        self, atendimento: AtendimentoIn,
+    ) -> None:
         try:
             await self.ixc_client.abrir_atendimento(atendimento)
         except HTTPException:
@@ -198,7 +208,9 @@ class AggregatorService:
             )
         
 
-    async def enviar_sinal_desconexao(self, id_login_ixc: int) -> None:
+    async def enviar_sinal_desconexao(
+        self, id_login_ixc: int,
+    ) -> None:
         try:
             await self.ixc_client.enviar_sinal_desconexao(id_login_ixc)
         except HTTPException:
@@ -210,7 +222,9 @@ class AggregatorService:
             )
         
 
-    async def checar_atendimentos_abertos(self, id_login_ixc: int, page: int = 1, per_page: int = 10) -> AtendimentoOut:
+    async def checar_atendimentos_abertos(
+        self, id_login_ixc: int, page: int = 1, per_page: int = 10,
+    ) -> AtendimentoOut:
         try:
             res = await self.ixc_client.checar_atendimentos_abertos(id_login_ixc, page, per_page)
             registros = res.get("registros", [])
