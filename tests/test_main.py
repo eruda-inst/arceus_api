@@ -1,9 +1,5 @@
-from ..app.main import app
+from .config import client
 from fastapi import status
-from fastapi.testclient import TestClient
-
-
-client = TestClient(app)
 
 
 def test_index():
