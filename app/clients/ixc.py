@@ -51,7 +51,7 @@ class IXCClient:
             ) from e
 
 
-    async def get_contratos_ativos_cliente(self, id_cliente_ixc: str, page: int = 1, per_page: int = 1) -> List[Dict[str, Any]]:
+    async def get_contratos_ativos_cliente(self, id_cliente_ixc: int, page: int = 1, per_page: int = 1) -> List[Dict[str, Any]]:
         payload = {
             "qtype": "cliente_contrato.id_cliente",
             "query": id_cliente_ixc,
@@ -86,7 +86,6 @@ class IXCClient:
     async def get_status_onu(self, id_login_ixc: int, mac_onu_ixc: str):
         query_field = "id_login" if id_login_ixc else "mac"
         query_value = id_login_ixc if id_login_ixc else mac_onu_ixc
-        
         payload = {
             "qtype": f"radpop_radio_cliente_fibra.{query_field}",
             "query": query_value,
@@ -116,11 +115,13 @@ class IXCClient:
         await self._make_request("desconectar_clientes", payload, include_ixcsoft=False)
 
 
-    async def checar_atendimentos_abertos(self, id_login_ixc: int) -> None:
+    async def checar_atendimentos_abertos(self, id_login_ixc: int, page: int = 1, per_page: int = 1) -> None:
         payload = {
             "qtype": "su_ticket.id_login",
             "query": id_login_ixc,
-            "oper": "="
+            "oper": "=",
+            "page": page,
+            "rp": per_page
         }
         data = await self._make_request("su_ticket", payload)
         return data

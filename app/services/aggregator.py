@@ -210,10 +210,11 @@ class AggregatorService:
             )
         
 
-    async def checar_atendimentos_abertos(self, id_login_ixc: int) -> AtendimentoOut:
+    async def checar_atendimentos_abertos(self, id_login_ixc: int, page: int = 1, per_page: int = 10) -> AtendimentoOut:
         try:
-            res = await self.ixc_client.checar_atendimentos_abertos(id_login_ixc)
+            res = await self.ixc_client.checar_atendimentos_abertos(id_login_ixc, page, per_page)
             registros = res.get("registros", [])
+            total = res.get("total", 0)
             if not registros:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
@@ -236,7 +237,26 @@ class AggregatorService:
                     status_code=status.HTTP_404_NOT_FOUND,
                     detail="Sem atendimentos abertos."
                 )
-            return AtendimentoOut(data=[Atendimento(**a) for a in atendimentos_abertos])
+            meta = Meta(total=total, page=page, per_page=per_page)
+            base_url = f"/checar_atendimentos_abertos?id_login_ixc={id_login_ixc}"
+            links = Links(
+                self=f"{base_url}&page={page}&per_page={per_page}",
+                next=(
+                    f"{base_url}&page={page + 1}&per_page={per_page}"
+                    if (page * per_page) < total
+                    else None
+                ),
+                prev=(
+                    f"{base_url}&page={page - 1}&per_page={per_page}"
+                    if page > 1
+                    else None
+                ),
+            )
+            return AtendimentoOut(
+                data=[Atendimento(**a) for a in atendimentos_abertos],
+                meta=meta,
+                links=links
+            )
         except HTTPException:
             raise
         except Exception as e:

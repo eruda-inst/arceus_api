@@ -30,7 +30,7 @@ class OpaClient:
         return data
 
 
-    def get_id_cliente_ixc(self, id_cliente_opa: str) -> Dict[str, Any]:
+    def get_id_cliente_ixc(self, id_cliente_opa: int) -> Dict[str, Any]:
         payload = {"filter": {"_id": id_cliente_opa}}
         data = self._make_request("cliente", payload)
         return data
