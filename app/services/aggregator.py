@@ -72,7 +72,7 @@ class AggregatorService:
                     contrato["valor"] = ultimo_titulo.get("valor")
                     contrato["data_vencimento"] = ultimo_titulo.get("data_vencimento")
 
-            contrato["status"] = rotular_status_contrato(contrato["status"])
+                contrato["status"] = rotular_status_contrato(contrato["status"])
 
             meta = Meta(total=total, page=page, per_page=per_page)
             base_url = f"/contratos?protocolo_atendimento_opa={protocolo_atendimento_opa}"
