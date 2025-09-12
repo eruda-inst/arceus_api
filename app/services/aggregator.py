@@ -44,8 +44,9 @@ class AggregatorService:
                 titulos_nao_quitados = [r for r in registros if r.get("status") != 'Q']
                 
                 if not titulos_nao_quitados:
-                    contrato["valor"] = None
-                    contrato["data_vencimento"] = None
+                    contrato["valor"] = 0.00
+                    contrato["data_vencimento"] = ""
+                    contrato["status"] = rotular_status_contrato(contrato["status"])
                     continue
 
                 hoje = datetime.now().date()
