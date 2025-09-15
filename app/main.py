@@ -10,6 +10,6 @@ app = FastAPI(
 
 app.include_router(router=aggregator_router, prefix="/api/v1", tags=["Aggregator"])
 
-@app.get("/")
+@app.get("/", summary="Rota padrão, mostra mensagens de boas vindas e URL para acessar esta página.")
 def index():
     return "Bem-vindo(a). Para documentação, acesse: https://reddator.newnet.com.br/docs."
