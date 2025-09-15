@@ -14,13 +14,11 @@ class IXCClient:
         self.base_url = "https://ixc.newnet.com.br/webservice/v1"
         self.auth_header = self._create_auth_header()
 
-
     def _create_auth_header(
         self,
     ) -> str:
         token_encoded = base64.b64encode(self.token.encode("utf-8")).decode("utf-8")
         return f"Basic {token_encoded}"
-
 
     def _get_headers(
         self, include_ixcsoft: bool = True,
@@ -29,7 +27,6 @@ class IXCClient:
         if include_ixcsoft:
             headers["ixcsoft"] = "listar"
         return headers
-
 
     async def _make_request(
         self, endpoint: str, payload: Dict[str, Any], include_ixcsoft: bool = True,
@@ -57,7 +54,6 @@ class IXCClient:
                 detail="Resposta inválida do servidor IXC"
             ) from e
 
-
     async def get_contratos_ativos_cliente(
         self, id_cliente_ixc: int, page: int = 1, per_page: int = 1,
     ) -> List[Dict[str, Any]]:
@@ -71,7 +67,6 @@ class IXCClient:
         data = await self._make_request("cliente_contrato", payload)
         return data
 
-
     async def get_status_conexao(
         self, id_login_ixc: int,
     ) -> List[Dict[str, Any]]:
@@ -83,7 +78,6 @@ class IXCClient:
         data = await self._make_request("radusuarios", payload)
         return data
 
-
     async def get_status_contrato(
         self, id_contrato_ixc: int,
     ) -> Dict[str, Any]:
@@ -94,7 +88,6 @@ class IXCClient:
         }
         data = await self._make_request("cliente_contrato", payload)
         return data
-
 
     async def get_status_onu(
         self, id_login_ixc: int, mac_onu_ixc: str,
@@ -109,7 +102,6 @@ class IXCClient:
         data = await self._make_request("radpop_radio_cliente_fibra", payload)
         return data
 
-
     async def valor_e_data_vencimento(
         self, id_contrato_ixc: int,
     ) -> Dict[str, Any]:
@@ -121,20 +113,17 @@ class IXCClient:
         data = await self._make_request("fn_areceber", payload)
         return data
     
-
     async def abrir_atendimento(
         self, atendimento: AtendimentoIn,
     ) -> None:
         payload = atendimento.model_dump()
         await self._make_request("su_ticket", payload, include_ixcsoft=False)
     
-
     async def enviar_sinal_desconexao(
         self, id_login_ixc: int,
     ) -> None:
         payload = {"id": id_login_ixc}
         await self._make_request("desconectar_clientes", payload, include_ixcsoft=False)
-
 
     async def checar_atendimentos_abertos(
         self, id_login_ixc: int, page: int = 1, per_page: int = 1,

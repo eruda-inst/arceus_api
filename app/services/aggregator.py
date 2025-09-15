@@ -1,12 +1,8 @@
 from datetime import datetime
-from ..clients.ixc import IXCClient
-from ..clients.opa import OpaClient
+from ..clients import IXCClient, OpaClient
 from fastapi import HTTPException, status
-from ..schemas.onu import StatusONU, StatusONUOut
-from ..schemas.conexao import StatusConexao, StatusConexaoOut
-from ..schemas.atendimento import AtendimentoIn, Atendimento, AtendimentoOut
-from ..schemas.contrato import ContratoListOut, Meta, Links, Contrato, StatusContratoOut, StatusContrato
-from ..utils.helpers.rotular import rotular_status_conexao, rotular_status_contrato, rotular_status_atendimento
+from ..utils import rotular_status_contrato, rotular_status_atendimento, rotular_status_conexao
+from ..schemas import (StatusONUOut, Atendimento, AtendimentoIn, AtendimentoOut, Contrato, ContratoListOut, Links, Meta, StatusConexao, StatusConexaoOut, StatusContrato, StatusONU, StatusContratoOut)
 
 
 class AggregatorService:
@@ -15,7 +11,6 @@ class AggregatorService:
     ):
         self.opa_client = OpaClient()
         self.ixc_client = IXCClient()
-
 
     async def get_contratos_ativos_cliente(
         self, protocolo_atendimento_opa: str, page: int = 1, per_page: int = 10,
@@ -104,7 +99,6 @@ class AggregatorService:
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=f"Erro interno ao processar solicitação: {str(e)}"
             )
-        
 
     async def get_status_conexao(
         self, id_login_ixc: int,
@@ -131,7 +125,6 @@ class AggregatorService:
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=f"Erro interno ao processar solicitação: {str(e)}"
             )
-
 
     async def get_status_contrato(
         self, id_contrato_ixc: int,
@@ -160,7 +153,6 @@ class AggregatorService:
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=f"Erro interno ao processar solicitação: {str(e)}"
             )
-        
 
     async def get_status_onu(
         self, id_login_ixc: int, mac_onu_ixc: str,
@@ -193,7 +185,6 @@ class AggregatorService:
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=f"Erro interno ao processar solicitação: {str(e)}"
             )
-        
 
     async def abrir_atendimento(
         self, atendimento: AtendimentoIn,
@@ -208,7 +199,6 @@ class AggregatorService:
                 detail=f"Erro interno ao processar solicitação: {str(e)}"
             )
         
-
     async def enviar_sinal_desconexao(
         self, id_login_ixc: int,
     ) -> None:
@@ -222,7 +212,6 @@ class AggregatorService:
                 detail=f"Erro interno ao processar solicitação: {str(e)}"
             )
         
-
     async def checar_atendimentos_abertos(
         self, id_login_ixc: int, page: int = 1, per_page: int = 10,
     ) -> AtendimentoOut:

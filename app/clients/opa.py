@@ -12,7 +12,6 @@ class OpaClient:
         self.base_url = "https://newnet.opasuite.com.br/api/v1"
         self.headers = {"Authorization": f"Bearer {self.token}"}
 
-
     def _make_request(
         self, endpoint: str, payload: Dict[str, Any],
     ) -> Dict[str, Any]:
@@ -27,14 +26,12 @@ class OpaClient:
                 detail=f"Erro na API do OPA: {str(e)}"
             )
 
-
     def get_id_cliente_opa(
         self, protocolo_atendimento_opa: str,
     ) -> Dict[str, Any]:
         payload = {"filter": {"protocolo": protocolo_atendimento_opa}}
         data = self._make_request("atendimento", payload)
         return data
-
 
     def get_id_cliente_ixc(
         self, id_cliente_opa: int,

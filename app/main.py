@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from .routes.aggregator import router as aggregator_router
+from .routes import router as aggregator_router
 
 
 app = FastAPI(
@@ -8,9 +8,7 @@ app = FastAPI(
     version="0.39.8"
 )
 
-
 app.include_router(router=aggregator_router, prefix="/api/v1", tags=["aggregator"])
-
 
 @app.get("/")
 def index():

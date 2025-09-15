@@ -17,7 +17,6 @@ class AtendimentoIn(BaseModel):
     id_ticket_setor: int =  Field(description="Setor do atendimento.")
     id_contrato: int = Field(description="ID de contrato do cliente.")
 
-
 class Atendimento(BaseModel):
     id: int = Field(description="ID do atendimento.")
     id_assunto: int = Field(description="ID do assunto do atendimento.")
@@ -25,7 +24,6 @@ class Atendimento(BaseModel):
     mensagem: str = Field(max_length=999, description="Mensagem descritiva.")
     titulo: str = Field(max_length=200, description="Título do atendimento.")
     data_criacao: str = Field(description="Data de criação do atendimento.")
-
 
 class AtendimentoOut(BaseModel):
     data: List[Atendimento]
