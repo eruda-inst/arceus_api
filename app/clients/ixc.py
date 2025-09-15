@@ -1,8 +1,8 @@
 import httpx
 import base64
 from ..core import settings
-from typing import Dict, Any, List
 from ..schemas import AtendimentoIn
+from typing import Dict, Any, List, Union
 from fastapi import HTTPException, status
 
 
@@ -34,7 +34,7 @@ class IXCClient:
         endpoint: str,
         payload: Dict[str, Any],
         include_ixcsoft: bool = True,
-    ) -> Dict[str, Any]:
+    ) -> Union[List[Dict[str, Any]], Dict[str, Any]]:
         url = f"{self.base_url}/{endpoint}"
         headers = self._get_headers(include_ixcsoft)
         try:
