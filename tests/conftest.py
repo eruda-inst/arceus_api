@@ -6,10 +6,10 @@ from fastapi.testclient import TestClient
 
 @pytest.fixture(scope="session")
 def client():
-    with TestClient(app) as c:
+    with TestClient(app=app) as c:
         yield c
 
 @pytest.fixture(scope="session")
 async def async_client():
-    async with AsyncClient(app=app, base_url="http://test") as ac:
+    async with AsyncClient() as ac:
         yield ac
