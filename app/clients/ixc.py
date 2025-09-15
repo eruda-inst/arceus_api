@@ -112,18 +112,6 @@ class IXCClient:
         }
         data = await self._make_request("radpop_radio_cliente_fibra", payload)
         return data
-
-    async def valor_e_data_vencimento(
-        self,
-        id_contrato_ixc: int,
-    ) -> Dict[str, Any]:
-        payload = {
-            "qtype": "fn_areceber.id_contrato",
-            "query": id_contrato_ixc,
-            "oper": "="
-        }
-        data = await self._make_request("fn_areceber", payload)
-        return data
     
     async def abrir_atendimento(
         self,
@@ -153,4 +141,28 @@ class IXCClient:
             "rp": per_page
         }
         data = await self._make_request("su_ticket", payload)
+        return data
+    
+    async def valor_e_data_vencimento(
+        self,
+        id_contrato_ixc: int,
+    ) -> Dict[str, Any]:
+        payload = {
+            "qtype": "fn_areceber.id_contrato",
+            "query": id_contrato_ixc,
+            "oper": "="
+        }
+        data = await self._make_request("fn_areceber", payload)
+        return data
+    
+    async def get_id_login(
+        self,
+        id_contrato_ixc: int
+    ) -> Dict[str, Any]:
+        payload = {
+            "qtype": "radusuarios.id_contrato",
+            "query": id_contrato_ixc,
+            "oper": "=",
+        }
+        data = await self._make_request("radusuarios", payload)
         return data

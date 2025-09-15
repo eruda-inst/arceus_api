@@ -34,11 +34,16 @@ class AggregatorService:
 
             registros_ativos = [r for r in registros if r["status"] not in ("I", "D")]
             total = registros_ativos.__len__()
-            
+
+
             for contrato in registros_ativos:
                 a_receber_res = await self.ixc_client.valor_e_data_vencimento(contrato["id"])
                 registros = a_receber_res.get("registros", [])
                 
+                id_login_res = await self.ixc_client.get_id_login(id_cliente_ixc)
+                id_login = id_login_res["registros"][0]["id"]
+                contrato["id_login"] = id_login
+
                 titulos_nao_quitados = [r for r in registros if r.get("status") != 'Q']
                 
                 if not titulos_nao_quitados:
