@@ -19,12 +19,12 @@ class AggregatorService:
         per_page: int = 10,
     ) -> ContratoListOut:
         try:
-            id_cliente_opa_res = self.opa_client.get_id_cliente_opa(protocolo_atendimento_opa)
+            id_cliente_opa_res = await self.opa_client.get_id_cliente_opa(protocolo_atendimento_opa)
             if not id_cliente_opa_res.get("data"):
                 raise HTTPException(status_code=404, detail="Cliente não encontrado no OPA")
             id_cliente_opa = id_cliente_opa_res["data"][0]["id_cliente"]
 
-            id_cliente_ixc_res = self.opa_client.get_id_cliente_ixc(id_cliente_opa)
+            id_cliente_ixc_res = await self.opa_client.get_id_cliente_ixc(id_cliente_opa)
             if not id_cliente_ixc_res.get("data"):
                 raise HTTPException(status_code=404, detail="Cliente não encontrado no IXC")
             id_cliente_ixc = id_cliente_ixc_res["data"][0]["id"]
@@ -35,12 +35,11 @@ class AggregatorService:
             registros_ativos = [r for r in registros if r["status"] not in ("I", "D")]
             total = registros_ativos.__len__()
 
-
             for contrato in registros_ativos:
                 a_receber_res = await self.ixc_client.valor_e_data_vencimento(contrato["id"])
                 registros = a_receber_res.get("registros", [])
                 
-                id_login_res = await self.ixc_client.get_id_login(id_cliente_ixc)
+                id_login_res = await self.ixc_client.get_id_login(contrato["id"])
                 id_login = id_login_res["registros"][0]["id"]
                 contrato["id_login"] = id_login
 

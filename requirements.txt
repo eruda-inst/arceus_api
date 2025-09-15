@@ -1,6 +1,4 @@
-requests
 pydantic_settings
 httpx
 uvicorn
 fastapi
-

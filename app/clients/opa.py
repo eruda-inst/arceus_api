@@ -1,4 +1,4 @@
-import requests
+import httpx
 from ..core import settings
 from typing import Dict, Any
 from fastapi import HTTPException, status
@@ -12,34 +12,35 @@ class OpaClient:
         self.base_url = "https://newnet.opasuite.com.br/api/v1"
         self.headers = {"Authorization": f"Bearer {self.token}"}
 
-    def _make_request(
+    async def _make_request(
         self,
         endpoint: str,
         payload: Dict[str, Any],
     ) -> Dict[str, Any]:
         url = f"{self.base_url}/{endpoint}"
         try:
-            res = requests.get(url=url, headers=self.headers, json=payload)
-            res.raise_for_status()
-            return res.json()
+            async with httpx.AsyncClient(timeout=30.0) as async_client:
+                res = await async_client.request(method="GET", url=url, headers=self.headers, json=payload)
+                res.raise_for_status()
+                return res.json()
         except requests.exceptions.RequestException as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=f"Erro na API do OPA: {str(e)}"
             )
 
-    def get_id_cliente_opa(
+    async def get_id_cliente_opa(
         self,
         protocolo_atendimento_opa: str,
     ) -> Dict[str, Any]:
         payload = {"filter": {"protocolo": protocolo_atendimento_opa}}
-        data = self._make_request("atendimento", payload)
+        data = await self._make_request("atendimento", payload)
         return data
 
-    def get_id_cliente_ixc(
+    async def get_id_cliente_ixc(
         self,
         id_cliente_opa: int,
     ) -> Dict[str, Any]:
         payload = {"filter": {"_id": id_cliente_opa}}
-        data = self._make_request("cliente", payload)
+        data = await self._make_request("cliente", payload)
         return data

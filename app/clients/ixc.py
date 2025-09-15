@@ -38,8 +38,8 @@ class IXCClient:
         url = f"{self.base_url}/{endpoint}"
         headers = self._get_headers(include_ixcsoft)
         try:
-            async with httpx.AsyncClient(timeout=30.0) as client:
-                res = await client.post(url=url, headers=headers, json=payload)
+            async with httpx.AsyncClient(timeout=30.0) as async_client:
+                res = await async_client.request(method="POST", url=url, headers=headers, json=payload)
                 res.raise_for_status()
                 return res.json()
         except httpx.RequestError as e:
