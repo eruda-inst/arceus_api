@@ -13,6 +13,7 @@ class StatusContratoOut(BaseModel):
 class Contrato(BaseModel):
     id: int = Field(description="ID único do contrato.")
     id_login: int = Field(description="ID de login associado ao contrato.")
+    id_cliente: int = Field(description="ID do cliente associado ao contrato.")
     status: StatusContratoRotulo = Field(description="Status atual do contrato.")
     contrato: str = Field(max_length=100, description="Número do contrato.")
     valor: float = Field(description="Valor do contrato.")
