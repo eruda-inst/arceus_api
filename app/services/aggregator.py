@@ -13,7 +13,10 @@ class AggregatorService:
         self.ixc_client = IXCClient()
 
     async def get_contratos_ativos_cliente(
-        self, protocolo_atendimento_opa: str, page: int = 1, per_page: int = 10,
+        self,
+        protocolo_atendimento_opa: str,
+        page: int = 1,
+        per_page: int = 10,
     ) -> ContratoListOut:
         try:
             id_cliente_opa_res = self.opa_client.get_id_cliente_opa(protocolo_atendimento_opa)
@@ -30,7 +33,7 @@ class AggregatorService:
             registros = contratos_res.get("registros", [])
 
             registros_ativos = [r for r in registros if r["status"] not in ("I", "D")]
-            total = len(registros_ativos)
+            total = registros_ativos.__len__()
             
             for contrato in registros_ativos:
                 a_receber_res = await self.ixc_client.valor_e_data_vencimento(contrato["id"])
@@ -101,7 +104,8 @@ class AggregatorService:
             )
 
     async def get_status_conexao(
-        self, id_login_ixc: int,
+        self,
+        id_login_ixc: int,
     ) -> StatusConexaoOut:
         try:
             status_conexao_res = await self.ixc_client.get_status_conexao(id_login_ixc)
@@ -127,7 +131,8 @@ class AggregatorService:
             )
 
     async def get_status_contrato(
-        self, id_contrato_ixc: int,
+        self,
+        id_contrato_ixc: int,
     ) -> StatusContratoOut:
         try:
             status_contrato_res = await self.ixc_client.get_status_contrato(id_contrato_ixc)
@@ -155,7 +160,9 @@ class AggregatorService:
             )
 
     async def get_status_onu(
-        self, id_login_ixc: int, mac_onu_ixc: str,
+        self,
+        id_login_ixc: int,
+        mac_onu_ixc: str,
     ) -> StatusONUOut:
         try:
             if not id_login_ixc and not mac_onu_ixc:
@@ -187,7 +194,8 @@ class AggregatorService:
             )
 
     async def abrir_atendimento(
-        self, atendimento: AtendimentoIn,
+        self,
+        atendimento: AtendimentoIn,
     ) -> None:
         try:
             await self.ixc_client.abrir_atendimento(atendimento)
@@ -200,7 +208,8 @@ class AggregatorService:
             )
         
     async def enviar_sinal_desconexao(
-        self, id_login_ixc: int,
+        self,
+        id_login_ixc: int,
     ) -> None:
         try:
             await self.ixc_client.enviar_sinal_desconexao(id_login_ixc)
@@ -213,12 +222,15 @@ class AggregatorService:
             )
         
     async def checar_atendimentos_abertos(
-        self, id_login_ixc: int, page: int = 1, per_page: int = 10,
+        self,
+        id_login_ixc: int,
+        page: int = 1,
+        per_page: int = 10,
     ) -> AtendimentoOut:
         try:
             res = await self.ixc_client.checar_atendimentos_abertos(id_login_ixc, page, per_page)
             registros = res.get("registros", [])
-            total = res.get("total", 0)
+            total = int(res.get("total", 0))
             if not registros:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,

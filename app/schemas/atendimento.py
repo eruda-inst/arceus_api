@@ -1,7 +1,7 @@
 from .misc import Meta, Links
 from pydantic import BaseModel, Field
 from typing import Literal, Optional, List
-from ..utils.helpers.rotular import StatusAtendimentoRotulo
+from ..utils import StatusAtendimentoRotulo
 
 
 class AtendimentoIn(BaseModel):

@@ -1,10 +1,7 @@
 from typing import Optional
-from ..schemas.onu import StatusONUOut
+from ..services import AggregatorService
 from fastapi import APIRouter, Query, status
-from ..schemas.conexao import StatusConexaoOut
-from ..services.aggregator import AggregatorService
-from ..schemas.atendimento import AtendimentoIn, AtendimentoOut
-from ..schemas.contrato import ContratoListOut, StatusContratoOut
+from ..schemas import StatusConexaoOut, AtendimentoOut, AtendimentoIn, ContratoListOut, StatusContratoOut, StatusONUOut
 
 
 router  = APIRouter()
@@ -13,8 +10,8 @@ service = AggregatorService()
 @router.get("/contratos_ativos_cliente", response_model=ContratoListOut)
 async def get_contratos_ativos_cliente(
     protocolo_atendimento_opa: str = Query(min_length=12, max_length=12, description="Protocolo de atendimento do cliente no OpaSuite."),
-    page: int = Query(ge=1, default=1, description="Número da página."),
-    per_page: int = Query(ge=1, default=10, description="Itens por página."),
+    page: Optional[int] = Query(ge=1, default=1, description="Número da página."),
+    per_page: Optional[int] = Query(ge=1, default=10, description="Itens por página."),
 ):
     return await service.get_contratos_ativos_cliente(protocolo_atendimento_opa, page, per_page)
 
@@ -33,7 +30,7 @@ async def get_status_contrato(
 @router.get("/status_onu", response_model=StatusONUOut)
 async def get_status_onu(
     id_login_ixc: Optional[int] = Query(default=None, description="ID de login do cliente no IXCSoft."),
-    mac_onu_ixc: Optional[str] = Query(default=None, max_length=50, description="MAC Address da ONU."),
+    mac_onu_ixc: Optional[str] = Query(default=None, description="MAC Address da ONU."),
 ):
     return await service.get_status_onu(id_login_ixc, mac_onu_ixc)
 
@@ -45,14 +42,14 @@ async def abrir_atendimento(
 
 @router.post("/enviar_sinal_desconexao", status_code=status.HTTP_204_NO_CONTENT)
 async def enviar_sinal_desconexao(
-    id_login_ixc: int = Query(default=None, description="ID de login do cliente no IXCSoft."),
+    id_login_ixc: int = Query(description="ID de login do cliente no IXCSoft."),
 ):
     return await service.enviar_sinal_desconexao(id_login_ixc)
 
 @router.get("/checar_atendimentos_abertos", response_model=AtendimentoOut)
 async def checar_atendimentos_abertos(
-    id_login_ixc: int = Query(default=None, description="ID de login do cliente no IXCSoft."),
-    page: int = Query(ge=1, default=1, description="Número da página."),
-    per_page: int = Query(ge=1, default=10, description="Itens por página."),
+    id_login_ixc: int = Query(description="ID de login do cliente no IXCSoft."),
+    page: Optional[int] = Query(ge=1, default=1, description="Número da página."),
+    per_page: Optional[int] = Query(ge=1, default=10, description="Itens por página."),
 ):
     return await service.checar_atendimentos_abertos(id_login_ixc, page, per_page)

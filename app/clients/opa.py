@@ -1,6 +1,6 @@
 import requests
+from ..core import settings
 from typing import Dict, Any
-from ..core.config import settings
 from fastapi import HTTPException, status
 
 
@@ -13,7 +13,9 @@ class OpaClient:
         self.headers = {"Authorization": f"Bearer {self.token}"}
 
     def _make_request(
-        self, endpoint: str, payload: Dict[str, Any],
+        self,
+        endpoint: str,
+        payload: Dict[str, Any],
     ) -> Dict[str, Any]:
         url = f"{self.base_url}/{endpoint}"
         try:
@@ -27,14 +29,16 @@ class OpaClient:
             )
 
     def get_id_cliente_opa(
-        self, protocolo_atendimento_opa: str,
+        self,
+        protocolo_atendimento_opa: str,
     ) -> Dict[str, Any]:
         payload = {"filter": {"protocolo": protocolo_atendimento_opa}}
         data = self._make_request("atendimento", payload)
         return data
 
     def get_id_cliente_ixc(
-        self, id_cliente_opa: int,
+        self,
+        id_cliente_opa: int,
     ) -> Dict[str, Any]:
         payload = {"filter": {"_id": id_cliente_opa}}
         data = self._make_request("cliente", payload)

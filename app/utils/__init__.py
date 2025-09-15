@@ -1,1 +1,1 @@
-from .helpers import rotular_status_atendimento, rotular_status_conexao, rotular_status_contrato
+from .helpers import rotular_status_atendimento, rotular_status_conexao, rotular_status_contrato, StatusAtendimentoCodigo, StatusAtendimentoRotulo, StatusConexaoCodigo, StatusContratoCodigo, StatusConexaoRotulo, StatusContratoRotulo

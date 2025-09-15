@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from ..utils.helpers.rotular import StatusConexaoRotulo
+from ..utils import StatusConexaoRotulo
 
 
 class StatusConexao(BaseModel):

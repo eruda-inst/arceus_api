@@ -1,9 +1,9 @@
 import httpx
 import base64
+from ..core import settings
 from typing import Dict, Any, List
-from ..core.config import settings
+from ..schemas import AtendimentoIn
 from fastapi import HTTPException, status
-from ..schemas.atendimento import AtendimentoIn
 
 
 class IXCClient:
@@ -21,7 +21,8 @@ class IXCClient:
         return f"Basic {token_encoded}"
 
     def _get_headers(
-        self, include_ixcsoft: bool = True,
+        self,
+        include_ixcsoft: bool = True,
     ) -> Dict[str, str]:
         headers = {"Authorization": self.auth_header}
         if include_ixcsoft:
@@ -29,7 +30,10 @@ class IXCClient:
         return headers
 
     async def _make_request(
-        self, endpoint: str, payload: Dict[str, Any], include_ixcsoft: bool = True,
+        self,
+        endpoint: str,
+        payload: Dict[str, Any],
+        include_ixcsoft: bool = True,
     ) -> Dict[str, Any]:
         url = f"{self.base_url}/{endpoint}"
         headers = self._get_headers(include_ixcsoft)
@@ -55,7 +59,10 @@ class IXCClient:
             ) from e
 
     async def get_contratos_ativos_cliente(
-        self, id_cliente_ixc: int, page: int = 1, per_page: int = 1,
+        self,
+        id_cliente_ixc: int,
+        page: int = 1,
+        per_page: int = 1,
     ) -> List[Dict[str, Any]]:
         payload = {
             "qtype": "cliente_contrato.id_cliente",
@@ -68,7 +75,8 @@ class IXCClient:
         return data
 
     async def get_status_conexao(
-        self, id_login_ixc: int,
+        self,
+        id_login_ixc: int,
     ) -> List[Dict[str, Any]]:
         payload = {
             "qtype": "radusuarios.id",
@@ -79,7 +87,8 @@ class IXCClient:
         return data
 
     async def get_status_contrato(
-        self, id_contrato_ixc: int,
+        self,
+        id_contrato_ixc: int,
     ) -> Dict[str, Any]:
         payload = {
             "qtype": "cliente_contrato.id",
@@ -90,7 +99,9 @@ class IXCClient:
         return data
 
     async def get_status_onu(
-        self, id_login_ixc: int, mac_onu_ixc: str,
+        self,
+        id_login_ixc: int,
+        mac_onu_ixc: str,
     ) -> Dict[str, Any]:
         query_field = "id_login" if id_login_ixc else "mac"
         query_value = id_login_ixc if id_login_ixc else mac_onu_ixc
@@ -103,7 +114,8 @@ class IXCClient:
         return data
 
     async def valor_e_data_vencimento(
-        self, id_contrato_ixc: int,
+        self,
+        id_contrato_ixc: int,
     ) -> Dict[str, Any]:
         payload = {
             "qtype": "fn_areceber.id_contrato",
@@ -114,19 +126,24 @@ class IXCClient:
         return data
     
     async def abrir_atendimento(
-        self, atendimento: AtendimentoIn,
+        self,
+        atendimento: AtendimentoIn,
     ) -> None:
         payload = atendimento.model_dump()
         await self._make_request("su_ticket", payload, include_ixcsoft=False)
     
     async def enviar_sinal_desconexao(
-        self, id_login_ixc: int,
+        self,
+        id_login_ixc: int,
     ) -> None:
         payload = {"id": id_login_ixc}
         await self._make_request("desconectar_clientes", payload, include_ixcsoft=False)
 
     async def checar_atendimentos_abertos(
-        self, id_login_ixc: int, page: int = 1, per_page: int = 1,
+        self,
+        id_login_ixc: int,
+        page: int = 1,
+        per_page: int = 10,
     ) -> List[Dict[str, Any]]:
         payload = {
             "qtype": "su_ticket.id_login",
