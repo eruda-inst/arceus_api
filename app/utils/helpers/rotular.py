@@ -35,16 +35,6 @@ def rotular_status_atendimento(
 def rotular_status_onu(
     sinal_rx: float,
 ) -> str:
-    '''
-    📊 Legenda de Qualidade do Sinal ONU (em dBm)
-    Faixa de Sinal (dBm)	Classificação
-    -10 a -14	Saturado (potência excessiva)
-    -15 a -20	Excelente (ótimo)
-    -21 a -25	Bom
-    -26 a -28	Regular / Aceitável
-    -29 a -30	Ruim (fraco, instável)
-    ≤ -31	Péssimo (quase sem conexão)
-    '''
     if sinal_rx >= -15:
         return "Saturado"
     elif sinal_rx >= -21:

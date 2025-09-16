@@ -181,10 +181,10 @@ class AggregatorService:
                     detail="Nenhuma ONU."
                 )
             sinal_rx = float(registros[0].get("sinal_rx"))
-            print(sinal_rx)
+            sinal_rx_rotulo = rotular_status_onu(sinal_rx)
             return StatusONUOut(
                 data=StatusONU(
-                    status_onu=rotular_status_onu(sinal_rx),
+                    status_onu=sinal_rx_rotulo
                 )
             )
         except HTTPException:
