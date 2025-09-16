@@ -5,7 +5,7 @@ from .routers import router as aggregator_router
 app = FastAPI(
     title="API do Bot",
     description="Atua como um aggregator, simplificando integrações entre a API aberta do OpaSuite e a API aberta do IXCSoft.",
-    version="0.42.4"
+    version="0.42.5"
 )
 
 app.include_router(router=aggregator_router, prefix="/api/v1", tags=["Aggregator"])

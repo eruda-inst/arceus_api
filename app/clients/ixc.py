@@ -2,26 +2,26 @@ import httpx
 import base64
 from ..core import settings
 from ..schemas import AtendimentoIn
-from typing import Dict, Any, List, Union
 from fastapi import HTTPException, status
+from typing import Dict, Any, List, Union, Self
 
 
 class IXCClient:
     def __init__(
-        self,
+        self: Self,
     ) -> None:
         self.token = settings.IXC_TOKEN
         self.base_url = "https://ixc.newnet.com.br/webservice/v1"
         self.auth_header = self._create_auth_header()
 
     def _create_auth_header(
-        self,
+        self: Self,
     ) -> str:
         token_encoded = base64.b64encode(self.token.encode("utf-8")).decode("utf-8")
         return f"Basic {token_encoded}"
 
     def _get_headers(
-        self,
+        self: Self,
         include_ixcsoft: bool = True,
     ) -> Dict[str, str]:
         headers = {"Authorization": self.auth_header}
@@ -30,7 +30,7 @@ class IXCClient:
         return headers
 
     async def _make_request(
-        self,
+        self: Self,
         endpoint: str,
         payload: Dict[str, Any],
         include_ixcsoft: bool = True,
@@ -59,7 +59,7 @@ class IXCClient:
             ) from e
 
     async def get_contratos_ativos_cliente(
-        self,
+        self: Self,
         id_cliente_ixc: int,
         page: int = 1,
         per_page: int = 1,
@@ -75,7 +75,7 @@ class IXCClient:
         return data
 
     async def get_status_conexao(
-        self,
+        self: Self,
         id_login_ixc: int,
     ) -> List[Dict[str, Any]]:
         payload = {
@@ -87,7 +87,7 @@ class IXCClient:
         return data
 
     async def get_status_contrato(
-        self,
+        self: Self,
         id_contrato_ixc: int,
     ) -> Dict[str, Any]:
         payload = {
@@ -99,7 +99,7 @@ class IXCClient:
         return data
 
     async def get_status_onu(
-        self,
+        self: Self,
         id_login_ixc: int,
         mac_onu_ixc: str,
     ) -> Dict[str, Any]:
@@ -114,21 +114,21 @@ class IXCClient:
         return data
     
     async def abrir_atendimento(
-        self,
+        self: Self,
         atendimento: AtendimentoIn,
     ) -> None:
         payload = atendimento.model_dump()
         await self._make_request("su_ticket", payload, include_ixcsoft=False)
     
     async def enviar_sinal_desconexao(
-        self,
+        self: Self,
         id_login_ixc: int,
     ) -> None:
         payload = {"id": id_login_ixc}
         await self._make_request("desconectar_clientes", payload, include_ixcsoft=False)
 
     async def checar_atendimentos_abertos(
-        self,
+        self: Self,
         id_login_ixc: int,
         page: int = 1,
         per_page: int = 10,
@@ -144,7 +144,7 @@ class IXCClient:
         return data
     
     async def valor_e_data_vencimento(
-        self,
+        self: Self,
         id_contrato_ixc: int,
     ) -> Dict[str, Any]:
         payload = {
@@ -156,7 +156,7 @@ class IXCClient:
         return data
     
     async def get_id_login(
-        self,
+        self: Self,
         id_contrato_ixc: int
     ) -> Dict[str, Any]:
         payload = {

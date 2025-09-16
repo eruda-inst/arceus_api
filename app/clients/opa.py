@@ -1,19 +1,19 @@
 import httpx
 from ..core import settings
-from typing import Dict, Any
+from typing import Dict, Any, Self
 from fastapi import HTTPException, status
 
 
 class OpaClient:
     def __init__(
-        self,
+        self: Self,
     ) -> None:
         self.token = settings.OPA_TOKEN
         self.base_url = "https://newnet.opasuite.com.br/api/v1"
         self.headers = {"Authorization": f"Bearer {self.token}"}
 
     async def _make_request(
-        self,
+        self: Self,
         endpoint: str,
         payload: Dict[str, Any],
     ) -> Dict[str, Any]:
@@ -23,14 +23,14 @@ class OpaClient:
                 res = await async_client.request(method="GET", url=url, headers=self.headers, json=payload)
                 res.raise_for_status()
                 return res.json()
-        except requests.exceptions.RequestException as e:
+        except httpx.RequestError as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=f"Erro na API do OPA: {str(e)}"
             )
 
     async def get_id_cliente_opa(
-        self,
+        self: Self,
         protocolo_atendimento_opa: str,
     ) -> Dict[str, Any]:
         payload = {"filter": {"protocolo": protocolo_atendimento_opa}}
@@ -38,7 +38,7 @@ class OpaClient:
         return data
 
     async def get_id_cliente_ixc(
-        self,
+        self: Self,
         id_cliente_opa: int,
     ) -> Dict[str, Any]:
         payload = {"filter": {"_id": id_cliente_opa}}

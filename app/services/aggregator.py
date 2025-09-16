@@ -1,3 +1,4 @@
+from typing import Self
 from datetime import datetime
 from ..clients import IXCClient, OpaClient
 from fastapi import HTTPException, status
@@ -7,13 +8,13 @@ from ..schemas import (StatusONUOut, Atendimento, AtendimentoIn, AtendimentoOut,
 
 class AggregatorService:
     def __init__(
-        self,
+        self: Self,
     ):
         self.opa_client = OpaClient()
         self.ixc_client = IXCClient()
 
     async def get_contratos_ativos_cliente(
-        self,
+        self: Self,
         protocolo_atendimento_opa: str,
         page: int = 1,
         per_page: int = 10,
@@ -108,7 +109,7 @@ class AggregatorService:
             )
 
     async def get_status_conexao(
-        self,
+        self: Self,
         id_login_ixc: int,
     ) -> StatusConexaoOut:
         try:
@@ -135,7 +136,7 @@ class AggregatorService:
             )
 
     async def get_status_contrato(
-        self,
+        self: Self,
         id_contrato_ixc: int,
     ) -> StatusContratoOut:
         try:
@@ -164,7 +165,7 @@ class AggregatorService:
             )
 
     async def get_status_onu(
-        self,
+        self: Self,
         id_login_ixc: int,
         mac_onu_ixc: str,
     ) -> StatusONUOut:
@@ -198,7 +199,7 @@ class AggregatorService:
             )
 
     async def abrir_atendimento(
-        self,
+        self: Self,
         atendimento: AtendimentoIn,
     ) -> None:
         try:
@@ -212,7 +213,7 @@ class AggregatorService:
             )
         
     async def enviar_sinal_desconexao(
-        self,
+        self: Self,
         id_login_ixc: int,
     ) -> None:
         try:
@@ -226,7 +227,7 @@ class AggregatorService:
             )
         
     async def checar_atendimentos_abertos(
-        self,
+        self: Self,
         id_login_ixc: int,
         page: int = 1,
         per_page: int = 10,
