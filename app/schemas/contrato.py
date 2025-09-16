@@ -18,6 +18,7 @@ class Contrato(BaseModel):
     contrato: str = Field(max_length=100, description="Número do contrato.")
     valor: float = Field(description="Valor do contrato.")
     data_vencimento: str = Field(description="Data de vencimento do contrato.")
+    mac_onu: str = Field(description="MAC Address da ONU.")
 
 class ContratoListOut(BaseModel):
     data: List[Contrato] = Field(default=None, description="Lista de contratos")

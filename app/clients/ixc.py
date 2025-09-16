@@ -157,11 +157,23 @@ class IXCClient:
     
     async def get_id_login(
         self: Self,
-        id_contrato_ixc: int
+        id_contrato_ixc: int,
     ) -> Dict[str, Any]:
         payload = {
             "qtype": "radusuarios.id_contrato",
             "query": id_contrato_ixc,
+            "oper": "=",
+        }
+        data = await self._make_request("radusuarios", payload)
+        return data
+    
+    async def get_onu_mac(
+        self: Self,
+        id_login_ixc,
+    ):
+        payload = {
+            "qtype": "radusuarios.id",
+            "query": id_login_ixc,
             "oper": "=",
         }
         data = await self._make_request("radusuarios", payload)

@@ -44,6 +44,11 @@ class AggregatorService:
                 id_login = id_login_res["registros"][0]["id"]
                 contrato["id_login"] = id_login
 
+                onu_mac_res = await self.ixc_client.get_onu_mac(id_login)
+                onu_mac = onu_mac_res["registros"][0]["onu_mac"]
+
+                contrato["mac_onu"] = onu_mac
+
                 titulos_nao_quitados = [r for r in registros if r.get("status") != 'Q']
                 
                 if not titulos_nao_quitados:
