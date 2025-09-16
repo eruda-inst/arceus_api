@@ -1,3 +1,3 @@
-from .helpers import rotular_status_atendimento, rotular_status_conexao, rotular_status_contrato
+from .helpers import rotular_status_atendimento, rotular_status_conexao, rotular_status_contrato, rotular_status_onu
 from .enums import StatusAtendimentoCod, StatusContratoCod, OrigemEnderecoCod, StatusConexaoCod, PrioridadeCod, SuStatusCod, TipoCod, StatusAtendimentoRot, StatusContratoRot, StatusConexaoRot
 from .maps import STATUS_ATENDIMENTO, STATUS_CONEXAO, STATUS_CONTRATO

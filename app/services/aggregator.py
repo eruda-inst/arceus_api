@@ -2,7 +2,7 @@ from typing import Self
 from datetime import datetime
 from ..clients import IXCClient, OpaClient
 from fastapi import HTTPException, status
-from ..utils import rotular_status_contrato, rotular_status_atendimento, rotular_status_conexao
+from ..utils import rotular_status_contrato, rotular_status_atendimento, rotular_status_conexao, rotular_status_onu
 from ..schemas import (StatusONUOut, Atendimento, AtendimentoIn, AtendimentoOut, Contrato, ContratoListOut, Links, Meta, StatusConexao, StatusConexaoOut, StatusContrato, StatusONU, StatusContratoOut)
 
 
@@ -180,12 +180,11 @@ class AggregatorService:
                     status=status.HTTP_404_NOT_FOUND,
                     detail="Nenhuma ONU."
                 )
-            sinal_rx = registros[0].get("sinal_rx")
-            sinal_tx = registros[0].get("sinal_tx")
+            sinal_rx = float(registros[0].get("sinal_rx"))
+            print(sinal_rx)
             return StatusONUOut(
                 data=StatusONU(
-                    sinal_rx=sinal_rx,
-                    sinal_tx=sinal_tx
+                    status_onu=rotular_status_onu(sinal_rx),
                 )
             )
         except HTTPException:
