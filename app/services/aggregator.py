@@ -149,8 +149,6 @@ class AggregatorService:
                 )
             status_contrato_codigo = registros[0].get("status")
             status_contrato_rotulo = rotular_status_contrato(status_contrato_codigo)
-            print(status_contrato_codigo)
-            print(status_contrato_rotulo)
             return StatusContratoOut(
                 data=StatusContrato(
                     status_contrato=status_contrato_rotulo

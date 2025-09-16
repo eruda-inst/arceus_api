@@ -1,9 +1,9 @@
+from ..utils import StatusConexaoRot
 from pydantic import BaseModel, Field
-from ..utils import StatusConexaoRotulo
 
 
 class StatusConexao(BaseModel):
-    status_conexao: StatusConexaoRotulo = Field(description="Status da conexão.")
+    status_conexao: StatusConexaoRot = Field(description="Status da conexão.")
 
 class StatusConexaoOut(BaseModel):
     data: StatusConexao

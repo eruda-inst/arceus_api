@@ -1,48 +1,33 @@
-from typing import Literal, Dict
+from enum import Enum
+from typing import Union, Any
+from ..maps import STATUS_CONEXAO, STATUS_ATENDIMENTO, STATUS_CONTRATO
+from ..enums import (
+    StatusConexaoCod,
+    StatusContratoCod,
+    StatusAtendimentoCod,
+    StatusConexaoRot,
+    StatusContratoRot,
+    StatusAtendimentoRot
+)
 
 
-StatusConexaoCodigo = Literal["S", "SS", "N"]
-StatusConexaoRotulo = Literal["Conectado", "Sem status", "Desconectado"]
-
-StatusContratoCodigo = Literal["P", "A", "I", "N", "D"]
-StatusContratoRotulo = Literal["Pré-contrato", "Ativo", "Inativo", "Negativado", "Desistiu"]
-
-StatusAtendimentoCodigo = Literal["N", "P", "EP", "S", "C"]
-StatusAtendimentoRotulo = Literal["Novo", "Pendente", "Em progresso", "Solucionado", "Cancelado"]
-
+def get_label(
+    code: Enum,
+    mapping: dict
+) -> Union[StatusConexaoRot, StatusContratoRot, StatusAtendimentoRot]:
+    return mapping[code]
 
 def rotular_status_conexao(
-    status_conexao_codigo: StatusConexaoCodigo,
-) -> StatusConexaoRotulo:
-    status_conexao_mapa: Dict[StatusConexaoCodigo, StatusConexaoRotulo] = {
-        "S": "Conectado",
-        "SS": "Sem status",
-        "N": "Desconectado"
-    }
-    return status_conexao_mapa[status_conexao_codigo]
-
+    status_conexao_codigo: StatusConexaoCod,
+) -> StatusConexaoRot:
+    return get_label(status_conexao_codigo, STATUS_CONEXAO)
 
 def rotular_status_contrato(
-    status_contrato_codigo: StatusContratoCodigo,
-) -> StatusContratoRotulo:
-    status_contrato_mapa: Dict[StatusContratoCodigo, StatusContratoRotulo] = {
-        "P": "Pré-contrato",
-        "A": "Ativo",
-        "I": "Inativo",
-        "N": "Negativado",
-        "D": "Desistiu"
-    }
-    return status_contrato_mapa[status_contrato_codigo]
-
+    status_contrato_codigo: StatusContratoCod,
+) -> StatusContratoRot:
+    return get_label(status_contrato_codigo, STATUS_CONTRATO)
 
 def rotular_status_atendimento(
-    status_contrato_codigo: StatusAtendimentoCodigo,
-):
-    status_contrato_mapa: Dict[StatusAtendimentoCodigo, StatusAtendimentoRotulo] = {
-        "N": "Novo",
-        "P": "Pendente",
-        "EP": "Em progresso",
-        "S": "Solucionado",
-        "C": "Cancelado",
-    }
-    return status_contrato_mapa[status_contrato_codigo]
+    status_atendimento_codigo: StatusAtendimentoCod,
+) -> StatusAtendimentoRot:
+    return get_label(status_atendimento_codigo, STATUS_ATENDIMENTO)
