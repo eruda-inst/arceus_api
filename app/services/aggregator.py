@@ -3,7 +3,22 @@ from datetime import datetime
 from ..clients import IXCClient, OpaClient
 from fastapi import HTTPException, status
 from ..utils import rotular_status_contrato, rotular_status_atendimento, rotular_status_conexao, rotular_status_onu
-from ..schemas import (StatusONUOut, Atendimento, AtendimentoIn, AtendimentoOut, Contrato, ContratoListOut, Links, Meta, StatusConexao, StatusConexaoOut, StatusContrato, StatusONU, StatusContratoOut)
+from ..schemas import (
+    StatusONUOut,
+    Atendimento,
+    AtendimentoIn,
+    AtendimentoOut,
+    Contrato,
+    ContratoListOut,
+    Links,
+    Meta,
+    StatusConexao,
+    StatusConexaoOut,
+    StatusContrato,
+    StatusONU,
+    StatusContratoOut,
+    AtendimentoCreate
+)
 
 
 class AggregatorService:
@@ -39,7 +54,7 @@ class AggregatorService:
             for contrato in registros_ativos:
                 a_receber_res = await self.ixc_client.valor_e_data_vencimento(contrato["id"])
                 registros = a_receber_res.get("registros", [])
-                
+
                 id_login_res = await self.ixc_client.get_id_login(contrato["id"])
                 id_login = id_login_res["registros"][0]["id"]
                 contrato["id_login"] = id_login
@@ -50,7 +65,7 @@ class AggregatorService:
                 contrato["mac_onu"] = onu_mac
 
                 titulos_nao_quitados = [r for r in registros if r.get("status") != 'Q']
-                
+
                 if not titulos_nao_quitados:
                     contrato["valor"] = 0.00
                     contrato["data_vencimento"] = ""
@@ -67,7 +82,7 @@ class AggregatorService:
                         try:
                             data_vencimento = datetime.strptime(data_vencimento_str, "%Y-%m-%d").date()
                             diferenca = (data_vencimento - hoje).days
-                            
+
                             if diferenca >= 0:
                                 if menor_diferenca is None or diferenca < menor_diferenca:
                                     menor_diferenca = diferenca
@@ -200,20 +215,6 @@ class AggregatorService:
                 detail=f"Erro interno ao processar solicitação: {str(e)}"
             )
 
-    async def abrir_atendimento(
-        self: Self,
-        atendimento: AtendimentoIn,
-    ) -> None:
-        try:
-            await self.ixc_client.abrir_atendimento(atendimento)
-        except HTTPException:
-            raise
-        except Exception as e:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno ao processar solicitação: {str(e)}"
-            )
-        
     async def enviar_sinal_desconexao(
         self: Self,
         id_login_ixc: int,
@@ -227,7 +228,7 @@ class AggregatorService:
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=f"Erro interno ao processar solicitação: {str(e)}"
             )
-        
+
     async def checar_atendimentos_abertos(
         self: Self,
         id_login_ixc: int,
@@ -235,7 +236,7 @@ class AggregatorService:
         per_page: int = 10,
     ) -> AtendimentoOut:
         try:
-            res = await self.ixc_client.checar_atendimentos_abertos(id_login_ixc, page, per_page)
+            res = await self.ixc_client.get_atendimentos(id_login_ixc, page, per_page)
             registros = res.get("registros", [])
             total = int(res.get("total", 0))
             if not registros:
@@ -280,6 +281,40 @@ class AggregatorService:
                 meta=meta,
                 links=links
             )
+        except HTTPException:
+            raise
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Erro interno ao processar solicitação: {str(e)}"
+            )
+
+    async def abrir_atendimento(
+        self: Self,
+        atendimento: AtendimentoIn,
+    ) -> AtendimentoCreate:
+        try:
+            await self.ixc_client.abrir_atendimento(atendimento)
+            id_login = atendimento.id_login
+            atendimentos_res = await self.ixc_client.get_atendimentos(id_login)
+            atendimentos = atendimentos_res.get("registros", [])
+
+            atendimentos_filtrados = [
+                a for a in atendimentos 
+                if a["su_status"] == "N" 
+                and str(a.get("id_responsavel_tecnico", "")) == "14336"
+            ]
+
+            atendimentos_ordenados = sorted(
+                atendimentos_filtrados,
+                key=lambda x: x["id"],
+                reverse=True
+            )
+
+            novo_atendimento = atendimentos_ordenados[0]
+            id_atendimento = novo_atendimento["id"]
+
+            return AtendimentoCreate(id=int(id_atendimento))
         except HTTPException:
             raise
         except Exception as e:

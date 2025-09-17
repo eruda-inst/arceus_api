@@ -1,7 +1,7 @@
 from typing import Optional
 from ..services import AggregatorService
 from fastapi import APIRouter, Query, status
-from ..schemas import StatusConexaoOut, AtendimentoOut, AtendimentoIn, ContratoListOut, StatusContratoOut, StatusONUOut
+from ..schemas import StatusConexaoOut, AtendimentoOut, AtendimentoIn, ContratoListOut, StatusContratoOut, StatusONUOut, AtendimentoCreate
 
 
 router  = APIRouter()
@@ -34,12 +34,6 @@ async def get_status_onu(
 ):
     return await service.get_status_onu(id_login_ixc, mac_onu_ixc)
 
-@router.post("/abrir_atendimento", status_code=status.HTTP_204_NO_CONTENT, summary="Abre ticket de atendimento, através de dados do atendimento.")
-async def abrir_atendimento(
-    atendimento: AtendimentoIn,
-) -> None:
-    return await service.ixc_client.abrir_atendimento(atendimento)
-
 @router.post("/enviar_sinal_desconexao", status_code=status.HTTP_204_NO_CONTENT, summary="Envia sinal de desconexão para um cliente, através de ID de login.")
 async def enviar_sinal_desconexao(
     id_login_ixc: int = Query(description="ID de login do cliente no IXCSoft."),
@@ -52,4 +46,10 @@ async def checar_atendimentos_abertos(
     page: Optional[int] = Query(ge=1, default=1, description="Número da página."),
     per_page: Optional[int] = Query(ge=1, default=10, description="Itens por página."),
 ):
-    return await service.checar_atendimentos_abertos(id_login_ixc, page, per_page)
+    await service.checar_atendimentos_abertos(id_login_ixc, page, per_page)
+
+@router.post("/abrir_atendimento", summary="Abre ticket de atendimento, através de dados do atendimento.")
+async def abrir_atendimento(
+    atendimento: AtendimentoIn,
+) -> AtendimentoCreate:
+    return await service.abrir_atendimento(atendimento)

@@ -1,7 +1,7 @@
 import httpx
 from ..core import settings
-from typing import Dict, Any, Self
 from fastapi import HTTPException, status
+from typing import Dict, Any, Self, Optional
 
 
 class OpaClient:
@@ -16,7 +16,7 @@ class OpaClient:
         self: Self,
         endpoint: str,
         payload: Dict[str, Any],
-    ) -> Dict[str, Any]:
+    ) -> Optional[Dict[str, Any]]:
         url = f"{self.base_url}/{endpoint}"
         try:
             async with httpx.AsyncClient(timeout=30.0) as async_client:
@@ -32,7 +32,7 @@ class OpaClient:
     async def get_id_cliente_opa(
         self: Self,
         protocolo_atendimento_opa: str,
-    ) -> Dict[str, Any]:
+    ) -> Optional[Dict[str, Any]]:
         payload = {"filter": {"protocolo": protocolo_atendimento_opa}}
         data = await self._make_request("atendimento", payload)
         return data
@@ -40,7 +40,7 @@ class OpaClient:
     async def get_id_cliente_ixc(
         self: Self,
         id_cliente_opa: int,
-    ) -> Dict[str, Any]:
+    ) -> Optional[Dict[str, Any]]:
         payload = {"filter": {"_id": id_cliente_opa}}
         data = await self._make_request("cliente", payload)
         return data

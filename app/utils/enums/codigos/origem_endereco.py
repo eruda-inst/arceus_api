@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class OrigemEnderecoCod(Enum):
+class OrigemEnderecoCod(str, Enum):
     CLIENTE = "C"
     LOGIN = "L"
     CONTRATO = "CC"
