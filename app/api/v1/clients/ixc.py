@@ -58,15 +58,15 @@ class IXCClient:
                 detail="Resposta inválida do servidor IXC"
             ) from e
 
-    async def get_contratos_ativos_cliente(
+    async def get_contratos(
         self: Self,
-        id_cliente_ixc: int,
+        id_cliente: int,
         page: int = 1,
-        per_page: int = 1,
+        per_page: int = 10,
     ) -> Optional[List[Dict[str, Any]]]:
         payload = {
             "qtype": "cliente_contrato.id_cliente",
-            "query": id_cliente_ixc,
+            "query": id_cliente,
             "oper": "=",
             "page": page,
             "rp": per_page
@@ -76,35 +76,23 @@ class IXCClient:
 
     async def get_status_conexao(
         self: Self,
-        id_login_ixc: int,
+        id_login: int,
     ) -> Optional[List[Dict[str, Any]]]:
         payload = {
             "qtype": "radusuarios.id",
-            "query": id_login_ixc,
+            "query": id_login,
             "oper": "=",
         }
         data = await self._make_request("radusuarios", payload)
         return data
 
-    async def get_status_contrato(
-        self: Self,
-        id_contrato_ixc: int,
-    ) -> Optional[Dict[str, Any]]:
-        payload = {
-            "qtype": "cliente_contrato.id",
-            "query": id_contrato_ixc,
-            "oper": "=",
-        }
-        data = await self._make_request("cliente_contrato", payload)
-        return data
-
     async def get_status_onu(
         self: Self,
-        id_login_ixc: int,
-        mac_onu_ixc: str,
+        id_login: int,
+        mac_onu: str,
     ) -> Optional[Dict[str, Any]]:
-        query_field = "id_login" if id_login_ixc else "mac"
-        query_value = id_login_ixc if id_login_ixc else mac_onu_ixc
+        query_field = "id_login" if id_login else "mac"
+        query_value = id_login if id_login else mac_onu
         payload = {
             "qtype": f"radpop_radio_cliente_fibra.{query_field}",
             "query": query_value,
@@ -113,29 +101,29 @@ class IXCClient:
         data = await self._make_request("radpop_radio_cliente_fibra", payload)
         return data
 
-    async def abrir_atendimento(
+    async def post_atendimentos(
         self: Self,
         atendimento: AtendimentoIn,
     ) -> None:
         payload = atendimento.model_dump()
         await self._make_request("su_ticket", payload, include_ixcsoft=False)
 
-    async def enviar_sinal_desconexao(
+    async def post_desconectar_cliente(
         self: Self,
-        id_login_ixc: int,
+        id_login: int,
     ) -> None:
-        payload = {"id": id_login_ixc}
+        payload = {"id": id_login}
         await self._make_request("desconectar_clientes", payload, include_ixcsoft=False)
 
     async def get_atendimentos(
         self: Self,
-        id_login_ixc: int,
+        id_login: int,
         page: int = 1,
         per_page: int = 10,
     ) -> Optional[List[Dict[str, Any]]]:
         payload = {
             "qtype": "su_ticket.id_login",
-            "query": id_login_ixc,
+            "query": id_login,
             "oper": "=",
             "page": page,
             "rp": per_page
@@ -143,13 +131,13 @@ class IXCClient:
         data = await self._make_request("su_ticket", payload)
         return data
 
-    async def valor_e_data_vencimento(
+    async def get_valor_e_data_vencimento(
         self: Self,
-        id_contrato_ixc: int,
+        id_contrato: int,
     ) -> Optional[Dict[str, Any]]:
         payload = {
             "qtype": "fn_areceber.id_contrato",
-            "query": id_contrato_ixc,
+            "query": id_contrato,
             "oper": "="
         }
         data = await self._make_request("fn_areceber", payload)
@@ -157,11 +145,11 @@ class IXCClient:
 
     async def get_id_login(
         self: Self,
-        id_contrato_ixc: int,
+        id_contrato: int,
     ) -> Optional[Dict[str, Any]]:
         payload = {
             "qtype": "radusuarios.id_contrato",
-            "query": id_contrato_ixc,
+            "query": id_contrato,
             "oper": "=",
         }
         data = await self._make_request("radusuarios", payload)
@@ -169,11 +157,11 @@ class IXCClient:
 
     async def get_onu_mac(
         self: Self,
-        id_login_ixc,
+        id_login: int,
     ) -> Optional[Dict[str, Any]]:
         payload = {
             "qtype": "radusuarios.id",
-            "query": id_login_ixc,
+            "query": id_login,
             "oper": "=",
         }
         data = await self._make_request("radusuarios", payload)

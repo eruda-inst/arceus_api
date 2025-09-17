@@ -21,21 +21,21 @@ from ..schemas import (
 )
 
 
-class AggregatorService:
+class Service:
     def __init__(
         self: Self,
     ):
         self.opa_client = OpaClient()
         self.ixc_client = IXCClient()
 
-    async def get_contratos_ativos_cliente(
+    async def get_contratos(
         self: Self,
-        protocolo_atendimento_opa: str,
+        protocolo: str,
         page: int = 1,
         per_page: int = 10,
     ) -> ContratoListOut:
         try:
-            id_cliente_opa_res = await self.opa_client.get_id_cliente_opa(protocolo_atendimento_opa)
+            id_cliente_opa_res = await self.opa_client.get_id_cliente_opa(protocolo)
             if not id_cliente_opa_res.get("data"):
                 raise HTTPException(status_code=404, detail="Cliente não encontrado no OPA")
             id_cliente_opa = id_cliente_opa_res["data"][0]["id_cliente"]
@@ -45,14 +45,14 @@ class AggregatorService:
                 raise HTTPException(status_code=404, detail="Cliente não encontrado no IXC")
             id_cliente_ixc = id_cliente_ixc_res["data"][0]["id"]
 
-            contratos_res = await self.ixc_client.get_contratos_ativos_cliente(id_cliente_ixc, page, per_page)
+            contratos_res = await self.ixc_client.get_contratos(id_cliente_ixc, page, per_page)
             registros = contratos_res.get("registros", [])
 
             registros_ativos = [r for r in registros if r["status"] not in ("I", "D")]
             total = registros_ativos.__len__()
 
             for contrato in registros_ativos:
-                a_receber_res = await self.ixc_client.valor_e_data_vencimento(contrato["id"])
+                a_receber_res = await self.ixc_client.get_valor_e_data_vencimento(contrato["id"])
                 registros = a_receber_res.get("registros", [])
 
                 id_login_res = await self.ixc_client.get_id_login(contrato["id"])
@@ -101,7 +101,7 @@ class AggregatorService:
                 contrato["status"] = rotular_status_contrato(contrato["status"])
 
             meta = Meta(total=total, page=page, per_page=per_page)
-            base_url = f"/contratos?protocolo_atendimento_opa={protocolo_atendimento_opa}"
+            base_url = f"/contratos?protocolo={protocolo}"
             links = Links(
                 self=f"{base_url}&page={page}&per_page={per_page}",
                 next=(
@@ -130,48 +130,21 @@ class AggregatorService:
 
     async def get_status_conexao(
         self: Self,
-        id_login_ixc: int,
+        id_login: int,
     ) -> StatusConexaoOut:
         try:
-            status_conexao_res = await self.ixc_client.get_status_conexao(id_login_ixc)
-            registros = status_conexao_res.get("registros", [])
+            res = await self.ixc_client.get_status_conexao(id_login)
+            registros = res.get("registros", [])
             if not registros:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
                     detail="Nenhum registro."
                 )
-            status_conexao_codigo = registros[0].get("online")
-            status_conexao_rotulo = rotular_status_conexao(status_conexao_codigo)
+            codigo = registros[0].get("online")
+            rotulo = rotular_status_conexao(codigo)
             return StatusConexaoOut(
                 data=StatusConexao(
-                    status_conexao=status_conexao_rotulo
-                )
-            )
-        except HTTPException:
-            raise
-        except Exception as e:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno ao processar solicitação: {str(e)}"
-            )
-
-    async def get_status_contrato(
-        self: Self,
-        id_contrato_ixc: int,
-    ) -> StatusContratoOut:
-        try:
-            status_contrato_res = await self.ixc_client.get_status_contrato(id_contrato_ixc)
-            registros = status_contrato_res.get("registros", [])
-            if not registros:
-                raise HTTPException(
-                    status=status.HTTP_404_NOT_FOUND,
-                    detail="Nenhum contrato."
-                )
-            status_contrato_codigo = registros[0].get("status")
-            status_contrato_rotulo = rotular_status_contrato(status_contrato_codigo)
-            return StatusContratoOut(
-                data=StatusContrato(
-                    status_contrato=status_contrato_rotulo
+                    status_conexao=rotulo
                 )
             )
         except HTTPException:
@@ -184,27 +157,27 @@ class AggregatorService:
 
     async def get_status_onu(
         self: Self,
-        id_login_ixc: int,
-        mac_onu_ixc: str,
+        id_login: int,
+        mac_onu: str,
     ) -> StatusONUOut:
         try:
-            if not id_login_ixc and not mac_onu_ixc:
+            if not id_login and not mac_onu:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="É necessário informar id_login_ixc ou mac_onu_ixc."
+                    detail="É necessário informar id_login ou mac_onu."
                 )
-            status_onu_res = await self.ixc_client.get_status_onu(id_login_ixc, mac_onu_ixc)
-            registros = status_onu_res.get("registros", [])
+            res = await self.ixc_client.get_status_onu(id_login, mac_onu)
+            registros = res.get("registros", [])
             if not registros:
                 raise HTTPException(
                     status=status.HTTP_404_NOT_FOUND,
                     detail="Nenhuma ONU."
                 )
-            sinal_rx = float(registros[0].get("sinal_rx"))
-            sinal_rx_rotulo = rotular_status_onu(sinal_rx)
+            codigo = float(registros[0].get("sinal_rx"))
+            rotulo = rotular_status_onu(codigo)
             return StatusONUOut(
                 data=StatusONU(
-                    status_onu=sinal_rx_rotulo
+                    status_onu=rotulo
                 )
             )
         except HTTPException:
@@ -215,12 +188,12 @@ class AggregatorService:
                 detail=f"Erro interno ao processar solicitação: {str(e)}"
             )
 
-    async def enviar_sinal_desconexao(
+    async def post_desconectar_cliente(
         self: Self,
-        id_login_ixc: int,
+        id_login: int,
     ) -> None:
         try:
-            await self.ixc_client.enviar_sinal_desconexao(id_login_ixc)
+            await self.ixc_client.post_desconectar_cliente(id_login)
         except HTTPException:
             raise
         except Exception as e:
@@ -229,16 +202,16 @@ class AggregatorService:
                 detail=f"Erro interno ao processar solicitação: {str(e)}"
             )
 
-    async def checar_atendimentos_abertos(
+    async def get_atendimentos(
         self: Self,
-        id_login_ixc: int,
+        id_login: int,
         page: int = 1,
         per_page: int = 10,
     ) -> AtendimentoOut:
         try:
-            res = await self.ixc_client.get_atendimentos(id_login_ixc, page, per_page)
+            res = await self.ixc_client.get_atendimentos(id_login, page, per_page)
             registros = res.get("registros", [])
-            total = int(res.get("total", 0))
+            total = registros.__len__()
             if not registros:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
@@ -262,7 +235,7 @@ class AggregatorService:
                     detail="Sem atendimentos abertos."
                 )
             meta = Meta(total=total, page=page, per_page=per_page)
-            base_url = f"/checar_atendimentos_abertos?id_login_ixc={id_login_ixc}"
+            base_url = f"/atendimentos?id_login={id_login}"
             links = Links(
                 self=f"{base_url}&page={page}&per_page={per_page}",
                 next=(
@@ -289,15 +262,15 @@ class AggregatorService:
                 detail=f"Erro interno ao processar solicitação: {str(e)}"
             )
 
-    async def abrir_atendimento(
+    async def post_atendimentos(
         self: Self,
         atendimento: AtendimentoIn,
     ) -> AtendimentoCreate:
         try:
-            await self.ixc_client.abrir_atendimento(atendimento)
+            await self.ixc_client.post_atendimentos(atendimento)
             id_login = atendimento.id_login
-            atendimentos_res = await self.ixc_client.get_atendimentos(id_login)
-            atendimentos = atendimentos_res.get("registros", [])
+            res = await self.ixc_client.get_atendimentos(id_login)
+            atendimentos = res.get("registros", [])
 
             atendimentos_filtrados = [
                 a for a in atendimentos 

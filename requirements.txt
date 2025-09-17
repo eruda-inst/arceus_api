@@ -1,4 +1,3 @@
-pytest
 pydantic_settings
 httpx
 uvicorn
