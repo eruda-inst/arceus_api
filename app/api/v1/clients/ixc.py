@@ -1,3 +1,4 @@
+import json
 import httpx
 import base64
 from ..core import settings
@@ -64,12 +65,15 @@ class IXCClient:
         page: int = 1,
         per_page: int = 10,
     ) -> Optional[List[Dict[str, Any]]]:
+        grid_param = [{
+            "TB": "cliente_contrato.id_cliente",
+            "OP": "=",
+            "P": str(id_cliente),
+        }]
         payload = {
-            "qtype": "cliente_contrato.id_cliente",
-            "query": id_cliente,
-            "oper": "=",
+            "grid_param": json.dumps(grid_param),
             "page": page,
-            "rp": per_page
+            "rp": per_page,
         }
         data = await self._make_request("cliente_contrato", payload)
         return data
@@ -78,10 +82,13 @@ class IXCClient:
         self: Self,
         id_login: int,
     ) -> Optional[List[Dict[str, Any]]]:
+        grid_param = [{
+            "TB": "radusuarios.id",
+            "OP": "=",
+            "P": str(id_login),
+        }]
         payload = {
-            "qtype": "radusuarios.id",
-            "query": id_login,
-            "oper": "=",
+            "grid_param": json.dumps(grid_param),
         }
         data = await self._make_request("radusuarios", payload)
         return data
@@ -93,10 +100,13 @@ class IXCClient:
     ) -> Optional[Dict[str, Any]]:
         query_field = "id_login" if id_login else "mac"
         query_value = id_login if id_login else mac_onu
+        grid_param = [{
+            "TB": f"radpop_radio_cliente_fibra.{query_field}",
+            "OP": "=",
+            "P": str(query_value),
+        }]
         payload = {
-            "qtype": f"radpop_radio_cliente_fibra.{query_field}",
-            "query": query_value,
-            "oper": "=",
+            "grid_param": json.dumps(grid_param),
         }
         data = await self._make_request("radpop_radio_cliente_fibra", payload)
         return data
@@ -121,12 +131,15 @@ class IXCClient:
         page: int = 1,
         per_page: int = 10,
     ) -> Optional[List[Dict[str, Any]]]:
+        grid_param = [{
+            "TB": "su_ticket.id_login",
+            "OP": "=",
+            "P": str(id_login),
+        }]
         payload = {
-            "qtype": "su_ticket.id_login",
-            "query": id_login,
-            "oper": "=",
+            "grid_param": json.dumps(grid_param),
             "page": page,
-            "rp": per_page
+            "rp": per_page,
         }
         data = await self._make_request("su_ticket", payload)
         return data
@@ -135,10 +148,13 @@ class IXCClient:
         self: Self,
         id_contrato: int,
     ) -> Optional[Dict[str, Any]]:
+        grid_param = [{
+            "TB": "fn_areceber.id_contrato",
+            "OP": "=",
+            "P": str(id_contrato),
+        }]
         payload = {
-            "qtype": "fn_areceber.id_contrato",
-            "query": id_contrato,
-            "oper": "="
+            "grid_param": json.dumps(grid_param),
         }
         data = await self._make_request("fn_areceber", payload)
         return data
@@ -147,10 +163,13 @@ class IXCClient:
         self: Self,
         id_contrato: int,
     ) -> Optional[Dict[str, Any]]:
+        grid_param = [{
+            "TB": "radusuarios.id_contrato",
+            "OP": "=",
+            "P": str(id_contrato),
+        }]
         payload = {
-            "qtype": "radusuarios.id_contrato",
-            "query": id_contrato,
-            "oper": "=",
+            "grid_param": json.dumps(grid_param),
         }
         data = await self._make_request("radusuarios", payload)
         return data
@@ -159,10 +178,13 @@ class IXCClient:
         self: Self,
         id_login: int,
     ) -> Optional[Dict[str, Any]]:
+        grid_param = [{
+            "TB": "radusuarios.id",
+            "OP": "=",
+            "P": str(id_login),
+        }]
         payload = {
-            "qtype": "radusuarios.id",
-            "query": id_login,
-            "oper": "=",
+            "grid_param": json.dumps(grid_param),
         }
         data = await self._make_request("radusuarios", payload)
         return data

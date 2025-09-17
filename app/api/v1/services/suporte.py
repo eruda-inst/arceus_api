@@ -37,21 +37,32 @@ class Service:
         try:
             id_cliente_opa_res = await self.opa_client.get_id_cliente_opa(protocolo)
             if not id_cliente_opa_res.get("data"):
-                raise HTTPException(status_code=404, detail="Cliente não encontrado no OPA")
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Cliente não encontrado no OPA.",
+                )
             id_cliente_opa = id_cliente_opa_res["data"][0]["id_cliente"]
 
             id_cliente_ixc_res = await self.opa_client.get_id_cliente_ixc(id_cliente_opa)
             if not id_cliente_ixc_res.get("data"):
-                raise HTTPException(status_code=404, detail="Cliente não encontrado no IXC")
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Cliente não encontrado no IXC.",
+                )
             id_cliente_ixc = id_cliente_ixc_res["data"][0]["id"]
 
             contratos_res = await self.ixc_client.get_contratos(id_cliente_ixc, page, per_page)
-            registros = contratos_res.get("registros", [])
+            if not contratos_res.get("registros"):
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Nenhum contrato encontrado.",
+                )
+            contratos = contratos_res.get("registros", [])
 
-            registros_ativos = [r for r in registros if r["status"] not in ("I", "D")]
-            total = registros_ativos.__len__()
+            contratos_ativos = [c for c in contratos if c["status"] not in ("I", "D")]
+            total = contratos_ativos.__len__()
 
-            for contrato in registros_ativos:
+            for contrato in contratos_ativos:
                 a_receber_res = await self.ixc_client.get_valor_e_data_vencimento(contrato["id"])
                 registros = a_receber_res.get("registros", [])
 
@@ -116,7 +127,7 @@ class Service:
                 ),
             )
             return ContratoListOut(
-                data=[Contrato(**contrato) for contrato in registros_ativos],
+                data=[Contrato(**contrato) for contrato in contratos_ativos],
                 meta=meta,
                 links=links
             )
@@ -211,7 +222,6 @@ class Service:
         try:
             res = await self.ixc_client.get_atendimentos(id_login, page, per_page)
             registros = res.get("registros", [])
-            total = registros.__len__()
             if not registros:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
@@ -234,6 +244,7 @@ class Service:
                     status_code=status.HTTP_404_NOT_FOUND,
                     detail="Sem atendimentos abertos."
                 )
+            total = atendimentos_abertos.__len__()
             meta = Meta(total=total, page=page, per_page=per_page)
             base_url = f"/atendimentos?id_login={id_login}"
             links = Links(
