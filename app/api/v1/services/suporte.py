@@ -45,7 +45,7 @@ class Service:
             id_cliente_opa_res = await self.opa_client.get_id_cliente_opa(
                 protocolo=protocolo,
             )
-            if not id_cliente_opa_res.get("data"):
+            if not id_cliente_opa_res.get("data", []):
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
                     detail="Cliente não encontrado no OPA.",
@@ -55,7 +55,7 @@ class Service:
             id_cliente_ixc_res = await self.opa_client.get_id_cliente_ixc(
                 id_cliente_opa=id_cliente_opa,
             )
-            if not id_cliente_ixc_res.get("data"):
+            if not id_cliente_ixc_res.get("data", []):
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
                     detail="Cliente não encontrado no IXC.",
@@ -79,11 +79,16 @@ class Service:
 
             for contrato in contratos_ativos:
                 a_receber_res = await self.ixc_client.get_valor_e_data_vencimento(
-                    id_contrato=contrato["id"],
+                    id_contrato=contrato.get("id"),
                 )
                 id_login_res = await self.ixc_client.get_id_login(
-                    id_contrato=contrato["id"],
+                    id_contrato=contrato.get("id"),
                 )
+                if not id_login_res.get("registros", []):
+                    raise HTTPException(
+                        status_code=status.HTTP_404_NOT_FOUND,
+                        detail="Sem ID login.",
+                    )
                 id_login = id_login_res.get("registros")[0]["id"]
                 onu_mac_res = await self.ixc_client.get_onu_mac(
                     id_login=id_login,
@@ -361,7 +366,6 @@ class Service:
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=f"Erro interno ao processar solicitação: {str(e)}"
             )
-
 
     async def post_atendimentos(
         self: Self,

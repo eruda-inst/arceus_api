@@ -79,6 +79,7 @@ class IXCClient:
     ) -> Optional[List[Dict[str, Any]]]:
         grid_param = [
             { "TB": "cliente_contrato.id_cliente", "OP": "=", "P": str(id_cliente) },
+            { "TB": "cliente_contrato.status", "OP": "!=", "P": "I" },
             { "TB": "cliente_contrato.status", "OP": "!=", "P": "N" },
             { "TB": "cliente_contrato.status", "OP": "!=", "P": "D" },
         ]
