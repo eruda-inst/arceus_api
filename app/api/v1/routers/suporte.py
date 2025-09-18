@@ -59,7 +59,7 @@ async def get_status_conexao(
         id_login=id_login,
     )
 
-@router.get("/status_onu", summary="Obtém status de ONU (sinal rx e tx) de um cliente, através de ID de login, ou MAC Address de ONU.")
+@router.get("/status_onu", summary="Obtém status de ONU (sinal rx) de um cliente, através de ID de login, ou MAC Address de ONU.")
 async def get_status_onu(
     id_login: Optional[int] = Query(
         default=None,
