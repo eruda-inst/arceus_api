@@ -10,6 +10,7 @@ from .v1 import (
     Contrato,
     ContratoListOut,
     Links,
+    Settings,
     Meta,
     StatusONU,
     StatusConexaoOut,

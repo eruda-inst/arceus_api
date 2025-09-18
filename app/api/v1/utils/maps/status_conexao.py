@@ -2,7 +2,7 @@ from ..enums import StatusConexaoCod, StatusConexaoRot
 
 
 STATUS_CONEXAO = {
-    StatusConexaoCod.CONECTADO.value: StatusConexaoRot.CONECTADO.value,
-    StatusConexaoCod.SEM_STATUS.value: StatusConexaoRot.SEM_STATUS.value,
-    StatusConexaoCod.DESCONECTADO.value: StatusConexaoRot.DESCONECTADO.value
+    StatusConexaoCod.CONECTADO: StatusConexaoRot.CONECTADO,
+    StatusConexaoCod.SEM_STATUS: StatusConexaoRot.SEM_STATUS,
+    StatusConexaoCod.DESCONECTADO: StatusConexaoRot.DESCONECTADO
 }

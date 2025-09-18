@@ -1,5 +1,5 @@
 from .clients import IXCClient, OpaClient
-from .core import settings
+from .core import settings, Settings
 from .routers import suporte_router
 from .schemas import (
     Atendimento,

@@ -13,7 +13,7 @@ from ..enums import (
 
 def get_label(
     code: Enum,
-    mapping: dict
+    mapping: dict,
 ) -> Union[StatusConexaoRot, StatusContratoRot, StatusAtendimentoRot]:
     return mapping[code]
 
