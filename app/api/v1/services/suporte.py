@@ -1,5 +1,6 @@
 from typing import Self, Optional
 from datetime import datetime
+from pydantic import ValidationError
 from ..clients import IXCClient, OpaClient
 from fastapi import HTTPException, status
 from ..utils import (
@@ -28,7 +29,7 @@ from ..schemas import (
 class Service:
     def __init__(
         self: Self,
-    ):
+    ) -> None:
         self.opa_client = OpaClient()
         self.ixc_client = IXCClient()
 
@@ -167,6 +168,11 @@ class Service:
             )
         except HTTPException:
             raise
+        except ValidationError as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Validação da resposta falhou: {e}"
+            )
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -193,15 +199,20 @@ class Service:
             )
             return StatusConexaoOut(
                 data=StatusConexao(
-                    status_conexao=rotulo
+                    status_conexao={"rotulo": rotulo}
                 )
             )
         except HTTPException:
             raise
+        except ValidationError as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Validação da resposta falhou: {e}"
+            )
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno ao processar solicitação: {str(e)}"
+                detail=f"Erro interno ao processar solicitação: {e}"
             )
 
     async def get_status_onu(
@@ -252,6 +263,11 @@ class Service:
             )
         except HTTPException:
             raise
+        except ValidationError as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Validação da resposta falhou: {e}"
+            )
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -335,6 +351,11 @@ class Service:
             )
         except HTTPException:
             raise
+        except ValidationError as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Validação da resposta falhou: {e}"
+            )
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -370,6 +391,11 @@ class Service:
             )
         except HTTPException:
             raise
+        except ValidationError as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Validação da resposta falhou: {e}"
+            )
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
