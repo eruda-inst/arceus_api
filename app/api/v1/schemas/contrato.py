@@ -4,12 +4,6 @@ from pydantic import BaseModel, Field
 from ..utils import StatusContratoRot
 
 
-class StatusContrato(BaseModel):
-    status_contrato: StatusContratoRot = Field(description="Status atual do contrato.")
-
-class StatusContratoOut(BaseModel):
-    data: StatusContrato
-
 class Contrato(BaseModel):
     id: int = Field(description="ID único do contrato.")
     id_login: int = Field(description="ID de login associado ao contrato.")

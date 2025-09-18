@@ -2,6 +2,7 @@ import json
 import httpx
 import base64
 from ..core import settings
+from ..utils import SortOrder
 from ..schemas import AtendimentoIn
 from fastapi import HTTPException, status
 from typing import Dict, Any, List, Union, Self, Optional
@@ -46,7 +47,7 @@ class IXCClient:
         except httpx.RequestError as e:
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail="Falha na comunicação com o serviço IXC"
+                detail=f"Falha na comunicação com o serviço IXC: {e.response.text}"
             ) from e
         except httpx.HTTPStatusError as e:
             raise HTTPException(
@@ -56,24 +57,40 @@ class IXCClient:
         except ValueError as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Resposta inválida do servidor IXC"
+                detail=f"Resposta inválida do servidor IXC: {e}"
             ) from e
 
-    async def get_contratos(
+    async def get_contratos_ativos(
         self: Self,
         id_cliente: int,
-        page: int = 1,
-        per_page: int = 10,
+        page: Optional[int] = 1,
+        per_page: Optional[int] = 10,
+        sortname: Optional[str] = "cliente_contrato.id",
+        sortorder: Optional[SortOrder] = SortOrder.ASC
     ) -> Optional[List[Dict[str, Any]]]:
-        grid_param = [{
-            "TB": "cliente_contrato.id_cliente",
-            "OP": "=",
-            "P": str(id_cliente),
-        }]
+        grid_param = [
+            {
+                "TB": "cliente_contrato.id_cliente",
+                "OP": "=",
+                "P": str(id_cliente),
+            },
+            {
+                "TB": "cliente_contrato.status",
+                "OP": "!=",
+                "P": "N",
+            },
+            {
+                "TB": "cliente_contrato.status",
+                "OP": "!=",
+                "P": "D",
+            },
+        ]
         payload = {
             "grid_param": json.dumps(grid_param),
             "page": page,
             "rp": per_page,
+            "sortname": sortname,
+            "sortorder": sortorder,
         }
         data = await self._make_request("cliente_contrato", payload)
         return data
@@ -125,21 +142,25 @@ class IXCClient:
         payload = {"id": id_login}
         await self._make_request("desconectar_clientes", payload, include_ixcsoft=False)
 
-    async def get_atendimentos(
+    async def get_atendimentos_abertos(
         self: Self,
         id_login: int,
-        page: int = 1,
-        per_page: int = 10,
+        page: Optional[int] = 1,
+        per_page: Optional[int] = 10,
+        sortname: Optional[str] = "su_ticket.id",
+        sortorder: Optional[SortOrder] = SortOrder.ASC
     ) -> Optional[List[Dict[str, Any]]]:
-        grid_param = [{
-            "TB": "su_ticket.id_login",
-            "OP": "=",
-            "P": str(id_login),
-        }]
+        grid_param = [
+            { "TB": "su_ticket.id_login", "OP": "=", "P": str(id_login) },
+            { "TB": "su_ticket.su_status", "OP": "!=", "P": "S" },
+            { "TB": "su_ticket.su_status", "OP": "!=", "P": "C" },
+        ]
         payload = {
             "grid_param": json.dumps(grid_param),
             "page": page,
             "rp": per_page,
+            "sortname": sortname,
+            "sortorder": sortorder
         }
         data = await self._make_request("su_ticket", payload)
         return data

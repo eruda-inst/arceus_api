@@ -12,8 +12,6 @@ from .v1 import (
     Links,
     Meta,
     StatusONU,
-    StatusContratoOut,
-    StatusContrato,
     StatusConexaoOut,
     StatusConexao,
     StatusONUOut,
@@ -35,5 +33,6 @@ from .v1 import (
     StatusONURot,
     STATUS_ATENDIMENTO,
     STATUS_CONEXAO,
-    STATUS_CONTRATO
+    STATUS_CONTRATO,
+    SortOrder
 )

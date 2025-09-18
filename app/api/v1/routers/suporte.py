@@ -1,4 +1,5 @@
 from typing import Optional
+from ..utils import SortOrder
 from ..services import SuporteService
 from fastapi import APIRouter, Query, status
 from ..schemas import (
@@ -19,8 +20,10 @@ async def get_contratos(
     protocolo: str = Query(min_length=12, max_length=12, description="Protocolo de atendimento do cliente no OpaSuite."),
     page: Optional[int] = Query(ge=1, default=1, description="Número da página."),
     per_page: Optional[int] = Query(ge=1, default=10, description="Itens por página."),
-) -> ContratoListOut:
-    return await service.get_contratos(protocolo, page, per_page)
+    sortname: Optional[str] = Query(default="cliente_contrato.id", description="Campo para ordenação."),
+    sortorder: Optional[SortOrder] = Query(default=SortOrder.ASC, description="Ordem da ordenação."),
+):
+    return await service.get_contratos_ativos(protocolo, page, per_page, sortname, sortorder)
 
 @router.get("/status_conexao", summary="Obtém status de conexão de um cliente, através de ID de login.")
 async def get_status_conexao(
@@ -46,8 +49,10 @@ async def get_atendimentos(
     id_login: int = Query(description="ID de login do cliente no IXCSoft."),
     page: Optional[int] = Query(ge=1, default=1, description="Número da página."),
     per_page: Optional[int] = Query(ge=1, default=10, description="Itens por página."),
+    sortname: Optional[str] = Query(default="su_ticket.id", description="Campo para ordenação."),
+    sortorder: Optional[SortOrder] = Query(default=SortOrder.ASC, description="Ordem da ordenação."),
 ) -> AtendimentoOut:
-    return await service.get_atendimentos(id_login, page, per_page)
+    return await service.get_atendimentos_abertos(id_login, page, per_page, sortname, sortorder)
 
 @router.post("/atendimentos", summary="Abre ticket de atendimento, através de dados do atendimento.")
 async def post_atendimentos(

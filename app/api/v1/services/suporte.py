@@ -1,8 +1,14 @@
-from typing import Self
+from typing import Self, Optional
 from datetime import datetime
 from ..clients import IXCClient, OpaClient
 from fastapi import HTTPException, status
-from ..utils import rotular_status_contrato, rotular_status_atendimento, rotular_status_conexao, rotular_status_onu
+from ..utils import (
+    rotular_status_contrato,
+    rotular_status_atendimento,
+    rotular_status_conexao,
+    rotular_status_onu,
+    SortOrder
+)
 from ..schemas import (
     StatusONUOut,
     Atendimento,
@@ -14,9 +20,7 @@ from ..schemas import (
     Meta,
     StatusConexao,
     StatusConexaoOut,
-    StatusContrato,
     StatusONU,
-    StatusContratoOut,
     AtendimentoCreate
 )
 
@@ -28,11 +32,13 @@ class Service:
         self.opa_client = OpaClient()
         self.ixc_client = IXCClient()
 
-    async def get_contratos(
+    async def get_contratos_ativos(
         self: Self,
         protocolo: str,
-        page: int = 1,
-        per_page: int = 10,
+        page: Optional[int] = 1,
+        per_page: Optional[int] = 10,
+        sortname: Optional[str] = "cliente_contrato.id",
+        sortorder: Optional[SortOrder] = SortOrder.ASC
     ) -> ContratoListOut:
         try:
             id_cliente_opa_res = await self.opa_client.get_id_cliente_opa(protocolo)
@@ -51,31 +57,28 @@ class Service:
                 )
             id_cliente_ixc = id_cliente_ixc_res["data"][0]["id"]
 
-            contratos_res = await self.ixc_client.get_contratos(id_cliente_ixc, page, per_page)
-            if not contratos_res.get("registros"):
+            contratos_ativos_res = await self.ixc_client.get_contratos_ativos(id_cliente_ixc, page, per_page, sortname, sortorder)
+            contratos_ativos = contratos_ativos_res.get("registros", [])
+            total = contratos_ativos.__len__()
+            if total < 1:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
-                    detail="Nenhum contrato encontrado.",
+                    detail="Nenhum contrato ativo encontrado.",
                 )
-            contratos = contratos_res.get("registros", [])
-
-            contratos_ativos = [c for c in contratos if c["status"] not in ("I", "D")]
-            total = contratos_ativos.__len__()
 
             for contrato in contratos_ativos:
                 a_receber_res = await self.ixc_client.get_valor_e_data_vencimento(contrato["id"])
-                registros = a_receber_res.get("registros", [])
-
                 id_login_res = await self.ixc_client.get_id_login(contrato["id"])
-                id_login = id_login_res["registros"][0]["id"]
-                contrato["id_login"] = id_login
-
+                id_login = id_login_res.get("registros")[0]["id"]
                 onu_mac_res = await self.ixc_client.get_onu_mac(id_login)
+
                 onu_mac = onu_mac_res["registros"][0]["onu_mac"]
+                a_receber = a_receber_res.get("registros", [])
 
+
+                contrato["id_login"] = id_login
                 contrato["mac_onu"] = onu_mac
-
-                titulos_nao_quitados = [r for r in registros if r.get("status") != 'Q']
+                titulos_nao_quitados = [r for r in a_receber if r.get("status") != 'Q']
 
                 if not titulos_nao_quitados:
                     contrato["valor"] = 0.00
@@ -213,38 +216,33 @@ class Service:
                 detail=f"Erro interno ao processar solicitação: {str(e)}"
             )
 
-    async def get_atendimentos(
+    async def get_atendimentos_abertos(
         self: Self,
         id_login: int,
-        page: int = 1,
-        per_page: int = 10,
+        page: Optional[int] = 1,
+        per_page: Optional[int] = 10,
+        sortname: Optional[str] = "su_ticket.id",
+        sortorder: Optional[SortOrder] = SortOrder.ASC
     ) -> AtendimentoOut:
         try:
-            res = await self.ixc_client.get_atendimentos(id_login, page, per_page)
+            res = await self.ixc_client.get_atendimentos_abertos(id_login, page, per_page, sortname, sortorder)
             registros = res.get("registros", [])
             if not registros:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
-                    detail="Sem atendimentos."
-                )
-            atendimentos_abertos = []
-            for r in registros:
-                if r.get("su_status") in ["N", "P"]:
-                    mapeado = {
-                        "id": r["id"],
-                        "id_assunto": r["id_assunto"],
-                        "status": rotular_status_atendimento(r["su_status"]),
-                        "mensagem": r["menssagem"],
-                        "titulo": r["titulo"],
-                        "data_criacao": r["data_criacao"]
-                    }
-                    atendimentos_abertos.append(mapeado)
-            if not atendimentos_abertos:
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
                     detail="Sem atendimentos abertos."
                 )
-            total = atendimentos_abertos.__len__()
+            formatted = []
+            for a in registros:
+                formatted.append({
+                    "id": a.get("id"),
+                    "id_assunto": a.get("id_assunto"),
+                    "status": rotular_status_atendimento(a.get("su_status")),
+                    "mensagem": a.get("menssagem") or a.get("mensagem") or "",
+                    "titulo": a.get("titulo"),
+                    "data_criacao": a.get("data_criacao")
+                })
+            total = registros.__len__()
             meta = Meta(total=total, page=page, per_page=per_page)
             base_url = f"/atendimentos?id_login={id_login}"
             links = Links(
@@ -261,7 +259,7 @@ class Service:
                 ),
             )
             return AtendimentoOut(
-                data=[Atendimento(**a) for a in atendimentos_abertos],
+                data=[Atendimento(**item) for item in formatted],
                 meta=meta,
                 links=links
             )
@@ -272,6 +270,7 @@ class Service:
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=f"Erro interno ao processar solicitação: {str(e)}"
             )
+
 
     async def post_atendimentos(
         self: Self,

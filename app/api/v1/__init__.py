@@ -11,8 +11,6 @@ from .schemas import (
     Links,
     Meta,
     StatusONU,
-    StatusContratoOut,
-    StatusContrato,
     StatusConexaoOut,
     StatusConexao,
     StatusONUOut
@@ -37,5 +35,6 @@ from .utils import (
     StatusONURot,
     STATUS_ATENDIMENTO,
     STATUS_CONEXAO,
-    STATUS_CONTRATO
+    STATUS_CONTRATO,
+    SortOrder
 )
