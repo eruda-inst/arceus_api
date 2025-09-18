@@ -199,7 +199,7 @@ class Service:
             )
             return StatusConexaoOut(
                 data=StatusConexao(
-                    status_conexao={"rotulo": rotulo}
+                    status_conexao=rotulo
                 )
             )
         except HTTPException:
