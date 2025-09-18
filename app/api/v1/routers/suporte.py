@@ -117,7 +117,7 @@ async def get_atendimentos(
         sortorder=sortorder,
     )
 
-@router.post("/atendimentos", summary="Abre ticket de atendimento, através de dados do atendimento.")
+@router.post("/atendimentos", status_code=status.HTTP_201_CREATED, summary="Abre ticket de atendimento, através de dados do atendimento.")
 async def post_atendimentos(
     atendimento: AtendimentoIn,
 ) -> AtendimentoCreate:
