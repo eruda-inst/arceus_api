@@ -1,6 +1,6 @@
 services:
     app:
-        container_name: api_roberto
+        container_name: api_larissa
         build: .
         ports:
-            - 8000:8000
+            - 8888:8000
