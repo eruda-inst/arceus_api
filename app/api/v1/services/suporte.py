@@ -376,20 +376,12 @@ class Service:
                 atendimento=atendimento,
             )
             id_login = atendimento.id_login
-            res = await self.ixc_client.get_atendimentos_abertos(id_login)
-            atendimentos = res.get("registros", [])
-            atendimentos_filtrados = [
-                a for a in atendimentos 
-                if a["su_status"] == "N" 
-                and str(a.get("id_responsavel_tecnico", "")) == "14336"
-            ]
-            atendimentos_ordenados = sorted(
-                atendimentos_filtrados,
-                key=lambda x: x["id"],
-                reverse=True
+            res = await self.ixc_client.get_id_atendimento_aberto(
+                id_login=id_login,
+                sortorder=SortOrder.DESC,
             )
-            novo_atendimento = atendimentos_ordenados[0]
-            id_atendimento = novo_atendimento["id"]
+            registros = res.get("registros", [])
+            id_atendimento = registros[0].get("id")
             return AtendimentoCreate(
                 id=int(id_atendimento),
             )
