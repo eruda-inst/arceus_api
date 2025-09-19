@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from .api import suporte_router
+from .api import suporte_router, comercial_router
 
 
 app = FastAPI(
@@ -11,7 +11,12 @@ app = FastAPI(
 app.include_router(
     router=suporte_router,
     prefix="/api/v1/suporte",
-    tags=["Suporte"]
+    tags=["Suporte"],
+)
+app.include_router(
+    router=comercial_router,
+    prefix="/api/v1/comercial",
+    tags=["Comercial"],
 )
 
 @app.get("/", summary="Rota padrão, mostra mensagens de boas vindas e URL para acessar esta página.")

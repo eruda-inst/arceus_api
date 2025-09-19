@@ -3,27 +3,8 @@ from datetime import datetime
 from pydantic import ValidationError
 from ..clients import IXCClient, OpaClient
 from fastapi import HTTPException, status
-from ..utils import (
-    rotular_status_contrato,
-    rotular_status_atendimento,
-    rotular_status_conexao,
-    rotular_status_onu,
-    SortOrder
-)
-from ..schemas import (
-    StatusONUOut,
-    Atendimento,
-    AtendimentoIn,
-    AtendimentoOut,
-    Contrato,
-    ContratoListOut,
-    Links,
-    Meta,
-    StatusConexao,
-    StatusConexaoOut,
-    StatusONU,
-    AtendimentoCreate
-)
+from ..utils import rotular_status_contrato, rotular_status_atendimento, rotular_status_conexao, rotular_status_onu, SortOrder
+from ..schemas import StatusONUOut, Atendimento, AtendimentoIn, AtendimentoOut, Contrato, ContratoListOut, Links, Meta, StatusConexao, StatusConexaoOut, StatusONU, AtendimentoCreate
 
 
 class Service:
@@ -39,7 +20,7 @@ class Service:
         page: Optional[int] = 1,
         per_page: Optional[int] = 10,
         sortname: Optional[str] = "cliente_contrato.id",
-        sortorder: Optional[SortOrder] = SortOrder.ASC
+        sortorder: Optional[SortOrder] = SortOrder.ASC,
     ) -> ContratoListOut:
         try:
             id_cliente_opa_res = await self.opa_client.get_id_cliente_opa(
@@ -225,46 +206,33 @@ class Service:
         id_login: Optional[int] = None,
         mac_onu: Optional[str] = None,
     ) -> StatusONUOut:
-        try:
-            if id_login:
-                res = await self.ixc_client.get_status_onu(
-                    id_login=id_login,
-                )
-                registros = res.get("registros", [])
-                if registros.__len__() == 0:
-                    raise HTTPException(
-                        status=status.HTTP_404_NOT_FOUND,
-                        detail="Sem ONU."
-                    )
-                codigo = float(registros[0].get("sinal_rx"))
-                rotulo = rotular_status_onu(
-                    sinal_rx=codigo,
-                )
-                return StatusONUOut(
-                    data=StatusONU(
-                        status_onu=rotulo
-                    )
-                )
-            if mac_onu:
-                res = await self.ixc_client.get_status_onu(
-                    mac_onu=mac_onu,
-                )
-                registros = res.get("registros", [])
-                if registros.__len__() == 0:
-                    raise HTTPException(
-                        status=status.HTTP_404_NOT_FOUND,
-                        detail="Sem ONU."
-                    )
-                codigo = float(registros[0].get("sinal_rx"))
-                rotulo = rotular_status_onu(codigo)
-                return StatusONUOut(
-                    data=StatusONU(
-                        status_onu=rotulo
-                    )
-                )
+        if not id_login and not mac_onu:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="É necessário informar id_login ou mac_onu."
+            )
+        try:
+            if id_login is not None:
+                try:
+                    res = await self.ixc_client.get_status_onu(id_login=id_login)
+                    registros = res.get("registros", [])
+                    if registros and "sinal_rx" in registros[0]:
+                        codigo = float(registros[0]["sinal_rx"])
+                        rotulo = rotular_status_onu(sinal_rx=codigo)
+                        return StatusONUOut(data=StatusONU(status_onu=rotulo))
+                except HTTPException:
+                    if not mac_onu:
+                        raise
+            if mac_onu is not None:
+                res = await self.ixc_client.get_status_onu(mac_onu=mac_onu)
+                registros = res.get("registros", [])
+                if registros and "sinal_rx" in registros[0]:
+                    codigo = float(registros[0]["sinal_rx"])
+                    rotulo = rotular_status_onu(sinal_rx=codigo)
+                    return StatusONUOut(data=StatusONU(status_onu=rotulo))
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="ONU não encontrada."
             )
         except HTTPException:
             raise

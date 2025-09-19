@@ -69,6 +69,8 @@ class IXCClient:
                 detail=f"Resposta inválida do servidor IXC: {e}"
             ) from e
 
+    # == SUPORTE ==
+
     async def get_contratos_ativos(
         self: Self,
         id_cliente: int,
@@ -273,3 +275,9 @@ class IXCClient:
             payload=payload,
         )
         return data
+
+    # == COMERCIAL ==
+
+    async def get_status_acesso():
+        #status_internet
+        pass

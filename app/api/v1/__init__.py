@@ -1,6 +1,6 @@
 from .clients import IXCClient, OpaClient
 from .core import settings, Settings
-from .routers import suporte_router
+from .routers import suporte_router, comercial_router
 from .schemas import (
     Atendimento,
     AtendimentoCreate,
@@ -16,7 +16,7 @@ from .schemas import (
     StatusONUOut
 
 )
-from .services import SuporteService
+from .services import SuporteService, ComercialService
 from .utils import (
     rotular_status_atendimento,
     rotular_status_conexao,

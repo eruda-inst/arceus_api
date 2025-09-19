@@ -9,6 +9,8 @@ from .v1 import (
     AtendimentoOut,
     Contrato,
     ContratoListOut,
+    ComercialService,
+    comercial_router,
     Links,
     Settings,
     Meta,
