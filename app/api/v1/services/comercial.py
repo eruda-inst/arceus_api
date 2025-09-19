@@ -1,8 +1,8 @@
 from typing import Self
 from pydantic import ValidationError
+from ..clients import ComercialIXCClient
 from fastapi import HTTPException, status
 from ..utils import rotular_status_acesso
-from ..clients import IXCClient, OpaClient
 from ..schemas import StatusAcesso, StatusAcessoOut
 
 
@@ -10,8 +10,7 @@ class Service:
     def __init__(
         self: Self,
     ) -> None:
-        self.opa_client = OpaClient()
-        self.ixc_client = IXCClient()
+        self.ixc_client = ComercialIXCClient()
 
     async def get_status_acesso(
         self: Self,

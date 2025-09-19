@@ -1,10 +1,10 @@
 import httpx
-from ..core import settings
+from .. import settings
 from fastapi import HTTPException, status
 from typing import Dict, Any, Self, Optional
 
 
-class OpaClient:
+class Cliente:
     def __init__(
         self: Self,
     ) -> None:

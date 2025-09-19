@@ -1,14 +1,14 @@
 import json
 import httpx
 import base64
-from ..core import settings
-from ..utils import SortOrder
-from ..schemas import AtendimentoIn
+from .. import settings
+from .. import SortOrder
+from .. import AtendimentoIn
 from fastapi import HTTPException, status
 from typing import Dict, Any, List, Union, Self, Optional
 
 
-class IXCClient:
+class Cliente:
     def __init__(
         self: Self,
     ) -> None:
@@ -69,8 +69,6 @@ class IXCClient:
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=f"Resposta inválida do servidor IXC: {e}"
             ) from e
-
-    # == SUPORTE ==
 
     async def get_contratos_ativos(
         self: Self,
@@ -275,19 +273,4 @@ class IXCClient:
             endpoint="su_ticket",
             payload=payload,
         )
-        return data
-
-    # == COMERCIAL ==
-
-    async def get_status_acesso(
-        self: Self,
-        id_contrato: int,
-    ) -> Optional[Dict[str, Any]]:
-        grid_param = [
-            {"TB": "cliente_contrato.id", "OP": "=", "P": str(id_contrato)},
-        ]
-        payload = {
-            "grid_param": json.dumps(obj=grid_param),
-        }
-        data = await self._make_request(endpoint="cliente_contrato", payload=payload)
         return data

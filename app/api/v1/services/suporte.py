@@ -1,7 +1,7 @@
 from typing import Self, Optional
 from datetime import datetime
 from pydantic import ValidationError
-from ..clients import IXCClient, OpaClient
+from ..clients import SuporteOpaClient, SuporteIXCClient
 from fastapi import HTTPException, status
 from ..utils import rotular_status_contrato, rotular_status_atendimento, rotular_status_conexao, rotular_status_onu, SortOrder
 from ..schemas import StatusONUOut, Atendimento, AtendimentoIn, AtendimentoOut, Contrato, ContratoListOut, Links, Meta, StatusConexao, StatusConexaoOut, StatusONU, AtendimentoCreate
@@ -11,8 +11,8 @@ class Service:
     def __init__(
         self: Self,
     ) -> None:
-        self.opa_client = OpaClient()
-        self.ixc_client = IXCClient()
+        self.opa_client = SuporteOpaClient()
+        self.ixc_client = SuporteIXCClient()
 
     async def get_contratos_ativos(
         self: Self,
