@@ -9,7 +9,8 @@ class OpaClient:
         self: Self,
     ) -> None:
         self.token = settings.OPA_TOKEN
-        self.base_url = "https://newnet.opasuite.com.br/api/v1"
+        self.host = settings.OPA_HOST
+        self.base_url = f"https://{self.host}/api/v1"
         self.headers = {"Authorization": f"Bearer {self.token}"}
 
     async def _make_request(

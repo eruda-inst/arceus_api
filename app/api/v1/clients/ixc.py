@@ -13,7 +13,8 @@ class IXCClient:
         self: Self,
     ) -> None:
         self.token = settings.IXC_TOKEN
-        self.base_url = "https://ixc.newnet.com.br/webservice/v1"
+        self.host = settings.IXC_HOST
+        self.base_url = f"https://{self.host}/webservice/v1"
         self.auth_header = self._create_auth_header()
 
     def _create_auth_header(
