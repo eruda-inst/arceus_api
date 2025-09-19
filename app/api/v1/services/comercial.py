@@ -1,5 +1,4 @@
 from typing import Self
-from typing import Optional
 from pydantic import ValidationError
 from fastapi import HTTPException, status
 from ..utils import rotular_status_acesso
@@ -17,12 +16,12 @@ class Service:
     async def get_status_acesso(
         self: Self,
         id_contrato: int,
-    ) -> Optional[StatusAcessoOut]:
+    ) -> StatusAcessoOut:
         try:
             res = await self.ixc_client.get_status_acesso(id_contrato=id_contrato)
             reg = res.get("registros", [])
             if not reg:
-                return HTTPException(
+                raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
                     detail="Sem status de acesso."
                 )
@@ -33,7 +32,7 @@ class Service:
             raise
         except ValidationError as e:
             raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
                 detail=f"Validação da resposta falhou: {e}"
             )
         except Exception as e:
