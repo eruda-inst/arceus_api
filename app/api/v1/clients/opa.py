@@ -1,0 +1,38 @@
+import httpx
+from ..core import settings
+from fastapi import HTTPException, status
+from typing import Dict, Any, Self, Optional
+
+
+class Cliente:
+    def __init__(
+        self: Self,
+    ) -> None:
+        self.token = settings.OPA_TOKEN
+        self.host = settings.OPA_HOST
+        self.base_url = f"https://{self.host}/api/v1"
+        self.headers = {"Authorization": f"Bearer {self.token}"}
+
+    async def _make_request(
+        self: Self,
+        endpoint: str,
+        payload: Dict[str, Any],
+    ) -> Optional[Dict[str, Any]]:
+        url = f"{self.base_url}/{endpoint}"
+        try:
+            async with httpx.AsyncClient(
+                timeout=30.0,
+            ) as async_client:
+                res = await async_client.request(
+                    method="GET",
+                    url=url,
+                    headers=self.headers,
+                    json=payload,
+                )
+                res.raise_for_status()
+                return res.json()
+        except httpx.RequestError as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Erro na API do OPA: {str(e)}",
+            )
