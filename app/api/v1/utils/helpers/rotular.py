@@ -1,14 +1,7 @@
 from enum import Enum
 from typing import Union
-from ..maps import STATUS_CONEXAO, STATUS_ATENDIMENTO, STATUS_CONTRATO
-from ..enums import (
-    StatusConexaoCod,
-    StatusContratoCod,
-    StatusAtendimentoCod,
-    StatusConexaoRot,
-    StatusContratoRot,
-    StatusAtendimentoRot
-)
+from ..maps import STATUS_CONEXAO, STATUS_ATENDIMENTO, STATUS_CONTRATO, STATUS_ACESSO
+from ..enums import StatusConexaoCod, StatusContratoCod, StatusAtendimentoCod, StatusConexaoRot, StatusContratoRot, StatusAtendimentoRot, StatusAcessoCod, StatusAcessoRot
 
 
 def get_label(
@@ -31,6 +24,11 @@ def rotular_status_atendimento(
     status_atendimento_codigo: StatusAtendimentoCod,
 ) -> StatusAtendimentoRot:
     return get_label(status_atendimento_codigo, STATUS_ATENDIMENTO)
+
+def rotular_status_acesso(
+    status_acesso_codigo: StatusAcessoCod,
+) -> StatusAcessoRot:
+    return get_label(status_acesso_codigo, STATUS_ACESSO)
 
 def rotular_status_onu(
     sinal_rx: float,

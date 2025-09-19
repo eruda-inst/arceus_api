@@ -23,6 +23,7 @@ from .v1 import (
     rotular_status_conexao,
     rotular_status_contrato,
     rotular_status_onu,
+    rotular_status_acesso,
     StatusAtendimentoCod,
     StatusContratoCod,
     OrigemEnderecoCod,
@@ -37,5 +38,6 @@ from .v1 import (
     STATUS_ATENDIMENTO,
     STATUS_CONEXAO,
     STATUS_CONTRATO,
+    STATUS_ACESSO,
     SortOrder
 )

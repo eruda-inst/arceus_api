@@ -5,3 +5,4 @@ from .status_conexao import StatusConexaoCod
 from .status_contrato import StatusContratoCod
 from .su_status import SuStatusCod
 from .tipo import TipoCod
+from .status_acesso import StatusAcessoCod
