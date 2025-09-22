@@ -1,3 +1,4 @@
+import json
 import httpx
 import base64
 from ..core import settings
@@ -54,15 +55,37 @@ class Cliente:
         except httpx.RequestError as e:
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail=f"Falha na comunicação com o serviço IXC: {e.response.text}"
+                detail=f"Falha na comunicação com o serviço IXC: {e.response.text}",
             ) from e
         except httpx.HTTPStatusError as e:
             raise HTTPException(
                 status_code=e.response.status_code,
-                detail=f"Erro retornado pelo IXC: {e.response.text}"
+                detail=f"Erro retornado pelo IXC: {e.response.text}",
             ) from e
         except ValueError as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Resposta inválida do servidor IXC: {e}"
+                detail=f"Resposta inválida do servidor IXC: {e}",
             ) from e
+
+    async def get_valor_e_data_vencimento(
+        self: Self,
+        id_contrato: int,
+    ) -> Optional[Dict[str, Any]]:
+        grid_param = [
+            {
+                "TB": "fn_areceber.id_contrato",
+                "OP": "=",
+                "P": str(id_contrato),
+            }
+        ]
+        payload = {
+            "grid_param": json.dumps(
+                obj=grid_param,
+            ),
+        }
+        data = await self._make_request(
+            endpoint="fn_areceber",
+            payload=payload,
+        )
+        return data

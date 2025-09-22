@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from .api import suporte_router, comercial_router
+from fastapi.middleware.cors import CORSMiddleware
 
 
 app = FastAPI(
@@ -19,6 +20,20 @@ app.include_router(
     tags=["Comercial"],
 )
 
-@app.get("/", summary="Rota padrão, mostra mensagens de boas vindas e URL para acessar esta página.")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["https://reddator.newnet.com.br/"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
+@app.get(
+    path="/",
+    summary="Rota padrão, mostra mensagens de boas vindas e URL para acessar esta página.",
+)
 def index():
-    return "Bem-vindo(a). Para documentação, acesse: https://reddator.newnet.com.br/docs."
+    return (
+        "Bem-vindo(a). Para documentação, acesse: https://reddator.newnet.com.br/docs."
+    )

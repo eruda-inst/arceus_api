@@ -6,5 +6,5 @@ STATUS_ATENDIMENTO = {
     StatusAtendimentoCod.PENDENTE: StatusAtendimentoRot.PENDENTE,
     StatusAtendimentoCod.EM_PROGRESSO: StatusAtendimentoRot.EM_PROGRESSO,
     StatusAtendimentoCod.SOLUCIONADO: StatusAtendimentoRot.SOLUCIONADO,
-    StatusAtendimentoCod.CANCELADO: StatusAtendimentoRot.CANCELADO
+    StatusAtendimentoCod.CANCELADO: StatusAtendimentoRot.CANCELADO,
 }
