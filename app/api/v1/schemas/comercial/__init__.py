@@ -3,3 +3,4 @@ from .contrato import (
     ContratoListOut as ComercialContratoListOut,
 )
 from .acesso import StatusAcesso, StatusAcessoOut
+from .lead import LeadIn, LeadCreate

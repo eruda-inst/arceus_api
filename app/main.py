@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 app = FastAPI(
     title="API do Bot",
     description="Atua como um aggregator, simplificando integrações entre a API aberta do OpaSuite e a API aberta do IXCSoft.",
-    version="0.45.5",
+    version="0.47.0",
 )
 
 app.include_router(

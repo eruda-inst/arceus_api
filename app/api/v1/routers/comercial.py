@@ -1,8 +1,8 @@
 from typing import Optional
 from ..utils import SortOrder
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, status, Body
 from ..services import ComercialService
-from ..schemas import ComercialContratoListOut, StatusAcessoOut
+from ..schemas import ComercialContratoListOut, StatusAcessoOut, LeadIn, LeadCreate
 
 
 router = APIRouter()
@@ -11,6 +11,7 @@ service = ComercialService()
 
 @router.get(
     path="/status_acesso",
+    response_model=StatusAcessoOut,
     description="Obtém status de acesso, através de ID de contrato.",
 )
 async def get_status_acesso(
@@ -21,6 +22,7 @@ async def get_status_acesso(
 
 @router.get(
     path="/contratos",
+    response_model=ComercialContratoListOut,
     description="Obtém contratos de um cliente, por meio de ID de login.",
 )
 async def get_contratos(
@@ -33,7 +35,7 @@ async def get_contratos(
     per_page: Optional[int] = 10,
     sortname: Optional[str] = "cliente_contrato.id",
     sortorder: Optional[SortOrder] = SortOrder.ASC,
-):
+) -> ComercialContratoListOut:
     return await service.get_contratos(
         protocolo=protocolo,
         page=page,
@@ -41,3 +43,15 @@ async def get_contratos(
         sortname=sortname,
         sortorder=sortorder,
     )
+
+
+@router.post(
+    path="/leads",
+    status_code=status.HTTP_201_CREATED,
+    response_model=LeadCreate,
+    description="Cadastra novo lead, a partir de lead submetido.",
+)
+async def post_lead(
+    lead: LeadIn = Body(description="Lead a ser cadastrado."),
+) -> LeadCreate:
+    return await service.post_lead(lead=lead)
