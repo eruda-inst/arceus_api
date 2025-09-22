@@ -81,7 +81,7 @@ class Cliente(IXCCliente):
         atendimento: AtendimentoIn,
     ) -> None:
         payload = atendimento.model_dump()
-        await self._make_request(
+        return await self._make_request(
             endpoint="su_ticket",
             payload=payload,
             include_ixcsoft=False,
@@ -166,37 +166,6 @@ class Cliente(IXCCliente):
         }
         data = await self._make_request(
             endpoint="radusuarios",
-            payload=payload,
-        )
-        return data
-
-    async def get_id_atendimento_aberto(
-        self: Self,
-        id_login: int,
-        page: Optional[int] = 1,
-        per_page: Optional[int] = 10,
-        sortname: Optional[str] = "su_ticket.id",
-        sortorder: Optional[SortOrder] = SortOrder.ASC,
-    ) -> Optional[List[Dict[str, Any]]]:
-        grid_param = [
-            {"TB": "su_ticket.id_login", "OP": "=", "P": str(id_login)},
-            {"TB": "su_ticket.su_status", "OP": "!=", "P": "P"},
-            {"TB": "su_ticket.su_status", "OP": "!=", "P": "EP"},
-            {"TB": "su_ticket.su_status", "OP": "!=", "P": "S"},
-            {"TB": "su_ticket.su_status", "OP": "!=", "P": "C"},
-            {"TB": "su_ticket.id_responsavel_tecnico", "OP": "=", "P": "14336"},
-        ]
-        payload = {
-            "grid_param": json.dumps(
-                obj=grid_param,
-            ),
-            "page": page,
-            "rp": per_page,
-            "sortname": sortname,
-            "sortorder": sortorder,
-        }
-        data = await self._make_request(
-            endpoint="su_ticket",
             payload=payload,
         )
         return data

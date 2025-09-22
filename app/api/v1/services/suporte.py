@@ -356,16 +356,10 @@ class Service:
         atendimento: AtendimentoIn,
     ) -> AtendimentoCreate:
         try:
-            await self.ixc_client.post_atendimentos(
+            res = await self.ixc_client.post_atendimentos(
                 atendimento=atendimento,
             )
-            id_login = atendimento.id_login
-            res = await self.ixc_client.get_id_atendimento_aberto(
-                id_login=id_login,
-                sortorder=SortOrder.DESC,
-            )
-            registros = res.get("registros", [])
-            id_atendimento = registros[0].get("id")
+            id_atendimento = res.get("id", None)
             return AtendimentoCreate(
                 id=int(id_atendimento),
             )
