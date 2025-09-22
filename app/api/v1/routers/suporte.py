@@ -8,14 +8,18 @@ from ..schemas import (
     AtendimentoIn,
     ContratoListOut,
     StatusONUOut,
-    AtendimentoCreate
+    AtendimentoCreate,
 )
 
 
-router  = APIRouter()
+router = APIRouter()
 service = SuporteService()
 
-@router.get("/contratos", summary="Obtém contratos ativos de um cliente, através de protocolo de atendimento.")
+
+@router.get(
+    path="/contratos",
+    summary="Obtém contratos ativos de um cliente, através de protocolo de atendimento.",
+)
 async def get_contratos(
     protocolo: str = Query(
         min_length=12,
@@ -49,7 +53,11 @@ async def get_contratos(
         sortorder=sortorder,
     )
 
-@router.get("/status_conexao", summary="Obtém status de conexão de um cliente, através de ID de login.")
+
+@router.get(
+    path="/status_conexao",
+    summary="Obtém status de conexão de um cliente, através de ID de login.",
+)
 async def get_status_conexao(
     id_login: int = Query(
         description="ID de login do cliente no IXCSoft.",
@@ -59,7 +67,11 @@ async def get_status_conexao(
         id_login=id_login,
     )
 
-@router.get("/status_onu", summary="Obtém status de ONU (sinal rx) de um cliente, através de ID de login, ou MAC Address de ONU.")
+
+@router.get(
+    path="/status_onu",
+    summary="Obtém status de ONU (sinal rx) de um cliente, através de ID de login, ou MAC Address de ONU.",
+)
 async def get_status_onu(
     id_login: Optional[int] = Query(
         default=None,
@@ -75,7 +87,12 @@ async def get_status_onu(
         mac_onu=mac_onu,
     )
 
-@router.post("/desconectar_cliente", status_code=status.HTTP_204_NO_CONTENT, summary="Envia sinal de desconexão para um cliente, através de ID de login.")
+
+@router.post(
+    path="/desconectar_cliente",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Envia sinal de desconexão para um cliente, através de ID de login.",
+)
 async def post_desconectar_cliente(
     id_login: int = Query(
         description="ID de login do cliente no IXCSoft.",
@@ -85,7 +102,11 @@ async def post_desconectar_cliente(
         id_login=id_login,
     )
 
-@router.get("/atendimentos", summary="Checa atendimentos abertos de um cliente, através de ID de login.")
+
+@router.get(
+    path="/atendimentos",
+    summary="Checa atendimentos abertos de um cliente, através de ID de login.",
+)
 async def get_atendimentos(
     id_login: int = Query(
         description="ID de login do cliente no IXCSoft.",
@@ -117,7 +138,12 @@ async def get_atendimentos(
         sortorder=sortorder,
     )
 
-@router.post("/atendimentos", status_code=status.HTTP_201_CREATED, summary="Abre ticket de atendimento, através de dados do atendimento.")
+
+@router.post(
+    path="/atendimentos",
+    status_code=status.HTTP_201_CREATED,
+    summary="Abre ticket de atendimento, através de dados do atendimento.",
+)
 async def post_atendimentos(
     atendimento: AtendimentoIn,
 ) -> AtendimentoCreate:

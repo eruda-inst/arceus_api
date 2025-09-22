@@ -6,6 +6,7 @@ from ..services import ComercialService
 router = APIRouter()
 service = ComercialService()
 
+
 @router.get(
     path="/status_acesso",
     description="Obtém status de acesso, através de ID de contrato.",

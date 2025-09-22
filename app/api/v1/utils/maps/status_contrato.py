@@ -6,5 +6,5 @@ STATUS_CONTRATO = {
     StatusContratoCod.ATIVO: StatusContratoRot.ATIVO,
     StatusContratoCod.INATIVO: StatusContratoRot.INATIVO,
     StatusContratoCod.NEGATIVADO: StatusContratoRot.NEGATIVADO,
-    StatusContratoCod.DESISTIU: StatusContratoRot.DESISTIU
+    StatusContratoCod.DESISTIU: StatusContratoRot.DESISTIU,
 }

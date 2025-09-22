@@ -7,5 +7,6 @@ class StatusConexao(BaseModel):
         description="Status da conexão.",
     )
 
+
 class StatusConexaoOut(BaseModel):
     data: StatusConexao

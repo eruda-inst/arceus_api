@@ -22,20 +22,22 @@ class Service:
             if not reg:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
-                    detail="Sem status de acesso."
+                    detail="Sem status de acesso.",
                 )
             status_acesso_cod = reg[0].get("status_internet")
-            status_acesso_rot = rotular_status_acesso(status_acesso_codigo=status_acesso_cod)
+            status_acesso_rot = rotular_status_acesso(
+                status_acesso_codigo=status_acesso_cod
+            )
             return StatusAcessoOut(data=StatusAcesso(status_acesso=status_acesso_rot))
         except HTTPException:
             raise
         except ValidationError as e:
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail=f"Validação da resposta falhou: {e}"
+                detail=f"Validação da resposta falhou: {e}",
             )
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno ao processar solicitação: {str(e)}"
+                detail=f"Erro interno ao processar solicitação: {str(e)}",
             )

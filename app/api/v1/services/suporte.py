@@ -3,8 +3,27 @@ from datetime import datetime
 from pydantic import ValidationError
 from ..clients import SuporteOpaClient, SuporteIXCClient
 from fastapi import HTTPException, status
-from ..utils import rotular_status_contrato, rotular_status_atendimento, rotular_status_conexao, rotular_status_onu, SortOrder
-from ..schemas import StatusONUOut, Atendimento, AtendimentoIn, AtendimentoOut, Contrato, ContratoListOut, Links, Meta, StatusConexao, StatusConexaoOut, StatusONU, AtendimentoCreate
+from ..utils import (
+    rotular_status_contrato,
+    rotular_status_atendimento,
+    rotular_status_conexao,
+    rotular_status_onu,
+    SortOrder,
+)
+from ..schemas import (
+    StatusONUOut,
+    Atendimento,
+    AtendimentoIn,
+    AtendimentoOut,
+    Contrato,
+    ContratoListOut,
+    Links,
+    Meta,
+    StatusConexao,
+    StatusConexaoOut,
+    StatusONU,
+    AtendimentoCreate,
+)
 
 
 class Service:
@@ -78,7 +97,6 @@ class Service:
                 onu_mac = onu_mac_res["registros"][0]["onu_mac"]
                 a_receber = a_receber_res.get("registros", [])
 
-
                 contrato["id_login"] = id_login
                 contrato["mac_onu"] = onu_mac
                 titulos_nao_quitados = [r for r in a_receber if r.get("status") != "Q"]
@@ -106,7 +124,10 @@ class Service:
                             diferenca = (data_vencimento - hoje).days
 
                             if diferenca >= 0:
-                                if menor_diferenca is None or diferenca < menor_diferenca:
+                                if (
+                                    menor_diferenca is None
+                                    or diferenca < menor_diferenca
+                                ):
                                     menor_diferenca = diferenca
                                     proximo_vencimento = titulo
                         except ValueError:
@@ -114,14 +135,15 @@ class Service:
 
                 if proximo_vencimento:
                     contrato["valor"] = proximo_vencimento.get("valor")
-                    contrato["data_vencimento"] = proximo_vencimento.get("data_vencimento")
+                    contrato["data_vencimento"] = proximo_vencimento.get(
+                        "data_vencimento"
+                    )
                 else:
                     ultimo_titulo = max(
                         titulos_nao_quitados,
                         key=lambda x: datetime.strptime(
-                            x.get("data_vencimento"),
-                            "%Y-%m-%d"
-                        ).date()
+                            x.get("data_vencimento"), "%Y-%m-%d"
+                        ).date(),
                     )
                     contrato["valor"] = ultimo_titulo.get("valor")
                     contrato["data_vencimento"] = ultimo_titulo.get("data_vencimento")
@@ -150,19 +172,19 @@ class Service:
             return ContratoListOut(
                 data=[Contrato(**contrato) for contrato in contratos_ativos],
                 meta=meta,
-                links=links
+                links=links,
             )
         except HTTPException:
             raise
         except ValidationError as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Validação da resposta falhou: {e}"
+                detail=f"Validação da resposta falhou: {e}",
             )
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno ao processar solicitação: {str(e)}"
+                detail=f"Erro interno ao processar solicitação: {str(e)}",
             )
 
     async def get_status_conexao(
@@ -176,29 +198,24 @@ class Service:
             registros = res.get("registros", [])
             if not registros:
                 raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail="Nenhum registro."
+                    status_code=status.HTTP_404_NOT_FOUND, detail="Nenhum registro."
                 )
             codigo = registros[0].get("online")
             rotulo = rotular_status_conexao(
                 status_conexao_codigo=codigo,
             )
-            return StatusConexaoOut(
-                data=StatusConexao(
-                    status_conexao=rotulo
-                )
-            )
+            return StatusConexaoOut(data=StatusConexao(status_conexao=rotulo))
         except HTTPException:
             raise
         except ValidationError as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Validação da resposta falhou: {e}"
+                detail=f"Validação da resposta falhou: {e}",
             )
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno ao processar solicitação: {e}"
+                detail=f"Erro interno ao processar solicitação: {e}",
             )
 
     async def get_status_onu(
@@ -209,7 +226,7 @@ class Service:
         if not id_login and not mac_onu:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="É necessário informar id_login ou mac_onu."
+                detail="É necessário informar id_login ou mac_onu.",
             )
         try:
             if id_login is not None:
@@ -231,20 +248,19 @@ class Service:
                     rotulo = rotular_status_onu(sinal_rx=codigo)
                     return StatusONUOut(data=StatusONU(status_onu=rotulo))
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="ONU não encontrada."
+                status_code=status.HTTP_404_NOT_FOUND, detail="ONU não encontrada."
             )
         except HTTPException:
             raise
         except ValidationError as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Validação da resposta falhou: {e}"
+                detail=f"Validação da resposta falhou: {e}",
             )
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno ao processar solicitação: {e}"
+                detail=f"Erro interno ao processar solicitação: {e}",
             )
 
     async def post_desconectar_cliente(
@@ -260,7 +276,7 @@ class Service:
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno ao processar solicitação: {str(e)}"
+                detail=f"Erro interno ao processar solicitação: {str(e)}",
             )
 
     async def get_atendimentos_abertos(
@@ -269,7 +285,7 @@ class Service:
         page: Optional[int] = 1,
         per_page: Optional[int] = 10,
         sortname: Optional[str] = "su_ticket.id",
-        sortorder: Optional[SortOrder] = SortOrder.ASC
+        sortorder: Optional[SortOrder] = SortOrder.ASC,
     ) -> AtendimentoOut:
         try:
             res = await self.ixc_client.get_atendimentos_abertos(
@@ -283,20 +299,22 @@ class Service:
             if not registros:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
-                    detail="Sem atendimentos abertos."
+                    detail="Sem atendimentos abertos.",
                 )
             formatted = []
             for a in registros:
-                formatted.append({
-                    "id": a.get("id"),
-                    "id_assunto": a.get("id_assunto"),
-                    "status": rotular_status_atendimento(
-                        status_atendimento_codigo=a.get("su_status"),
-                    ),
-                    "mensagem": a.get("menssagem") or a.get("mensagem") or "",
-                    "titulo": a.get("titulo"),
-                    "data_criacao": a.get("data_criacao")
-                })
+                formatted.append(
+                    {
+                        "id": a.get("id"),
+                        "id_assunto": a.get("id_assunto"),
+                        "status": rotular_status_atendimento(
+                            status_atendimento_codigo=a.get("su_status"),
+                        ),
+                        "mensagem": a.get("menssagem") or a.get("mensagem") or "",
+                        "titulo": a.get("titulo"),
+                        "data_criacao": a.get("data_criacao"),
+                    }
+                )
             total = registros.__len__()
             meta = Meta(
                 total=total,
@@ -318,21 +336,19 @@ class Service:
                 ),
             )
             return AtendimentoOut(
-                data=[Atendimento(**item) for item in formatted],
-                meta=meta,
-                links=links
+                data=[Atendimento(**item) for item in formatted], meta=meta, links=links
             )
         except HTTPException:
             raise
         except ValidationError as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Validação da resposta falhou: {e}"
+                detail=f"Validação da resposta falhou: {e}",
             )
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno ao processar solicitação: {str(e)}"
+                detail=f"Erro interno ao processar solicitação: {str(e)}",
             )
 
     async def post_atendimentos(
@@ -358,10 +374,10 @@ class Service:
         except ValidationError as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Validação da resposta falhou: {e}"
+                detail=f"Validação da resposta falhou: {e}",
             )
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno ao processar solicitação: {str(e)}"
+                detail=f"Erro interno ao processar solicitação: {str(e)}",
             )

@@ -18,6 +18,7 @@ class Meta(BaseModel):
         description="Número de itens exibidos por página.",
     )
 
+
 class Links(BaseModel):
     self: str = Field(
         description="URL da página atual de resultados.",

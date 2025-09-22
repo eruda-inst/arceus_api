@@ -1,40 +1,34 @@
 from .misc import Meta, Links
 from typing import Optional, List
 from pydantic import BaseModel, Field
-from ..utils import TipoCod, SuStatusCod, PrioridadeCod, OrigemEnderecoCod, StatusAtendimentoRot
+from ..utils import (
+    TipoCod,
+    SuStatusCod,
+    PrioridadeCod,
+    OrigemEnderecoCod,
+    StatusAtendimentoRot,
+)
 
 ID_BOT = 14336
 ID_TICKET_SETOR = 4
 
+
 class AtendimentoCreate(BaseModel):
-    id: int = Field(
-        description="ID do atendimento aberto.",
-    )
+    id: int = Field(description="ID do atendimento aberto.")
+
 
 class AtendimentoIn(BaseModel):
-    id_login: int = Field(
-        description="ID de login do cliente.",
-    )
-    id_assunto: int = Field(
-        description="ID do assunto do atendimento.",
-    )
-    id_cliente: int = Field(
-        description="ID do cliente.",
-    )
-    menssagem: str = Field(
-        description="Mensagem descritiva.",
-    )
+    id_login: int = Field(description="ID de login do cliente.")
+    id_assunto: int = Field(description="ID do assunto do atendimento.")
+    id_cliente: int = Field(description="ID do cliente.")
+    menssagem: str = Field(description="Mensagem descritiva.")
     origem_endereco: Optional[OrigemEnderecoCod] = Field(
-        default=OrigemEnderecoCod.LOGIN,
-        description="Origem de endereço.",
+        default=OrigemEnderecoCod.LOGIN, description="Origem de endereço."
     )
     tipo: Optional[TipoCod] = Field(
-        default=TipoCod.CLIENTE,
-        description="Tipo do atendimento.",
+        default=TipoCod.CLIENTE, description="Tipo do atendimento."
     )
-    titulo: str = Field(
-        description="Título do atendimento.",
-    )
+    titulo: str = Field(description="Título do atendimento.")
     prioridade: Optional[PrioridadeCod] = Field(
         default=PrioridadeCod.NORMAL,
         description="Pioridade do atendimento.",
@@ -43,7 +37,7 @@ class AtendimentoIn(BaseModel):
         default=SuStatusCod.NOVO,
         description="Status do atendimento.",
     )
-    id_ticket_setor: Optional[int] =  Field(
+    id_ticket_setor: Optional[int] = Field(
         default=ID_TICKET_SETOR,
         description="Setor do atendimento.",
     )
@@ -54,6 +48,7 @@ class AtendimentoIn(BaseModel):
         default=ID_BOT,
         description="ID do responsável técnico.",
     )
+
 
 class Atendimento(BaseModel):
     id: int = Field(
@@ -76,6 +71,7 @@ class Atendimento(BaseModel):
     data_criacao: str = Field(
         description="Data de criação do atendimento.",
     )
+
 
 class AtendimentoOut(BaseModel):
     data: List[Atendimento]

@@ -19,6 +19,12 @@ app.include_router(
     tags=["Comercial"],
 )
 
-@app.get("/", summary="Rota padrão, mostra mensagens de boas vindas e URL para acessar esta página.")
+
+@app.get(
+    path="/",
+    summary="Rota padrão, mostra mensagens de boas vindas e URL para acessar esta página.",
+)
 def index():
-    return "Bem-vindo(a). Para documentação, acesse: https://reddator.newnet.com.br/docs."
+    return (
+        "Bem-vindo(a). Para documentação, acesse: https://reddator.newnet.com.br/docs."
+    )

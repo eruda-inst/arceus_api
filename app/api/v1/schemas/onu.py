@@ -7,5 +7,6 @@ class StatusONU(BaseModel):
         description="Sinal de recepção da ONU.",
     )
 
+
 class StatusONUOut(BaseModel):
     data: StatusONU

@@ -54,15 +54,15 @@ class Cliente:
         except httpx.RequestError as e:
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail=f"Falha na comunicação com o serviço IXC: {e.response.text}"
+                detail=f"Falha na comunicação com o serviço IXC: {e.response.text}",
             ) from e
         except httpx.HTTPStatusError as e:
             raise HTTPException(
                 status_code=e.response.status_code,
-                detail=f"Erro retornado pelo IXC: {e.response.text}"
+                detail=f"Erro retornado pelo IXC: {e.response.text}",
             ) from e
         except ValueError as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Resposta inválida do servidor IXC: {e}"
+                detail=f"Resposta inválida do servidor IXC: {e}",
             ) from e
