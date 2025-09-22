@@ -10,6 +10,8 @@ from ..schemas import (
     ComercialContrato,
     StatusAcessoOut,
     StatusAcesso,
+    LeadIn,
+    LeadCreate,
 )
 
 
@@ -185,6 +187,24 @@ class Service:
                 links=links,
             )
 
+        except HTTPException:
+            raise
+        except ValidationError as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Validação da resposta falhou: {e}",
+            )
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Erro interno ao processar solicitação: {str(e)}",
+            )
+
+    async def post_lead(self: Self, lead: LeadIn) -> LeadCreate:
+        try:
+            res = await self.ixc_cliente.post_lead(lead=lead)
+            id_lead = res.get("id", None)
+            return LeadCreate(id=id_lead)
         except HTTPException:
             raise
         except ValidationError as e:

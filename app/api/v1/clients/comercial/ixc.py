@@ -2,6 +2,7 @@ import json
 from typing import Dict, Any, Self, Optional, List
 from app.api.v1.utils.enums import SortOrder
 from ..ixc import Cliente as IXCCliente
+from app.api.v1.schemas import LeadIn
 
 
 class Cliente(IXCCliente):
@@ -40,3 +41,11 @@ class Cliente(IXCCliente):
         }
         data = await self._make_request("cliente_contrato", payload)
         return data
+
+    async def post_lead(self: Self, lead: LeadIn) -> Dict[str, Any]:
+        payload = lead.model_dump()
+        return await self._make_request(
+            endpoint="contato",
+            payload=payload,
+            include_ixcsoft=False,
+        )
