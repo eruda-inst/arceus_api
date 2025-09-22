@@ -1,5 +1,5 @@
-from ..utils import StatusAcessoRot
 from pydantic import BaseModel, Field
+from app.api.v1.utils import StatusAcessoRot
 
 
 class StatusAcesso(BaseModel):

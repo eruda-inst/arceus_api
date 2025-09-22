@@ -126,28 +126,6 @@ class Cliente(IXCCliente):
         )
         return data
 
-    async def get_valor_e_data_vencimento(
-        self: Self,
-        id_contrato: int,
-    ) -> Optional[Dict[str, Any]]:
-        grid_param = [
-            {
-                "TB": "fn_areceber.id_contrato",
-                "OP": "=",
-                "P": str(id_contrato),
-            }
-        ]
-        payload = {
-            "grid_param": json.dumps(
-                obj=grid_param,
-            ),
-        }
-        data = await self._make_request(
-            endpoint="fn_areceber",
-            payload=payload,
-        )
-        return data
-
     async def get_id_login(
         self: Self,
         id_contrato: int,

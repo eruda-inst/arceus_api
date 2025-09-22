@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from .api import suporte_router, comercial_router
+from fastapi.middleware.cors import CORSMiddleware
 
 
 app = FastAPI(
@@ -17,6 +18,14 @@ app.include_router(
     router=comercial_router,
     prefix="/api/v1/comercial",
     tags=["Comercial"],
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["https://reddator.newnet.com.br/"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 

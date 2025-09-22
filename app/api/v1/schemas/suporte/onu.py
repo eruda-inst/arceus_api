@@ -1,5 +1,5 @@
-from ..utils import StatusONURot
 from pydantic import BaseModel, Field
+from app.api.v1.utils import StatusONURot
 
 
 class StatusONU(BaseModel):

@@ -6,7 +6,7 @@ from ..schemas import (
     StatusConexaoOut,
     AtendimentoOut,
     AtendimentoIn,
-    ContratoListOut,
+    SuporteContratoListOut,
     StatusONUOut,
     AtendimentoCreate,
 )
@@ -44,7 +44,7 @@ async def get_contratos(
         default=SortOrder.ASC,
         description="Ordem da ordenação.",
     ),
-) -> ContratoListOut:
+) -> SuporteContratoListOut:
     return await service.get_contratos_ativos(
         protocolo=protocolo,
         page=page,

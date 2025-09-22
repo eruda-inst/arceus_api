@@ -1,7 +1,7 @@
 from typing import Self, Optional
 from datetime import datetime
 from pydantic import ValidationError
-from ..clients import SuporteOpaClient, SuporteIXCClient
+from ..clients import SuporteOpaCliente, SuporteIXCCliente
 from fastapi import HTTPException, status
 from ..utils import (
     rotular_status_contrato,
@@ -15,8 +15,8 @@ from ..schemas import (
     Atendimento,
     AtendimentoIn,
     AtendimentoOut,
-    Contrato,
-    ContratoListOut,
+    SuporteContratoListOut,
+    SuporteContrato,
     Links,
     Meta,
     StatusConexao,
@@ -30,8 +30,8 @@ class Service:
     def __init__(
         self: Self,
     ) -> None:
-        self.opa_client = SuporteOpaClient()
-        self.ixc_client = SuporteIXCClient()
+        self.opa_client = SuporteOpaCliente()
+        self.ixc_client = SuporteIXCCliente()
 
     async def get_contratos_ativos(
         self: Self,
@@ -40,7 +40,7 @@ class Service:
         per_page: Optional[int] = 10,
         sortname: Optional[str] = "cliente_contrato.id",
         sortorder: Optional[SortOrder] = SortOrder.ASC,
-    ) -> ContratoListOut:
+    ) -> SuporteContratoListOut:
         try:
             id_cliente_opa_res = await self.opa_client.get_id_cliente_opa(
                 protocolo=protocolo,
@@ -169,8 +169,8 @@ class Service:
                     else None
                 ),
             )
-            return ContratoListOut(
-                data=[Contrato(**contrato) for contrato in contratos_ativos],
+            return SuporteContratoListOut(
+                data=[SuporteContrato(**contrato) for contrato in contratos_ativos],
                 meta=meta,
                 links=links,
             )

@@ -1,7 +1,7 @@
 from typing import List
-from .misc import Links, Meta
+from ..misc import Links, Meta
 from pydantic import BaseModel, Field
-from ..utils import StatusContratoRot
+from app.api.v1.utils import StatusContratoRot
 
 
 class Contrato(BaseModel):

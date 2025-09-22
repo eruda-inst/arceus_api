@@ -1,7 +1,7 @@
-from .misc import Meta, Links
+from ..misc import Meta, Links
 from typing import Optional, List
 from pydantic import BaseModel, Field
-from ..utils import (
+from app.api.v1.utils import (
     TipoCod,
     SuStatusCod,
     PrioridadeCod,

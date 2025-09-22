@@ -1,5 +1,5 @@
-from ..utils import StatusConexaoRot
 from pydantic import BaseModel, Field
+from app.api.v1.utils import StatusConexaoRot
 
 
 class StatusConexao(BaseModel):
