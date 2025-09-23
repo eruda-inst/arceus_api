@@ -16,3 +16,4 @@ from .rotulos import (
     StatusONURot,
     StatusAcessoRot,
 )
+from .default import Default

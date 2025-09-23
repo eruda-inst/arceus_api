@@ -8,9 +8,7 @@ from app.api.v1.utils import (
     OrigemEnderecoCod,
     StatusAtendimentoRot,
 )
-
-ID_BOT = 14336
-ID_TICKET_SETOR = 4
+from app.api.v1.utils import Default
 
 
 class AtendimentoCreate(BaseModel):
@@ -36,11 +34,11 @@ class AtendimentoIn(BaseModel):
         default=SuStatusCod.NOVO, description="Status do atendimento."
     )
     id_ticket_setor: Optional[int] = Field(
-        default=ID_TICKET_SETOR, description="Setor do atendimento."
+        default=Default.ID_TICKET_SETOR, description="Setor do atendimento."
     )
     id_contrato: int = Field(description="ID de contrato do cliente.")
     id_responsavel_tecnico: Optional[int] = Field(
-        default=ID_BOT, description="ID do responsável técnico."
+        default=Default.ID_RESPONSAVEL_ARCEUS, description="ID do responsável técnico."
     )
 
 

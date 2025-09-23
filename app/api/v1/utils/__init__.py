@@ -20,5 +20,6 @@ from .enums import (
     SortOrder,
     StatusAcessoRot,
     StatusAcessoCod,
+    Default,
 )
 from .maps import STATUS_ATENDIMENTO, STATUS_CONEXAO, STATUS_CONTRATO, STATUS_ACESSO

@@ -201,6 +201,12 @@ class Service:
         try:
             res = await self.ixc_cliente.post_lead(lead=lead)
             id_lead = res.get("id", None)
+
+            if not id_lead:
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail="Não foi possível cadastrar novo lead.",
+                )
             return LeadCreate(id=id_lead)
         except HTTPException:
             raise
