@@ -14,15 +14,12 @@ from ..enums import (
 
 
 def get_label(
-    code: Enum,
-    mapping: dict,
+    code: Enum, mapping: dict
 ) -> Union[StatusConexaoRot, StatusContratoRot, StatusAtendimentoRot]:
     return mapping[code]
 
 
-def rotular_status_conexao(
-    status_conexao_codigo: StatusConexaoCod,
-) -> StatusConexaoRot:
+def rotular_status_conexao(status_conexao_codigo: StatusConexaoCod) -> StatusConexaoRot:
     return get_label(status_conexao_codigo, STATUS_CONEXAO)
 
 
@@ -38,15 +35,11 @@ def rotular_status_atendimento(
     return get_label(status_atendimento_codigo, STATUS_ATENDIMENTO)
 
 
-def rotular_status_acesso(
-    status_acesso_codigo: StatusAcessoCod,
-) -> StatusAcessoRot:
+def rotular_status_acesso(status_acesso_codigo: StatusAcessoCod) -> StatusAcessoRot:
     return get_label(status_acesso_codigo, STATUS_ACESSO)
 
 
-def rotular_status_onu(
-    sinal_rx: float,
-) -> str:
+def rotular_status_onu(sinal_rx: float) -> str:
     if sinal_rx >= -15:
         return "Saturado"
     elif sinal_rx >= -21:

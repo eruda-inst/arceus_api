@@ -4,7 +4,6 @@ from fastapi import APIRouter, Query, status, Body
 from ..services import ComercialService
 from ..schemas import ComercialContratoListOut, StatusAcessoOut, LeadIn, LeadCreate
 
-
 router = APIRouter()
 service = ComercialService()
 

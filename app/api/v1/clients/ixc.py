@@ -7,23 +7,18 @@ from typing import Dict, Any, List, Union, Self, Optional
 
 
 class Cliente:
-    def __init__(
-        self: Self,
-    ) -> None:
+    def __init__(self: Self) -> None:
         self.token = settings.IXC_TOKEN
         self.host = settings.IXC_HOST
         self.base_url = f"https://{self.host}/webservice/v1"
         self.auth_header = self._create_auth_header()
 
-    def _create_auth_header(
-        self: Self,
-    ) -> str:
+    def _create_auth_header(self: Self) -> str:
         token_encoded = base64.b64encode(self.token.encode("utf-8")).decode("utf-8")
         return f"Basic {token_encoded}"
 
     def _get_headers(
-        self: Self,
-        include_ixcsoft: Optional[bool] = True,
+        self: Self, include_ixcsoft: Optional[bool] = True
     ) -> Dict[str, str]:
         headers = {"Authorization": self.auth_header}
         if include_ixcsoft:
@@ -37,13 +32,9 @@ class Cliente:
         include_ixcsoft: Optional[bool] = True,
     ) -> Optional[Union[List[Dict[str, Any]], Dict[str, Any]]]:
         url = f"{self.base_url}/{endpoint}"
-        headers = self._get_headers(
-            include_ixcsoft=include_ixcsoft,
-        )
+        headers = self._get_headers(include_ixcsoft=include_ixcsoft)
         try:
-            async with httpx.AsyncClient(
-                timeout=30.0,
-            ) as async_client:
+            async with httpx.AsyncClient(timeout=30.0) as async_client:
                 res = await async_client.request(
                     method="POST",
                     url=url,
@@ -69,23 +60,11 @@ class Cliente:
             ) from e
 
     async def get_valor_e_data_vencimento(
-        self: Self,
-        id_contrato: int,
+        self: Self, id_contrato: int
     ) -> Optional[Dict[str, Any]]:
         grid_param = [
-            {
-                "TB": "fn_areceber.id_contrato",
-                "OP": "=",
-                "P": str(id_contrato),
-            }
+            {"TB": "fn_areceber.id_contrato", "OP": "=", "P": str(id_contrato)}
         ]
-        payload = {
-            "grid_param": json.dumps(
-                obj=grid_param,
-            ),
-        }
-        data = await self._make_request(
-            endpoint="fn_areceber",
-            payload=payload,
-        )
+        payload = {"grid_param": json.dumps(obj=grid_param)}
+        data = await self._make_request(endpoint="fn_areceber", payload=payload)
         return data

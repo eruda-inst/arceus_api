@@ -21,9 +21,7 @@ class Cliente(IXCCliente):
             {"TB": "cliente_contrato.status", "OP": "!=", "P": "D"},
         ]
         payload = {
-            "grid_param": json.dumps(
-                obj=grid_param,
-            ),
+            "grid_param": json.dumps(obj=grid_param),
             "page": page,
             "rp": per_page,
             "sortname": sortname,
@@ -33,28 +31,15 @@ class Cliente(IXCCliente):
         return data
 
     async def get_status_conexao(
-        self: Self,
-        id_login: int,
+        self: Self, id_login: int
     ) -> Optional[List[Dict[str, Any]]]:
-        grid_param = [
-            {
-                "TB": "radusuarios.id",
-                "OP": "=",
-                "P": str(id_login),
-            }
-        ]
-        payload = {
-            "grid_param": json.dumps(
-                obj=grid_param,
-            ),
-        }
+        grid_param = [{"TB": "radusuarios.id", "OP": "=", "P": str(id_login)}]
+        payload = {"grid_param": json.dumps(obj=grid_param)}
         data = await self._make_request("radusuarios", payload)
         return data
 
     async def get_status_onu(
-        self: Self,
-        id_login: Optional[int] = None,
-        mac_onu: Optional[str] = None,
+        self: Self, id_login: Optional[int] = None, mac_onu: Optional[str] = None
     ) -> Optional[Dict[str, Any]]:
         query_field = "id_login" if id_login else "mac"
         query_value = id_login if id_login else mac_onu
@@ -65,37 +50,22 @@ class Cliente(IXCCliente):
                 "P": str(query_value),
             }
         ]
-        payload = {
-            "grid_param": json.dumps(
-                obj=grid_param,
-            ),
-        }
+        payload = {"grid_param": json.dumps(obj=grid_param)}
         data = await self._make_request(
-            endpoint="radpop_radio_cliente_fibra",
-            payload=payload,
+            endpoint="radpop_radio_cliente_fibra", payload=payload
         )
         return data
 
-    async def post_atendimentos(
-        self: Self,
-        atendimento: AtendimentoIn,
-    ) -> None:
+    async def post_atendimentos(self: Self, atendimento: AtendimentoIn) -> None:
         payload = atendimento.model_dump()
         return await self._make_request(
-            endpoint="su_ticket",
-            payload=payload,
-            include_ixcsoft=False,
+            endpoint="su_ticket", payload=payload, include_ixcsoft=False
         )
 
-    async def post_desconectar_cliente(
-        self: Self,
-        id_login: int,
-    ) -> None:
+    async def post_desconectar_cliente(self: Self, id_login: int) -> None:
         payload = {"id": id_login}
         await self._make_request(
-            endpoint="desconectar_clientes",
-            payload=payload,
-            include_ixcsoft=False,
+            endpoint="desconectar_clientes", payload=payload, include_ixcsoft=False
         )
 
     async def get_atendimentos_abertos(
@@ -112,60 +82,25 @@ class Cliente(IXCCliente):
             {"TB": "su_ticket.su_status", "OP": "!=", "P": "C"},
         ]
         payload = {
-            "grid_param": json.dumps(
-                obj=grid_param,
-            ),
+            "grid_param": json.dumps(obj=grid_param),
             "page": page,
             "rp": per_page,
             "sortname": sortname,
             "sortorder": sortorder,
         }
-        data = await self._make_request(
-            endpoint="su_ticket",
-            payload=payload,
-        )
+        data = await self._make_request(endpoint="su_ticket", payload=payload)
         return data
 
-    async def get_id_login(
-        self: Self,
-        id_contrato: int,
-    ) -> Optional[Dict[str, Any]]:
+    async def get_id_login(self: Self, id_contrato: int) -> Optional[Dict[str, Any]]:
         grid_param = [
-            {
-                "TB": "radusuarios.id_contrato",
-                "OP": "=",
-                "P": str(id_contrato),
-            }
+            {"TB": "radusuarios.id_contrato", "OP": "=", "P": str(id_contrato)}
         ]
-        payload = {
-            "grid_param": json.dumps(
-                obj=grid_param,
-            ),
-        }
-        data = await self._make_request(
-            endpoint="radusuarios",
-            payload=payload,
-        )
+        payload = {"grid_param": json.dumps(obj=grid_param)}
+        data = await self._make_request(endpoint="radusuarios", payload=payload)
         return data
 
-    async def get_onu_mac(
-        self: Self,
-        id_login: int,
-    ) -> Optional[Dict[str, Any]]:
-        grid_param = [
-            {
-                "TB": "radusuarios.id",
-                "OP": "=",
-                "P": str(id_login),
-            }
-        ]
-        payload = {
-            "grid_param": json.dumps(
-                obj=grid_param,
-            ),
-        }
-        data = await self._make_request(
-            endpoint="radusuarios",
-            payload=payload,
-        )
+    async def get_onu_mac(self: Self, id_login: int) -> Optional[Dict[str, Any]]:
+        grid_param = [{"TB": "radusuarios.id", "OP": "=", "P": str(id_login)}]
+        payload = {"grid_param": json.dumps(obj=grid_param)}
+        data = await self._make_request(endpoint="radusuarios", payload=payload)
         return data

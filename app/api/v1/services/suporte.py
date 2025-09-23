@@ -27,9 +27,7 @@ from ..schemas import (
 
 
 class Service:
-    def __init__(
-        self: Self,
-    ) -> None:
+    def __init__(self: Self) -> None:
         self.opa_client = SuporteOpaCliente()
         self.ixc_client = SuporteIXCCliente()
 
@@ -43,7 +41,7 @@ class Service:
     ) -> SuporteContratoListOut:
         try:
             id_cliente_opa_res = await self.opa_client.get_id_cliente_opa(
-                protocolo=protocolo,
+                protocolo=protocolo
             )
             if not id_cliente_opa_res.get("data", []):
                 raise HTTPException(
@@ -53,7 +51,7 @@ class Service:
             id_cliente_opa = id_cliente_opa_res["data"][0]["id_cliente"]
 
             id_cliente_ixc_res = await self.opa_client.get_id_cliente_ixc(
-                id_cliente_opa=id_cliente_opa,
+                id_cliente_opa=id_cliente_opa
             )
             if not id_cliente_ixc_res.get("data", []):
                 raise HTTPException(
@@ -79,10 +77,10 @@ class Service:
 
             for contrato in contratos_ativos:
                 a_receber_res = await self.ixc_client.get_valor_e_data_vencimento(
-                    id_contrato=contrato.get("id"),
+                    id_contrato=contrato.get("id")
                 )
                 id_login_res = await self.ixc_client.get_id_login(
-                    id_contrato=contrato.get("id"),
+                    id_contrato=contrato.get("id")
                 )
                 if not id_login_res.get("registros", []):
                     raise HTTPException(
@@ -90,9 +88,7 @@ class Service:
                         detail="Sem ID login.",
                     )
                 id_login = id_login_res.get("registros")[0]["id"]
-                onu_mac_res = await self.ixc_client.get_onu_mac(
-                    id_login=id_login,
-                )
+                onu_mac_res = await self.ixc_client.get_onu_mac(id_login=id_login)
 
                 onu_mac = onu_mac_res["registros"][0]["onu_mac"]
                 a_receber = a_receber_res.get("registros", [])
@@ -150,11 +146,7 @@ class Service:
 
                 contrato["status"] = rotular_status_contrato(contrato["status"])
 
-            meta = Meta(
-                total=total,
-                page=page,
-                per_page=per_page,
-            )
+            meta = Meta(total=total, page=page, per_page=per_page)
             base_url = f"/contratos?protocolo={protocolo}"
             links = Links(
                 self=f"{base_url}&page={page}&per_page={per_page}",
@@ -170,7 +162,7 @@ class Service:
                 ),
             )
             return SuporteContratoListOut(
-                data=[SuporteContrato(**contrato) for contrato in contratos_ativos],
+                data=[SuporteContrato(**c) for c in contratos_ativos],
                 meta=meta,
                 links=links,
             )
@@ -187,10 +179,7 @@ class Service:
                 detail=f"Erro interno ao processar solicitação: {str(e)}",
             )
 
-    async def get_status_conexao(
-        self: Self,
-        id_login: int,
-    ) -> StatusConexaoOut:
+    async def get_status_conexao(self: Self, id_login: int) -> StatusConexaoOut:
         try:
             res = await self.ixc_client.get_status_conexao(
                 id_login=id_login,
@@ -219,9 +208,7 @@ class Service:
             )
 
     async def get_status_onu(
-        self: Self,
-        id_login: Optional[int] = None,
-        mac_onu: Optional[str] = None,
+        self: Self, id_login: Optional[int] = None, mac_onu: Optional[str] = None
     ) -> StatusONUOut:
         if not id_login and not mac_onu:
             raise HTTPException(
@@ -263,14 +250,9 @@ class Service:
                 detail=f"Erro interno ao processar solicitação: {e}",
             )
 
-    async def post_desconectar_cliente(
-        self: Self,
-        id_login: int,
-    ) -> None:
+    async def post_desconectar_cliente(self: Self, id_login: int) -> None:
         try:
-            await self.ixc_client.post_desconectar_cliente(
-                id_login=id_login,
-            )
+            await self.ixc_client.post_desconectar_cliente(id_login=id_login)
         except HTTPException:
             raise
         except Exception as e:
@@ -316,11 +298,7 @@ class Service:
                     }
                 )
             total = registros.__len__()
-            meta = Meta(
-                total=total,
-                page=page,
-                per_page=per_page,
-            )
+            meta = Meta(total=total, page=page, per_page=per_page)
             base_url = f"/atendimentos?id_login={id_login}"
             links = Links(
                 self=f"{base_url}&page={page}&per_page={per_page}",
@@ -336,7 +314,7 @@ class Service:
                 ),
             )
             return AtendimentoOut(
-                data=[Atendimento(**item) for item in formatted], meta=meta, links=links
+                data=[Atendimento(**i) for i in formatted], meta=meta, links=links
             )
         except HTTPException:
             raise
@@ -352,17 +330,12 @@ class Service:
             )
 
     async def post_atendimentos(
-        self: Self,
-        atendimento: AtendimentoIn,
+        self: Self, atendimento: AtendimentoIn
     ) -> AtendimentoCreate:
         try:
-            res = await self.ixc_client.post_atendimentos(
-                atendimento=atendimento,
-            )
+            res = await self.ixc_client.post_atendimentos(atendimento=atendimento)
             id_atendimento = res.get("id", None)
-            return AtendimentoCreate(
-                id=int(id_atendimento),
-            )
+            return AtendimentoCreate(id=int(id_atendimento))
         except HTTPException:
             raise
         except ValidationError as e:

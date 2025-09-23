@@ -9,15 +9,9 @@ app = FastAPI(
     version="0.47.0",
 )
 
+app.include_router(router=suporte_router, prefix="/api/v1/suporte", tags=["Suporte"])
 app.include_router(
-    router=suporte_router,
-    prefix="/api/v1/suporte",
-    tags=["Suporte"],
-)
-app.include_router(
-    router=comercial_router,
-    prefix="/api/v1/comercial",
-    tags=["Comercial"],
+    router=comercial_router, prefix="/api/v1/comercial", tags=["Comercial"]
 )
 
 app.add_middleware(

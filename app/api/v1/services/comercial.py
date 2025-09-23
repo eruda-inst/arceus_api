@@ -16,9 +16,7 @@ from ..schemas import (
 
 
 class Service:
-    def __init__(
-        self: Self,
-    ) -> None:
+    def __init__(self: Self) -> None:
         self.ixc_cliente = ComercialIXCCliente()
         self.opa_cliente = ComercialOpaCliente()
 
@@ -87,8 +85,7 @@ class Service:
             )
             if not contratos_res.get("registros", []):
                 raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail="Sem contrato.",
+                    status_code=status.HTTP_404_NOT_FOUND, detail="Sem contrato."
                 )
             contratos = contratos_res["registros"]
 
@@ -143,7 +140,7 @@ class Service:
                     titulo_final = max(
                         titulos_nao_quitados,
                         key=lambda x: datetime.strptime(
-                            x.get("data_vencimento"), "%Y-%m-%d"
+                            x.ge("data_vencimento"), "%Y-%m-%d"
                         ).date(),
                     )
 
