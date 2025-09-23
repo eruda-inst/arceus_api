@@ -11,7 +11,7 @@ service = ComercialService()
 @router.get(
     path="/status_acesso",
     response_model=StatusAcessoOut,
-    description="Obtém status de acesso, através de ID de contrato.",
+    summary="Obtém status de acesso, através de ID de contrato.",
 )
 async def get_status_acesso(
     id_contrato: int = Query(ge=1, description="ID do contrato.")
@@ -22,7 +22,7 @@ async def get_status_acesso(
 @router.get(
     path="/contratos",
     response_model=ComercialContratoListOut,
-    description="Obtém contratos de um cliente, por meio de ID de login.",
+    summary="Obtém contratos de um cliente, por meio de ID de login.",
 )
 async def get_contratos(
     protocolo: str = Query(
@@ -48,7 +48,7 @@ async def get_contratos(
     path="/leads",
     status_code=status.HTTP_201_CREATED,
     response_model=LeadCreate,
-    description="Cadastra novo lead, a partir de lead submetido.",
+    summary="Cadastra novo lead, a partir de lead submetido.",
 )
 async def post_lead(
     lead: LeadIn = Body(description="Lead a ser cadastrado."),

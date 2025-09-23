@@ -4,7 +4,13 @@ from ..schemas import Meta, Links
 from pydantic import ValidationError
 from ..clients import ComercialIXCCliente, ComercialOpaCliente
 from fastapi import HTTPException, status
-from ..utils import rotular_status_acesso, SortOrder
+from ..utils import (
+    rotular_status_acesso,
+    SortOrder,
+    formatar_cpf_ou_cnpj,
+    formatar_cel,
+    formatar_cep,
+)
 from ..schemas import (
     ComercialContratoListOut,
     ComercialContrato,
@@ -199,13 +205,27 @@ class Service:
 
     async def post_lead(self: Self, lead: LeadIn) -> LeadCreate:
         try:
-            res = await self.ixc_cliente.post_lead(lead=lead)
-            id_lead = res.get("id", None)
+            lead_data = lead.model_dump()
+            if lead_data.get("cnpj_cpf"):
+                cnpj_ou_cpf = lead_data["cnpj_cpf"]
+                lead_data["cnpj_cpf"] = formatar_cpf_ou_cnpj(cpf_ou_cnpj=cnpj_ou_cpf)
+            if lead_data.get("fone_celular"):
+                cel = lead_data["fone_celular"]
+                lead_data["fone_celular"] = formatar_cel(cel=cel)
+            if lead_data.get("cep"):
+                cep = lead_data["cep"]
+                lead_data["cep"] = formatar_cep(cep=cep)
 
+            formatted_lead = LeadIn(**lead_data)
+
+            res = await self.ixc_cliente.post_lead(lead=formatted_lead)
+
+            id_lead = res.get("id", None)
             if not id_lead:
+                error_message = res.get("message", "")
                 raise HTTPException(
                     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    detail="Não foi possível cadastrar novo lead.",
+                    detail=f"Não foi possível retornar o ID do lead criado: {error_message}",
                 )
             return LeadCreate(id=id_lead)
         except HTTPException:

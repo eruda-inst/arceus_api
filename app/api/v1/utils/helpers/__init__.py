@@ -5,3 +5,4 @@ from .rotular import (
     rotular_status_onu,
     rotular_status_acesso,
 )
+from .formatar import formatar_cpf_ou_cnpj, formatar_cel, formatar_cep

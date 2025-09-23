@@ -4,6 +4,9 @@ from .helpers import (
     rotular_status_contrato,
     rotular_status_onu,
     rotular_status_acesso,
+    formatar_cpf_ou_cnpj,
+    formatar_cel,
+    formatar_cep,
 )
 from .enums import (
     StatusAtendimentoCod,

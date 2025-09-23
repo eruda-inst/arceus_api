@@ -36,7 +36,5 @@ class Cliente(IXCCliente):
     async def post_lead(self: Self, lead: LeadIn) -> Dict[str, Any]:
         payload = lead.model_dump()
         return await self._make_request(
-            endpoint="contato",
-            payload=payload,
-            include_ixcsoft=False,
+            endpoint="contato", payload=payload, include_ixcsoft=False
         )
