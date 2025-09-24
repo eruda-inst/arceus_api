@@ -22,3 +22,7 @@ class Links(BaseModel):
         default=None,
         description="URL para a página anterior de resultados, se disponível.",
     )
+
+
+class MensagemOut(BaseModel):
+    mensagem: str = Field(description="Mensagem de sucesso.")

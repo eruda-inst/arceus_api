@@ -1,4 +1,4 @@
-from .misc import Links, Meta
+from .misc import Links, Meta, MensagemOut
 from .comercial import (
     ComercialContrato,
     ComercialContratoListOut,
@@ -20,5 +20,4 @@ from .suporte import (
     StatusONUOut,
     StatusONU,
     StatusConexaoOut,
-    LoginOut,
 )

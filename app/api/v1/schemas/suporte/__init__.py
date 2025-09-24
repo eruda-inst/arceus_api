@@ -5,4 +5,4 @@ from .contrato import (
 )
 from .conexao import StatusConexao, StatusConexaoOut
 from .atendimento import Atendimento, AtendimentoIn, AtendimentoOut, AtendimentoCreate
-from .login import LoginIn, LoginOut
+from .login import LoginIn

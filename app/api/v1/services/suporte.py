@@ -20,11 +20,11 @@ from ..schemas import (
     Links,
     Meta,
     LoginIn,
-    LoginOut,
     StatusConexao,
     StatusConexaoOut,
     StatusONU,
     AtendimentoCreate,
+    MensagemOut,
 )
 
 
@@ -351,7 +351,7 @@ class Service:
                 detail=f"Erro interno ao processar solicitação: {str(e)}",
             )
 
-    async def patch_logins(self: Self, id: int, login: LoginIn) -> LoginOut:
+    async def patch_logins(self: Self, id: int, login: LoginIn) -> MensagemOut:
         try:
             res = await self.ixc_cliente.get_login(id=id)
             if not res.get("registros"):
@@ -362,16 +362,16 @@ class Service:
             login_antigo = res["registros"][0]
 
             novo_login = login.model_dump(exclude_unset=True)
+
             login_atualizado = {**login_antigo, **novo_login}
 
             del login_atualizado["id"]
 
-            await self.ixc_cliente.put_login(id=id, login=login_atualizado)
+            res = await self.ixc_cliente.put_login(id=id, login=login_atualizado)
 
-            res_atualizado = await self.ixc_cliente.get_login(id=id)
-            login_final = res_atualizado["registros"][0]
+            mensagem = res["message"]
 
-            return LoginOut(mensagem="Login atualizado com sucesso!")
+            return MensagemOut(mensagem=mensagem)
         except HTTPException:
             raise
         except ValidationError as e:

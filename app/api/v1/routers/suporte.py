@@ -10,7 +10,7 @@ from ..schemas import (
     StatusONUOut,
     AtendimentoCreate,
     LoginIn,
-    LoginOut,
+    MensagemOut,
 )
 
 router = APIRouter()
@@ -119,5 +119,5 @@ async def post_atendimentos(atendimento: AtendimentoIn) -> AtendimentoCreate:
 async def patch_logins(
     id: int = Path(ge=1, description="ID de login."),
     login: LoginIn = Body(description="Campos de login a serem atualizados."),
-) -> LoginOut:
+) -> MensagemOut:
     return await service.patch_logins(id=id, login=login)

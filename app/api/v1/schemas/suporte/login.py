@@ -272,7 +272,3 @@ class LoginIn(BaseModel):
     longitude: Optional[float] = Field(default=None, description="Longitude.")
     longitude_novo: Optional[float] = Field(default=None, description="Longitude nova.")
     obs: Optional[str] = Field(default=None, description="Observações.")
-
-
-class LoginOut(BaseModel):
-    mensagem: str = Field(description="Mensagem de sucesso.")
