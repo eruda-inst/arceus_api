@@ -1,6 +1,7 @@
 import json
 from .. import SortOrder
 from .. import AtendimentoIn
+from app.api.v1.schemas import LoginIn
 from ..ixc import Cliente as IXCCliente
 from typing import Dict, Any, List, Self, Optional
 
@@ -103,4 +104,21 @@ class Cliente(IXCCliente):
         grid_param = [{"TB": "radusuarios.id", "OP": "=", "P": str(id_login)}]
         payload = {"grid_param": json.dumps(obj=grid_param)}
         data = await self._make_request(endpoint="radusuarios", payload=payload)
+        return data
+
+    async def get_login(self: Self, id: int) -> Optional[Dict[str, Any]]:
+        grid_param = [{"TB": "radusuarios.id", "OP": "=", "P": str(id)}]
+        payload = {"grid_param": json.dumps(obj=grid_param)}
+        data = await self._make_request(endpoint="radusuarios", payload=payload)
+        return data
+
+    async def put_login(
+        self: Self, id: int, login: LoginIn
+    ) -> Optional[Dict[str, Any]]:
+        data = await self._make_request(
+            endpoint=f"radusuarios/{id}",
+            payload=login,
+            include_ixcsoft=False,
+            method="PUT",
+        )
         return data

@@ -1,7 +1,7 @@
 from typing import Optional
 from ..utils import SortOrder
 from ..services import SuporteService
-from fastapi import APIRouter, Query, status
+from fastapi import APIRouter, Query, status, Path, Body
 from ..schemas import (
     StatusConexaoOut,
     AtendimentoOut,
@@ -9,6 +9,8 @@ from ..schemas import (
     SuporteContratoListOut,
     StatusONUOut,
     AtendimentoCreate,
+    LoginIn,
+    LoginOut,
 )
 
 router = APIRouter()
@@ -108,3 +110,14 @@ async def get_atendimentos(
 )
 async def post_atendimentos(atendimento: AtendimentoIn) -> AtendimentoCreate:
     return await service.post_atendimentos(atendimento=atendimento)
+
+
+@router.patch(
+    path="/logins/{id}",
+    summary="Atualiza um ou mais campos associado a um login específico, por meio do ID de login.",
+)
+async def patch_logins(
+    id: int = Path(ge=1, description="ID de login."),
+    login: LoginIn = Body(description="Campos de login a serem atualizados."),
+) -> LoginOut:
+    return await service.patch_logins(id=id, login=login)

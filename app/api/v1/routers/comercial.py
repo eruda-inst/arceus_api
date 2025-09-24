@@ -1,8 +1,14 @@
 from typing import Optional
 from ..utils import SortOrder
-from fastapi import APIRouter, Query, status, Body
+from fastapi import APIRouter, Query, status, Body, Path
 from ..services import ComercialService
-from ..schemas import ComercialContratoListOut, StatusAcessoOut, LeadIn, LeadCreate
+from ..schemas import (
+    ComercialContratoListOut,
+    StatusAcessoOut,
+    LeadIn,
+    LeadCreate,
+    LoginIn,
+)
 
 router = APIRouter()
 service = ComercialService()
@@ -50,7 +56,7 @@ async def get_contratos(
     response_model=LeadCreate,
     summary="Cadastra novo lead, a partir de lead submetido.",
 )
-async def post_lead(
+async def post_leads(
     lead: LeadIn = Body(description="Lead a ser cadastrado."),
 ) -> LeadCreate:
-    return await service.post_lead(lead=lead)
+    return await service.post_leads(lead=lead)

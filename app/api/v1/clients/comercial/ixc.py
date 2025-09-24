@@ -30,11 +30,12 @@ class Cliente(IXCCliente):
             "sortname": sortname,
             "sortorder": sortorder,
         }
-        data = await self._make_request("cliente_contrato", payload)
+        data = await self._make_request(endpoint="cliente_contrato", payload=payload)
         return data
 
-    async def post_lead(self: Self, lead: LeadIn) -> Dict[str, Any]:
+    async def post_leads(self: Self, lead: LeadIn) -> Dict[str, Any]:
         payload = lead.model_dump()
-        return await self._make_request(
+        data = await self._make_request(
             endpoint="contato", payload=payload, include_ixcsoft=False
         )
+        return data

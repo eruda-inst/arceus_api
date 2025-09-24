@@ -18,6 +18,7 @@ from ..schemas import (
     StatusAcesso,
     LeadIn,
     LeadCreate,
+    LoginIn,
 )
 
 
@@ -218,7 +219,7 @@ class Service:
 
             formatted_lead = LeadIn(**lead_data)
 
-            res = await self.ixc_cliente.post_lead(lead=formatted_lead)
+            res = await self.ixc_cliente.post_leads(lead=formatted_lead)
 
             id_lead = res.get("id", None)
             if not id_lead:

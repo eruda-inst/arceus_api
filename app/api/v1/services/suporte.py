@@ -19,6 +19,8 @@ from ..schemas import (
     SuporteContrato,
     Links,
     Meta,
+    LoginIn,
+    LoginOut,
     StatusConexao,
     StatusConexaoOut,
     StatusONU,
@@ -28,8 +30,8 @@ from ..schemas import (
 
 class Service:
     def __init__(self: Self) -> None:
-        self.opa_client = SuporteOpaCliente()
-        self.ixc_client = SuporteIXCCliente()
+        self.opa_cliente = SuporteOpaCliente()
+        self.ixc_cliente = SuporteIXCCliente()
 
     async def get_contratos_ativos(
         self: Self,
@@ -40,7 +42,7 @@ class Service:
         sortorder: Optional[SortOrder] = SortOrder.ASC,
     ) -> SuporteContratoListOut:
         try:
-            id_cliente_opa_res = await self.opa_client.get_id_cliente_opa(
+            id_cliente_opa_res = await self.opa_cliente.get_id_cliente_opa(
                 protocolo=protocolo
             )
             if not id_cliente_opa_res.get("data", []):
@@ -50,7 +52,7 @@ class Service:
                 )
             id_cliente_opa = id_cliente_opa_res["data"][0]["id_cliente"]
 
-            id_cliente_ixc_res = await self.opa_client.get_id_cliente_ixc(
+            id_cliente_ixc_res = await self.opa_cliente.get_id_cliente_ixc(
                 id_cliente_opa=id_cliente_opa
             )
             if not id_cliente_ixc_res.get("data", []):
@@ -60,7 +62,7 @@ class Service:
                 )
             id_cliente_ixc = id_cliente_ixc_res["data"][0]["id"]
 
-            contratos_ativos_res = await self.ixc_client.get_contratos_ativos(
+            contratos_ativos_res = await self.ixc_cliente.get_contratos_ativos(
                 id_cliente=id_cliente_ixc,
                 page=page,
                 per_page=per_page,
@@ -76,10 +78,10 @@ class Service:
                 )
 
             for contrato in contratos_ativos:
-                a_receber_res = await self.ixc_client.get_valor_e_data_vencimento(
+                a_receber_res = await self.ixc_cliente.get_valor_e_data_vencimento(
                     id_contrato=contrato.get("id")
                 )
-                id_login_res = await self.ixc_client.get_id_login(
+                id_login_res = await self.ixc_cliente.get_id_login(
                     id_contrato=contrato.get("id")
                 )
                 if not id_login_res.get("registros", []):
@@ -88,7 +90,7 @@ class Service:
                         detail="Sem ID login.",
                     )
                 id_login = id_login_res.get("registros")[0]["id"]
-                onu_mac_res = await self.ixc_client.get_onu_mac(id_login=id_login)
+                onu_mac_res = await self.ixc_cliente.get_onu_mac(id_login=id_login)
 
                 onu_mac = onu_mac_res["registros"][0]["onu_mac"]
                 a_receber = a_receber_res.get("registros", [])
@@ -181,7 +183,7 @@ class Service:
 
     async def get_status_conexao(self: Self, id_login: int) -> StatusConexaoOut:
         try:
-            res = await self.ixc_client.get_status_conexao(
+            res = await self.ixc_cliente.get_status_conexao(
                 id_login=id_login,
             )
             registros = res.get("registros", [])
@@ -218,7 +220,7 @@ class Service:
         try:
             if id_login is not None:
                 try:
-                    res = await self.ixc_client.get_status_onu(id_login=id_login)
+                    res = await self.ixc_cliente.get_status_onu(id_login=id_login)
                     registros = res.get("registros", [])
                     if registros and "sinal_rx" in registros[0]:
                         codigo = float(registros[0]["sinal_rx"])
@@ -228,7 +230,7 @@ class Service:
                     if not mac_onu:
                         raise
             if mac_onu is not None:
-                res = await self.ixc_client.get_status_onu(mac_onu=mac_onu)
+                res = await self.ixc_cliente.get_status_onu(mac_onu=mac_onu)
                 registros = res.get("registros", [])
                 if registros and "sinal_rx" in registros[0]:
                     codigo = float(registros[0]["sinal_rx"])
@@ -252,7 +254,7 @@ class Service:
 
     async def post_desconectar_cliente(self: Self, id_login: int) -> None:
         try:
-            await self.ixc_client.post_desconectar_cliente(id_login=id_login)
+            await self.ixc_cliente.post_desconectar_cliente(id_login=id_login)
         except HTTPException:
             raise
         except Exception as e:
@@ -270,7 +272,7 @@ class Service:
         sortorder: Optional[SortOrder] = SortOrder.ASC,
     ) -> AtendimentoOut:
         try:
-            res = await self.ixc_client.get_atendimentos_abertos(
+            res = await self.ixc_cliente.get_atendimentos_abertos(
                 id_login=id_login,
                 page=page,
                 per_page=per_page,
@@ -333,7 +335,7 @@ class Service:
         self: Self, atendimento: AtendimentoIn
     ) -> AtendimentoCreate:
         try:
-            res = await self.ixc_client.post_atendimentos(atendimento=atendimento)
+            res = await self.ixc_cliente.post_atendimentos(atendimento=atendimento)
             id_atendimento = res.get("id", None)
             return AtendimentoCreate(id=int(id_atendimento))
         except HTTPException:
@@ -347,4 +349,38 @@ class Service:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=f"Erro interno ao processar solicitação: {str(e)}",
+            )
+
+    async def patch_logins(self: Self, id: int, login: LoginIn) -> LoginOut:
+        try:
+            res = await self.ixc_cliente.get_login(id=id)
+            if not res.get("registros"):
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Login não encontrado.",
+                )
+            login_antigo = res["registros"][0]
+
+            novo_login = login.model_dump(exclude_unset=True)
+            login_atualizado = {**login_antigo, **novo_login}
+
+            del login_atualizado["id"]
+
+            await self.ixc_cliente.put_login(id=id, login=login_atualizado)
+
+            res_atualizado = await self.ixc_cliente.get_login(id=id)
+            login_final = res_atualizado["registros"][0]
+
+            return LoginOut(mensagem="Login atualizado com sucesso!")
+        except HTTPException:
+            raise
+        except ValidationError as e:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail=f"Erro de validação: {e}",
+            )
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Erro interno: {str(e)}",
             )
