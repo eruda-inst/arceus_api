@@ -63,11 +63,12 @@ class Cliente(IXCCliente):
             endpoint="su_ticket", payload=payload, include_ixcsoft=False
         )
 
-    async def post_desconectar_cliente(self: Self, id_login: int) -> None:
+    async def post_desconectar_cliente(self: Self, id_login: int) -> Dict[str, Any]:
         payload = {"id": id_login}
-        await self._make_request(
+        data = await self._make_request(
             endpoint="desconectar_clientes", payload=payload, include_ixcsoft=False
         )
+        return data
 
     async def get_atendimentos_abertos(
         self: Self,

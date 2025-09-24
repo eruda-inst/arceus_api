@@ -19,6 +19,7 @@ service = SuporteService()
 
 @router.get(
     path="/contratos",
+    response_model=SuporteContratoListOut,
     summary="Obtém contratos ativos de um cliente, através de protocolo de atendimento.",
 )
 async def get_contratos(
@@ -47,6 +48,7 @@ async def get_contratos(
 
 @router.get(
     path="/status_conexao",
+    response_model=StatusConexaoOut,
     summary="Obtém status de conexão de um cliente, através de ID de login.",
 )
 async def get_status_conexao(
@@ -57,6 +59,7 @@ async def get_status_conexao(
 
 @router.get(
     path="/status_onu",
+    response_model=StatusONUOut,
     summary="Obtém status de ONU (sinal rx) de um cliente, através de ID de login, ou MAC Address de ONU.",
 )
 async def get_status_onu(
@@ -70,17 +73,18 @@ async def get_status_onu(
 
 @router.post(
     path="/desconectar_cliente",
-    status_code=status.HTTP_204_NO_CONTENT,
+    response_model=MensagemOut,
     summary="Envia sinal de desconexão para um cliente, através de ID de login.",
 )
 async def post_desconectar_cliente(
     id_login: int = Query(description="ID de login do cliente no IXCSoft."),
-) -> None:
+) -> MensagemOut:
     return await service.post_desconectar_cliente(id_login=id_login)
 
 
 @router.get(
     path="/atendimentos",
+    response_model=AtendimentoOut,
     summary="Checa atendimentos abertos de um cliente, através de ID de login.",
 )
 async def get_atendimentos(
@@ -106,6 +110,7 @@ async def get_atendimentos(
 @router.post(
     path="/atendimentos",
     status_code=status.HTTP_201_CREATED,
+    response_model=AtendimentoCreate,
     summary="Abre ticket de atendimento, através de dados do atendimento.",
 )
 async def post_atendimentos(atendimento: AtendimentoIn) -> AtendimentoCreate:
@@ -114,6 +119,7 @@ async def post_atendimentos(atendimento: AtendimentoIn) -> AtendimentoCreate:
 
 @router.patch(
     path="/logins/{id}",
+    response_model=MensagemOut,
     summary="Atualiza um ou mais campos associado a um login específico, por meio do ID de login.",
 )
 async def patch_logins(

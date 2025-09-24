@@ -1,13 +1,12 @@
 from typing import Optional
 from ..utils import SortOrder
-from fastapi import APIRouter, Query, status, Body, Path
+from fastapi import APIRouter, Query, status, Body
 from ..services import ComercialService
 from ..schemas import (
     ComercialContratoListOut,
     StatusAcessoOut,
     LeadIn,
     LeadCreate,
-    LoginIn,
 )
 
 router = APIRouter()

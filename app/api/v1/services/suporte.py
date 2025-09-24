@@ -252,9 +252,11 @@ class Service:
                 detail=f"Erro interno ao processar solicitação: {e}",
             )
 
-    async def post_desconectar_cliente(self: Self, id_login: int) -> None:
+    async def post_desconectar_cliente(self: Self, id_login: int) -> MensagemOut:
         try:
-            await self.ixc_cliente.post_desconectar_cliente(id_login=id_login)
+            res = await self.ixc_cliente.post_desconectar_cliente(id_login=id_login)
+            mensagem = res["msg"][0]["message"]
+            return MensagemOut(mensagem=mensagem)
         except HTTPException:
             raise
         except Exception as e:
