@@ -204,7 +204,7 @@ class Service:
                 detail=f"Erro interno ao processar solicitação: {str(e)}",
             )
 
-    async def post_lead(self: Self, lead: LeadIn) -> LeadCreate:
+    async def post_leads(self: Self, lead: LeadIn) -> LeadCreate:
         try:
             lead_data = lead.model_dump()
             if lead_data.get("cnpj_cpf"):
