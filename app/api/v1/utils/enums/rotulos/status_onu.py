@@ -8,3 +8,4 @@ class StatusONURot(str, Enum):
     REGULAR = "Regular"
     RUIM = "Ruim"
     PESSIMO = "Péssimo"
+    SEM_ONU = "Sem ONU"

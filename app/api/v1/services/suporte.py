@@ -9,6 +9,7 @@ from ..utils import (
     rotular_status_conexao,
     rotular_status_onu,
     SortOrder,
+    StatusONURot,
 )
 from ..schemas import (
     StatusONUOut,
@@ -223,8 +224,12 @@ class Service:
                     res = await self.ixc_cliente.get_status_onu(id_login=id_login)
                     registros = res.get("registros", [])
                     if registros and "sinal_rx" in registros[0]:
-                        codigo = float(registros[0]["sinal_rx"])
-                        rotulo = rotular_status_onu(sinal_rx=codigo)
+                        codigo = registros[0].get("sinal_rx")
+                        if not codigo:
+                            return StatusONUOut(
+                                data=StatusONU(status_onu=StatusONURot.SEM_ONU)
+                            )
+                        rotulo = rotular_status_onu(sinal_rx=float(codigo))
                         return StatusONUOut(data=StatusONU(status_onu=rotulo))
                 except HTTPException:
                     if not mac_onu:
@@ -233,8 +238,12 @@ class Service:
                 res = await self.ixc_cliente.get_status_onu(mac_onu=mac_onu)
                 registros = res.get("registros", [])
                 if registros and "sinal_rx" in registros[0]:
-                    codigo = float(registros[0]["sinal_rx"])
-                    rotulo = rotular_status_onu(sinal_rx=codigo)
+                    codigo = registros[0].get("sinal_rx")
+                    if not codigo:
+                        return StatusONUOut(
+                            data=StatusONU(status_onu=StatusONURot.SEM_ONU)
+                        )
+                    rotulo = rotular_status_onu(sinal_rx=float(codigo))
                     return StatusONUOut(data=StatusONU(status_onu=rotulo))
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="ONU não encontrada."
