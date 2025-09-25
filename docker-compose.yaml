@@ -1,6 +1,8 @@
 services:
     app:
         container_name: api_larissa
+        env_file:
+                - .env
         build: .
         ports:
-            - 8888:8000
+            - 8000:8000
