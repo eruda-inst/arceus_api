@@ -1,8 +1,9 @@
 from typing import Self, Optional
 from datetime import datetime
 from pydantic import ValidationError, PositiveInt
-from ..clients import SuporteOpaCliente, SuporteIXCCliente
+from ..clients import SuporteIXCCliente
 from fastapi import HTTPException, status
+from .service import Service
 from ..utils import (
     rotular_status_contrato,
     rotular_status_atendimento,
@@ -29,10 +30,10 @@ from ..schemas import (
 )
 
 
-class SuporteService:
+class SuporteService(Service):
     def __init__(self: Self) -> None:
-        self.opa_cliente = SuporteOpaCliente()
-        self.ixc_cliente = SuporteIXCCliente()
+        super().__init__()
+        self.suporte_ixc_cliente = SuporteIXCCliente()
 
     async def get_contratos_ativos(
         self: Self,
@@ -43,28 +44,10 @@ class SuporteService:
         sortorder: Optional[SortOrder] = SortOrder.ASC,
     ) -> SuporteContratoListOut:
         try:
-            id_cliente_opa_res = await self.opa_cliente.get_id_cliente_opa(
-                protocolo=protocolo
-            )
-            if not id_cliente_opa_res.get("data", []):
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail="Cliente não encontrado no OPA.",
-                )
-            id_cliente_opa = id_cliente_opa_res["data"][0]["id_cliente"]
+            id_cliente = await self.get_id_cliente_ixc(protocolo=protocolo)
 
-            id_cliente_ixc_res = await self.opa_cliente.get_id_cliente_ixc(
-                id_cliente_opa=id_cliente_opa
-            )
-            if not id_cliente_ixc_res.get("data", []):
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail="Cliente não encontrado no IXC.",
-                )
-            id_cliente_ixc = id_cliente_ixc_res["data"][0]["id"]
-
-            contratos_ativos_res = await self.ixc_cliente.get_contratos_ativos(
-                id_cliente=id_cliente_ixc,
+            contratos_ativos_res = await self.suporte_ixc_cliente.get_contratos_ativos(
+                id_cliente=id_cliente,
                 page=page,
                 per_page=per_page,
                 sortname=sortname,
@@ -79,10 +62,12 @@ class SuporteService:
                 )
 
             for contrato in contratos_ativos:
-                a_receber_res = await self.ixc_cliente.get_valor_e_data_vencimento(
-                    id_contrato=contrato.get("id")
+                a_receber_res = (
+                    await self.suporte_ixc_cliente.get_valor_e_data_vencimento(
+                        id_contrato=contrato.get("id")
+                    )
                 )
-                id_login_res = await self.ixc_cliente.get_id_login(
+                id_login_res = await self.suporte_ixc_cliente.get_id_login(
                     id_contrato=contrato.get("id")
                 )
                 if not id_login_res.get("registros", []):
@@ -91,7 +76,9 @@ class SuporteService:
                         detail="Sem ID login.",
                     )
                 id_login = id_login_res.get("registros")[0]["id"]
-                onu_mac_res = await self.ixc_cliente.get_onu_mac(id_login=id_login)
+                onu_mac_res = await self.suporte_ixc_cliente.get_onu_mac(
+                    id_login=id_login
+                )
 
                 onu_mac = onu_mac_res["registros"][0]["onu_mac"]
                 a_receber = a_receber_res.get("registros", [])
@@ -184,7 +171,7 @@ class SuporteService:
 
     async def get_status_conexao(self: Self, id_login: PositiveInt) -> StatusConexaoOut:
         try:
-            res = await self.ixc_cliente.get_status_conexao(
+            res = await self.suporte_ixc_cliente.get_status_conexao(
                 id_login=id_login,
             )
             registros = res.get("registros", [])
@@ -223,7 +210,9 @@ class SuporteService:
         try:
             if id_login is not None:
                 try:
-                    res = await self.ixc_cliente.get_status_onu(id_login=id_login)
+                    res = await self.suporte_ixc_cliente.get_status_onu(
+                        id_login=id_login
+                    )
                     registros = res.get("registros", [])
                     if registros and "sinal_rx" in registros[0]:
                         codigo = registros[0].get("sinal_rx")
@@ -237,7 +226,7 @@ class SuporteService:
                     if not mac_onu:
                         raise
             if mac_onu is not None:
-                res = await self.ixc_cliente.get_status_onu(mac_onu=mac_onu)
+                res = await self.suporte_ixc_cliente.get_status_onu(mac_onu=mac_onu)
                 registros = res.get("registros", [])
                 if registros and "sinal_rx" in registros[0]:
                     codigo = registros[0].get("sinal_rx")
@@ -267,7 +256,9 @@ class SuporteService:
         self: Self, id_login: PositiveInt
     ) -> MensagemOut:
         try:
-            res = await self.ixc_cliente.post_desconectar_cliente(id_login=id_login)
+            res = await self.suporte_ixc_cliente.post_desconectar_cliente(
+                id_login=id_login
+            )
             mensagem = res["msg"][0]["message"]
             return MensagemOut(mensagem=mensagem)
         except HTTPException:
@@ -287,7 +278,7 @@ class SuporteService:
         sortorder: Optional[SortOrder] = SortOrder.ASC,
     ) -> AtendimentoOut:
         try:
-            res = await self.ixc_cliente.get_atendimentos_abertos(
+            res = await self.suporte_ixc_cliente.get_atendimentos_abertos(
                 id_login=id_login,
                 page=page,
                 per_page=per_page,
@@ -350,7 +341,9 @@ class SuporteService:
         self: Self, atendimento: AtendimentoIn
     ) -> AtendimentoCreate:
         try:
-            res = await self.ixc_cliente.post_atendimentos(atendimento=atendimento)
+            res = await self.suporte_ixc_cliente.post_atendimentos(
+                atendimento=atendimento
+            )
             id_atendimento = res.get("id", None)
             return AtendimentoCreate(id=int(id_atendimento))
         except HTTPException:
@@ -368,7 +361,7 @@ class SuporteService:
 
     async def patch_logins(self: Self, id: PositiveInt, login: LoginIn) -> MensagemOut:
         try:
-            res = await self.ixc_cliente.get_login(id=id)
+            res = await self.suporte_ixc_cliente.get_login(id=id)
             if not res.get("registros"):
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
@@ -382,7 +375,9 @@ class SuporteService:
 
             del login_atualizado["id"]
 
-            res = await self.ixc_cliente.put_login(id=id, login=login_atualizado)
+            res = await self.suporte_ixc_cliente.put_login(
+                id=id, login=login_atualizado
+            )
 
             mensagem = res["message"]
 

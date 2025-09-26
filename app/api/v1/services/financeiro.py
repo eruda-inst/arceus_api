@@ -2,14 +2,15 @@ from ..utils import SortOrder
 from typing import Self, Optional
 from pydantic import ValidationError, PositiveInt
 from fastapi import HTTPException, status
-from ..clients import FinanceiroIXCCliente, FinanceiroOpaCliente
+from ..clients import FinanceiroIXCCliente
 from ..schemas import FaturaAberta, FaturaAbertaListOut, Meta, Links
+from .service import Service
 
 
-class FinanceiroService:
+class FinanceiroService(Service):
     def __init__(self: Self) -> None:
-        self.ixc_cliente = FinanceiroIXCCliente()
-        self.opa_cliente = FinanceiroOpaCliente()
+        super().__init__()
+        self.financeiro_ixc_cliente = FinanceiroIXCCliente()
 
     async def get_faturas_abertas(
         self: Self,
@@ -20,28 +21,10 @@ class FinanceiroService:
         sortorder: Optional[SortOrder] = SortOrder.ASC,
     ) -> FaturaAbertaListOut:
         try:
-            id_cliente_opa_res = await self.opa_cliente.get_id_cliente_opa(
-                protocolo=protocolo
-            )
-            if not id_cliente_opa_res.get("data", []):
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail="Cliente não encontrado no OPA.",
-                )
-            id_cliente_opa = id_cliente_opa_res["data"][0]["id_cliente"]
+            id_cliente = await self.get_id_cliente_ixc(protocolo=protocolo)
 
-            id_cliente_ixc_res = await self.opa_cliente.get_id_cliente_ixc(
-                id_cliente_opa=id_cliente_opa
-            )
-            if not id_cliente_ixc_res.get("data", []):
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail="Cliente não encontrado no IXC.",
-                )
-            id_cliente_ixc = id_cliente_ixc_res["data"][0]["id"]
-
-            faturas_abertas = await self.ixc_cliente.get_faturas_abertas(
-                id_cliente=id_cliente_ixc,
+            faturas_abertas = await self.financeiro_ixc_cliente.get_faturas_abertas(
+                id_cliente=id_cliente,
                 page=page,
                 per_page=per_page,
                 sortname=sortname,
@@ -59,7 +42,7 @@ class FinanceiroService:
 
             for fatura_aberta in faturas_abertas:
                 id_contrato = fatura_aberta["id_contrato"]
-                contrato_res = await self.ixc_cliente.get_contrato(
+                contrato_res = await self.financeiro_ixc_cliente.get_contrato(
                     id_contrato=id_contrato
                 )
                 contrato = (

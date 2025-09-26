@@ -2,8 +2,9 @@ from datetime import datetime
 from typing import Self, Optional
 from ..schemas import Meta, Links
 from pydantic import ValidationError, PositiveInt
-from ..clients import ComercialIXCCliente, ComercialOpaCliente
+from ..clients import ComercialIXCCliente
 from fastapi import HTTPException, status
+from .service import Service
 from ..utils import (
     rotular_status_acesso,
     SortOrder,
@@ -21,16 +22,18 @@ from ..schemas import (
 )
 
 
-class ComercialService:
+class ComercialService(Service):
     def __init__(self: Self) -> None:
-        self.ixc_cliente = ComercialIXCCliente()
-        self.opa_cliente = ComercialOpaCliente()
+        super().__init__()
+        self.comercial_ixc_cliente = ComercialIXCCliente()
 
     async def get_status_acesso(
         self: Self, id_contrato: PositiveInt
     ) -> StatusAcessoOut:
         try:
-            res = await self.ixc_cliente.get_status_acesso(id_contrato=id_contrato)
+            res = await self.comercial_ixc_cliente.get_status_acesso(
+                id_contrato=id_contrato
+            )
             status_acesso = res.get("registros", [])
             if not status_acesso:
                 raise HTTPException(
@@ -64,28 +67,10 @@ class ComercialService:
         sortorder: Optional[SortOrder] = SortOrder.ASC,
     ) -> ComercialContratoListOut:
         try:
-            id_cliente_opa_res = await self.opa_cliente.get_id_cliente_opa(
-                protocolo=protocolo
-            )
-            if not id_cliente_opa_res.get("data", []):
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail="Cliente não encontrado no OPA.",
-                )
-            id_cliente_opa = id_cliente_opa_res["data"][0]["id_cliente"]
+            id_cliente = await self.get_id_cliente_ixc(protocolo=protocolo)
 
-            id_cliente_ixc_res = await self.opa_cliente.get_id_cliente_ixc(
-                id_cliente_opa=id_cliente_opa
-            )
-            if not id_cliente_ixc_res.get("data", []):
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail="Cliente não encontrado no IXC.",
-                )
-            id_cliente_ixc = id_cliente_ixc_res["data"][0]["id"]
-
-            contratos_res = await self.ixc_cliente.get_contratos(
-                id_cliente=id_cliente_ixc,
+            contratos_res = await self.comercial_ixc_cliente.get_contratos(
+                id_cliente=id_cliente,
                 page=page,
                 per_page=per_page,
                 sortname=sortname,
@@ -101,8 +86,10 @@ class ComercialService:
             hoje = datetime.now().date()
 
             for contrato in contratos:
-                a_receber_res = await self.ixc_cliente.get_valor_e_data_vencimento(
-                    id_contrato=contrato["id"]
+                a_receber_res = (
+                    await self.comercial_ixc_cliente.get_valor_e_data_vencimento(
+                        id_contrato=contrato["id"]
+                    )
                 )
                 titulos_nao_quitados = [
                     ar
@@ -171,7 +158,7 @@ class ComercialService:
                 per_page=per_page,
             )
 
-            base_url = f"/contratos?protocolo={protocolo}"
+            base_url = f"/api/v1/comercial/contratos?protocolo={protocolo}"
             links = Links(
                 self=f"{base_url}&page={page}&per_page={per_page}",
                 next=(
@@ -220,7 +207,7 @@ class ComercialService:
 
             formatted_lead = LeadIn(**lead_data)
 
-            res = await self.ixc_cliente.post_leads(lead=formatted_lead)
+            res = await self.comercial_ixc_cliente.post_leads(lead=formatted_lead)
 
             id_lead = res.get("id", None)
             if not id_lead:
