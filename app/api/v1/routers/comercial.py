@@ -1,5 +1,6 @@
 from typing import Optional
 from ..utils import SortOrder
+from pydantic import PositiveInt
 from fastapi import APIRouter, Query, status, Body
 from ..services import ComercialService
 from ..schemas import (
@@ -19,7 +20,7 @@ service = ComercialService()
     summary="Obtém status de acesso, através de ID de contrato.",
 )
 async def get_status_acesso(
-    id_contrato: int = Query(ge=1, description="ID do contrato.")
+    id_contrato: PositiveInt = Query(description="ID do contrato."),
 ) -> StatusAcessoOut:
     return await service.get_status_acesso(id_contrato=id_contrato)
 
@@ -35,8 +36,8 @@ async def get_contratos(
         max_length=12,
         description="Protocolo de atendimento do cliente no OpaSuite.",
     ),
-    page: Optional[int] = 1,
-    per_page: Optional[int] = 10,
+    page: Optional[PositiveInt] = 1,
+    per_page: Optional[PositiveInt] = 10,
     sortname: Optional[str] = "cliente_contrato.id",
     sortorder: Optional[SortOrder] = SortOrder.ASC,
 ) -> ComercialContratoListOut:

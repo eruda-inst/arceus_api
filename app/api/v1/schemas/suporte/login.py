@@ -1,5 +1,12 @@
 from typing import Optional
-from pydantic import BaseModel, Field
+from pydantic import (
+    BaseModel,
+    Field,
+    PositiveInt,
+    NonNegativeFloat,
+    NonPositiveInt,
+    PositiveFloat,
+)
 
 
 class LoginIn(BaseModel):
@@ -9,22 +16,24 @@ class LoginIn(BaseModel):
     tipo_conexao_mapa: Optional[str] = Field(
         default=None, description="Tipo de conexão do mapa."
     )
-    id_integracao: Optional[int] = Field(
-        default=None, ge=1, description="ID de integração."
+    id_integracao: Optional[PositiveInt] = Field(
+        default=None, description="ID de integração."
     )
-    lte_id: Optional[int] = Field(default=None, ge=1, description="ID LTE.")
+    lte_id: Optional[PositiveInt] = Field(default=None, description="ID LTE.")
     pacote_lte: Optional[str] = Field(default=None, description="Pacote LTE.")
-    id_cliente: Optional[int] = Field(default=None, ge=1, description="ID do cliente.")
-    id_contrato: Optional[int] = Field(
-        default=None, ge=1, description="ID do contrato."
+    id_cliente: Optional[PositiveInt] = Field(
+        default=None, description="ID do cliente."
     )
-    id_filial: Optional[int] = Field(default=None, ge=1, description="ID da filial.")
+    id_contrato: Optional[PositiveInt] = Field(
+        default=None, description="ID do contrato."
+    )
+    id_filial: Optional[PositiveInt] = Field(default=None, description="ID da filial.")
     contrato_plano_venda_: Optional[str] = Field(
         default=None, description="Contrato plano venda."
     )
-    id_grupo: Optional[int] = Field(default=None, ge=1, description="ID do grupo.")
+    id_grupo: Optional[PositiveInt] = Field(default=None, description="ID do grupo.")
     login: Optional[str] = Field(default=None, description="Login do usuário.")
-    agent_circuit_id: Optional[int] = Field(
+    agent_circuit_id: Optional[PositiveInt] = Field(
         default=None, description="Agent Circuit ID."
     )
     senha_md5: Optional[str] = Field(
@@ -36,8 +45,8 @@ class LoginIn(BaseModel):
     )
     ativo: Optional[str] = Field(default="S", description="Indica se está ativo.")
     online: Optional[str] = Field(default="SS", description="Status online.")
-    login_simultaneo: Optional[int] = Field(
-        default=1, ge=1, description="Número de logins simultâneos."
+    login_simultaneo: Optional[PositiveInt] = Field(
+        default=1, description="Número de logins simultâneos."
     )
     ultima_atualizacao: Optional[str] = Field(
         default="CURRENT_TIMESTAMP", description="Data da última atualização."
@@ -100,8 +109,8 @@ class LoginIn(BaseModel):
     autenticacao_wpa: Optional[str] = Field(
         default=None, description="Autenticação WPA."
     )
-    id_porta_transmissor: Optional[int] = Field(
-        default=None, ge=1, description="ID da porta do transmissor."
+    id_porta_transmissor: Optional[PositiveInt] = Field(
+        default=None, description="ID da porta do transmissor."
     )
     auto_preencher_mac: Optional[str] = Field(
         default="H", description="Auto preencher MAC."
@@ -112,30 +121,30 @@ class LoginIn(BaseModel):
     relacionar_concentrador_ao_login: Optional[str] = Field(
         default="H", description="Relacionar concentrador ao login."
     )
-    pool_radius: Optional[int] = Field(default=None, description="Pool RADIUS.")
-    id_radgrupos_pools: Optional[int] = Field(
-        default=None, ge=1, description="ID dos grupos de pools RADIUS."
+    pool_radius: Optional[PositiveInt] = Field(default=None, description="Pool RADIUS.")
+    id_radgrupos_pools: Optional[PositiveInt] = Field(
+        default=None, description="ID dos grupos de pools RADIUS."
     )
-    id_rad_dns: Optional[int] = Field(default=None, ge=1, description="ID RAD DNS.")
-    id_concentrador: Optional[int] = Field(
-        default=None, ge=1, description="ID do concentrador."
+    id_rad_dns: Optional[PositiveInt] = Field(default=None, description="ID RAD DNS.")
+    id_concentrador: Optional[PositiveInt] = Field(
+        default=None, description="ID do concentrador."
     )
     ip_concentrador: Optional[str] = Field(
         default=None, description="IP do concentrador."
     )
     interface: Optional[str] = Field(default=None, description="Interface de rede.")
-    vlan: Optional[int] = Field(default=None, ge=1, description="VLAN.")
+    vlan: Optional[PositiveInt] = Field(default=None, description="VLAN.")
     vlan_ip_rede: Optional[str] = Field(default=None, description="IP da rede VLAN.")
     gw_vlan: Optional[str] = Field(default=None, description="Gateway da VLAN.")
     service_tag_vlan: Optional[str] = Field(
         default="S", description="Service tag VLAN."
     )
-    mtu: Optional[int] = Field(default=1500, ge=1, description="MTU.")
+    mtu: Optional[PositiveInt] = Field(default=1500, description="MTU.")
     concentrador: Optional[str] = Field(default=None, description="Concentrador.")
     conexao: Optional[str] = Field(default=None, description="Conexão.")
     tipo_conexao: Optional[str] = Field(default=None, description="Tipo de conexão.")
-    porta_http_nas: Optional[int] = Field(
-        default=None, ge=1, description="Porta HTTP NAS."
+    porta_http_nas: Optional[PositiveInt] = Field(
+        default=None, description="Porta HTTP NAS."
     )
     acct_session_id: Optional[str] = Field(
         default=None, description="ID da sessão accounting."
@@ -153,12 +162,14 @@ class LoginIn(BaseModel):
         default="S", description="Autenticação MAC."
     )
     tipo_acesso: Optional[str] = Field(default="http", description="Tipo de acesso.")
-    porta_http: Optional[int] = Field(default=None, ge=1, description="Porta HTTP.")
-    porta_router2: Optional[int] = Field(
-        default=None, ge=1, description="Porta do router 2."
+    porta_http: Optional[PositiveInt] = Field(default=None, description="Porta HTTP.")
+    porta_router2: Optional[PositiveInt] = Field(
+        default=None, description="Porta do router 2."
     )
-    ip_aux: Optional[int] = Field(default=None, description="IP auxiliar.")
-    porta_aux: Optional[int] = Field(default=None, ge=1, description="Porta auxiliar.")
+    ip_aux: Optional[PositiveInt] = Field(default=None, description="IP auxiliar.")
+    porta_aux: Optional[PositiveInt] = Field(
+        default=None, description="Porta auxiliar."
+    )
     ultima_conexao_inicial: Optional[str] = Field(
         default=None, description="Última conexão inicial."
     )
@@ -168,27 +179,29 @@ class LoginIn(BaseModel):
     motivo_desconexao: Optional[str] = Field(
         default=None, description="Motivo da desconexão."
     )
-    count_desconexao: Optional[int] = Field(
-        default=None, ge=1, description="Contador de desconexões."
+    count_desconexao: Optional[PositiveInt] = Field(
+        default=None, description="Contador de desconexões."
     )
-    tempo_conexao: Optional[int] = Field(
-        default=None, ge=1, description="Tempo de conexão."
+    tempo_conexao: Optional[PositiveInt] = Field(
+        default=None, description="Tempo de conexão."
     )
-    tempo_conectado: Optional[int] = Field(
-        default=None, ge=1, description="Tempo conectado."
+    tempo_conectado: Optional[PositiveInt] = Field(
+        default=None, description="Tempo conectado."
     )
-    download_atual: Optional[int] = Field(
-        default=None, ge=1, description="Download atual."
+    download_atual: Optional[NonNegativeFloat] = Field(
+        default=None, description="Download atual."
     )
-    upload_atual: Optional[int] = Field(default=None, ge=1, description="Upload atual.")
-    franquia_maximo: Optional[int] = Field(
-        default=None, ge=1, description="Franquia máxima."
+    upload_atual: Optional[NonNegativeFloat] = Field(
+        default=None, description="Upload atual."
     )
-    franquia_consumo: Optional[int] = Field(
-        default=None, ge=1, description="Consumo da franquia."
+    franquia_maximo: Optional[PositiveFloat] = Field(
+        default=None, description="Franquia máxima."
     )
-    franquia_consumo_up: Optional[int] = Field(
-        default=None, ge=1, description="Consumo de upload da franquia."
+    franquia_consumo: Optional[PositiveFloat] = Field(
+        default=None, description="Consumo da franquia."
+    )
+    franquia_consumo_up: Optional[PositiveFloat] = Field(
+        default=None, description="Consumo de upload da franquia."
     )
     franquia_atingida: Optional[str] = Field(
         default="N", description="Franquia atingida."
@@ -196,11 +209,11 @@ class LoginIn(BaseModel):
     onu_compartilhada: Optional[str] = Field(
         default=None, description="ONU compartilhada."
     )
-    id_df_projeto: Optional[int] = Field(
-        default=None, ge=1, description="ID do projeto DF."
+    id_df_projeto: Optional[PositiveInt] = Field(
+        default=None, description="ID do projeto DF."
     )
-    id_transmissor: Optional[int] = Field(
-        default=None, ge=1, description="ID do transmissor."
+    id_transmissor: Optional[PositiveInt] = Field(
+        default=None, description="ID do transmissor."
     )
     modelo_tranmissor: Optional[str] = Field(
         default=None, description="Modelo do transmissor."
@@ -211,52 +224,52 @@ class LoginIn(BaseModel):
     interface_transmissao_fibra: Optional[str] = Field(
         default=None, description="Interface de transmissão fibra."
     )
-    id_caixa_ftth: Optional[int] = Field(
-        default=None, ge=1, description="ID da caixa FTTH."
+    id_caixa_ftth: Optional[PositiveInt] = Field(
+        default=None, description="ID da caixa FTTH."
     )
-    ftth_porta: Optional[int] = Field(default=None, ge=1, description="Porta FTTH.")
+    ftth_porta: Optional[PositiveInt] = Field(default=None, description="Porta FTTH.")
     tronco: Optional[str] = Field(default=None, description="Tronco.")
     splitter: Optional[str] = Field(default=None, description="Splitter.")
     onu_mac: Optional[str] = Field(default=None, description="MAC da ONU.")
-    sinal_ultimo_atendimento: Optional[int] = Field(
-        default=None, ge=1, description="Sinal do último atendimento."
+    sinal_ultimo_atendimento: Optional[PositiveInt] = Field(
+        default=None, description="Sinal do último atendimento."
     )
-    id_hardware: Optional[int] = Field(
-        default=None, ge=1, description="ID do hardware."
+    id_hardware: Optional[PositiveInt] = Field(
+        default=None, description="ID do hardware."
     )
     tipo_equipamento: Optional[str] = Field(
         default=None, description="Tipo de equipamento."
     )
-    metragem_interna: Optional[int] = Field(
-        default=None, ge=1, description="Metragem interna."
+    metragem_interna: Optional[PositiveInt] = Field(
+        default=None, description="Metragem interna."
     )
-    metragem_externa: Optional[int] = Field(
-        default=None, ge=1, description="Metragem externa."
+    metragem_externa: Optional[PositiveInt] = Field(
+        default=None, description="Metragem externa."
     )
-    id_reserva_rede_neutra: Optional[int] = Field(
-        default=None, ge=1, description="ID da reserva da rede neutra."
+    id_reserva_rede_neutra: Optional[PositiveInt] = Field(
+        default=None, description="ID da reserva da rede neutra."
     )
     endereco_padrao_cliente: Optional[str] = Field(
         default="S", description="Endereço padrão do cliente."
     )
     ponta: Optional[str] = Field(default=None, description="Ponta.")
-    id_condominio: Optional[int] = Field(
-        default=None, ge=1, description="ID do condomínio."
+    id_condominio: Optional[PositiveInt] = Field(
+        default=None, description="ID do condomínio."
     )
-    id_predio: Optional[int] = Field(default=None, ge=1, description="ID do prédio.")
+    id_predio: Optional[PositiveInt] = Field(default=None, description="ID do prédio.")
     condominio_novo: Optional[str] = Field(default=None, description="Condomínio novo.")
     bloco: Optional[str] = Field(default=None, description="Bloco.")
     bloco_novo: Optional[str] = Field(default=None, description="Bloco novo.")
-    apartamento: Optional[int] = Field(default=None, ge=1, description="Apartamento.")
-    apartamento_novo: Optional[int] = Field(
-        default=None, ge=1, description="Apartamento novo."
+    apartamento: Optional[PositiveInt] = Field(default=None, description="Apartamento.")
+    apartamento_novo: Optional[PositiveInt] = Field(
+        default=None, description="Apartamento novo."
     )
     cep: Optional[str] = Field(default=None, description="CEP.")
     cep_novo: Optional[str] = Field(default=None, description="CEP novo.")
     endereco: Optional[str] = Field(default=None, description="Endereço.")
     endereco_novo: Optional[str] = Field(default=None, description="Endereço novo.")
-    numero: Optional[int] = Field(default=None, ge=1, description="Número.")
-    numero_novo: Optional[int] = Field(default=None, ge=1, description="Número novo.")
+    numero: Optional[PositiveInt] = Field(default=None, description="Número.")
+    numero_novo: Optional[PositiveInt] = Field(default=None, description="Número novo.")
     bairro: Optional[str] = Field(default=None, description="Bairro.")
     bairro_novo: Optional[str] = Field(default=None, description="Bairro novo.")
     cidade: Optional[str] = Field(default=None, description="Cidade.")

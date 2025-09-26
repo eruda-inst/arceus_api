@@ -1,14 +1,14 @@
 from typing import Optional
-from pydantic import Field, BaseModel
+from pydantic import Field, BaseModel, PositiveInt
 
 
 class Meta(BaseModel):
-    total: int = Field(ge=1, description="Número total de itens em todas as páginas.")
-    page: Optional[int] = Field(
-        default=1, ge=1, description="Número da página atual na sequência de paginação."
+    total: PositiveInt = Field(description="Número total de itens em todas as páginas.")
+    page: Optional[PositiveInt] = Field(
+        default=1, description="Número da página atual na sequência de paginação."
     )
-    per_page: Optional[int] = Field(
-        default=10, ge=1, description="Número de itens exibidos por página."
+    per_page: Optional[PositiveInt] = Field(
+        default=10, description="Número de itens exibidos por página."
     )
 
 

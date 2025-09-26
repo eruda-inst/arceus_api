@@ -1,5 +1,6 @@
 from typing import Optional
 from ..utils import SortOrder
+from pydantic import PositiveInt
 from fastapi import APIRouter, Query
 from ..services import FinanceiroService
 from ..schemas import FaturaOut
@@ -20,8 +21,10 @@ async def get_faturas(
         max_length=12,
         description="Protocolo de atendimento do cliente no OpaSuite.",
     ),
-    page: Optional[int] = Query(ge=1, default=1, description="Número da página."),
-    per_page: Optional[int] = Query(ge=1, default=10, description="Itens por página."),
+    page: Optional[PositiveInt] = Query(default=1, description="Número da página."),
+    per_page: Optional[PositiveInt] = Query(
+        default=10, description="Itens por página."
+    ),
     sortname: Optional[str] = Query(
         default="fn_areceber.id", description="Campo para ordenação."
     ),

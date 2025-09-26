@@ -1,11 +1,11 @@
 from typing import List
 from ..misc import Links, Meta
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, PositiveInt
 from app.api.v1.utils import StatusAcessoRot
 
 
 class Contrato(BaseModel):
-    id: int = Field(description="ID único do contrato.")
+    id: PositiveInt = Field(description="ID único do contrato.")
     contrato: str = Field(max_length=100, description="Número do contrato.")
     valor: float = Field(description="Valor do contrato.")
     status_acesso: StatusAcessoRot = Field(description="Status do acesso do contrato.")

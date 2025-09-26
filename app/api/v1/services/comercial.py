@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Self, Optional
 from ..schemas import Meta, Links
-from pydantic import ValidationError
+from pydantic import ValidationError, PositiveInt
 from ..clients import ComercialIXCCliente, ComercialOpaCliente
 from fastapi import HTTPException, status
 from ..utils import (
@@ -26,7 +26,9 @@ class Service:
         self.ixc_cliente = ComercialIXCCliente()
         self.opa_cliente = ComercialOpaCliente()
 
-    async def get_status_acesso(self: Self, id_contrato: int) -> StatusAcessoOut:
+    async def get_status_acesso(
+        self: Self, id_contrato: PositiveInt
+    ) -> StatusAcessoOut:
         try:
             res = await self.ixc_cliente.get_status_acesso(id_contrato=id_contrato)
             status_acesso = res.get("registros", [])
@@ -55,9 +57,9 @@ class Service:
 
     async def get_contratos(
         self: Self,
-        protocolo: int,
-        page: Optional[int] = 1,
-        per_page: Optional[int] = 10,
+        protocolo: str,
+        page: Optional[PositiveInt] = 1,
+        per_page: Optional[PositiveInt] = 10,
         sortname: Optional[str] = "cliente_contrato.id",
         sortorder: Optional[SortOrder] = SortOrder.ASC,
     ) -> ComercialContratoListOut:
@@ -116,7 +118,7 @@ class Service:
                         "status_acesso": rotular_status_acesso(
                             status_acesso_codigo=contrato["status_internet"]
                         ),
-                        "data_vencimento": "Não fornecida.",
+                        "data_vencimento": "N/A",
                     }
                     contratos_tratados.append(contrato_tratado)
                     continue
@@ -146,7 +148,7 @@ class Service:
                     titulo_final = max(
                         titulos_nao_quitados,
                         key=lambda x: datetime.strptime(
-                            x.ge("data_vencimento"), "%Y-%m-%d"
+                            x.get("data_vencimento"), "%Y-%m-%d"
                         ).date(),
                     )
 

@@ -1,6 +1,6 @@
 from typing import Self, Optional
 from datetime import datetime
-from pydantic import ValidationError
+from pydantic import ValidationError, PositiveInt
 from ..clients import SuporteOpaCliente, SuporteIXCCliente
 from fastapi import HTTPException, status
 from ..utils import (
@@ -37,8 +37,8 @@ class Service:
     async def get_contratos_ativos(
         self: Self,
         protocolo: str,
-        page: Optional[int] = 1,
-        per_page: Optional[int] = 10,
+        page: Optional[PositiveInt] = 1,
+        per_page: Optional[PositiveInt] = 10,
         sortname: Optional[str] = "cliente_contrato.id",
         sortorder: Optional[SortOrder] = SortOrder.ASC,
     ) -> SuporteContratoListOut:
@@ -182,7 +182,7 @@ class Service:
                 detail=f"Erro interno ao processar solicitação: {str(e)}",
             )
 
-    async def get_status_conexao(self: Self, id_login: int) -> StatusConexaoOut:
+    async def get_status_conexao(self: Self, id_login: PositiveInt) -> StatusConexaoOut:
         try:
             res = await self.ixc_cliente.get_status_conexao(
                 id_login=id_login,
@@ -211,7 +211,9 @@ class Service:
             )
 
     async def get_status_onu(
-        self: Self, id_login: Optional[int] = None, mac_onu: Optional[str] = None
+        self: Self,
+        id_login: Optional[PositiveInt] = None,
+        mac_onu: Optional[str] = None,
     ) -> StatusONUOut:
         if not id_login and not mac_onu:
             raise HTTPException(
@@ -261,7 +263,9 @@ class Service:
                 detail=f"Erro interno ao processar solicitação: {e}",
             )
 
-    async def post_desconectar_cliente(self: Self, id_login: int) -> MensagemOut:
+    async def post_desconectar_cliente(
+        self: Self, id_login: PositiveInt
+    ) -> MensagemOut:
         try:
             res = await self.ixc_cliente.post_desconectar_cliente(id_login=id_login)
             mensagem = res["msg"][0]["message"]
@@ -276,9 +280,9 @@ class Service:
 
     async def get_atendimentos_abertos(
         self: Self,
-        id_login: int,
-        page: Optional[int] = 1,
-        per_page: Optional[int] = 10,
+        id_login: PositiveInt,
+        page: Optional[PositiveInt] = 1,
+        per_page: Optional[PositiveInt] = 10,
         sortname: Optional[str] = "su_ticket.id",
         sortorder: Optional[SortOrder] = SortOrder.ASC,
     ) -> AtendimentoOut:
@@ -362,7 +366,7 @@ class Service:
                 detail=f"Erro interno ao processar solicitação: {str(e)}",
             )
 
-    async def patch_logins(self: Self, id: int, login: LoginIn) -> MensagemOut:
+    async def patch_logins(self: Self, id: PositiveInt, login: LoginIn) -> MensagemOut:
         try:
             res = await self.ixc_cliente.get_login(id=id)
             if not res.get("registros"):
