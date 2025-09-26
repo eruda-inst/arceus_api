@@ -3,7 +3,7 @@ from pydantic import BaseModel, Field, PositiveInt, NonNegativeInt
 from ..misc import Meta, Links
 
 
-class Fatura(BaseModel):
+class FaturaAberta(BaseModel):
     id: PositiveInt = Field(description="ID da fatura.")
     id_contrato: NonNegativeInt = Field(description="ID de contrato associado à fatura")
     data_vencimento: str = Field(
@@ -13,7 +13,7 @@ class Fatura(BaseModel):
     contrato: str = Field(description="Nome do contrato associado à fatura.")
 
 
-class FaturaOut(BaseModel):
-    data: List[Fatura]
+class FaturaAbertaListOut(BaseModel):
+    data: List[FaturaAberta]
     meta: Meta
     links: Links

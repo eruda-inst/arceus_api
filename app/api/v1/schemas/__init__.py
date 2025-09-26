@@ -21,4 +21,4 @@ from .suporte import (
     StatusONU,
     StatusConexaoOut,
 )
-from .financeiro import Fatura, FaturaOut
+from .financeiro import FaturaAbertaListOut, FaturaAberta

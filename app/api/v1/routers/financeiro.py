@@ -3,7 +3,7 @@ from ..utils import SortOrder
 from pydantic import PositiveInt
 from fastapi import APIRouter, Query
 from ..services import FinanceiroService
-from ..schemas import FaturaOut
+from ..schemas import FaturaAbertaListOut
 
 
 financeiro_router = APIRouter()
@@ -11,11 +11,11 @@ financeiro_service = FinanceiroService()
 
 
 @financeiro_router.get(
-    path="/faturas",
-    response_model=FaturaOut,
+    path="/faturas_abertas",
+    response_model=FaturaAbertaListOut,
     summary="Obtém faturas associadas a um cliente, através de ID de protocolo de atendimento.",
 )
-async def get_faturas(
+async def get_faturas_abertas(
     protocolo: str = Query(
         min_length=12,
         max_length=12,
@@ -31,8 +31,8 @@ async def get_faturas(
     sortorder: Optional[SortOrder] = Query(
         default=SortOrder.ASC, description="Ordem da ordenação."
     ),
-) -> FaturaOut:
-    return await financeiro_service.get_faturas(
+) -> FaturaAbertaListOut:
+    return await financeiro_service.get_faturas_abertas(
         protocolo=protocolo,
         page=page,
         per_page=per_page,

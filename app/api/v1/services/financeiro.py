@@ -3,7 +3,7 @@ from typing import Self, Optional
 from pydantic import ValidationError, PositiveInt
 from fastapi import HTTPException, status
 from ..clients import FinanceiroIXCCliente, FinanceiroOpaCliente
-from ..schemas import Fatura, FaturaOut, Meta, Links
+from ..schemas import FaturaAberta, FaturaAbertaListOut, Meta, Links
 
 
 class FinanceiroService:
@@ -11,14 +11,14 @@ class FinanceiroService:
         self.ixc_cliente = FinanceiroIXCCliente()
         self.opa_cliente = FinanceiroOpaCliente()
 
-    async def get_faturas(
+    async def get_faturas_abertas(
         self: Self,
         protocolo: str,
         page: Optional[PositiveInt] = 1,
         per_page: Optional[PositiveInt] = 10,
         sortname: Optional[str] = "fn_areceber.id",
         sortorder: Optional[SortOrder] = SortOrder.ASC,
-    ) -> FaturaOut:
+    ) -> FaturaAbertaListOut:
         try:
             id_cliente_opa_res = await self.opa_cliente.get_id_cliente_opa(
                 protocolo=protocolo
@@ -40,7 +40,7 @@ class FinanceiroService:
                 )
             id_cliente_ixc = id_cliente_ixc_res["data"][0]["id"]
 
-            faturas_res = await self.ixc_cliente.get_faturas(
+            faturas_abertas = await self.ixc_cliente.get_faturas_abertas(
                 id_cliente=id_cliente_ixc,
                 page=page,
                 per_page=per_page,
@@ -48,17 +48,17 @@ class FinanceiroService:
                 sortorder=sortorder,
             )
 
-            if not faturas_res.get("registros"):
+            if not faturas_abertas.get("registros"):
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND, detail="Cliente sem faturas."
                 )
 
-            faturas = faturas_res["registros"]
+            faturas_abertas = faturas_abertas["registros"]
 
-            faturas_formatadas = []
+            faturas_abertas_formatadas = []
 
-            for fatura in faturas:
-                id_contrato = fatura["id_contrato"]
+            for fatura_aberta in faturas_abertas:
+                id_contrato = fatura_aberta["id_contrato"]
                 contrato_res = await self.ixc_cliente.get_contrato(
                     id_contrato=id_contrato
                 )
@@ -67,17 +67,17 @@ class FinanceiroService:
                     if contrato_res.get("registros")
                     else "N/A"
                 )
-                faturas_formatadas.append(
+                faturas_abertas_formatadas.append(
                     {
-                        "id": fatura["id"],
-                        "id_contrato": fatura["id_contrato"],
-                        "data_vencimento": fatura["data_vencimento"],
-                        "preco": fatura["valor"],
+                        "id": fatura_aberta["id"],
+                        "id_contrato": fatura_aberta["id_contrato"],
+                        "data_vencimento": fatura_aberta["data_vencimento"],
+                        "preco": fatura_aberta["valor"],
                         "contrato": contrato,
                     }
                 )
 
-            total = len(faturas)
+            total = len(faturas_abertas)
 
             meta = Meta(
                 total=total,
@@ -100,8 +100,8 @@ class FinanceiroService:
                 ),
             )
 
-            return FaturaOut(
-                data=[Fatura(**f) for f in faturas_formatadas],
+            return FaturaAbertaListOut(
+                data=[FaturaAberta(**f) for f in faturas_abertas_formatadas],
                 meta=meta,
                 links=links,
             )

@@ -5,15 +5,24 @@ from typing import Dict, Any, List, Self, Optional
 
 
 class FinanceiroIXCCliente(IXCCliente):
-    async def get_faturas(
+    async def get_contrato(self: Self, id_contrato: int) -> List[Dict[str, Any]]:
+        grid_param = [{"TB": "cliente_contrato.id", "OP": "=", "P": str(id_contrato)}]
+        payload = {"grid_param": json.dumps(obj=grid_param)}
+        data = await self._make_request(endpoint="cliente_contrato", payload=payload)
+        return data
+
+    async def get_faturas_abertas(
         self: Self,
         id_cliente: int,
         page: Optional[int] = 1,
         per_page: Optional[int] = 10,
         sortname: Optional[str] = "fn_areceber.id",
         sortorder: Optional[SortOrder] = SortOrder.ASC,
-    ) -> List[Dict[str, Any]]:
-        grid_param = [{"TB": "fn_areceber.id_cliente", "OP": "=", "P": str(id_cliente)}]
+    ):
+        grid_param = [
+            {"TB": "fn_areceber.id_cliente", "OP": "=", "P": str(id_cliente)},
+            {"TB": "fn_areceber.status", "OP": "=", "P": "A"},
+        ]
         payload = {
             "grid_param": json.dumps(obj=grid_param),
             "page": page,
@@ -22,10 +31,4 @@ class FinanceiroIXCCliente(IXCCliente):
             "sortorder": sortorder,
         }
         data = await self._make_request(endpoint="fn_areceber", payload=payload)
-        return data
-
-    async def get_contrato(self: Self, id_contrato: int) -> List[Dict[str, Any]]:
-        grid_param = [{"TB": "cliente_contrato.id", "OP": "=", "P": str(id_contrato)}]
-        payload = {"grid_param": json.dumps(obj=grid_param)}
-        data = await self._make_request(endpoint="cliente_contrato", payload=payload)
         return data

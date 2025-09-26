@@ -1,1 +1,1 @@
-from .fatura import Fatura, FaturaOut
+from .fatura import FaturaAberta, FaturaAbertaListOut
