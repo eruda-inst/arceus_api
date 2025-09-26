@@ -13,6 +13,7 @@ from ..schemas import (
     MensagemOut,
 )
 
+
 router = APIRouter()
 service = SuporteService()
 

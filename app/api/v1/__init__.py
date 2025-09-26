@@ -1,1 +1,1 @@
-from .routers import suporte_router, comercial_router
+from .api import router as api_v1

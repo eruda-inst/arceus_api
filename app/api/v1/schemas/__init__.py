@@ -21,3 +21,4 @@ from .suporte import (
     StatusONU,
     StatusConexaoOut,
 )
+from .financeiro import Fatura, FaturaOut

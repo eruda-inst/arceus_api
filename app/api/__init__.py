@@ -1,1 +1,1 @@
-from .v1 import suporte_router, comercial_router
+from .v1 import api_v1

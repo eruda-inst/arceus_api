@@ -1,18 +1,15 @@
+from .api import api_v1
 from fastapi import FastAPI
-from .api import suporte_router, comercial_router
 from fastapi.middleware.cors import CORSMiddleware
 
 
 app = FastAPI(
     title="API do Bot",
     description="Atua como um aggregator, simplificando integrações entre a API aberta do OpaSuite e a API aberta do IXCSoft.",
-    version="0.49.8",
+    version="0.50.8",
 )
 
-app.include_router(router=suporte_router, prefix="/api/v1/suporte", tags=["Suporte"])
-app.include_router(
-    router=comercial_router, prefix="/api/v1/comercial", tags=["Comercial"]
-)
+app.include_router(router=api_v1, prefix="/api/v1")
 
 app.add_middleware(
     CORSMiddleware,

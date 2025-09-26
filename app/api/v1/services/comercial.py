@@ -18,7 +18,6 @@ from ..schemas import (
     StatusAcesso,
     LeadIn,
     LeadCreate,
-    LoginIn,
 )
 
 
@@ -61,7 +60,7 @@ class Service:
         per_page: Optional[int] = 10,
         sortname: Optional[str] = "cliente_contrato.id",
         sortorder: Optional[SortOrder] = SortOrder.ASC,
-    ):
+    ) -> ComercialContratoListOut:
         try:
             id_cliente_opa_res = await self.opa_cliente.get_id_cliente_opa(
                 protocolo=protocolo
