@@ -1,10 +1,10 @@
 import json
 from .. import SortOrder
-from ..ixc import Cliente as IXCCliente
+from ..ixc import IXCCliente
 from typing import Dict, Any, List, Self, Optional
 
 
-class Cliente(IXCCliente):
+class FinanceiroIXCCliente(IXCCliente):
     async def get_faturas(
         self: Self,
         id_cliente: int,

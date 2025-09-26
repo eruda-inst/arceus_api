@@ -6,11 +6,11 @@ from ..services import FinanceiroService
 from ..schemas import FaturaOut
 
 
-router = APIRouter()
-service = FinanceiroService()
+financeiro_router = APIRouter()
+financeiro_service = FinanceiroService()
 
 
-@router.get(
+@financeiro_router.get(
     path="/faturas",
     response_model=FaturaOut,
     summary="Obtém faturas associadas a um cliente, através de ID de protocolo de atendimento.",
@@ -32,7 +32,7 @@ async def get_faturas(
         default=SortOrder.ASC, description="Ordem da ordenação."
     ),
 ) -> FaturaOut:
-    return await service.get_faturas(
+    return await financeiro_service.get_faturas(
         protocolo=protocolo,
         page=page,
         per_page=per_page,

@@ -6,7 +6,7 @@ from fastapi import HTTPException, status
 from typing import Dict, Any, List, Union, Self, Optional
 
 
-class Cliente:
+class IXCCliente:
     def __init__(self: Self) -> None:
         self.token = settings.IXC_TOKEN
         self.host = settings.IXC_HOST

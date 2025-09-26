@@ -1,2 +1,2 @@
-from .ixc import Cliente as ComercialIXCCliente
-from .opa import Cliente as ComercialOpaCliente
+from .ixc import ComercialIXCCliente
+from .opa import ComercialOpaCliente

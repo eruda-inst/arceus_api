@@ -1,11 +1,11 @@
 import json
-from typing import Dict, Any, Self, Optional, List
-from app.api.v1.utils.enums import SortOrder
-from ..ixc import Cliente as IXCCliente
+from ..ixc import IXCCliente
 from app.api.v1.schemas import LeadIn
+from app.api.v1.utils.enums import SortOrder
+from typing import Dict, Any, Self, Optional, List
 
 
-class Cliente(IXCCliente):
+class ComercialIXCCliente(IXCCliente):
     async def get_status_acesso(self: Self, id_contrato: int) -> Dict[str, Any]:
         grid_param = [{"TB": "cliente_contrato.id", "OP": "=", "P": str(id_contrato)}]
         payload = {"grid_param": json.dumps(obj=grid_param)}

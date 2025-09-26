@@ -15,11 +15,11 @@ from ..schemas import (
 )
 
 
-router = APIRouter()
-service = SuporteService()
+suporte_router = APIRouter()
+suporte_service = SuporteService()
 
 
-@router.get(
+@suporte_router.get(
     path="/contratos",
     response_model=SuporteContratoListOut,
     summary="Obtém contratos ativos de um cliente, através de protocolo de atendimento.",
@@ -41,7 +41,7 @@ async def get_contratos(
         default=SortOrder.ASC, description="Ordem da ordenação."
     ),
 ) -> SuporteContratoListOut:
-    return await service.get_contratos_ativos(
+    return await suporte_service.get_contratos_ativos(
         protocolo=protocolo,
         page=page,
         per_page=per_page,
@@ -50,7 +50,7 @@ async def get_contratos(
     )
 
 
-@router.get(
+@suporte_router.get(
     path="/status_conexao",
     response_model=StatusConexaoOut,
     summary="Obtém status de conexão de um cliente, através de ID de login.",
@@ -58,10 +58,10 @@ async def get_contratos(
 async def get_status_conexao(
     id_login: PositiveInt = Query(description="ID de login do cliente no IXCSoft."),
 ) -> StatusConexaoOut:
-    return await service.get_status_conexao(id_login=id_login)
+    return await suporte_service.get_status_conexao(id_login=id_login)
 
 
-@router.get(
+@suporte_router.get(
     path="/status_onu",
     response_model=StatusONUOut,
     summary="Obtém status de ONU (sinal rx) de um cliente, através de ID de login, ou MAC Address de ONU.",
@@ -72,10 +72,10 @@ async def get_status_onu(
     ),
     mac_onu: Optional[str] = Query(default=None, description="MAC Address da ONU."),
 ) -> StatusONUOut:
-    return await service.get_status_onu(id_login=id_login, mac_onu=mac_onu)
+    return await suporte_service.get_status_onu(id_login=id_login, mac_onu=mac_onu)
 
 
-@router.post(
+@suporte_router.post(
     path="/desconectar_cliente",
     response_model=MensagemOut,
     summary="Envia sinal de desconexão para um cliente, através de ID de login.",
@@ -83,10 +83,10 @@ async def get_status_onu(
 async def post_desconectar_cliente(
     id_login: PositiveInt = Query(description="ID de login do cliente no IXCSoft."),
 ) -> MensagemOut:
-    return await service.post_desconectar_cliente(id_login=id_login)
+    return await suporte_service.post_desconectar_cliente(id_login=id_login)
 
 
-@router.get(
+@suporte_router.get(
     path="/atendimentos",
     response_model=AtendimentoOut,
     summary="Checa atendimentos abertos de um cliente, através de ID de login.",
@@ -104,7 +104,7 @@ async def get_atendimentos(
         default=SortOrder.ASC, description="Ordem da ordenação."
     ),
 ) -> AtendimentoOut:
-    return await service.get_atendimentos_abertos(
+    return await suporte_service.get_atendimentos_abertos(
         id_login=id_login,
         page=page,
         per_page=per_page,
@@ -113,17 +113,17 @@ async def get_atendimentos(
     )
 
 
-@router.post(
+@suporte_router.post(
     path="/atendimentos",
     status_code=status.HTTP_201_CREATED,
     response_model=AtendimentoCreate,
     summary="Abre ticket de atendimento, através de dados do atendimento.",
 )
 async def post_atendimentos(atendimento: AtendimentoIn) -> AtendimentoCreate:
-    return await service.post_atendimentos(atendimento=atendimento)
+    return await suporte_service.post_atendimentos(atendimento=atendimento)
 
 
-@router.patch(
+@suporte_router.patch(
     path="/logins/{id}",
     response_model=MensagemOut,
     summary="Atualiza um ou mais campos associado a um login específico, por meio do ID de login.",
@@ -132,4 +132,4 @@ async def patch_logins(
     id: PositiveInt = Path(description="ID de login."),
     login: LoginIn = Body(description="Campos de login a serem atualizados."),
 ) -> MensagemOut:
-    return await service.patch_logins(id=id, login=login)
+    return await suporte_service.patch_logins(id=id, login=login)

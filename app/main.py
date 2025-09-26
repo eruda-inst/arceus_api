@@ -1,5 +1,5 @@
-from .api import api_v1
 from fastapi import FastAPI
+from .api import api_v1_router
 from fastapi.middleware.cors import CORSMiddleware
 
 
@@ -9,7 +9,7 @@ app = FastAPI(
     version="0.50.9",
 )
 
-app.include_router(router=api_v1, prefix="/api/v1")
+app.include_router(router=api_v1_router, prefix="/api/v1")
 
 app.add_middleware(
     CORSMiddleware,

@@ -1,2 +1,2 @@
-from .ixc import Cliente as SuporteIXCCliente
-from .opa import Cliente as SuporteOpaCliente
+from .ixc import SuporteIXCCliente
+from .opa import SuporteOpaCliente

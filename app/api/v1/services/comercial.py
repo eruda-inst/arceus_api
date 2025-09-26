@@ -21,7 +21,7 @@ from ..schemas import (
 )
 
 
-class Service:
+class ComercialService:
     def __init__(self: Self) -> None:
         self.ixc_cliente = ComercialIXCCliente()
         self.opa_cliente = ComercialOpaCliente()

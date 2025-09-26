@@ -1,5 +1,5 @@
-from ..opa import Cliente as OpaCliente
+from ..opa import OpaCliente
 
 
-class Cliente(OpaCliente):
+class FinanceiroOpaCliente(OpaCliente):
     pass

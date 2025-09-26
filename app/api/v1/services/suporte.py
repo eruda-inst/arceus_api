@@ -29,7 +29,7 @@ from ..schemas import (
 )
 
 
-class Service:
+class SuporteService:
     def __init__(self: Self) -> None:
         self.opa_cliente = SuporteOpaCliente()
         self.ixc_cliente = SuporteIXCCliente()

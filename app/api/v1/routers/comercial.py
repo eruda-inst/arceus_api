@@ -10,11 +10,11 @@ from ..schemas import (
     LeadCreate,
 )
 
-router = APIRouter()
-service = ComercialService()
+comercial_router = APIRouter()
+comercial_service = ComercialService()
 
 
-@router.get(
+@comercial_router.get(
     path="/status_acesso",
     response_model=StatusAcessoOut,
     summary="Obtém status de acesso, através de ID de contrato.",
@@ -22,10 +22,10 @@ service = ComercialService()
 async def get_status_acesso(
     id_contrato: PositiveInt = Query(description="ID do contrato."),
 ) -> StatusAcessoOut:
-    return await service.get_status_acesso(id_contrato=id_contrato)
+    return await comercial_service.get_status_acesso(id_contrato=id_contrato)
 
 
-@router.get(
+@comercial_router.get(
     path="/contratos",
     response_model=ComercialContratoListOut,
     summary="Obtém contratos de um cliente, por meio de ID de login.",
@@ -41,7 +41,7 @@ async def get_contratos(
     sortname: Optional[str] = "cliente_contrato.id",
     sortorder: Optional[SortOrder] = SortOrder.ASC,
 ) -> ComercialContratoListOut:
-    return await service.get_contratos(
+    return await comercial_service.get_contratos(
         protocolo=protocolo,
         page=page,
         per_page=per_page,
@@ -50,7 +50,7 @@ async def get_contratos(
     )
 
 
-@router.post(
+@comercial_router.post(
     path="/leads",
     status_code=status.HTTP_201_CREATED,
     response_model=LeadCreate,
@@ -59,4 +59,4 @@ async def get_contratos(
 async def post_leads(
     lead: LeadIn = Body(description="Lead a ser cadastrado."),
 ) -> LeadCreate:
-    return await service.post_leads(lead=lead)
+    return await comercial_service.post_leads(lead=lead)

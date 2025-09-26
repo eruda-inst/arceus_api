@@ -4,7 +4,7 @@ from fastapi import HTTPException, status
 from typing import Dict, Any, Self, Optional
 
 
-class Cliente:
+class OpaCliente:
     def __init__(self: Self) -> None:
         self.token = settings.OPA_TOKEN
         self.host = settings.OPA_HOST

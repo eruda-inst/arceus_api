@@ -2,11 +2,11 @@ import json
 from .. import SortOrder
 from .. import AtendimentoIn
 from app.api.v1.schemas import LoginIn
-from ..ixc import Cliente as IXCCliente
+from ..ixc import IXCCliente
 from typing import Dict, Any, List, Self, Optional
 
 
-class Cliente(IXCCliente):
+class SuporteIXCCliente(IXCCliente):
     async def get_contratos_ativos(
         self: Self,
         id_cliente: int,

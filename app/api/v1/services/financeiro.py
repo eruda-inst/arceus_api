@@ -6,7 +6,7 @@ from ..clients import FinanceiroIXCCliente, FinanceiroOpaCliente
 from ..schemas import Fatura, FaturaOut, Meta, Links
 
 
-class Service:
+class FinanceiroService:
     def __init__(self: Self) -> None:
         self.ixc_cliente = FinanceiroIXCCliente()
         self.opa_cliente = FinanceiroOpaCliente()
