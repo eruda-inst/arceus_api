@@ -1,8 +1,8 @@
-# API da Larissa
+# API do Bot
 
 ## Visão Geral
 
-A API do Roberto é um serviço agregador que simplifica a integração entre a API do OpaSuite e a API do IXCSoft. Desenvolvida em FastAPI, oferece endpoints unificados para gerenciamento de clientes, contratos, atendimentos, status de conexão, dentre outros.
+A API do Bot atua como um serviço agregador, simplificando a integração entre a API do OpaSuite e a API do IXCSoft. Desenvolvida em FastAPI, oferece endpoints unificados para gerenciamento de clientes, contratos, atendimentos, status de conexão, entre outros.
 
 ## Funcionalidades Principais
 
@@ -16,113 +16,79 @@ A API do Roberto é um serviço agregador que simplifica a integração entre a 
 
 ## Tecnologias Utilizadas
 
-- **FastAPI** - Framework web moderno e rápido
-- **Pydantic** - Validação de dados e configurações
-- **HTTPX** - Cliente HTTP assíncrono
-- **Pytest** - Framework de testes
-- **Python 3.8+** - Linguagem de programação
+- **Python 3.8+**
+- **FastAPI** - Framework web moderno e rápido para construção de APIs.
+- **Pydantic** - Validação de dados e gerenciamento de configurações.
+- **HTTPX** - Cliente HTTP assíncrono para realizar requisições a outras APIs.
+- **Docker** - Plataforma de containerização para fácil deploy e escalabilidade.
 
 ## Configuração do Ambiente
 
+### Pré-requisitos
+
+- Python 3.8+
+- Docker (opcional, para execução em container)
+
 ### Variáveis de Ambiente
 
-Crie um arquivo `.env` na raiz do projeto com as seguintes variáveis:
+Crie um arquivo `.env` na raiz do projeto, baseado no `.env_example`, com as seguintes variáveis:
 
 ```env
 OPA_TOKEN=seu_token_opa
 IXC_TOKEN=seu_token_ixc
+OPA_HOST=seu_host_opa
+IXC_HOST=seu_host_ixc
 ```
 
-### Instalação de Dependências
+### Instalação
 
-```bash
-pip install -r requirements.txt
-```
+1.  Clone o repositório:
+    ```bash
+    git clone <url-do-repositorio>
+    cd backend-larissa
+    ```
+2.  Crie e ative um ambiente virtual:
+    ```bash
+    python -m venv venv
+    source venv/bin/activate
+    ```
+3.  Instale as dependências:
+    ```bash
+    pip install -r requirements.txt
+    ```
 
 ### Executando a Aplicação
+
+Para executar a aplicação em modo de desenvolvimento com hot-reload:
 
 ```bash
 uvicorn app.main:app --reload
 ```
 
-Ou
+Alternativamente, utilize Docker Compose para subir a aplicação:
 
 ```bash
 docker compose up -d
 ```
 
-A documentação interativa da API estará disponível em: https://reddator.newnet.com.br/docs
+Após iniciar, a documentação interativa da API (Swagger UI) estará disponível em [http://localhost:8000/docs](http://localhost:8000/docs).
 
 ## Estrutura do Projeto
 
 ```
-app/
-├── clients/           # Clientes para APIs externas
-│   ├── ixc.py         # Cliente para integração com IXCSoft
-│   └── opa.py         # Cliente para integração com OpaSuite
-├── core/              # Configurações principais
-│   └── config.py      # Configurações da aplicação (variáveis de ambiente)
-├── routers/           # Definição de rotas da API
-│   └── aggregator.py  # Rotas principais do aggregator
-├── schemas/           # Modelos Pydantic (schemas)
-│   ├── atendimento.py # Schemas para atendimentos
-│   ├── conexao.py     # Schemas para status de conexão
-│   ├── contrato.py    # Schemas para contratos
-│   ├── misc.py        # Schemas auxiliares (Meta, Links)
-│   └── onu.py         # Schemas para status de ONU
-├── services/          # Lógica de negócio e serviços
-│   └── aggregator.py  # Serviço principal do aggregator
-├── utils/             # Utilitários e helpers
-│   └── helpers/
-│       └── rotular.py # Funções para rotular status
-├── main.py            # Aplicação FastAPI principal
-└── __init__.py        # Arquivos de inicialização do pacote
-
-tests/                 # Testes automatizados
-├── conftest.py        # Configurações do pytest
-├── test_main.py       # Testes do endpoint principal
-└── test_rotular.py    # Testes das funções de rotulagem
-
-docker-compose.yaml    # Configuração do Docker Compose
-Dockerfile             # Instruções de build da imagem Docker
-pytest.ini             # Configuração do Pytest
-requirements.txt       # Dependências do projeto
-README.md              # Documentação do projeto
-```
-
-## Exemplos de Uso
-
-### Consultar Contratos Ativos
-
-```bash
-GET /api/v1/contratos_ativos_cliente?protocolo_atendimento_opa=123456789012
-```
-
-### Verificar Status de Conexão
-
-```bash
-GET /api/v1/status_conexao?id_login_ixc=12345
-```
-
-### Abrir Atendimento
-
-```bash
-POST /api/v1/abrir_atendimento
-{
-  "id_login": 12345,
-  "id_assunto": 1,
-  "id_cliente": 67890,
-  "menssagem": "Problema de conexão",
-  "titulo": "Cliente sem internet",
-  "id_ticket_setor": 1,
-  "id_contrato": 54321
-}
-```
-
-## Testes
-
-Execute a suíte de testes:
-
-```bash
-python -m pytest
+.
+├── app/
+│   ├── api/
+│   │   └── v1/
+│   │       ├── clients/
+│   │       ├── core/
+│   │       ├── routers/
+│   │       ├── schemas/
+│   │       ├── services/
+│   │       └── utils/
+│   ├── main.py
+├── docker-compose.yaml
+├── Dockerfile
+├── requirements.txt
+└── README.md
 ```
