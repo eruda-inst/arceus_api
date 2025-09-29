@@ -20,7 +20,7 @@ comercial_service = ComercialService()
     summary="Obtém status de acesso, através de ID de contrato.",
 )
 async def get_status_acesso(
-    id_contrato: PositiveInt = Query(description="ID do contrato."),
+    id_contrato: PositiveInt = Query(ge=1, description="ID do contrato."),
 ) -> StatusAcessoOut:
     return await comercial_service.get_status_acesso(id_contrato=id_contrato)
 
@@ -36,10 +36,18 @@ async def get_contratos(
         max_length=12,
         description="Protocolo de atendimento do cliente no OpaSuite.",
     ),
-    page: Optional[PositiveInt] = 1,
-    per_page: Optional[PositiveInt] = 10,
-    sortname: Optional[str] = "cliente_contrato.id",
-    sortorder: Optional[SortOrder] = SortOrder.ASC,
+    page: Optional[PositiveInt] = Query(
+        ge=1, default=1, description="Número da página."
+    ),
+    per_page: Optional[PositiveInt] = Query(
+        ge=1, default=10, description="Itens por página."
+    ),
+    sortname: Optional[str] = Query(
+        default="cliente_contrato.id", description="Campo para ordenação."
+    ),
+    sortorder: Optional[SortOrder] = Query(
+        SortOrder.ASC, description="Ordem da ordenação."
+    ),
 ) -> ComercialContratoListOut:
     return await comercial_service.get_contratos(
         protocolo=protocolo,

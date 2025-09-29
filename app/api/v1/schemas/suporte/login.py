@@ -4,12 +4,11 @@ from pydantic import (
     Field,
     PositiveInt,
     NonNegativeFloat,
-    NonPositiveInt,
     PositiveFloat,
 )
 
 
-class LoginIn(BaseModel):
+class LoginUpdate(BaseModel):
     autenticacao: Optional[str] = Field(
         default="L", description="Tipo de autenticação."
     )

@@ -16,7 +16,7 @@ from .suporte import (
     SuporteContrato,
     onu,
     StatusConexao,
-    LoginIn,
+    LoginUpdate,
     StatusONUOut,
     StatusONU,
     StatusConexaoOut,

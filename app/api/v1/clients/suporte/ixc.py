@@ -1,8 +1,8 @@
 import json
 from .. import SortOrder
 from .. import AtendimentoIn
-from app.api.v1.schemas import LoginIn
 from ..ixc import IXCCliente
+from app.api.v1.schemas import LoginUpdate
 from typing import Dict, Any, List, Self, Optional
 
 
@@ -114,7 +114,7 @@ class SuporteIXCCliente(IXCCliente):
         return data
 
     async def put_login(
-        self: Self, id: int, login: LoginIn
+        self: Self, id: int, login: LoginUpdate
     ) -> Optional[Dict[str, Any]]:
         data = await self._make_request(
             endpoint=f"radusuarios/{id}",

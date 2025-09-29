@@ -10,7 +10,7 @@ from ..schemas import (
     SuporteContratoListOut,
     StatusONUOut,
     AtendimentoCreate,
-    LoginIn,
+    LoginUpdate,
     MensagemOut,
 )
 
@@ -30,9 +30,11 @@ async def get_contratos(
         max_length=12,
         description="Protocolo de atendimento do cliente no OpaSuite.",
     ),
-    page: Optional[PositiveInt] = Query(default=1, description="Número da página."),
+    page: Optional[PositiveInt] = Query(
+        ge=1, default=1, description="Número da página."
+    ),
     per_page: Optional[PositiveInt] = Query(
-        default=10, description="Itens por página."
+        ge=1, default=10, description="Itens por página."
     ),
     sortname: Optional[str] = Query(
         default="cliente_contrato.id", description="Campo para ordenação."
@@ -56,7 +58,9 @@ async def get_contratos(
     summary="Obtém status de conexão de um cliente, através de ID de login.",
 )
 async def get_status_conexao(
-    id_login: PositiveInt = Query(description="ID de login do cliente no IXCSoft."),
+    id_login: PositiveInt = Query(
+        ge=1, description="ID de login do cliente no IXCSoft."
+    ),
 ) -> StatusConexaoOut:
     return await suporte_service.get_status_conexao(id_login=id_login)
 
@@ -68,9 +72,11 @@ async def get_status_conexao(
 )
 async def get_status_onu(
     id_login: Optional[PositiveInt] = Query(
-        default=None, description="ID de login do cliente no IXCSoft."
+        ge=1, default=None, description="ID de login do cliente no IXCSoft."
     ),
-    mac_onu: Optional[str] = Query(default=None, description="MAC Address da ONU."),
+    mac_onu: Optional[str] = Query(
+        min_length=12, max_length=12, default=None, description="MAC Address da ONU."
+    ),
 ) -> StatusONUOut:
     return await suporte_service.get_status_onu(id_login=id_login, mac_onu=mac_onu)
 
@@ -81,7 +87,9 @@ async def get_status_onu(
     summary="Envia sinal de desconexão para um cliente, através de ID de login.",
 )
 async def post_desconectar_cliente(
-    id_login: PositiveInt = Query(description="ID de login do cliente no IXCSoft."),
+    id_login: PositiveInt = Query(
+        ge=1, description="ID de login do cliente no IXCSoft."
+    ),
 ) -> MensagemOut:
     return await suporte_service.post_desconectar_cliente(id_login=id_login)
 
@@ -92,10 +100,14 @@ async def post_desconectar_cliente(
     summary="Checa atendimentos abertos de um cliente, através de ID de login.",
 )
 async def get_atendimentos(
-    id_login: PositiveInt = Query(description="ID de login do cliente no IXCSoft."),
-    page: Optional[PositiveInt] = Query(default=1, description="Número da página."),
+    id_login: PositiveInt = Query(
+        ge=1, description="ID de login do cliente no IXCSoft."
+    ),
+    page: Optional[PositiveInt] = Query(
+        ge=1, default=1, description="Número da página."
+    ),
     per_page: Optional[PositiveInt] = Query(
-        default=10, description="Itens por página."
+        ge=1, default=10, description="Itens por página."
     ),
     sortname: Optional[str] = Query(
         default="su_ticket.id", description="Campo para ordenação."
@@ -129,7 +141,7 @@ async def post_atendimentos(atendimento: AtendimentoIn) -> AtendimentoCreate:
     summary="Atualiza um ou mais campos associado a um login específico, por meio do ID de login.",
 )
 async def patch_logins(
-    id: PositiveInt = Path(description="ID de login."),
-    login: LoginIn = Body(description="Campos de login a serem atualizados."),
+    id: PositiveInt = Path(ge=1, description="ID de login."),
+    login: LoginUpdate = Body(ge=1, description="Campos de login a serem atualizados."),
 ) -> MensagemOut:
     return await suporte_service.patch_logins(id=id, login=login)

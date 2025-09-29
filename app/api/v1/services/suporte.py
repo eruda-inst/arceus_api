@@ -21,7 +21,7 @@ from ..schemas import (
     SuporteContrato,
     Links,
     Meta,
-    LoginIn,
+    LoginUpdate,
     StatusConexao,
     StatusConexaoOut,
     StatusONU,
@@ -359,7 +359,9 @@ class SuporteService(Service):
                 detail=f"Erro interno ao processar solicitação: {str(e)}",
             )
 
-    async def patch_logins(self: Self, id: PositiveInt, login: LoginIn) -> MensagemOut:
+    async def patch_logins(
+        self: Self, id: PositiveInt, login: LoginUpdate
+    ) -> MensagemOut:
         try:
             res = await self.suporte_ixc_cliente.get_login(id=id)
             if not res.get("registros"):
