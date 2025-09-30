@@ -122,3 +122,31 @@ class FinanceiroService(Service):
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=f"Erro interno ao processar solicitação: {str(e)}",
             )
+
+    async def get_linha_digitavel(
+        self: Self, id: PositiveInt
+    ) -> schemas.LinhaDigitavelOut:
+        try:
+            res = await self.financeiro_ixc_cliente.get_linha_digitavel(id=id)
+            reg = res.get("registros")
+            if not reg:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Sem linha digitável.",
+                )
+            linha_digitavel = reg[0]["linha_digitavel"]
+            return schemas.LinhaDigitavelOut(
+                data=schemas.LinhaDigitavelBase(linha_digitavel=linha_digitavel)
+            )
+        except HTTPException:
+            raise
+        except ValidationError as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Validação da resposta falhou: {e}",
+            )
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Erro interno ao processar solicitação: {str(e)}",
+            )

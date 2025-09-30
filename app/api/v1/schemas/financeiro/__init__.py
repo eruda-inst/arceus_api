@@ -1,1 +1,6 @@
-from .fatura import FaturaAberta, FaturaAbertaListOut
+from .fatura import (
+    FaturaAberta,
+    FaturaAbertaListOut,
+    LinhaDigitavelBase,
+    LinhaDigitavelOut,
+)

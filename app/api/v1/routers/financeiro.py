@@ -2,7 +2,7 @@ from .. import schemas
 from typing import Optional
 from ..utils import SortOrder
 from pydantic import PositiveInt
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, Path
 from ..services import FinanceiroService, ComercialService
 
 
@@ -86,3 +86,14 @@ async def post_desbloqueio_em_confianca(
     return await financeiro_service.post_desbloqueio_em_confianca(
         id_contrato=id_contrato
     )
+
+
+@financeiro_router.get(
+    path="/linha_digitavel/{id}",
+    response_model=schemas.LinhaDigitavelOut,
+    summary="Obtém linha digitável de uma fatura, através do ID da fatura.",
+)
+async def get_linha_digitavel(
+    id: PositiveInt = Path(ge=1, description="ID da fatura.")
+) -> schemas.LinhaDigitavelOut:
+    return await financeiro_service.get_linha_digitavel(id=id)

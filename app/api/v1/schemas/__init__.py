@@ -21,4 +21,9 @@ from .suporte import (
     StatusONU,
     StatusConexaoOut,
 )
-from .financeiro import FaturaAbertaListOut, FaturaAberta
+from .financeiro import (
+    FaturaAbertaListOut,
+    FaturaAberta,
+    LinhaDigitavelBase,
+    LinhaDigitavelOut,
+)

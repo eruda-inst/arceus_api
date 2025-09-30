@@ -1,6 +1,6 @@
+from .. import misc
 from typing import List
 from pydantic import BaseModel, Field, PositiveInt, NonNegativeInt
-from ..misc import Meta, Links
 
 
 class FaturaAberta(BaseModel):
@@ -15,5 +15,15 @@ class FaturaAberta(BaseModel):
 
 class FaturaAbertaListOut(BaseModel):
     data: List[FaturaAberta]
-    meta: Meta
-    links: Links
+    meta: misc.Meta
+    links: misc.Links
+
+
+class LinhaDigitavelBase(BaseModel):
+    linha_digitavel: str = Field(
+        min_length=47, max_length=47, description="Linha digitável."
+    )
+
+
+class LinhaDigitavelOut(BaseModel):
+    data: LinhaDigitavelBase

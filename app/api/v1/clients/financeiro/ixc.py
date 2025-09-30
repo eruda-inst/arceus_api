@@ -1,6 +1,7 @@
 import json
 from .. import SortOrder
 from ..ixc import IXCCliente
+from pydantic import PositiveInt
 from typing import Dict, Any, List, Self, Optional
 
 
@@ -40,4 +41,10 @@ class FinanceiroIXCCliente(IXCCliente):
         data = await self._make_request(
             endpoint="cliente_contrato_15464", payload=payload, include_ixcsoft=False
         )
+        return data
+
+    async def get_linha_digitavel(self: Self, id: PositiveInt) -> List[Dict[str, Any]]:
+        grid_param = [{"TB": "fn_areceber.id", "OP": "=", "P": str(id)}]
+        payload = {"grid_param": json.dumps(obj=grid_param)}
+        data = await self._make_request(endpoint="fn_areceber", payload=payload)
         return data
