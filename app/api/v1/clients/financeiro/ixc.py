@@ -18,7 +18,7 @@ class FinanceiroIXCCliente(IXCCliente):
         per_page: Optional[int] = 10,
         sortname: Optional[str] = "fn_areceber.id",
         sortorder: Optional[SortOrder] = SortOrder.ASC,
-    ):
+    ) -> List[Dict[str, Any]]:
         grid_param = [
             {"TB": "fn_areceber.id_cliente", "OP": "=", "P": str(id_cliente)},
             {"TB": "fn_areceber.status", "OP": "=", "P": "A"},
@@ -31,4 +31,13 @@ class FinanceiroIXCCliente(IXCCliente):
             "sortorder": sortorder,
         }
         data = await self._make_request(endpoint="fn_areceber", payload=payload)
+        return data
+
+    async def post_desbloqueio_em_confianca(
+        self: Self, id_contrato: int
+    ) -> Dict[str, Any]:
+        payload = {"id_contrato": id_contrato}
+        data = await self._make_request(
+            endpoint="desbloqueio_em_confianca", payload=payload
+        )
         return data

@@ -1,33 +1,11 @@
-from typing import Self, Optional
+from .. import utils
+from .. import schemas
+from .service import Service
 from datetime import datetime
-from pydantic import ValidationError, PositiveInt
+from typing import Self, Optional
 from ..clients import SuporteIXCCliente
 from fastapi import HTTPException, status
-from .service import Service
-from ..utils import (
-    rotular_status_contrato,
-    rotular_status_atendimento,
-    rotular_status_conexao,
-    rotular_status_onu,
-    SortOrder,
-    StatusONURot,
-)
-from ..schemas import (
-    StatusONUOut,
-    Atendimento,
-    AtendimentoIn,
-    AtendimentoOut,
-    SuporteContratoListOut,
-    SuporteContrato,
-    Links,
-    Meta,
-    LoginUpdate,
-    StatusConexao,
-    StatusConexaoOut,
-    StatusONU,
-    AtendimentoCreate,
-    MensagemOut,
-)
+from pydantic import ValidationError, PositiveInt
 
 
 class SuporteService(Service):
@@ -41,8 +19,8 @@ class SuporteService(Service):
         page: Optional[PositiveInt] = 1,
         per_page: Optional[PositiveInt] = 10,
         sortname: Optional[str] = "cliente_contrato.id",
-        sortorder: Optional[SortOrder] = SortOrder.ASC,
-    ) -> SuporteContratoListOut:
+        sortorder: Optional[utils.SortOrder] = utils.SortOrder.ASC,
+    ) -> schemas.SuporteContratoListOut:
         try:
             id_cliente = await self.get_id_cliente_ixc(protocolo=protocolo)
 
@@ -90,7 +68,7 @@ class SuporteService(Service):
                 if not titulos_nao_quitados:
                     contrato["valor"] = 0.00
                     contrato["data_vencimento"] = ""
-                    contrato["status"] = rotular_status_contrato(
+                    contrato["status"] = utils.rotular_status_contrato(
                         status_contrato_codigo=contrato["status"],
                     )
                     continue
@@ -134,11 +112,11 @@ class SuporteService(Service):
                     contrato["valor"] = ultimo_titulo.get("valor")
                     contrato["data_vencimento"] = ultimo_titulo.get("data_vencimento")
 
-                contrato["status"] = rotular_status_contrato(contrato["status"])
+                contrato["status"] = utils.rotular_status_contrato(contrato["status"])
 
-            meta = Meta(total=total, page=page, per_page=per_page)
+            meta = schemas.Meta(total=total, page=page, per_page=per_page)
             base_url = f"/contratos?protocolo={protocolo}"
-            links = Links(
+            links = schemas.Links(
                 self=f"{base_url}&page={page}&per_page={per_page}",
                 next=(
                     f"{base_url}&page={page + 1}&per_page={per_page}"
@@ -151,8 +129,8 @@ class SuporteService(Service):
                     else None
                 ),
             )
-            return SuporteContratoListOut(
-                data=[SuporteContrato(**c) for c in contratos_ativos],
+            return schemas.SuporteContratoListOut(
+                data=[schemas.SuporteContrato(**c) for c in contratos_ativos],
                 meta=meta,
                 links=links,
             )
@@ -169,7 +147,9 @@ class SuporteService(Service):
                 detail=f"Erro interno ao processar solicitação: {str(e)}",
             )
 
-    async def get_status_conexao(self: Self, id_login: PositiveInt) -> StatusConexaoOut:
+    async def get_status_conexao(
+        self: Self, id_login: PositiveInt
+    ) -> schemas.StatusConexaoOut:
         try:
             res = await self.suporte_ixc_cliente.get_status_conexao(
                 id_login=id_login,
@@ -180,10 +160,12 @@ class SuporteService(Service):
                     status_code=status.HTTP_404_NOT_FOUND, detail="Nenhum registro."
                 )
             codigo = registros[0].get("online")
-            rotulo = rotular_status_conexao(
+            rotulo = utils.rotular_status_conexao(
                 status_conexao_codigo=codigo,
             )
-            return StatusConexaoOut(data=StatusConexao(status_conexao=rotulo))
+            return schemas.StatusConexaoOut(
+                data=schemas.StatusConexao(status_conexao=rotulo)
+            )
         except HTTPException:
             raise
         except ValidationError as e:
@@ -201,7 +183,7 @@ class SuporteService(Service):
         self: Self,
         id_login: Optional[PositiveInt] = None,
         mac_onu: Optional[str] = None,
-    ) -> StatusONUOut:
+    ) -> schemas.StatusONUOut:
         if not id_login and not mac_onu:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -217,11 +199,15 @@ class SuporteService(Service):
                     if registros and "sinal_rx" in registros[0]:
                         codigo = registros[0].get("sinal_rx")
                         if not codigo:
-                            return StatusONUOut(
-                                data=StatusONU(status_onu=StatusONURot.SEM_ONU)
+                            return schemas.StatusONUOut(
+                                data=schemas.StatusONU(
+                                    status_onu=utils.StatusONURot.SEM_ONU
+                                )
                             )
-                        rotulo = rotular_status_onu(sinal_rx=float(codigo))
-                        return StatusONUOut(data=StatusONU(status_onu=rotulo))
+                        rotulo = utils.rotular_status_onu(sinal_rx=float(codigo))
+                        return schemas.StatusONUOut(
+                            data=schemas.StatusONU(status_onu=rotulo)
+                        )
                 except HTTPException:
                     if not mac_onu:
                         raise
@@ -231,11 +217,15 @@ class SuporteService(Service):
                 if registros and "sinal_rx" in registros[0]:
                     codigo = registros[0].get("sinal_rx")
                     if not codigo:
-                        return StatusONUOut(
-                            data=StatusONU(status_onu=StatusONURot.SEM_ONU)
+                        return schemas.StatusONUOut(
+                            data=schemas.StatusONU(
+                                status_onu=utils.StatusONURot.SEM_ONU
+                            )
                         )
-                    rotulo = rotular_status_onu(sinal_rx=float(codigo))
-                    return StatusONUOut(data=StatusONU(status_onu=rotulo))
+                    rotulo = utils.rotular_status_onu(sinal_rx=float(codigo))
+                    return schemas.StatusONUOut(
+                        data=schemas.StatusONU(status_onu=rotulo)
+                    )
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="ONU não encontrada."
             )
@@ -254,13 +244,13 @@ class SuporteService(Service):
 
     async def post_desconectar_cliente(
         self: Self, id_login: PositiveInt
-    ) -> MensagemOut:
+    ) -> schemas.MensagemOut:
         try:
             res = await self.suporte_ixc_cliente.post_desconectar_cliente(
                 id_login=id_login
             )
             mensagem = res["msg"][0]["message"]
-            return MensagemOut(mensagem=mensagem)
+            return schemas.MensagemOut(mensagem=mensagem)
         except HTTPException:
             raise
         except Exception as e:
@@ -275,8 +265,8 @@ class SuporteService(Service):
         page: Optional[PositiveInt] = 1,
         per_page: Optional[PositiveInt] = 10,
         sortname: Optional[str] = "su_ticket.id",
-        sortorder: Optional[SortOrder] = SortOrder.ASC,
-    ) -> AtendimentoOut:
+        sortorder: Optional[utils.SortOrder] = utils.SortOrder.ASC,
+    ) -> schemas.AtendimentoOut:
         try:
             res = await self.suporte_ixc_cliente.get_atendimentos_abertos(
                 id_login=id_login,
@@ -297,7 +287,7 @@ class SuporteService(Service):
                     {
                         "id": a.get("id"),
                         "id_assunto": a.get("id_assunto"),
-                        "status": rotular_status_atendimento(
+                        "status": utils.rotular_status_atendimento(
                             status_atendimento_codigo=a.get("su_status"),
                         ),
                         "mensagem": a.get("menssagem") or a.get("mensagem") or "",
@@ -306,9 +296,9 @@ class SuporteService(Service):
                     }
                 )
             total = registros.__len__()
-            meta = Meta(total=total, page=page, per_page=per_page)
+            meta = schemas.Meta(total=total, page=page, per_page=per_page)
             base_url = f"/atendimentos?id_login={id_login}"
-            links = Links(
+            links = schemas.Links(
                 self=f"{base_url}&page={page}&per_page={per_page}",
                 next=(
                     f"{base_url}&page={page + 1}&per_page={per_page}"
@@ -321,8 +311,10 @@ class SuporteService(Service):
                     else None
                 ),
             )
-            return AtendimentoOut(
-                data=[Atendimento(**i) for i in formatted], meta=meta, links=links
+            return schemas.AtendimentoOut(
+                data=[schemas.Atendimento(**i) for i in formatted],
+                meta=meta,
+                links=links,
             )
         except HTTPException:
             raise
@@ -338,14 +330,14 @@ class SuporteService(Service):
             )
 
     async def post_atendimentos(
-        self: Self, atendimento: AtendimentoIn
-    ) -> AtendimentoCreate:
+        self: Self, atendimento: schemas.AtendimentoIn
+    ) -> schemas.AtendimentoCreate:
         try:
             res = await self.suporte_ixc_cliente.post_atendimentos(
                 atendimento=atendimento
             )
             id_atendimento = res.get("id", None)
-            return AtendimentoCreate(id=int(id_atendimento))
+            return schemas.AtendimentoCreate(id=int(id_atendimento))
         except HTTPException:
             raise
         except ValidationError as e:
@@ -360,8 +352,8 @@ class SuporteService(Service):
             )
 
     async def patch_logins(
-        self: Self, id: PositiveInt, login: LoginUpdate
-    ) -> MensagemOut:
+        self: Self, id: PositiveInt, login: schemas.LoginUpdate
+    ) -> schemas.MensagemOut:
         try:
             res = await self.suporte_ixc_cliente.get_login(id=id)
             if not res.get("registros"):
@@ -383,7 +375,7 @@ class SuporteService(Service):
 
             mensagem = res["message"]
 
-            return MensagemOut(mensagem=mensagem)
+            return schemas.MensagemOut(mensagem=mensagem)
         except HTTPException:
             raise
         except ValidationError as e:

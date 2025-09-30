@@ -1,3 +1,5 @@
+from .. import utils
+from .. import schemas
 from datetime import datetime
 from typing import Self, Optional
 from ..schemas import Meta, Links
@@ -5,21 +7,6 @@ from pydantic import ValidationError, PositiveInt
 from ..clients import ComercialIXCCliente
 from fastapi import HTTPException, status
 from .service import Service
-from ..utils import (
-    rotular_status_acesso,
-    SortOrder,
-    formatar_cpf_ou_cnpj,
-    formatar_cel,
-    formatar_cep,
-)
-from ..schemas import (
-    ComercialContratoListOut,
-    ComercialContrato,
-    StatusAcessoOut,
-    StatusAcesso,
-    LeadIn,
-    LeadCreate,
-)
 
 
 class ComercialService(Service):
@@ -29,7 +16,7 @@ class ComercialService(Service):
 
     async def get_status_acesso(
         self: Self, id_contrato: PositiveInt
-    ) -> StatusAcessoOut:
+    ) -> schemas.StatusAcessoOut:
         try:
             res = await self.comercial_ixc_cliente.get_status_acesso(
                 id_contrato=id_contrato
@@ -41,10 +28,12 @@ class ComercialService(Service):
                     detail="Sem status de acesso.",
                 )
             status_acesso_cod = status_acesso[0].get("status_internet")
-            status_acesso_rot = rotular_status_acesso(
+            status_acesso_rot = utils.rotular_status_acesso(
                 status_acesso_codigo=status_acesso_cod
             )
-            return StatusAcessoOut(data=StatusAcesso(status_acesso=status_acesso_rot))
+            return schemas.StatusAcessoOut(
+                data=schemas.StatusAcesso(status_acesso=status_acesso_rot)
+            )
         except HTTPException:
             raise
         except ValidationError as e:
@@ -64,8 +53,8 @@ class ComercialService(Service):
         page: Optional[PositiveInt] = 1,
         per_page: Optional[PositiveInt] = 10,
         sortname: Optional[str] = "cliente_contrato.id",
-        sortorder: Optional[SortOrder] = SortOrder.ASC,
-    ) -> ComercialContratoListOut:
+        sortorder: Optional[utils.SortOrder] = utils.SortOrder.ASC,
+    ) -> schemas.ComercialContratoListOut:
         try:
             id_cliente = await self.get_id_cliente_ixc(protocolo=protocolo)
 
@@ -102,7 +91,7 @@ class ComercialService(Service):
                         "id": contrato["id"],
                         "contrato": contrato["contrato"],
                         "valor": 0.00,
-                        "status_acesso": rotular_status_acesso(
+                        "status_acesso": utils.rotular_status_acesso(
                             status_acesso_codigo=contrato["status_internet"]
                         ),
                         "data_vencimento": "N/A",
@@ -143,7 +132,7 @@ class ComercialService(Service):
                     "id": contrato["id"],
                     "contrato": contrato["contrato"],
                     "valor": titulo_final.get("valor"),
-                    "status_acesso": rotular_status_acesso(
+                    "status_acesso": utils.rotular_status_acesso(
                         status_acesso_codigo=contrato["status_internet"]
                     ),
                     "data_vencimento": titulo_final.get("data_vencimento"),
@@ -173,8 +162,8 @@ class ComercialService(Service):
                 ),
             )
 
-            return ComercialContratoListOut(
-                data=[ComercialContrato(**ct) for ct in contratos_tratados],
+            return schemas.ComercialContratoListOut(
+                data=[schemas.ComercialContrato(**ct) for ct in contratos_tratados],
                 meta=meta,
                 links=links,
             )
@@ -192,20 +181,22 @@ class ComercialService(Service):
                 detail=f"Erro interno ao processar solicitação: {str(e)}",
             )
 
-    async def post_leads(self: Self, lead: LeadIn) -> LeadCreate:
+    async def post_leads(self: Self, lead: schemas.LeadIn) -> schemas.LeadCreate:
         try:
             lead_data = lead.model_dump()
             if lead_data.get("cnpj_cpf"):
                 cnpj_ou_cpf = lead_data["cnpj_cpf"]
-                lead_data["cnpj_cpf"] = formatar_cpf_ou_cnpj(cpf_ou_cnpj=cnpj_ou_cpf)
+                lead_data["cnpj_cpf"] = utils.formatar_cpf_ou_cnpj(
+                    cpf_ou_cnpj=cnpj_ou_cpf
+                )
             if lead_data.get("fone_celular"):
                 cel = lead_data["fone_celular"]
-                lead_data["fone_celular"] = formatar_cel(cel=cel)
+                lead_data["fone_celular"] = utils.formatar_cel(cel=cel)
             if lead_data.get("cep"):
                 cep = lead_data["cep"]
-                lead_data["cep"] = formatar_cep(cep=cep)
+                lead_data["cep"] = utils.formatar_cep(cep=cep)
 
-            formatted_lead = LeadIn(**lead_data)
+            formatted_lead = schemas.LeadIn(**lead_data)
 
             res = await self.comercial_ixc_cliente.post_leads(lead=formatted_lead)
 
@@ -216,7 +207,7 @@ class ComercialService(Service):
                     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                     detail=f"Não foi possível retornar o ID do lead criado: {error_message}",
                 )
-            return LeadCreate(id=id_lead)
+            return schemas.LeadCreate(id=id_lead)
         except HTTPException:
             raise
         except ValidationError as e:

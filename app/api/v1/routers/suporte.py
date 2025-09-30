@@ -1,18 +1,9 @@
+from .. import schemas
 from typing import Optional
 from ..utils import SortOrder
 from pydantic import PositiveInt
 from ..services import SuporteService
 from fastapi import APIRouter, Query, status, Path, Body
-from ..schemas import (
-    StatusConexaoOut,
-    AtendimentoOut,
-    AtendimentoIn,
-    SuporteContratoListOut,
-    StatusONUOut,
-    AtendimentoCreate,
-    LoginUpdate,
-    MensagemOut,
-)
 
 
 suporte_router = APIRouter()
@@ -21,7 +12,7 @@ suporte_service = SuporteService()
 
 @suporte_router.get(
     path="/contratos",
-    response_model=SuporteContratoListOut,
+    response_model=schemas.SuporteContratoListOut,
     summary="Obtém contratos ativos de um cliente, através de protocolo de atendimento.",
 )
 async def get_contratos(
@@ -42,7 +33,7 @@ async def get_contratos(
     sortorder: Optional[SortOrder] = Query(
         default=SortOrder.ASC, description="Ordem da ordenação."
     ),
-) -> SuporteContratoListOut:
+) -> schemas.SuporteContratoListOut:
     return await suporte_service.get_contratos_ativos(
         protocolo=protocolo,
         page=page,
@@ -54,20 +45,20 @@ async def get_contratos(
 
 @suporte_router.get(
     path="/status_conexao",
-    response_model=StatusConexaoOut,
+    response_model=schemas.StatusConexaoOut,
     summary="Obtém status de conexão de um cliente, através de ID de login.",
 )
 async def get_status_conexao(
     id_login: PositiveInt = Query(
         ge=1, description="ID de login do cliente no IXCSoft."
     ),
-) -> StatusConexaoOut:
+) -> schemas.StatusConexaoOut:
     return await suporte_service.get_status_conexao(id_login=id_login)
 
 
 @suporte_router.get(
     path="/status_onu",
-    response_model=StatusONUOut,
+    response_model=schemas.StatusONUOut,
     summary="Obtém status de ONU (sinal rx) de um cliente, através de ID de login, ou MAC Address de ONU.",
 )
 async def get_status_onu(
@@ -77,26 +68,26 @@ async def get_status_onu(
     mac_onu: Optional[str] = Query(
         min_length=12, max_length=12, default=None, description="MAC Address da ONU."
     ),
-) -> StatusONUOut:
+) -> schemas.StatusONUOut:
     return await suporte_service.get_status_onu(id_login=id_login, mac_onu=mac_onu)
 
 
 @suporte_router.post(
     path="/desconectar_cliente",
-    response_model=MensagemOut,
+    response_model=schemas.MensagemOut,
     summary="Envia sinal de desconexão para um cliente, através de ID de login.",
 )
 async def post_desconectar_cliente(
     id_login: PositiveInt = Query(
         ge=1, description="ID de login do cliente no IXCSoft."
     ),
-) -> MensagemOut:
+) -> schemas.MensagemOut:
     return await suporte_service.post_desconectar_cliente(id_login=id_login)
 
 
 @suporte_router.get(
     path="/atendimentos",
-    response_model=AtendimentoOut,
+    response_model=schemas.AtendimentoOut,
     summary="Checa atendimentos abertos de um cliente, através de ID de login.",
 )
 async def get_atendimentos(
@@ -115,7 +106,7 @@ async def get_atendimentos(
     sortorder: Optional[SortOrder] = Query(
         default=SortOrder.ASC, description="Ordem da ordenação."
     ),
-) -> AtendimentoOut:
+) -> schemas.AtendimentoOut:
     return await suporte_service.get_atendimentos_abertos(
         id_login=id_login,
         page=page,
@@ -128,20 +119,24 @@ async def get_atendimentos(
 @suporte_router.post(
     path="/atendimentos",
     status_code=status.HTTP_201_CREATED,
-    response_model=AtendimentoCreate,
+    response_model=schemas.AtendimentoCreate,
     summary="Abre ticket de atendimento, através de dados do atendimento.",
 )
-async def post_atendimentos(atendimento: AtendimentoIn) -> AtendimentoCreate:
+async def post_atendimentos(
+    atendimento: schemas.AtendimentoIn,
+) -> schemas.AtendimentoCreate:
     return await suporte_service.post_atendimentos(atendimento=atendimento)
 
 
 @suporte_router.patch(
     path="/logins/{id}",
-    response_model=MensagemOut,
+    response_model=schemas.MensagemOut,
     summary="Atualiza um ou mais campos associado a um login específico, por meio do ID de login.",
 )
 async def patch_logins(
     id: PositiveInt = Path(ge=1, description="ID de login."),
-    login: LoginUpdate = Body(ge=1, description="Campos de login a serem atualizados."),
-) -> MensagemOut:
+    login: schemas.LoginUpdate = Body(
+        ge=1, description="Campos de login a serem atualizados."
+    ),
+) -> schemas.MensagemOut:
     return await suporte_service.patch_logins(id=id, login=login)

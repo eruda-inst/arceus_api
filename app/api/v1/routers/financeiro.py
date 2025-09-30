@@ -1,9 +1,9 @@
+from .. import schemas
 from typing import Optional
 from ..utils import SortOrder
 from pydantic import PositiveInt
 from fastapi import APIRouter, Query
 from ..services import FinanceiroService, ComercialService
-from ..schemas import FaturaAbertaListOut, ComercialContratoListOut
 
 
 financeiro_router = APIRouter()
@@ -13,7 +13,7 @@ comercial_service = ComercialService()
 
 @financeiro_router.get(
     path="/faturas_abertas",
-    response_model=FaturaAbertaListOut,
+    response_model=schemas.FaturaAbertaListOut,
     summary="Obtém faturas associadas a um cliente, através de ID de protocolo de atendimento.",
 )
 async def get_faturas_abertas(
@@ -32,7 +32,7 @@ async def get_faturas_abertas(
     sortorder: Optional[SortOrder] = Query(
         default=SortOrder.ASC, description="Ordem da ordenação."
     ),
-) -> FaturaAbertaListOut:
+) -> schemas.FaturaAbertaListOut:
     return await financeiro_service.get_faturas_abertas(
         protocolo=protocolo,
         page=page,
@@ -44,7 +44,7 @@ async def get_faturas_abertas(
 
 @financeiro_router.get(
     path="/contratos",
-    response_model=ComercialContratoListOut,
+    response_model=schemas.ComercialContratoListOut,
     summary="Obtém contratos de um cliente, por meio de ID de login.",
 )
 async def get_contratos(
@@ -65,11 +65,23 @@ async def get_contratos(
     sortorder: Optional[SortOrder] = Query(
         SortOrder.ASC, description="Ordem da ordenação."
     ),
-) -> ComercialContratoListOut:
+) -> schemas.ComercialContratoListOut:
     return await comercial_service.get_contratos(
         protocolo=protocolo,
         page=page,
         per_page=per_page,
         sortname=sortname,
         sortorder=sortorder,
+    )
+
+
+@financeiro_router.post(
+    path="/desbloqueio_em_confianca",
+    summary="Realiza desbloqueio em confiança de um determinado contrato, através do ID do contrato.",
+)
+async def post_desbloqueio_em_confianca(
+    id_contrato: PositiveInt = Query(description="ID do contrato."),
+):
+    return await financeiro_service.post_desbloqueio_em_confianca(
+        id_contrato=id_contrato
     )

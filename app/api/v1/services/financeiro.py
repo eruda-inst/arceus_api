@@ -1,10 +1,10 @@
+from .. import schemas
+from .service import Service
 from ..utils import SortOrder
 from typing import Self, Optional
-from pydantic import ValidationError, PositiveInt
 from fastapi import HTTPException, status
 from ..clients import FinanceiroIXCCliente
-from ..schemas import FaturaAberta, FaturaAbertaListOut, Meta, Links
-from .service import Service
+from pydantic import ValidationError, PositiveInt
 
 
 class FinanceiroService(Service):
@@ -19,7 +19,7 @@ class FinanceiroService(Service):
         per_page: Optional[PositiveInt] = 10,
         sortname: Optional[str] = "fn_areceber.id",
         sortorder: Optional[SortOrder] = SortOrder.ASC,
-    ) -> FaturaAbertaListOut:
+    ) -> schemas.FaturaAbertaListOut:
         try:
             id_cliente = await self.get_id_cliente_ixc(protocolo=protocolo)
 
@@ -62,14 +62,14 @@ class FinanceiroService(Service):
 
             total = len(faturas_abertas)
 
-            meta = Meta(
+            meta = schemas.Meta(
                 total=total,
                 page=page,
                 per_page=per_page,
             )
 
             base_url = f"/api/v1/financeiro/faturas?protocolo={protocolo}"
-            links = Links(
+            links = schemas.Links(
                 self=f"{base_url}&page={page}&per_page={per_page}",
                 next=(
                     f"{base_url}&page={page + 1}&per_page={per_page}"
@@ -83,11 +83,31 @@ class FinanceiroService(Service):
                 ),
             )
 
-            return FaturaAbertaListOut(
-                data=[FaturaAberta(**f) for f in faturas_abertas_formatadas],
+            return schemas.FaturaAbertaListOut(
+                data=[schemas.FaturaAberta(**f) for f in faturas_abertas_formatadas],
                 meta=meta,
                 links=links,
             )
+        except HTTPException:
+            raise
+        except ValidationError as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Validação da resposta falhou: {e}",
+            )
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Erro interno ao processar solicitação: {str(e)}",
+            )
+
+    async def post_desbloqueio_em_confianca(self: Self, id_contrato: PositiveInt):
+        try:
+            res = await self.financeiro_ixc_cliente.post_desbloqueio_em_confianca(
+                id_contrato=id_contrato
+            )
+            print(res)
+            return res
         except HTTPException:
             raise
         except ValidationError as e:

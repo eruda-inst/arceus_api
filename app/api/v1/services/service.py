@@ -1,7 +1,7 @@
 from typing import Self
 from ..clients import OpaCliente
-from fastapi import HTTPException, status
 from pydantic import ValidationError
+from fastapi import HTTPException, status
 
 
 class Service:

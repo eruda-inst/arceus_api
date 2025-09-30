@@ -1,7 +1,8 @@
+from typing import Dict
 from ..enums import StatusAcessoRot, StatusAcessoCod
 
 
-STATUS_ACESSO = {
+STATUS_ACESSO: Dict[StatusAcessoCod, StatusAcessoRot] = {
     StatusAcessoCod.AGUARDANDO_ASSINATURA: StatusAcessoRot.AGUARDANDO_ASSINATURA,
     StatusAcessoCod.ATIVO: StatusAcessoRot.ATIVO,
     StatusAcessoCod.BLOQUEIO_AUTOMATICO: StatusAcessoRot.BLOQUEIO_AUTOMATICO,

@@ -1,14 +1,9 @@
+from .. import schemas
 from typing import Optional
 from ..utils import SortOrder
 from pydantic import PositiveInt
-from fastapi import APIRouter, Query, status, Body
 from ..services import ComercialService
-from ..schemas import (
-    ComercialContratoListOut,
-    StatusAcessoOut,
-    LeadIn,
-    LeadCreate,
-)
+from fastapi import APIRouter, Query, status, Body
 
 comercial_router = APIRouter()
 comercial_service = ComercialService()
@@ -16,18 +11,18 @@ comercial_service = ComercialService()
 
 @comercial_router.get(
     path="/status_acesso",
-    response_model=StatusAcessoOut,
+    response_model=schemas.StatusAcessoOut,
     summary="Obtém status de acesso, através de ID de contrato.",
 )
 async def get_status_acesso(
     id_contrato: PositiveInt = Query(ge=1, description="ID do contrato."),
-) -> StatusAcessoOut:
+) -> schemas.StatusAcessoOut:
     return await comercial_service.get_status_acesso(id_contrato=id_contrato)
 
 
 @comercial_router.get(
     path="/contratos",
-    response_model=ComercialContratoListOut,
+    response_model=schemas.ComercialContratoListOut,
     summary="Obtém contratos de um cliente, por meio de ID de login.",
 )
 async def get_contratos(
@@ -48,7 +43,7 @@ async def get_contratos(
     sortorder: Optional[SortOrder] = Query(
         SortOrder.ASC, description="Ordem da ordenação."
     ),
-) -> ComercialContratoListOut:
+) -> schemas.ComercialContratoListOut:
     return await comercial_service.get_contratos(
         protocolo=protocolo,
         page=page,
@@ -61,10 +56,10 @@ async def get_contratos(
 @comercial_router.post(
     path="/leads",
     status_code=status.HTTP_201_CREATED,
-    response_model=LeadCreate,
+    response_model=schemas.LeadCreate,
     summary="Cadastra novo lead, a partir de lead submetido.",
 )
 async def post_leads(
-    lead: LeadIn = Body(description="Lead a ser cadastrado."),
-) -> LeadCreate:
+    lead: schemas.LeadIn = Body(description="Lead a ser cadastrado."),
+) -> schemas.LeadCreate:
     return await comercial_service.post_leads(lead=lead)
