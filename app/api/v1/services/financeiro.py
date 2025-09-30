@@ -134,7 +134,12 @@ class FinanceiroService(Service):
                     status_code=status.HTTP_404_NOT_FOUND,
                     detail="Sem linha digitável.",
                 )
-            linha_digitavel = reg[0]["linha_digitavel"]
+            linha_digitavel = reg[0].get("linha_digitavel")
+            if not linha_digitavel:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Sem linha digitável.",
+                )
             return schemas.LinhaDigitavelOut(
                 data=schemas.LinhaDigitavelBase(linha_digitavel=linha_digitavel)
             )
