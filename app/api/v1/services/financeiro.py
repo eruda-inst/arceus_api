@@ -101,13 +101,15 @@ class FinanceiroService(Service):
                 detail=f"Erro interno ao processar solicitação: {str(e)}",
             )
 
-    async def post_desbloqueio_em_confianca(self: Self, id_contrato: PositiveInt):
+    async def post_desbloqueio_em_confianca(
+        self: Self, id_contrato: PositiveInt
+    ) -> schemas.MensagemOut:
         try:
             res = await self.financeiro_ixc_cliente.post_desbloqueio_em_confianca(
                 id_contrato=id_contrato
             )
-            print(res)
-            return res
+            mensagem = res.get("message")
+            return schemas.MensagemOut(mensagem=mensagem)
         except HTTPException:
             raise
         except ValidationError as e:

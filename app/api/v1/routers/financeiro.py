@@ -77,11 +77,12 @@ async def get_contratos(
 
 @financeiro_router.post(
     path="/desbloqueio_em_confianca",
+    response_model=schemas.MensagemOut,
     summary="Realiza desbloqueio em confiança de um determinado contrato, através do ID do contrato.",
 )
 async def post_desbloqueio_em_confianca(
     id_contrato: PositiveInt = Query(description="ID do contrato."),
-):
+) -> schemas.MensagemOut:
     return await financeiro_service.post_desbloqueio_em_confianca(
         id_contrato=id_contrato
     )

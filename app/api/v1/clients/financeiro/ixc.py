@@ -38,6 +38,6 @@ class FinanceiroIXCCliente(IXCCliente):
     ) -> Dict[str, Any]:
         payload = {"id_contrato": id_contrato}
         data = await self._make_request(
-            endpoint="desbloqueio_em_confianca", payload=payload
+            endpoint="cliente_contrato_15464", payload=payload, include_ixcsoft=False
         )
         return data
