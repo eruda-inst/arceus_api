@@ -6,6 +6,8 @@ class Settings(BaseSettings):
     IXC_TOKEN: str
     OPA_HOST: str
     IXC_HOST: str
+    API_KEY_7AZ: str
+    BASE_URL_7AZ: str
 
     model_config = SettingsConfigDict(env_file=".env", case_sensitive=True)
 

@@ -4,3 +4,5 @@ from .fatura import (
     LinhaDigitavelBase,
     LinhaDigitavelOut,
 )
+
+from .pix import ChavePixBase

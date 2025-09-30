@@ -3,7 +3,7 @@ from .service import Service
 from ..utils import SortOrder
 from typing import Self, Optional
 from fastapi import HTTPException, status
-from ..clients import FinanceiroIXCCliente
+from ..clients import FinanceiroIXCCliente, FinanceiroAZ7Cliente
 from pydantic import ValidationError, PositiveInt
 
 
@@ -11,6 +11,7 @@ class FinanceiroService(Service):
     def __init__(self: Self) -> None:
         super().__init__()
         self.financeiro_ixc_cliente = FinanceiroIXCCliente()
+        self.financeiro_az7_cliente = FinanceiroAZ7Cliente()
 
     async def get_faturas_abertas(
         self: Self,
@@ -143,6 +144,29 @@ class FinanceiroService(Service):
             return schemas.LinhaDigitavelOut(
                 data=schemas.LinhaDigitavelBase(linha_digitavel=linha_digitavel)
             )
+        except HTTPException:
+            raise
+        except ValidationError as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Validação da resposta falhou: {e}",
+            )
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Erro interno ao processar solicitação: {str(e)}",
+            )
+
+    async def get_chave_pix(self: Self, id_fatura: PositiveInt):
+        try:
+            res = await self.financeiro_az7_cliente.get_chave_pix(id_fatura=id_fatura)
+            if len(res) < 1 or not res.get("pixCode"):
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Sem chave pix.",
+                )
+            chave_pix = res.get("pixCode")
+            return schemas.ChavePixBase(chave_pix=chave_pix)
         except HTTPException:
             raise
         except ValidationError as e:

@@ -26,4 +26,5 @@ from .financeiro import (
     FaturaAberta,
     LinhaDigitavelBase,
     LinhaDigitavelOut,
+    ChavePixBase,
 )

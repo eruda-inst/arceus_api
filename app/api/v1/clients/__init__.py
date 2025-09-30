@@ -3,6 +3,6 @@ from app.api.v1.utils import SortOrder
 from app.api.v1.schemas import AtendimentoIn
 from .comercial import ComercialIXCCliente
 from .suporte import SuporteIXCCliente
-from .financeiro import FinanceiroIXCCliente
+from .financeiro import FinanceiroIXCCliente, FinanceiroAZ7Cliente
 from .ixc import IXCCliente
 from .opa import OpaCliente

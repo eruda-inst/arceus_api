@@ -97,3 +97,14 @@ async def get_linha_digitavel(
     id: PositiveInt = Path(ge=1, description="ID da fatura.")
 ) -> schemas.LinhaDigitavelOut:
     return await financeiro_service.get_linha_digitavel(id=id)
+
+
+@financeiro_router.get(
+    path="/chave_pix",
+    response_model=schemas.ChavePixBase,
+    summary="Obtém chave pix de uma fatura, através do ID da fatura.",
+)
+async def get_chave_pix(
+    id_fatura: PositiveInt = Query(description="ID da fatura."),
+) -> schemas.ChavePixBase:
+    return await financeiro_service.get_chave_pix(id_fatura=id_fatura)
