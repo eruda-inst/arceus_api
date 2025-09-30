@@ -105,6 +105,6 @@ async def get_linha_digitavel(
     summary="Obtém chave pix de uma fatura, através do ID da fatura.",
 )
 async def get_chave_pix(
-    id_fatura: PositiveInt = Query(description="ID da fatura."),
+    id_fatura: PositiveInt = Query(ge=1, description="ID da fatura."),
 ) -> schemas.ChavePixBase:
     return await financeiro_service.get_chave_pix(id_fatura=id_fatura)
