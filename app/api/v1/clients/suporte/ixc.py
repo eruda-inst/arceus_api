@@ -123,3 +123,10 @@ class SuporteIXCCliente(IXCCliente):
             method="PUT",
         )
         return data
+
+    async def post_limpar_mac(self: Self, id_login: int) -> None:
+        payload = {"get_id": id_login}
+        data = await self._make_request(
+            endpoint="radusuarios_25452", payload=payload, include_ixcsoft=False
+        )
+        return data

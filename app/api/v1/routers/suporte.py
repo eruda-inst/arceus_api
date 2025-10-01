@@ -141,3 +141,16 @@ async def patch_logins(
     ),
 ) -> schemas.MensagemOut:
     return await suporte_service.patch_logins(id=id, login=login)
+
+
+@suporte_router.post(
+    path="/limpar_mac",
+    response_model=schemas.MensagemOut,
+    summary="Limpa MAC Address, através do ID de login.",
+)
+async def limpar_mac(
+    id_login: PositiveInt = Query(
+        ge=1, description="ID de login do cliente no IXCSoft."
+    )
+) -> schemas.MensagemOut:
+    return await suporte_service.post_limpar_mac(id_login=id_login)

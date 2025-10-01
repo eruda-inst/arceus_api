@@ -109,6 +109,7 @@ class FinanceiroService(Service):
             res = await self.financeiro_ixc_cliente.post_desbloqueio_em_confianca(
                 id_contrato=id_contrato
             )
+            mensagem = "Nenhuma mensagem retornada."
             mensagem = res.get("message")
             return schemas.MensagemOut(mensagem=mensagem)
         except HTTPException:

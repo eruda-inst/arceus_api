@@ -249,7 +249,8 @@ class SuporteService(Service):
             res = await self.suporte_ixc_cliente.post_desconectar_cliente(
                 id_login=id_login
             )
-            mensagem = res["msg"][0]["message"]
+            mensagem = "Nenhuma mensagem retornada."
+            mensagem = res.get("msg")[0]["message"]
             return schemas.MensagemOut(mensagem=mensagem)
         except HTTPException:
             raise
@@ -375,6 +376,25 @@ class SuporteService(Service):
 
             mensagem = res["message"]
 
+            return schemas.MensagemOut(mensagem=mensagem)
+        except HTTPException:
+            raise
+        except ValidationError as e:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail=f"Erro de validação: {e}",
+            )
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Erro interno: {str(e)}",
+            )
+
+    async def post_limpar_mac(self: Self, id_login: PositiveInt) -> schemas.MensagemOut:
+        try:
+            res = await self.suporte_ixc_cliente.post_limpar_mac(id_login=id_login)
+            mensagem = "Nenhuma mensagem retornada."
+            mensagem = res.get("message")
             return schemas.MensagemOut(mensagem=mensagem)
         except HTTPException:
             raise
