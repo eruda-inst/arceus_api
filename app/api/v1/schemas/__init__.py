@@ -28,3 +28,4 @@ from .financeiro import (
     LinhaDigitavelOut,
     ChavePixBase,
 )
+from .triagem import ClienteIn

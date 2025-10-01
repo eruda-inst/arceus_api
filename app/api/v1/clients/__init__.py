@@ -6,3 +6,4 @@ from .suporte import SuporteIXCCliente
 from .financeiro import FinanceiroIXCCliente, FinanceiroAZ7Cliente
 from .ixc import IXCCliente
 from .opa import OpaCliente
+from .triagem import TriagemIXCCliente
