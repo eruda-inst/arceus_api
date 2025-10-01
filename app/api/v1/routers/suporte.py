@@ -137,7 +137,7 @@ async def post_atendimentos(
 async def patch_logins(
     id: PositiveInt = Path(ge=1, description="ID de login."),
     login: schemas.LoginUpdate = Body(
-        ge=1, description="Campos de login a serem atualizados."
+        description="Campos de login a serem atualizados."
     ),
 ) -> schemas.MensagemOut:
     return await suporte_service.patch_logins(id=id, login=login)
