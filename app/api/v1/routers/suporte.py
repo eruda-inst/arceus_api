@@ -128,7 +128,8 @@ async def post_atendimentos(
     return await suporte_service.post_atendimentos(atendimento=atendimento)
 
 
-@suporte_router.patch(
+# Por razões de limitações na plataforma opa, o verbo deve ser put, ao invés de patch
+@suporte_router.put(
     path="/logins/{id}",
     response_model=schemas.MensagemOut,
     summary="Atualiza um ou mais campos associado a um login específico, por meio do ID de login.",
