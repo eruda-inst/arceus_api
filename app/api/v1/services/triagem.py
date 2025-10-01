@@ -26,9 +26,6 @@ class TriagemService(service.Service):
 
             cliente_atualizado = {**cliente_antigo, **novo_cliente}
 
-            print("sem formatar", cliente_atualizado["cep"])
-            print("formatado", utils.apenas_numeros(string=cliente_atualizado["cep"]))
-
             if "cep" in cliente_atualizado:
                 cliente_atualizado["cep"] = utils.formatar_cep(
                     cep=cliente_atualizado["cep"]

@@ -10,7 +10,6 @@ class TriagemIXCCliente(ixc.IXCCliente):
         grid_param = [{"TB": "cliente.id", "OP": "=", "P": str(id)}]
         payload = {"grid_param": json.dumps(obj=grid_param)}
         data = await self._make_request("cliente", payload)
-        print(data)
         return data
 
     async def patch_clientes(
