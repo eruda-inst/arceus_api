@@ -1,18 +1,15 @@
-from .. import utils
-from .. import schemas
+from . import service
 from datetime import datetime
 from typing import Self, Optional
-from ..schemas import Meta, Links
-from pydantic import ValidationError, PositiveInt
-from ..clients import ComercialIXCCliente
+from .. import utils, schemas, clients
 from fastapi import HTTPException, status
-from .service import Service
+from pydantic import ValidationError, PositiveInt
 
 
-class ComercialService(Service):
+class ComercialService(service.Service):
     def __init__(self: Self) -> None:
         super().__init__()
-        self.comercial_ixc_cliente = ComercialIXCCliente()
+        self.comercial_ixc_cliente = clients.ComercialIXCCliente()
 
     async def get_status_acesso(
         self: Self, id_contrato: PositiveInt
@@ -139,16 +136,16 @@ class ComercialService(Service):
                 }
                 contratos_tratados.append(contrato_tratado)
 
-            total = contratos.__len__()
+            total = len(contratos)
 
-            meta = Meta(
+            meta = schemas.Meta(
                 total=total,
                 page=page,
                 per_page=per_page,
             )
 
             base_url = f"/api/v1/comercial/contratos?protocolo={protocolo}"
-            links = Links(
+            links = schemas.Links(
                 self=f"{base_url}&page={page}&per_page={per_page}",
                 next=(
                     f"{base_url}&page={page + 1}&per_page={per_page}"

@@ -1,11 +1,11 @@
-from .service import Service
+from . import service
 from typing import Self, Optional
 from .. import clients, schemas, utils
 from fastapi import HTTPException, status
 from pydantic import ValidationError, PositiveInt
 
 
-class FinanceiroService(Service):
+class FinanceiroService(service.Service):
     def __init__(self: Self) -> None:
         super().__init__()
         self.financeiro_ixc_cliente = clients.FinanceiroIXCCliente()
@@ -124,10 +124,12 @@ class FinanceiroService(Service):
             )
 
     async def get_linha_digitavel(
-        self: Self, id: PositiveInt
+        self: Self, id_fatura: PositiveInt
     ) -> schemas.LinhaDigitavelOut:
         try:
-            res = await self.financeiro_ixc_cliente.get_linha_digitavel(id=id)
+            res = await self.financeiro_ixc_cliente.get_linha_digitavel(
+                id_fatura=id_fatura
+            )
             reg = res.get("registros")
             if not reg:
                 raise HTTPException(
@@ -156,7 +158,7 @@ class FinanceiroService(Service):
                 detail=f"Erro interno ao processar solicitação: {str(e)}",
             )
 
-    async def get_chave_pix(self: Self, id_fatura: PositiveInt):
+    async def get_chave_pix(self: Self, id_fatura: PositiveInt) -> schemas.ChavePixBase:
         try:
             res = await self.financeiro_az7_cliente.get_chave_pix(id_fatura=id_fatura)
             if len(res) < 1 or not res.get("pixCode"):
@@ -179,9 +181,13 @@ class FinanceiroService(Service):
                 detail=f"Erro interno ao processar solicitação: {str(e)}",
             )
 
-    async def get_credenciais(self: Self, id: PositiveInt) -> schemas.CredencialOut:
+    async def get_credenciais(
+        self: Self, id_cliente: PositiveInt
+    ) -> schemas.CredencialOut:
         try:
-            res = await self.financeiro_ixc_cliente.get_credenciais(id=id)
+            res = await self.financeiro_ixc_cliente.get_credenciais(
+                id_cliente=id_cliente
+            )
             if not res.get("registros"):
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
@@ -205,10 +211,12 @@ class FinanceiroService(Service):
             )
 
     async def put_credenciais(
-        self: Self, id: PositiveInt, credenciais: schemas.CredencialUpdate
+        self: Self, id_cliente: PositiveInt, credenciais: schemas.CredencialUpdate
     ) -> schemas.MensagemOut:
         try:
-            res = await self.financeiro_ixc_cliente.get_credenciais(id=id)
+            res = await self.financeiro_ixc_cliente.get_credenciais(
+                id_cliente=id_cliente
+            )
             if not res.get("registros"):
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
@@ -216,10 +224,10 @@ class FinanceiroService(Service):
                 )
             cliente_antigo = res["registros"][0]
             novas_credenciais = credenciais.model_dump(exclude_unset=True)
-            credenciais_atualizadas = {**cliente_antigo, **novas_credenciais}
-            del credenciais_atualizadas["id"]
-            res = await self.financeiro_ixc_cliente.put_credenciais(
-                id=id, credenciais=credenciais_atualizadas
+            cliente_atualizado = {**cliente_antigo, **novas_credenciais}
+            del cliente_atualizado["id"]
+            res = await self.financeiro_ixc_cliente.put_clientes(
+                id_cliente=id_cliente, cliente=cliente_atualizado
             )
             mensagem = "Nenhuma mensagem retornada."
             mensagem = res.get("message")

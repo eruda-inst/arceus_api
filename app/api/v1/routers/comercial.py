@@ -1,12 +1,10 @@
-from .. import schemas
 from typing import Optional
-from ..utils import SortOrder
 from pydantic import PositiveInt
-from ..services import ComercialService
+from .. import utils, services, schemas
 from fastapi import APIRouter, Query, status, Body
 
 comercial_router = APIRouter()
-comercial_service = ComercialService()
+comercial_service = services.ComercialService()
 
 
 @comercial_router.get(
@@ -40,8 +38,8 @@ async def get_contratos(
     sortname: Optional[str] = Query(
         default="cliente_contrato.id", description="Campo para ordenação."
     ),
-    sortorder: Optional[SortOrder] = Query(
-        SortOrder.ASC, description="Ordem da ordenação."
+    sortorder: Optional[utils.SortOrder] = Query(
+        utils.SortOrder.ASC, description="Ordem da ordenação."
     ),
 ) -> schemas.ComercialContratoListOut:
     return await comercial_service.get_contratos(

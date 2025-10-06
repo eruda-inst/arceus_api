@@ -1,5 +1,5 @@
-from pydantic import BaseModel, Field
 from app.api.v1 import utils
+from pydantic import BaseModel, Field
 
 
 class StatusONU(BaseModel):

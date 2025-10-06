@@ -1,14 +1,14 @@
-from typing import Self
-from ..clients import OpaCliente
+from .. import clients
+from typing import Self, Dict
 from pydantic import ValidationError
 from fastapi import HTTPException, status
 
 
 class Service:
     def __init__(self: Self) -> None:
-        self.opa_cliente = OpaCliente()
+        self.opa_cliente = clients.OpaCliente()
 
-    async def get_id_cliente_ixc(self: Self, protocolo: str) -> dict:
+    async def get_id_cliente_ixc(self: Self, protocolo: str) -> Dict:
         try:
             id_cliente_opa_res = await self.opa_cliente.get_id_cliente_opa(
                 protocolo=protocolo

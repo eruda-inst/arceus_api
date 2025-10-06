@@ -2,7 +2,7 @@ from typing import Optional
 from pydantic import BaseModel, Field
 
 
-class ClienteIn(BaseModel):
+class ClienteUpdate(BaseModel):
     ativo: Optional[str] = Field(
         default=None,
         description="Indica se o cliente está ativo. (S para Sim, N para Não).",

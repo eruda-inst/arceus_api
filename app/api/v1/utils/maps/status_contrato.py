@@ -1,11 +1,11 @@
 from typing import Dict
-from ..enums import StatusContratoCod, StatusContratoRot
+from .. import enums
 
 
-STATUS_CONTRATO: Dict[StatusContratoCod, StatusContratoRot] = {
-    StatusContratoCod.PRE_CONTRATO: StatusContratoRot.PRE_CONTRATO,
-    StatusContratoCod.ATIVO: StatusContratoRot.ATIVO,
-    StatusContratoCod.INATIVO: StatusContratoRot.INATIVO,
-    StatusContratoCod.NEGATIVADO: StatusContratoRot.NEGATIVADO,
-    StatusContratoCod.DESISTIU: StatusContratoRot.DESISTIU,
+STATUS_CONTRATO: Dict[enums.StatusContratoCod, enums.StatusContratoRot] = {
+    enums.StatusContratoCod.PRE_CONTRATO: enums.StatusContratoRot.PRE_CONTRATO,
+    enums.StatusContratoCod.ATIVO: enums.StatusContratoRot.ATIVO,
+    enums.StatusContratoCod.INATIVO: enums.StatusContratoRot.INATIVO,
+    enums.StatusContratoCod.NEGATIVADO: enums.StatusContratoRot.NEGATIVADO,
+    enums.StatusContratoCod.DESISTIU: enums.StatusContratoRot.DESISTIU,
 }

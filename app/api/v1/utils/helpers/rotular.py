@@ -1,7 +1,6 @@
-from .. import maps
-from .. import enums
 from enum import Enum
 from typing import Union
+from .. import maps, enums
 
 
 def get_label(

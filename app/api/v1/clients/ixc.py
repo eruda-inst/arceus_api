@@ -1,15 +1,15 @@
 import json
 import httpx
 import base64
-from ..core import settings
+from .. import core
+from typing import Dict, Self
 from fastapi import HTTPException, status
-from typing import Dict, Any, List, Union, Self, Optional
 
 
 class IXCCliente:
     def __init__(self: Self) -> None:
-        self.token = settings.IXC_TOKEN
-        self.host = settings.IXC_HOST
+        self.token = core.settings.IXC_TOKEN
+        self.host = core.settings.IXC_HOST
         self.base_url = f"https://{self.host}/webservice/v1"
         self.auth_header = self._create_auth_header()
 
@@ -17,7 +17,7 @@ class IXCCliente:
         token_encoded = base64.b64encode(self.token.encode("utf-8")).decode("utf-8")
         return f"Basic {token_encoded}"
 
-    def _get_headers(self: Self, include_ixcsoft: bool = True) -> Dict[str, str]:
+    def _get_headers(self: Self, include_ixcsoft: bool = True) -> Dict:
         headers = {"Authorization": self.auth_header}
         if include_ixcsoft:
             headers["ixcsoft"] = "listar"
@@ -26,10 +26,10 @@ class IXCCliente:
     async def _make_request(
         self: Self,
         endpoint: str,
-        payload: Dict[str, Any],
+        payload: Dict,
         method: str = "POST",
         include_ixcsoft: bool = True,
-    ) -> Optional[Union[List[Dict[str, Any]], Dict[str, Any]]]:
+    ) -> Dict:
         url = f"{self.base_url}/{endpoint}"
         headers = self._get_headers(include_ixcsoft=include_ixcsoft)
 
@@ -64,9 +64,7 @@ class IXCCliente:
                 detail=f"Resposta inválida do servidor IXC: {e}",
             ) from e
 
-    async def get_valor_e_data_vencimento(
-        self: Self, id_contrato: int
-    ) -> Optional[Dict[str, Any]]:
+    async def get_valor_e_data_vencimento(self: Self, id_contrato: int) -> Dict:
         grid_param = [
             {"TB": "fn_areceber.id_contrato", "OP": "=", "P": str(id_contrato)}
         ]

@@ -32,4 +32,5 @@ from .financeiro import (
     CredencialUpdate,
     CredencialOut,
 )
-from .cliente import ClienteIn
+from .triagem import ContatoUpdate
+from .cliente import ClienteUpdate

@@ -1,13 +1,11 @@
-from .. import schemas
 from typing import Optional
-from ..utils import SortOrder
 from pydantic import PositiveInt
-from ..services import SuporteService
+from .. import schemas, utils, services
 from fastapi import APIRouter, Query, status, Path, Body
 
 
 suporte_router = APIRouter()
-suporte_service = SuporteService()
+suporte_service = services.SuporteService()
 
 
 @suporte_router.get(
@@ -30,11 +28,11 @@ async def get_contratos(
     sortname: Optional[str] = Query(
         default="cliente_contrato.id", description="Campo para ordenação."
     ),
-    sortorder: Optional[SortOrder] = Query(
-        default=SortOrder.ASC, description="Ordem da ordenação."
+    sortorder: Optional[utils.SortOrder] = Query(
+        default=utils.SortOrder.ASC, description="Ordem da ordenação."
     ),
 ) -> schemas.SuporteContratoListOut:
-    return await suporte_service.get_contratos_ativos(
+    return await suporte_service.get_contratos(
         protocolo=protocolo,
         page=page,
         per_page=per_page,
@@ -103,11 +101,11 @@ async def get_atendimentos(
     sortname: Optional[str] = Query(
         default="su_ticket.id", description="Campo para ordenação."
     ),
-    sortorder: Optional[SortOrder] = Query(
-        default=SortOrder.ASC, description="Ordem da ordenação."
+    sortorder: Optional[utils.SortOrder] = Query(
+        default=utils.SortOrder.ASC, description="Ordem da ordenação."
     ),
 ) -> schemas.AtendimentoOut:
-    return await suporte_service.get_atendimentos_abertos(
+    return await suporte_service.get_atendimentos(
         id_login=id_login,
         page=page,
         per_page=per_page,
@@ -130,15 +128,15 @@ async def post_atendimentos(
 
 # Por razões de limitações na plataforma opa, o verbo deve ser put, ao invés de patch
 @suporte_router.put(
-    path="/ip/{id}",
+    path="/ip/{id_login}",
     response_model=schemas.MensagemOut,
     summary="Atualiza um ou mais campos associado a um login específico, por meio do ID de login.",
 )
 async def put_ip(
-    id: PositiveInt = Path(ge=1, description="ID de login."),
+    id_login: PositiveInt = Path(ge=1, description="ID de login."),
     ip: schemas.IPUpdate = Body(description="IP a ser atualizado."),
 ) -> schemas.MensagemOut:
-    return await suporte_service.put_ip(id=id, ip=ip)
+    return await suporte_service.put_ip(id_login=id_login, ip=ip)
 
 
 @suporte_router.post(
@@ -146,7 +144,7 @@ async def put_ip(
     response_model=schemas.MensagemOut,
     summary="Limpa MAC Address, através do ID de login.",
 )
-async def limpar_mac(
+async def post_limpar_mac(
     id_login: PositiveInt = Query(
         ge=1, description="ID de login do cliente no IXCSoft."
     )

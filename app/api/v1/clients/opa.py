@@ -1,19 +1,17 @@
 import httpx
-from ..core import settings
+from .. import core
+from typing import Dict, Self
 from fastapi import HTTPException, status
-from typing import Dict, Any, Self, Optional
 
 
 class OpaCliente:
     def __init__(self: Self) -> None:
-        self.token = settings.OPA_TOKEN
-        self.host = settings.OPA_HOST
+        self.token = core.settings.OPA_TOKEN
+        self.host = core.settings.OPA_HOST
         self.base_url = f"https://{self.host}/api/v1"
         self.headers = {"Authorization": f"Bearer {self.token}"}
 
-    async def _make_request(
-        self: Self, endpoint: str, payload: Dict[str, Any]
-    ) -> Optional[Dict[str, Any]]:
+    async def _make_request(self: Self, endpoint: str, payload: Dict) -> Dict:
         url = f"{self.base_url}/{endpoint}"
         try:
             async with httpx.AsyncClient(timeout=30.0) as async_client:
@@ -31,16 +29,12 @@ class OpaCliente:
                 detail=f"Erro na API do OPA: {str(e)}",
             )
 
-    async def get_id_cliente_opa(
-        self: Self, protocolo: str
-    ) -> Optional[Dict[str, Any]]:
+    async def get_id_cliente_opa(self: Self, protocolo: str) -> Dict:
         payload = {"filter": {"protocolo": protocolo}}
         data = await self._make_request(endpoint="atendimento", payload=payload)
         return data
 
-    async def get_id_cliente_ixc(
-        self: Self, id_cliente_opa: int
-    ) -> Optional[Dict[str, Any]]:
+    async def get_id_cliente_ixc(self: Self, id_cliente_opa: int) -> Dict:
         payload = {"filter": {"_id": id_cliente_opa}}
         data = await self._make_request(endpoint="cliente", payload=payload)
         return data

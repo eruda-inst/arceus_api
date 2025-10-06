@@ -87,14 +87,14 @@ async def post_desbloqueio_em_confianca(
 
 
 @financeiro_router.get(
-    path="/linha_digitavel/{id}",
+    path="/linha_digitavel/{id_fatura}",
     response_model=schemas.LinhaDigitavelOut,
     summary="Obtém linha digitável de uma fatura, através do ID da fatura.",
 )
 async def get_linha_digitavel(
-    id: PositiveInt = Path(ge=1, description="ID da fatura.")
+    id_fatura: PositiveInt = Path(ge=1, description="ID da fatura.")
 ) -> schemas.LinhaDigitavelOut:
-    return await financeiro_service.get_linha_digitavel(id=id)
+    return await financeiro_service.get_linha_digitavel(id_fatura=id_fatura)
 
 
 @financeiro_router.get(
@@ -109,26 +109,28 @@ async def get_chave_pix(
 
 
 @financeiro_router.get(
-    path="/credenciais/{id}",
+    path="/credenciais/{id_cliente}",
     response_model=schemas.CredencialOut,
     summary="Obtém credenciais de acesso à central do assinante de um cliente, através do ID do cliente.",
 )
 async def get_credenciais(
-    id: PositiveInt = Path(ge=1, description="ID do cliente."),
+    id_cliente: PositiveInt = Path(ge=1, description="ID do cliente."),
 ) -> schemas.CredencialOut:
-    return await financeiro_service.get_credenciais(id=id)
+    return await financeiro_service.get_credenciais(id_cliente=id_cliente)
 
 
 # Por razões de limitações na plataforma opa, o verbo deve ser put, ao invés de patch
 @financeiro_router.put(
-    path="/credenciais/{id}",
+    path="/credenciais/{id_cliente}",
     response_model=schemas.MensagemOut,
     summary="Atualiza credenciais de acesso à central do assinante de um cliente, através do ID do cliente.",
 )
 async def put_credenciais(
-    id: PositiveInt = Path(ge=1, description="ID do cliente."),
+    id_cliente: PositiveInt = Path(ge=1, description="ID do cliente."),
     credenciais: schemas.CredencialUpdate = Body(
         description="Credenciais a serem atualizadas."
     ),
 ) -> schemas.MensagemOut:
-    return await financeiro_service.put_credenciais(id=id, credenciais=credenciais)
+    return await financeiro_service.put_credenciais(
+        id_cliente=id_cliente, credenciais=credenciais
+    )

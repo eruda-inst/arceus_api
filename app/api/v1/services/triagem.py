@@ -10,11 +10,11 @@ class TriagemService(service.Service):
         super().__init__()
         self.triagem_ixc_cliente = clients.TriagemIXCCliente()
 
-    async def patch_clientes(
-        self: Self, id: PositiveInt, cliente: schemas.ClienteIn
+    async def put_contato_cliente(
+        self: Self, id_cliente: PositiveInt, contato: schemas.ContatoUpdate
     ) -> schemas.MensagemOut:
         try:
-            res = await self.triagem_ixc_cliente.get_clientes(id=id)
+            res = await self.triagem_ixc_cliente.get_clientes(id_cliente=id_cliente)
             if not res.get("registros"):
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
@@ -22,19 +22,19 @@ class TriagemService(service.Service):
                 )
 
             cliente_antigo = res["registros"][0]
-            novo_cliente = cliente.model_dump(exclude_unset=True)
+            novo_contato = contato.model_dump()
 
-            cliente_atualizado = {**cliente_antigo, **novo_cliente}
+            cliente_atualizado = {**cliente_antigo, **novo_contato}
 
             if "cep" in cliente_atualizado:
                 cliente_atualizado["cep"] = utils.formatar_cep(
                     cep=cliente_atualizado["cep"]
                 )
 
-            cliente_atualizado.pop("id", None)
+            del cliente_atualizado["id"]
 
-            res = await self.triagem_ixc_cliente.patch_clientes(
-                id=id, cliente=cliente_atualizado
+            res = await self.triagem_ixc_cliente.put_clientes(
+                id_cliente=id_cliente, cliente=cliente_atualizado
             )
 
             mensagem = "Nenhuma mensagem retornada."

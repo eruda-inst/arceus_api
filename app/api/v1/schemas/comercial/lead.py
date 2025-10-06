@@ -1,6 +1,6 @@
+from app.api.v1 import utils
 from typing import Optional, Union
 from pydantic import BaseModel, Field, PositiveInt
-from app.api.v1.utils import Default
 
 
 class LeadIn(BaseModel):
@@ -18,15 +18,15 @@ class LeadIn(BaseModel):
         default="N/A", max_length=20, description="Data de cadastro do lead."
     )
     id_vd_contrato: Optional[PositiveInt] = Field(
-        Default.ID_VD_CONTRATO,
+        utils.Default.ID_VD_CONTRATO,
         description="ID do plano de contrato associado ao lead.",
     )
     id_responsavel: Optional[PositiveInt] = Field(
-        Default.ID_RESPONSAVEL_ARCEUS,
+        utils.Default.ID_RESPONSAVEL_ARCEUS,
         description="ID do responsável técnico associado ao lead.",
     )
     cidade: Optional[PositiveInt] = Field(
-        Default.ID_CIDADE_JACOBINA, description="ID da cidade associada ao lead."
+        utils.Default.ID_CIDADE_JACOBINA, description="ID da cidade associada ao lead."
     )
 
 

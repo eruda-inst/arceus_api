@@ -43,24 +43,24 @@ class FinanceiroIXCCliente(ixc.IXCCliente):
         )
         return data
 
-    async def get_linha_digitavel(self: Self, id: PositiveInt) -> Dict:
-        grid_param = [{"TB": "fn_areceber.id", "OP": "=", "P": str(id)}]
+    async def get_linha_digitavel(self: Self, id_fatura: PositiveInt) -> Dict:
+        grid_param = [{"TB": "fn_areceber.id", "OP": "=", "P": str(id_fatura)}]
         payload = {"grid_param": json.dumps(obj=grid_param)}
         data = await self._make_request(endpoint="fn_areceber", payload=payload)
         return data
 
-    async def get_credenciais(self: Self, id: PositiveInt) -> Dict:
-        grid_param = [{"TB": "cliente.id", "OP": "=", "P": str(id)}]
+    async def get_credenciais(self: Self, id_cliente: PositiveInt) -> Dict:
+        grid_param = [{"TB": "cliente.id", "OP": "=", "P": str(id_cliente)}]
         payload = {"grid_param": json.dumps(obj=grid_param)}
         data = await self._make_request(endpoint="cliente", payload=payload)
         return data
 
-    async def put_credenciais(
-        self: Self, id: PositiveInt, credenciais: schemas.CredencialUpdate
+    async def put_clientes(
+        self: Self, id_cliente: PositiveInt, cliente: schemas.ClienteUpdate
     ) -> Dict:
         data = await self._make_request(
-            endpoint=f"cliente/{id}",
-            payload=credenciais,
+            endpoint=f"cliente/{id_cliente}",
+            payload=cliente,
             include_ixcsoft=False,
             method="PUT",
         )

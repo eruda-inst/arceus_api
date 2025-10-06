@@ -1,7 +1,7 @@
-from typing import List
 from .. import misc
-from pydantic import BaseModel, Field, PositiveInt
+from typing import List
 from app.api.v1 import utils
+from pydantic import BaseModel, Field, PositiveInt
 
 
 class Contrato(BaseModel):

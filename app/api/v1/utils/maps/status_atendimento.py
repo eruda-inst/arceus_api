@@ -1,11 +1,11 @@
+from .. import enums
 from typing import Dict
-from ..enums import StatusAtendimentoCod, StatusAtendimentoRot
 
 
-STATUS_ATENDIMENTO: Dict[StatusAtendimentoCod, StatusAtendimentoRot] = {
-    StatusAtendimentoCod.NOVO: StatusAtendimentoRot.NOVO,
-    StatusAtendimentoCod.PENDENTE: StatusAtendimentoRot.PENDENTE,
-    StatusAtendimentoCod.EM_PROGRESSO: StatusAtendimentoRot.EM_PROGRESSO,
-    StatusAtendimentoCod.SOLUCIONADO: StatusAtendimentoRot.SOLUCIONADO,
-    StatusAtendimentoCod.CANCELADO: StatusAtendimentoRot.CANCELADO,
+STATUS_ATENDIMENTO: Dict[enums.StatusAtendimentoCod, enums.StatusAtendimentoRot] = {
+    enums.StatusAtendimentoCod.NOVO: enums.StatusAtendimentoRot.NOVO,
+    enums.StatusAtendimentoCod.PENDENTE: enums.StatusAtendimentoRot.PENDENTE,
+    enums.StatusAtendimentoCod.EM_PROGRESSO: enums.StatusAtendimentoRot.EM_PROGRESSO,
+    enums.StatusAtendimentoCod.SOLUCIONADO: enums.StatusAtendimentoRot.SOLUCIONADO,
+    enums.StatusAtendimentoCod.CANCELADO: enums.StatusAtendimentoRot.CANCELADO,
 }

@@ -1,19 +1,17 @@
-from .. import utils
-from .. import schemas
-from .service import Service
+from . import service
 from datetime import datetime
 from typing import Self, Optional
-from ..clients import SuporteIXCCliente
+from .. import utils, schemas, clients
 from fastapi import HTTPException, status
 from pydantic import ValidationError, PositiveInt
 
 
-class SuporteService(Service):
+class SuporteService(service.Service):
     def __init__(self: Self) -> None:
         super().__init__()
-        self.suporte_ixc_cliente = SuporteIXCCliente()
+        self.suporte_ixc_cliente = clients.SuporteIXCCliente()
 
-    async def get_contratos_ativos(
+    async def get_contratos(
         self: Self,
         protocolo: str,
         page: Optional[PositiveInt] = 1,
@@ -24,7 +22,7 @@ class SuporteService(Service):
         try:
             id_cliente = await self.get_id_cliente_ixc(protocolo=protocolo)
 
-            contratos_ativos_res = await self.suporte_ixc_cliente.get_contratos_ativos(
+            contratos_ativos_res = await self.suporte_ixc_cliente.get_contratos(
                 id_cliente=id_cliente,
                 page=page,
                 per_page=per_page,
@@ -32,7 +30,7 @@ class SuporteService(Service):
                 sortorder=sortorder,
             )
             contratos_ativos = contratos_ativos_res.get("registros", [])
-            total = contratos_ativos.__len__()
+            total = len(contratos_ativos)
             if total < 1:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
@@ -260,7 +258,7 @@ class SuporteService(Service):
                 detail=f"Erro interno ao processar solicitação: {str(e)}",
             )
 
-    async def get_atendimentos_abertos(
+    async def get_atendimentos(
         self: Self,
         id_login: PositiveInt,
         page: Optional[PositiveInt] = 1,
@@ -269,7 +267,7 @@ class SuporteService(Service):
         sortorder: Optional[utils.SortOrder] = utils.SortOrder.ASC,
     ) -> schemas.AtendimentoOut:
         try:
-            res = await self.suporte_ixc_cliente.get_atendimentos_abertos(
+            res = await self.suporte_ixc_cliente.get_atendimentos(
                 id_login=id_login,
                 page=page,
                 per_page=per_page,
@@ -296,7 +294,7 @@ class SuporteService(Service):
                         "data_criacao": a.get("data_criacao"),
                     }
                 )
-            total = registros.__len__()
+            total = len(registros)
             meta = schemas.Meta(total=total, page=page, per_page=per_page)
             base_url = f"/atendimentos?id_login={id_login}"
             links = schemas.Links(
@@ -353,10 +351,10 @@ class SuporteService(Service):
             )
 
     async def put_ip(
-        self: Self, id: PositiveInt, ip: schemas.IPUpdate
+        self: Self, id_login: PositiveInt, ip: schemas.IPUpdate
     ) -> schemas.MensagemOut:
         try:
-            res = await self.suporte_ixc_cliente.get_login(id=id)
+            res = await self.suporte_ixc_cliente.get_login(id_login=id_login)
             if not res.get("registros"):
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
@@ -366,7 +364,9 @@ class SuporteService(Service):
             novo_ip = ip.model_dump()
             login_atualizado = {**login_antigo, **novo_ip}
             del login_atualizado["id"]
-            res = await self.suporte_ixc_cliente.put_ip(id=id, ip=login_atualizado)
+            res = await self.suporte_ixc_cliente.put_ip(
+                id_login=id_login, ip=login_atualizado
+            )
             mensagem = "Nenhuma mensagem retornada."
             mensagem = res["message"]
             return schemas.MensagemOut(mensagem=mensagem)
