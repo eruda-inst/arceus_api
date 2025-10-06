@@ -1,12 +1,11 @@
 import json
-from .. import SortOrder
-from ..ixc import IXCCliente
+from .. import SortOrder, ixc
 from pydantic import PositiveInt
-from typing import Dict, Any, List, Self, Optional
+from typing import Dict, Self, Optional
 
 
-class FinanceiroIXCCliente(IXCCliente):
-    async def get_contrato(self: Self, id_contrato: int) -> List[Dict[str, Any]]:
+class FinanceiroIXCCliente(ixc.IXCCliente):
+    async def get_contrato(self: Self, id_contrato: PositiveInt) -> Dict:
         grid_param = [{"TB": "cliente_contrato.id", "OP": "=", "P": str(id_contrato)}]
         payload = {"grid_param": json.dumps(obj=grid_param)}
         data = await self._make_request(endpoint="cliente_contrato", payload=payload)
@@ -14,12 +13,12 @@ class FinanceiroIXCCliente(IXCCliente):
 
     async def get_faturas_abertas(
         self: Self,
-        id_cliente: int,
-        page: Optional[int] = 1,
-        per_page: Optional[int] = 10,
+        id_cliente: PositiveInt,
+        page: Optional[PositiveInt] = 1,
+        per_page: Optional[PositiveInt] = 10,
         sortname: Optional[str] = "fn_areceber.id",
         sortorder: Optional[SortOrder] = SortOrder.ASC,
-    ) -> List[Dict[str, Any]]:
+    ) -> Dict:
         grid_param = [
             {"TB": "fn_areceber.id_cliente", "OP": "=", "P": str(id_cliente)},
             {"TB": "fn_areceber.status", "OP": "=", "P": "A"},
@@ -35,16 +34,22 @@ class FinanceiroIXCCliente(IXCCliente):
         return data
 
     async def post_desbloqueio_em_confianca(
-        self: Self, id_contrato: int
-    ) -> Dict[str, Any]:
+        self: Self, id_contrato: PositiveInt
+    ) -> Dict:
         payload = {"id_contrato": id_contrato}
         data = await self._make_request(
             endpoint="cliente_contrato_15464", payload=payload, include_ixcsoft=False
         )
         return data
 
-    async def get_linha_digitavel(self: Self, id: PositiveInt) -> List[Dict[str, Any]]:
+    async def get_linha_digitavel(self: Self, id: PositiveInt) -> Dict:
         grid_param = [{"TB": "fn_areceber.id", "OP": "=", "P": str(id)}]
         payload = {"grid_param": json.dumps(obj=grid_param)}
         data = await self._make_request(endpoint="fn_areceber", payload=payload)
+        return data
+
+    async def get_credenciais(self: Self, id: PositiveInt) -> Dict:
+        grid_param = [{"TB": "cliente.id", "OP": "=", "P": str(id)}]
+        payload = {"grid_param": json.dumps(obj=grid_param)}
+        data = await self._make_request(endpoint="cliente", payload=payload)
         return data

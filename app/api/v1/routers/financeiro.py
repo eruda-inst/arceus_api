@@ -1,14 +1,12 @@
-from .. import schemas
 from typing import Optional
-from ..utils import SortOrder
 from pydantic import PositiveInt
 from fastapi import APIRouter, Query, Path
-from ..services import FinanceiroService, ComercialService
+from .. import services, utils, schemas
 
 
 financeiro_router = APIRouter()
-financeiro_service = FinanceiroService()
-comercial_service = ComercialService()
+financeiro_service = services.FinanceiroService()
+comercial_service = services.ComercialService()
 
 
 @financeiro_router.get(
@@ -29,8 +27,8 @@ async def get_faturas_abertas(
     sortname: Optional[str] = Query(
         default="fn_areceber.id", description="Campo para ordenação."
     ),
-    sortorder: Optional[SortOrder] = Query(
-        default=SortOrder.ASC, description="Ordem da ordenação."
+    sortorder: Optional[utils.SortOrder] = Query(
+        default=utils.SortOrder.ASC, description="Ordem da ordenação."
     ),
 ) -> schemas.FaturaAbertaListOut:
     return await financeiro_service.get_faturas_abertas(
@@ -62,8 +60,8 @@ async def get_contratos(
     sortname: Optional[str] = Query(
         default="cliente_contrato.id", description="Campo para ordenação."
     ),
-    sortorder: Optional[SortOrder] = Query(
-        SortOrder.ASC, description="Ordem da ordenação."
+    sortorder: Optional[utils.SortOrder] = Query(
+        utils.SortOrder.ASC, description="Ordem da ordenação."
     ),
 ) -> schemas.ComercialContratoListOut:
     return await comercial_service.get_contratos(
@@ -108,3 +106,10 @@ async def get_chave_pix(
     id_fatura: PositiveInt = Query(ge=1, description="ID da fatura."),
 ) -> schemas.ChavePixBase:
     return await financeiro_service.get_chave_pix(id_fatura=id_fatura)
+
+
+@financeiro_router.get(path="/credenciais/{id}")
+async def get_credenciais(
+    id: PositiveInt = Path(ge=1, description="ID do cliente."),
+) -> schemas.CredenciaisOut:
+    return await financeiro_service.get_credenciais(id=id)

@@ -1,17 +1,15 @@
-from .. import schemas
 from .service import Service
-from ..utils import SortOrder
 from typing import Self, Optional
+from .. import clients, schemas, utils
 from fastapi import HTTPException, status
-from ..clients import FinanceiroIXCCliente, FinanceiroAZ7Cliente
 from pydantic import ValidationError, PositiveInt
 
 
 class FinanceiroService(Service):
     def __init__(self: Self) -> None:
         super().__init__()
-        self.financeiro_ixc_cliente = FinanceiroIXCCliente()
-        self.financeiro_az7_cliente = FinanceiroAZ7Cliente()
+        self.financeiro_ixc_cliente = clients.FinanceiroIXCCliente()
+        self.financeiro_az7_cliente = clients.FinanceiroAZ7Cliente()
 
     async def get_faturas_abertas(
         self: Self,
@@ -19,7 +17,7 @@ class FinanceiroService(Service):
         page: Optional[PositiveInt] = 1,
         per_page: Optional[PositiveInt] = 10,
         sortname: Optional[str] = "fn_areceber.id",
-        sortorder: Optional[SortOrder] = SortOrder.ASC,
+        sortorder: Optional[utils.SortOrder] = utils.SortOrder.ASC,
     ) -> schemas.FaturaAbertaListOut:
         try:
             id_cliente = await self.get_id_cliente_ixc(protocolo=protocolo)
@@ -168,6 +166,31 @@ class FinanceiroService(Service):
                 )
             chave_pix = res.get("pixCode")
             return schemas.ChavePixBase(chave_pix=chave_pix)
+        except HTTPException:
+            raise
+        except ValidationError as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Validação da resposta falhou: {e}",
+            )
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Erro interno ao processar solicitação: {str(e)}",
+            )
+
+    async def get_credenciais(self: Self, id: PositiveInt) -> schemas.CredenciaisOut:
+        try:
+            res = await self.financeiro_ixc_cliente.get_credenciais(id=id)
+            if not res.get("registros"):
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Sem credenciais.",
+                )
+            cliente = res["registros"][0]
+            senha = cliente["senha"]
+            hotsite_email = cliente["hotsite_email"]
+            return schemas.CredenciaisOut(usuario=hotsite_email, senha=senha)
         except HTTPException:
             raise
         except ValidationError as e:
