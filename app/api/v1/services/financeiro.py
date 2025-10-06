@@ -179,7 +179,7 @@ class FinanceiroService(Service):
                 detail=f"Erro interno ao processar solicitação: {str(e)}",
             )
 
-    async def get_credenciais(self: Self, id: PositiveInt) -> schemas.CredenciaisOut:
+    async def get_credenciais(self: Self, id: PositiveInt) -> schemas.CredencialOut:
         try:
             res = await self.financeiro_ixc_cliente.get_credenciais(id=id)
             if not res.get("registros"):
@@ -190,7 +190,40 @@ class FinanceiroService(Service):
             cliente = res["registros"][0]
             senha = cliente["senha"]
             hotsite_email = cliente["hotsite_email"]
-            return schemas.CredenciaisOut(usuario=hotsite_email, senha=senha)
+            return schemas.CredencialOut(usuario=hotsite_email, senha=senha)
+        except HTTPException:
+            raise
+        except ValidationError as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Validação da resposta falhou: {e}",
+            )
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Erro interno ao processar solicitação: {str(e)}",
+            )
+
+    async def put_credenciais(
+        self: Self, id: PositiveInt, credenciais: schemas.CredencialUpdate
+    ) -> schemas.MensagemOut:
+        try:
+            res = await self.financeiro_ixc_cliente.get_credenciais(id=id)
+            if not res.get("registros"):
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Cliente não encontrado.",
+                )
+            cliente_antigo = res["registros"][0]
+            novas_credenciais = credenciais.model_dump(exclude_unset=True)
+            credenciais_atualizadas = {**cliente_antigo, **novas_credenciais}
+            del credenciais_atualizadas["id"]
+            res = await self.financeiro_ixc_cliente.put_credenciais(
+                id=id, credenciais=credenciais_atualizadas
+            )
+            mensagem = "Nenhuma mensagem retornada."
+            mensagem = res.get("message")
+            return schemas.MensagemOut(mensagem=mensagem)
         except HTTPException:
             raise
         except ValidationError as e:

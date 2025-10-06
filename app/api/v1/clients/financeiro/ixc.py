@@ -1,5 +1,6 @@
 import json
 from .. import SortOrder, ixc
+from app.api.v1 import schemas
 from pydantic import PositiveInt
 from typing import Dict, Self, Optional
 
@@ -52,4 +53,15 @@ class FinanceiroIXCCliente(ixc.IXCCliente):
         grid_param = [{"TB": "cliente.id", "OP": "=", "P": str(id)}]
         payload = {"grid_param": json.dumps(obj=grid_param)}
         data = await self._make_request(endpoint="cliente", payload=payload)
+        return data
+
+    async def put_credenciais(
+        self: Self, id: PositiveInt, credenciais: schemas.CredencialUpdate
+    ) -> Dict:
+        data = await self._make_request(
+            endpoint=f"cliente/{id}",
+            payload=credenciais,
+            include_ixcsoft=False,
+            method="PUT",
+        )
         return data

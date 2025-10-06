@@ -374,6 +374,7 @@ class SuporteService(Service):
                 id=id, login=login_atualizado
             )
 
+            mensagem = "Nenhuma mensagem retornada."
             mensagem = res["message"]
 
             return schemas.MensagemOut(mensagem=mensagem)

@@ -27,6 +27,8 @@ from .financeiro import (
     LinhaDigitavelBase,
     LinhaDigitavelOut,
     ChavePixBase,
-    CredenciaisOut,
+    CredencialBase,
+    CredencialUpdate,
+    CredencialOut,
 )
-from .triagem import ClienteIn
+from .cliente import ClienteIn

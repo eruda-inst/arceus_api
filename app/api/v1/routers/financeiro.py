@@ -1,7 +1,7 @@
 from typing import Optional
 from pydantic import PositiveInt
-from fastapi import APIRouter, Query, Path
 from .. import services, utils, schemas
+from fastapi import APIRouter, Query, Path, Body
 
 
 financeiro_router = APIRouter()
@@ -108,8 +108,27 @@ async def get_chave_pix(
     return await financeiro_service.get_chave_pix(id_fatura=id_fatura)
 
 
-@financeiro_router.get(path="/credenciais/{id}")
+@financeiro_router.get(
+    path="/credenciais/{id}",
+    response_model=schemas.CredencialOut,
+    summary="Obtém credenciais de acesso à central do assinante de um cliente, através do ID do cliente.",
+)
 async def get_credenciais(
     id: PositiveInt = Path(ge=1, description="ID do cliente."),
-) -> schemas.CredenciaisOut:
+) -> schemas.CredencialOut:
     return await financeiro_service.get_credenciais(id=id)
+
+
+# Por razões de limitações na plataforma opa, o verbo deve ser put, ao invés de patch
+@financeiro_router.put(
+    path="/credenciais/{id}",
+    response_model=schemas.MensagemOut,
+    summary="Atualiza credenciais de acesso à central do assinante de um cliente, através do ID do cliente.",
+)
+async def put_credenciais(
+    id: PositiveInt = Path(ge=1, description="ID do cliente."),
+    credenciais: schemas.CredencialUpdate = Body(
+        description="Credenciais a serem atualizadas."
+    ),
+) -> schemas.MensagemOut:
+    return await financeiro_service.put_credenciais(id=id, credenciais=credenciais)
