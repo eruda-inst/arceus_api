@@ -20,6 +20,7 @@ from .suporte import (
     StatusONUOut,
     StatusONU,
     StatusConexaoOut,
+    IPUpdate,
 )
 from .financeiro import (
     FaturaAbertaListOut,

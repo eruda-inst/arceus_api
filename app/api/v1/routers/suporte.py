@@ -130,17 +130,15 @@ async def post_atendimentos(
 
 # Por razões de limitações na plataforma opa, o verbo deve ser put, ao invés de patch
 @suporte_router.put(
-    path="/logins/{id}",
+    path="/ip/{id}",
     response_model=schemas.MensagemOut,
     summary="Atualiza um ou mais campos associado a um login específico, por meio do ID de login.",
 )
-async def patch_logins(
+async def put_ip(
     id: PositiveInt = Path(ge=1, description="ID de login."),
-    login: schemas.LoginUpdate = Body(
-        description="Campos de login a serem atualizados."
-    ),
+    ip: schemas.IPUpdate = Body(description="IP a ser atualizado."),
 ) -> schemas.MensagemOut:
-    return await suporte_service.patch_logins(id=id, login=login)
+    return await suporte_service.put_ip(id=id, ip=ip)
 
 
 @suporte_router.post(

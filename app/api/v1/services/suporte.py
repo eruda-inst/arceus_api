@@ -352,8 +352,8 @@ class SuporteService(Service):
                 detail=f"Erro interno ao processar solicitação: {str(e)}",
             )
 
-    async def patch_logins(
-        self: Self, id: PositiveInt, login: schemas.LoginUpdate
+    async def put_ip(
+        self: Self, id: PositiveInt, ip: schemas.IPUpdate
     ) -> schemas.MensagemOut:
         try:
             res = await self.suporte_ixc_cliente.get_login(id=id)
@@ -363,20 +363,12 @@ class SuporteService(Service):
                     detail="Login não encontrado.",
                 )
             login_antigo = res["registros"][0]
-
-            novo_login = login.model_dump(exclude_unset=True)
-
-            login_atualizado = {**login_antigo, **novo_login}
-
+            novo_ip = ip.model_dump()
+            login_atualizado = {**login_antigo, **novo_ip}
             del login_atualizado["id"]
-
-            res = await self.suporte_ixc_cliente.put_login(
-                id=id, login=login_atualizado
-            )
-
+            res = await self.suporte_ixc_cliente.put_ip(id=id, ip=login_atualizado)
             mensagem = "Nenhuma mensagem retornada."
             mensagem = res["message"]
-
             return schemas.MensagemOut(mensagem=mensagem)
         except HTTPException:
             raise
