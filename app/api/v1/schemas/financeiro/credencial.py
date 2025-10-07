@@ -1,14 +1,8 @@
-from typing import Optional
 from pydantic import BaseModel, Field
 
 
 class CredencialBase(BaseModel):
-    usuario: Optional[str] = Field(
-        default=None,
-        description="Usuário da central de acesso do assinante, a ser atualizado.",
-    )
-    senha: Optional[str] = Field(
-        default=None,
+    senha: str = Field(
         description="Senha da central de acesso do assinante, a ser atualizada.",
     )
 
