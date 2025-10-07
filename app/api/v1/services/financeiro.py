@@ -223,7 +223,11 @@ class FinanceiroService(service.Service):
                     detail="Cliente não encontrado.",
                 )
             cliente_antigo = res["registros"][0]
-            novas_credenciais = credenciais.model_dump(exclude_unset=True)
+            credenciais_limpas = credenciais.model_dump(exclude_unset=True)
+            novas_credenciais = {
+                "hotsite_email": credenciais_limpas.get("usuario"),
+                "senha": credenciais_limpas.get("senha"),
+            }
             cliente_atualizado = {**cliente_antigo, **novas_credenciais}
             del cliente_atualizado["id"]
             res = await self.financeiro_ixc_cliente.put_clientes(
