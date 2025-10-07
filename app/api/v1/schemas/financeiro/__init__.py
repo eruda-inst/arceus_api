@@ -5,4 +5,4 @@ from .fatura import (
     LinhaDigitavelOut,
 )
 from .pix import ChavePixBase
-from .credencial import CredencialBase, CredencialUpdate, CredencialOut
+from .credencial import CredencialBase, CredencialOut, CredencialUpdate

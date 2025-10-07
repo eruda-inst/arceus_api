@@ -28,9 +28,9 @@ from .financeiro import (
     LinhaDigitavelBase,
     LinhaDigitavelOut,
     ChavePixBase,
-    CredencialBase,
     CredencialUpdate,
     CredencialOut,
+    CredencialBase,
 )
 from .triagem import ContatoUpdate
 from .cliente import ClienteUpdate
