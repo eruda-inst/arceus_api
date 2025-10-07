@@ -109,14 +109,18 @@ async def get_chave_pix(
 
 
 @financeiro_router.get(
-    path="/credenciais/{id_cliente}",
+    path="/credenciais",
     response_model=schemas.CredencialOut,
-    summary="Obtém credenciais de acesso à central do assinante de um cliente, através do ID do cliente.",
+    summary="Obtém credenciais de acesso à central do assinante de um cliente, através de protocolo de atendimento.",
 )
 async def get_credenciais(
-    id_cliente: PositiveInt = Path(ge=1, description="ID do cliente."),
+    protocolo: str = Query(
+        min_length=12,
+        max_length=12,
+        description="Protocolo de atendimento do cliente no OpaSuite.",
+    )
 ) -> schemas.CredencialOut:
-    return await financeiro_service.get_credenciais(id_cliente=id_cliente)
+    return await financeiro_service.get_credenciais(protocolo=protocolo)
 
 
 # Por razões de limitações na plataforma opa, o verbo deve ser put, ao invés de patch

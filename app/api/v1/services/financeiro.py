@@ -181,10 +181,10 @@ class FinanceiroService(service.Service):
                 detail=f"Erro interno ao processar solicitação: {str(e)}",
             )
 
-    async def get_credenciais(
-        self: Self, id_cliente: PositiveInt
-    ) -> schemas.CredencialOut:
+    async def get_credenciais(self: Self, protocolo: str) -> schemas.CredencialOut:
         try:
+            id_cliente = await self.get_id_cliente_ixc(protocolo=protocolo)
+
             res = await self.financeiro_ixc_cliente.get_credenciais(
                 id_cliente=id_cliente
             )
