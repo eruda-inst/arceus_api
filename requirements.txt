@@ -1,4 +1,6 @@
-pydantic_settings
-httpx
-uvicorn
 fastapi
+httpx
+psycopg2-binary
+pydantic_settings
+sqlalchemy
+uvicorn

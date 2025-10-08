@@ -1,8 +1,37 @@
 services:
-    app:
-        container_name: api_larissa
+    db:
+        image: postgres:15
+        ports:
+            - "5432:5432"
+        container_name: larissa_postgres
+        restart: always
+        environment:
+            - POSTGRES_USER=larissa_user
+            - POSTGRES_PASSWORD=segurademais
+            - POSTGRES_DB=larissa_db
+        volumes:
+            - pgdata:/var/lib/postgresql/data
+        networks:
+            - larissa_net
+
+    api:
+        container_name: larissa_api
         env_file:
-                - .env
+            - .env
         build: .
         ports:
             - 8000:8000
+        depends_on:
+            - db
+        networks:
+            - larissa_net
+        volumes:
+            - .:/app
+            - media:/app/media
+
+volumes:
+  pgdata:
+  media:
+
+networks:
+  larissa_net:
