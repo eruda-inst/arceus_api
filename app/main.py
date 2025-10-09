@@ -1,15 +1,16 @@
 from fastapi import FastAPI
 from app.api import api_v1_router
 from contextlib import asynccontextmanager
-from app.api.v1.database import criar_tabelas
-from app.api.v1 import middlewares
+from app.api.v1 import middlewares, database
 from fastapi.middleware.cors import CORSMiddleware
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    criar_tabelas()
+    database.criar_tabelas()
+    print("Tabelas criadas com sucesso!")
     yield
+    print("Encerrando aplicação...")
 
 
 app = FastAPI(
