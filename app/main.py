@@ -1,29 +1,25 @@
+from fastapi import FastAPI
 from app.api import api_v1_router
+from contextlib import asynccontextmanager
+from app.api.v1.database import criar_tabelas
+from app.api.v1 import middlewares
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi import FastAPI, HTTPException, status
-from app.api.v1 import database, models, middlewares
 
 
-def criar_tabelas():
-    try:
-        models.log.Base.metadata.create_all(bind=database.engine)
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Erro ao criar tabelas: {e}",
-        )
-
-
-criar_tabelas()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    criar_tabelas()
+    yield
 
 
 app = FastAPI(
     title="API do Bot",
     description="Atua como um aggregator, simplificando integrações entre a API do OpaSuite, a API do IXCSoft e a API do 7AZ.",
-    version="0.56.8",
+    version="0.56.9",
+    lifespan=lifespan,
 )
 
-app.add_middleware(middlewares.LogsMiddleware)
+app.add_middleware(middlewares.LogMiddleware)
 
 app.add_middleware(
     CORSMiddleware,

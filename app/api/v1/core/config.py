@@ -9,6 +9,8 @@ class Settings(BaseSettings):
     API_KEY_7AZ: str
     BASE_URL_7AZ: str
 
+    DB_URL: str
+
     model_config = SettingsConfigDict(env_file=".env", case_sensitive=True)
 
 
