@@ -33,7 +33,7 @@ class LinhaDigitavelOut(BaseModel):
 
 
 class FaturaPagaBase(Fatura):
-    pagamento_valor: PositiveFloat = Field(description="Valor pago.")
-    pagamento_data: str = Field(
+    valor_pago: PositiveFloat = Field(description="Valor pago.")
+    data_pagamento: str = Field(
         max_length=10, description="Data de pagamento da fatura."
     )

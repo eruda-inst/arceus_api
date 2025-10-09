@@ -267,8 +267,8 @@ class FinanceiroService(service.Service):
                 id=id,
                 data_vencimento=data_vencimento,
                 preco=preco,
-                pagamento_valor=pagamento_valor,
-                pagamento_data=pagamento_data,
+                valor_pago=pagamento_valor,
+                data_pagamento=pagamento_data,
             )
         except HTTPException:
             raise
