@@ -22,7 +22,7 @@ async def get_faturas_abertas(
     ),
     page: Optional[PositiveInt] = Query(default=1, description="Número da página."),
     per_page: Optional[PositiveInt] = Query(
-        ge=1, default=10, description="Itens por página."
+        ge=1, default=15, description="Itens por página."
     ),
     sortname: Optional[str] = Query(
         default="fn_areceber.id", description="Campo para ordenação."
