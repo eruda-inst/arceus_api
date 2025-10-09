@@ -15,7 +15,7 @@ class FinanceiroService(service.Service):
         self: Self,
         protocolo: str,
         page: Optional[PositiveInt] = 1,
-        per_page: Optional[PositiveInt] = 10,
+        per_page: Optional[PositiveInt] = 15,
         sortname: Optional[str] = "fn_areceber.id",
         sortorder: Optional[utils.SortOrder] = utils.SortOrder.ASC,
     ) -> schemas.FaturaAbertaListOut:

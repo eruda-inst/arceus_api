@@ -16,7 +16,7 @@ class FinanceiroIXCCliente(ixc.IXCCliente):
         self: Self,
         id_cliente: PositiveInt,
         page: Optional[PositiveInt] = 1,
-        per_page: Optional[PositiveInt] = 10,
+        per_page: Optional[PositiveInt] = 15,
         sortname: Optional[str] = "fn_areceber.id",
         sortorder: Optional[SortOrder] = SortOrder.ASC,
     ) -> Dict:
