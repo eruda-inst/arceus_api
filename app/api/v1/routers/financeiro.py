@@ -138,3 +138,14 @@ async def put_credenciais(
     return await financeiro_service.put_credenciais(
         id_cliente=id_cliente, credenciais=credenciais
     )
+
+
+@financeiro_router.get(
+    path="/ultima_fatura_paga",
+    response_model=schemas.FaturaPagaBase,
+    summary="Obtém última fatura paga de um contrato, através do ID do contrato.",
+)
+async def get_ultima_fatura_paga(
+    id_contrato: PositiveInt = Query(ge=1, description="ID do contrato."),
+) -> schemas.FaturaPagaBase:
+    return await financeiro_service.get_ultima_fatura_paga(id_contrato=id_contrato)

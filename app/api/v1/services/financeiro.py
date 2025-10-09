@@ -244,3 +244,41 @@ class FinanceiroService(service.Service):
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=f"Erro interno ao processar solicitação: {str(e)}",
             )
+
+    async def get_ultima_fatura_paga(self: Self, id_contrato: PositiveInt):
+        try:
+            res = await self.financeiro_ixc_cliente.get_ultima_fatura_paga(
+                id_contrato=id_contrato
+            )
+            if not res.get("registros"):
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Sem faturas pagas.",
+                )
+            ultima_fatura_paga = res["registros"][0]
+
+            id = ultima_fatura_paga["id"]
+            data_vencimento = ultima_fatura_paga["data_vencimento"]
+            preco = ultima_fatura_paga["valor"]
+            pagamento_valor = ultima_fatura_paga["pagamento_valor"]
+            pagamento_data = ultima_fatura_paga["pagamento_data"]
+
+            return schemas.FaturaPagaBase(
+                id=id,
+                data_vencimento=data_vencimento,
+                preco=preco,
+                pagamento_valor=pagamento_valor,
+                pagamento_data=pagamento_data,
+            )
+        except HTTPException:
+            raise
+        except ValidationError as e:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                detail=f"Validação da resposta falhou: {e}",
+            )
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Erro interno ao processar solicitação: {str(e)}",
+            )

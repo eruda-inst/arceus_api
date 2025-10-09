@@ -65,3 +65,16 @@ class FinanceiroIXCCliente(ixc.IXCCliente):
             method="PUT",
         )
         return data
+
+    async def get_ultima_fatura_paga(self: Self, id_contrato: PositiveInt) -> Dict:
+        grid_param = [
+            {"TB": "fn_areceber.id_contrato", "OP": "=", "P": str(id_contrato)},
+            {"TB": "fn_areceber.status", "OP": "=", "P": "R"},
+        ]
+        payload = {
+            "grid_param": json.dumps(obj=grid_param),
+            "sortname": "fn_areceber.id",
+            "sortorder": "DESC",
+        }
+        data = await self._make_request(endpoint="fn_areceber", payload=payload)
+        return data
