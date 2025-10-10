@@ -7,11 +7,7 @@ class StatusAcesso(BaseModel):
 
     model_config = {
         "json_schema_extra": {
-            "examples": [
-                {
-                    "status_acesso": utils.enums.rotulos.status_acesso.StatusAcessoRot.DESATIVADO
-                }
-            ]
+            "examples": [{"status_acesso": utils.StatusAcessoRot.DESATIVADO}]
         }
     }
 
@@ -21,10 +17,6 @@ class StatusAcessoOut(BaseModel):
 
     model_config = {
         "json_schema_extra": {
-            "examples": [
-                {
-                    "status_acesso": utils.enums.rotulos.status_acesso.StatusAcessoRot.DESATIVADO
-                }
-            ]
+            "examples": [{"status_acesso": utils.StatusAcessoRot.DESATIVADO}]
         }
     }

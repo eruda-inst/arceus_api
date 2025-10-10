@@ -31,6 +31,19 @@ async def get_faturas_abertas(
         default=utils.SortOrder.ASC, description="Ordem da ordenação."
     ),
 ) -> schemas.FaturaAbertaListOut:
+    """
+    Obtém a lista de faturas em aberto de um cliente.
+
+    Args:
+        protocolo: O protocolo de atendimento do cliente no OpaSuite.
+        page: O número da página para a paginação.
+        per_page: A quantidade de itens por página.
+        sortname: O campo pelo qual a lista será ordenada.
+        sortorder: A ordem de ordenação (ascendente ou descendente).
+
+    Returns:
+        Uma lista paginada de faturas em aberto do cliente.
+    """
     return await financeiro_service.get_faturas_abertas(
         protocolo=protocolo,
         page=page,
@@ -64,6 +77,19 @@ async def get_contratos(
         utils.SortOrder.ASC, description="Ordem da ordenação."
     ),
 ) -> schemas.ComercialContratoListOut:
+    """
+    Obtém a lista de contratos de um cliente.
+
+    Args:
+        protocolo: O protocolo de atendimento do cliente no OpaSuite.
+        page: O número da página para a paginação.
+        per_page: A quantidade de itens por página.
+        sortname: O campo pelo qual a lista será ordenada.
+        sortorder: A ordem de ordenação (ascendente ou descendente).
+
+    Returns:
+        Uma lista paginada de contratos do cliente.
+    """
     return await comercial_service.get_contratos(
         protocolo=protocolo,
         page=page,
@@ -81,6 +107,15 @@ async def get_contratos(
 async def post_desbloqueio_em_confianca(
     id_contrato: PositiveInt = Query(description="ID do contrato."),
 ) -> schemas.MensagemOut:
+    """
+    Solicita o desbloqueio em confiança para um contrato.
+
+    Args:
+        id_contrato: O ID do contrato a ser desbloqueado.
+
+    Returns:
+        Uma mensagem de confirmação da solicitação.
+    """
     return await financeiro_service.post_desbloqueio_em_confianca(
         id_contrato=id_contrato
     )
@@ -94,6 +129,15 @@ async def post_desbloqueio_em_confianca(
 async def get_linha_digitavel(
     id_fatura: PositiveInt = Path(ge=1, description="ID da fatura.")
 ) -> schemas.LinhaDigitavelOut:
+    """
+    Obtém a linha digitável de uma fatura específica.
+
+    Args:
+        id_fatura: O ID da fatura.
+
+    Returns:
+        A linha digitável da fatura.
+    """
     return await financeiro_service.get_linha_digitavel(id_fatura=id_fatura)
 
 
@@ -105,6 +149,15 @@ async def get_linha_digitavel(
 async def get_chave_pix(
     id_fatura: PositiveInt = Query(ge=1, description="ID da fatura."),
 ) -> schemas.ChavePixBase:
+    """
+    Obtém a chave PIX para pagamento de uma fatura.
+
+    Args:
+        id_fatura: O ID da fatura.
+
+    Returns:
+        A chave PIX da fatura.
+    """
     return await financeiro_service.get_chave_pix(id_fatura=id_fatura)
 
 
@@ -120,6 +173,15 @@ async def get_credenciais(
         description="Protocolo de atendimento do cliente no OpaSuite.",
     )
 ) -> schemas.CredencialOut:
+    """
+    Obtém as credenciais de acesso à central do assinante de um cliente.
+
+    Args:
+        protocolo: O protocolo de atendimento do cliente no OpaSuite.
+
+    Returns:
+        As credenciais de acesso do cliente.
+    """
     return await financeiro_service.get_credenciais(protocolo=protocolo)
 
 
@@ -135,6 +197,16 @@ async def put_credenciais(
         description="Credenciais a serem atualizadas."
     ),
 ) -> schemas.MensagemOut:
+    """
+    Atualiza as credenciais de acesso à central do assinante de um cliente.
+
+    Args:
+        id_cliente: O ID do cliente a ser atualizado.
+        credenciais: As novas credenciais do cliente.
+
+    Returns:
+        Uma mensagem de confirmação da atualização.
+    """
     return await financeiro_service.put_credenciais(
         id_cliente=id_cliente, credenciais=credenciais
     )
@@ -148,4 +220,13 @@ async def put_credenciais(
 async def get_ultima_fatura_paga(
     id_contrato: PositiveInt = Query(ge=1, description="ID do contrato."),
 ) -> schemas.FaturaPagaBase:
+    """
+    Obtém a última fatura paga de um contrato.
+
+    Args:
+        id_contrato: O ID do contrato.
+
+    Returns:
+        Os dados da última fatura paga.
+    """
     return await financeiro_service.get_ultima_fatura_paga(id_contrato=id_contrato)

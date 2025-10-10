@@ -3,6 +3,18 @@ from app.api.v1 import schemas
 
 
 def make_links(base_url: str, page: int, per_page: int, total: int) -> schemas.Links:
+    """
+    Gera links de paginação (self, next, prev) para uma coleção de recursos.
+
+    Args:
+        base_url: A URL base para os links.
+        page: O número da página atual.
+        per_page: O número de itens por página.
+        total: O número total de itens na coleção.
+
+    Returns:
+        Um objeto `schemas.Links` contendo os links de paginação.
+    """
     page = int(page)
     per_page = int(per_page) if int(per_page) > 0 else 1
     total = int(total)

@@ -7,17 +7,49 @@ from fastapi import HTTPException, status
 
 
 class IXCCliente:
+    """
+    Cliente base para interagir com a API do IXC Provedor.
+
+    Esta classe abstrata lida com a autenticação, montagem de requisições
+    e tratamento de erros comuns ao se comunicar com a API do IXC. As classes
+    filhas devem implementar os métodos específicos para cada endpoint.
+    """
+
     def __init__(self: Self) -> None:
+        """
+        Inicializa o cliente base para a API do IXC Provedor.
+
+        Configura o token, host, URL base e o cabeçalho de autenticação
+        a partir das configurações do ambiente.
+        """
         self.token = core.settings.IXC_TOKEN
         self.host = core.settings.IXC_HOST
         self.base_url = f"https://{self.host}/webservice/v1"
         self.auth_header = self._create_auth_header()
 
     def _create_auth_header(self: Self) -> str:
+        """
+        Cria o cabeçalho de autenticação Basic a partir do token.
+
+        O token é codificado em Base64, conforme exigido pela API do IXC.
+
+        Returns:
+            str: O cabeçalho de autorização no formato "Basic <token_encoded>".
+        """
         token_encoded = base64.b64encode(self.token.encode("utf-8")).decode("utf-8")
         return f"Basic {token_encoded}"
 
     def _get_headers(self: Self, include_ixcsoft: bool = True) -> Dict:
+        """
+        Monta os cabeçalhos para a requisição à API IXC.
+
+        Args:
+            include_ixcsoft (bool): Se True, inclui o cabeçalho "ixcsoft: listar",
+                                    usado para consultas de listagem.
+
+        Returns:
+            Dict: Um dicionário contendo os cabeçalhos da requisição.
+        """
         headers = {"Authorization": self.auth_header}
         if include_ixcsoft:
             headers["ixcsoft"] = "listar"
@@ -30,6 +62,26 @@ class IXCCliente:
         method: str = "POST",
         include_ixcsoft: bool = True,
     ) -> Dict:
+        """
+        Realiza uma requisição assíncrona para um endpoint da API IXC.
+
+        Este método encapsula a lógica de requisição, incluindo a montagem
+        da URL, cabeçalhos e tratamento de erros comuns, convertendo exceções
+        de HTTP e de rede em `HTTPException` do FastAPI.
+
+        Args:
+            endpoint (str): O endpoint da API para o qual a requisição será feita.
+            payload (Dict): O corpo da requisição a ser enviado como JSON.
+            method (str): O método HTTP a ser utilizado (e.g., "POST", "PUT").
+            include_ixcsoft (bool): Se True, inclui o cabeçalho "ixcsoft: listar".
+
+        Returns:
+            Dict: A resposta da API em formato de dicionário.
+
+        Raises:
+            HTTPException: Em caso de erros de status HTTP, falhas de comunicação
+                           ou se a resposta não for um JSON válido.
+        """
         url = f"{self.base_url}/{endpoint}"
         headers = self._get_headers(include_ixcsoft=include_ixcsoft)
 
@@ -65,6 +117,15 @@ class IXCCliente:
             ) from e
 
     async def get_valor_e_data_vencimento(self: Self, id_contrato: int) -> Dict:
+        """
+        Busca o valor e a data de vencimento de faturas de um contrato.
+
+        Args:
+            id_contrato (int): O ID do contrato.
+
+        Returns:
+            Dict: A resposta da API IXC contendo os dados das faturas.
+        """
         grid_param = [
             {"TB": "fn_areceber.id_contrato", "OP": "=", "P": str(id_contrato)}
         ]

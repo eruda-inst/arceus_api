@@ -15,6 +15,15 @@ comercial_service = services.ComercialService()
 async def get_status_acesso(
     id_contrato: PositiveInt = Query(ge=1, description="ID do contrato."),
 ) -> schemas.StatusAcessoOut:
+    """
+    Obtém o status de acesso de um contrato específico.
+
+    Args:
+        id_contrato: O ID do contrato a ser consultado.
+
+    Returns:
+        O status de acesso do contrato.
+    """
     return await comercial_service.get_status_acesso(id_contrato=id_contrato)
 
 
@@ -42,6 +51,19 @@ async def get_contratos(
         utils.SortOrder.ASC, description="Ordem da ordenação."
     ),
 ) -> schemas.ComercialContratoListOut:
+    """
+    Obtém a lista de contratos de um cliente, com base no protocolo de atendimento.
+
+    Args:
+        protocolo: O protocolo de atendimento do cliente no OpaSuite.
+        page: O número da página para a paginação.
+        per_page: A quantidade de itens por página.
+        sortname: O campo pelo qual a lista será ordenada.
+        sortorder: A ordem de ordenação (ascendente ou descendente).
+
+    Returns:
+        Uma lista paginada de contratos do cliente.
+    """
     return await comercial_service.get_contratos(
         protocolo=protocolo,
         page=page,
@@ -60,4 +82,13 @@ async def get_contratos(
 async def post_leads(
     lead: schemas.LeadIn = Body(description="Lead a ser cadastrado."),
 ) -> schemas.LeadCreate:
+    """
+    Cadastra um novo lead no sistema.
+
+    Args:
+        lead: Os dados do lead a ser cadastrado.
+
+    Returns:
+        Os dados do lead recém-criado.
+    """
     return await comercial_service.post_leads(lead=lead)

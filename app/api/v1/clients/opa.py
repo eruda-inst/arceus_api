@@ -5,13 +5,39 @@ from fastapi import HTTPException, status
 
 
 class OpaCliente:
+    """
+    Cliente para interagir com a API do OPA Suite.
+
+    Esta classe gerencia a comunicação com a API do OPA, lidando com
+    autenticação e realizando as chamadas necessárias para obter
+    informações de clientes e atendimentos.
+    """
+
     def __init__(self: Self) -> None:
+        """
+        Inicializa o cliente OPA com as configurações necessárias.
+
+        Define o token, host, URL base e cabeçalhos para as requisições à API.
+        """
         self.token = core.settings.OPA_TOKEN
         self.host = core.settings.OPA_HOST
         self.base_url = f"https://{self.host}/api/v1"
         self.headers = {"Authorization": f"Bearer {self.token}"}
 
     async def _make_request(self: Self, endpoint: str, payload: Dict) -> Dict:
+        """
+        Realiza uma requisição GET para um endpoint da API do OPA.
+
+        Args:
+            endpoint: O endpoint da API a ser chamado.
+            payload: O corpo da requisição em formato de dicionário.
+
+        Returns:
+            A resposta da API em formato de dicionário.
+
+        Raises:
+            HTTPException: Se ocorrer um erro durante a requisição.
+        """
         url = f"{self.base_url}/{endpoint}"
         try:
             async with httpx.AsyncClient(timeout=30.0) as async_client:
@@ -30,11 +56,29 @@ class OpaCliente:
             )
 
     async def get_id_cliente_opa(self: Self, protocolo: str) -> Dict:
+        """
+        Obtém o ID do cliente no OPA a partir do protocolo de atendimento.
+
+        Args:
+            protocolo: O número do protocolo de atendimento.
+
+        Returns:
+            Um dicionário contendo os dados do atendimento, incluindo o ID do cliente no OPA.
+        """
         payload = {"filter": {"protocolo": protocolo}}
         data = await self._make_request(endpoint="atendimento", payload=payload)
         return data
 
     async def get_id_cliente_ixc(self: Self, id_cliente_opa: int) -> Dict:
+        """
+        Obtém o ID do cliente no IXC a partir do ID do cliente no OPA.
+
+        Args:
+            id_cliente_opa: O ID do cliente no sistema OPA.
+
+        Returns:
+            Um dicionário contendo os dados do cliente, incluindo o ID do cliente no IXC.
+        """
         payload = {"filter": {"_id": id_cliente_opa}}
         data = await self._make_request(endpoint="cliente", payload=payload)
         return data

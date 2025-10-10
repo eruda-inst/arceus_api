@@ -8,7 +8,16 @@ from starlette.middleware.base import BaseHTTPMiddleware
 
 
 class LogMiddleware(BaseHTTPMiddleware):
+    """Middleware para registrar requisições HTTP em um banco de dados."""
+
     def __init__(self, app, exclude_paths: list = None):
+        """
+        Inicializa o middleware de log.
+
+        Args:
+            app: A aplicação ASGI.
+            exclude_paths: Uma lista de caminhos de URL a serem excluídos do log.
+        """
         super().__init__(app)
         self.exclude_paths = exclude_paths or [
             "/",
@@ -19,6 +28,19 @@ class LogMiddleware(BaseHTTPMiddleware):
         ]
 
     async def dispatch(self, request: Request, call_next):
+        """
+        Intercepta, processa e registra uma requisição.
+
+        Mede o tempo de processamento da requisição e chama a função de log
+        após a conclusão. Exclui caminhos específicos do log.
+
+        Args:
+            request: O objeto da requisição.
+            call_next: A próxima chamada no pipeline de middleware.
+
+        Returns:
+            A resposta da requisição.
+        """
         if request.url.path in self.exclude_paths:
             return await call_next(request)
 
@@ -46,6 +68,16 @@ class LogMiddleware(BaseHTTPMiddleware):
     async def _log_request(
         self, request: Request, status_code: int, process_time: float
     ):
+        """
+        Chama a função de log do banco de dados em uma thread separada.
+
+        Isso evita o bloqueio do loop de eventos principal para operações de banco de dados.
+
+        Args:
+            request: O objeto da requisição.
+            status_code: O código de status da resposta.
+            process_time: O tempo de processamento da requisição.
+        """
         try:
             await asyncio.to_thread(
                 self._log_to_database, request, status_code, process_time
@@ -54,6 +86,17 @@ class LogMiddleware(BaseHTTPMiddleware):
             print(f"Erro ao registrar log: {e}")
 
     def _log_to_database(self, request: Request, status_code: int, process_time: float):
+        """
+        Registra os detalhes da requisição no banco de dados.
+
+        Obtém uma sessão de banco de dados, cria uma entrada de log e a salva.
+        Trata exceções de banco de dados e garante que a sessão seja fechada.
+
+        Args:
+            request: O objeto da requisição.
+            status_code: O código de status da resposta.
+            process_time: O tempo de processamento da requisição.
+        """
         try:
             db = next(database.get_db())
             crud.log_crud.create_log(

@@ -4,12 +4,16 @@ from .. import clients, schemas, utils
 from fastapi import HTTPException, status
 from pydantic import ValidationError, PositiveInt
 
-from math import ceil
-from pydantic import NonNegativeInt
-
 
 class FinanceiroService(service.Service):
+    """
+    Serviço para encapsular a lógica de negócios relacionada às operações financeiras.
+    """
+
     def __init__(self: Self) -> None:
+        """
+        Inicializa o serviço financeiro e os clientes de API necessários.
+        """
         super().__init__()
         self.financeiro_ixc_cliente = clients.FinanceiroIXCCliente()
         self.financeiro_az7_cliente = clients.FinanceiroAZ7Cliente()
@@ -22,6 +26,22 @@ class FinanceiroService(service.Service):
         sortname: Optional[str] = "fn_areceber.id",
         sortorder: Optional[utils.SortOrder] = utils.SortOrder.ASC,
     ) -> schemas.FaturaAbertaListOut:
+        """
+        Obtém uma lista paginada de faturas em aberto para um cliente.
+
+        Args:
+            protocolo: O protocolo de atendimento para identificar o cliente.
+            page: O número da página para a paginação.
+            per_page: A quantidade de itens por página.
+            sortname: O campo para ordenação.
+            sortorder: A ordem de ordenação.
+
+        Returns:
+            Uma lista paginada e formatada de faturas em aberto.
+
+        Raises:
+            HTTPException: Se o cliente ou as faturas não forem encontrados, ou em caso de erro.
+        """
         try:
             id_cliente = await self.get_id_cliente_ixc(protocolo=protocolo)
 
@@ -96,6 +116,18 @@ class FinanceiroService(service.Service):
     async def post_desbloqueio_em_confianca(
         self: Self, id_contrato: PositiveInt
     ) -> schemas.MensagemOut:
+        """
+        Solicita o desbloqueio em confiança para um contrato.
+
+        Args:
+            id_contrato: O ID do contrato a ser desbloqueado.
+
+        Returns:
+            Uma mensagem de confirmação da solicitação.
+
+        Raises:
+            HTTPException: Em caso de falha na solicitação.
+        """
         try:
             res = await self.financeiro_ixc_cliente.post_desbloqueio_em_confianca(
                 id_contrato=id_contrato
@@ -119,6 +151,18 @@ class FinanceiroService(service.Service):
     async def get_linha_digitavel(
         self: Self, id_fatura: PositiveInt
     ) -> schemas.LinhaDigitavelOut:
+        """
+        Obtém a linha digitável de uma fatura específica.
+
+        Args:
+            id_fatura: O ID da fatura.
+
+        Returns:
+            A linha digitável da fatura.
+
+        Raises:
+            HTTPException: Se a linha digitável não for encontrada ou ocorrer um erro.
+        """
         try:
             res = await self.financeiro_ixc_cliente.get_linha_digitavel(
                 id_fatura=id_fatura
@@ -152,6 +196,18 @@ class FinanceiroService(service.Service):
             )
 
     async def get_chave_pix(self: Self, id_fatura: PositiveInt) -> schemas.ChavePixBase:
+        """
+        Obtém a chave PIX para pagamento de uma fatura.
+
+        Args:
+            id_fatura: O ID da fatura.
+
+        Returns:
+            A chave PIX da fatura.
+
+        Raises:
+            HTTPException: Se a chave PIX não for encontrada ou ocorrer um erro.
+        """
         try:
             res = await self.financeiro_az7_cliente.get_chave_pix(id_fatura=id_fatura)
             if len(res) < 1 or not res.get("pixCode"):
@@ -175,6 +231,18 @@ class FinanceiroService(service.Service):
             )
 
     async def get_credenciais(self: Self, protocolo: str) -> schemas.CredencialOut:
+        """
+        Obtém as credenciais de acesso à central do assinante de um cliente.
+
+        Args:
+            protocolo: O protocolo de atendimento para identificar o cliente.
+
+        Returns:
+            As credenciais de acesso (usuário e senha).
+
+        Raises:
+            HTTPException: Se as credenciais não forem encontradas ou ocorrer um erro.
+        """
         try:
             id_cliente = await self.get_id_cliente_ixc(protocolo=protocolo)
 
@@ -206,6 +274,19 @@ class FinanceiroService(service.Service):
     async def put_credenciais(
         self: Self, id_cliente: PositiveInt, credenciais: schemas.CredencialUpdate
     ) -> schemas.MensagemOut:
+        """
+        Atualiza as credenciais de acesso de um cliente.
+
+        Args:
+            id_cliente: O ID do cliente a ser atualizado.
+            credenciais: As novas credenciais (senha e/ou email).
+
+        Returns:
+            Uma mensagem de confirmação da atualização.
+
+        Raises:
+            HTTPException: Se o cliente não for encontrado ou ocorrer um erro na atualização.
+        """
         try:
             res = await self.financeiro_ixc_cliente.get_credenciais(
                 id_cliente=id_cliente
@@ -239,6 +320,18 @@ class FinanceiroService(service.Service):
             )
 
     async def get_ultima_fatura_paga(self: Self, id_contrato: PositiveInt):
+        """
+        Obtém os detalhes da última fatura paga de um contrato.
+
+        Args:
+            id_contrato: O ID do contrato.
+
+        Returns:
+            Os dados da última fatura paga.
+
+        Raises:
+            HTTPException: Se não houver faturas pagas ou ocorrer um erro.
+        """
         try:
             res = await self.financeiro_ixc_cliente.get_ultima_fatura_paga(
                 id_contrato=id_contrato

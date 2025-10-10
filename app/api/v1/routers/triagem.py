@@ -19,6 +19,16 @@ async def put_contato_cliente(
         description="Campos de cliente a serem atualizados."
     ),
 ) -> schemas.MensagemOut:
+    """
+    Atualiza os dados de contato de um cliente específico.
+
+    Args:
+        id_cliente: O ID do cliente a ser atualizado.
+        contato: Os novos dados de contato do cliente.
+
+    Returns:
+        Uma mensagem de confirmação da atualização.
+    """
     return await triagem_service.put_contato_cliente(
         id_cliente=id_cliente, contato=contato
     )

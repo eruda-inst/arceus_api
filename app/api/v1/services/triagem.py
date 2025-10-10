@@ -6,13 +6,33 @@ from pydantic import ValidationError, PositiveInt
 
 
 class TriagemService(service.Service):
+    """
+    Serviço para encapsular a lógica de negócios relacionada à triagem de clientes.
+    """
+
     def __init__(self: Self) -> None:
+        """
+        Inicializa o serviço de triagem e o cliente IXC correspondente.
+        """
         super().__init__()
         self.triagem_ixc_cliente = clients.TriagemIXCCliente()
 
     async def put_contato_cliente(
         self: Self, id_cliente: PositiveInt, contato: schemas.ContatoUpdate
     ) -> schemas.MensagemOut:
+        """
+        Atualiza as informações de contato de um cliente.
+
+        Args:
+            id_cliente: O ID do cliente a ser atualizado.
+            contato: Os novos dados de contato a serem aplicados.
+
+        Returns:
+            Uma mensagem de confirmação da atualização.
+
+        Raises:
+            HTTPException: Se o cliente não for encontrado ou ocorrer um erro.
+        """
         try:
             res = await self.triagem_ixc_cliente.get_clientes(id_cliente=id_cliente)
             if not res.get("registros"):
