@@ -16,7 +16,6 @@ from .suporte import (
     SuporteContrato,
     onu,
     StatusConexao,
-    LoginUpdate,
     StatusONUOut,
     StatusONU,
     StatusConexaoOut,
@@ -35,3 +34,4 @@ from .financeiro import (
 )
 from .triagem import ContatoUpdate
 from .cliente import ClienteUpdate
+from .login import LoginUpdate

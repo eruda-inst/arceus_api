@@ -18,14 +18,14 @@ class Contrato(BaseModel):
         "json_schema_extra": {
             "examples": [
                 {
-                    "id": 324,
-                    "id_login": 133,
-                    "id_cliente": 2321,
+                    "id": 123,
+                    "id_login": 456,
+                    "id_cliente": 789,
                     "status": utils.enums.rotulos.StatusContratoRot.PRE_CONTRATO,
                     "contrato": "NEWNET PADRAO - 250MB - 06/2025",
-                    "valor": 99.9,
-                    "data_vencimento": "2025-06-01",
-                    "mac_onu": "DD18b3d3e400",
+                    "valor": 99.99,
+                    "data_vencimento": "2025-12-31",
+                    "mac_onu": "AB1230001234",
                 }
             ]
         }
@@ -43,24 +43,24 @@ class ContratoListOut(BaseModel):
                 {
                     "data": [
                         {
-                            "id": 8516,
-                            "id_login": 8247,
-                            "id_cliente": 7921,
-                            "status": utils.enums.rotulos.StatusContratoRot.ATIVO,
-                            "contrato": "NEWNET BASICO - 150MB - 06/2025",
-                            "valor": 50.0,
-                            "data_vencimento": "2025-10-20",
-                            "mac_onu": "DD16E6112683",
+                            "id": 123,
+                            "id_login": 456,
+                            "id_cliente": 789,
+                            "status": utils.enums.rotulos.StatusContratoRot.PRE_CONTRATO,
+                            "contrato": "NEWNET PADRAO - 250MB - 06/2025",
+                            "valor": 99.99,
+                            "data_vencimento": "2025-12-31",
+                            "mac_onu": "AB1230001234",
                         },
                         {
-                            "id": 11807,
-                            "id_login": 11582,
-                            "id_cliente": 7921,
-                            "status": utils.enums.rotulos.StatusContratoRot.ATIVO,
-                            "contrato": "NEWNET BASICO - 150MB - 06/2025",
-                            "valor": 55.0,
-                            "data_vencimento": "2025-10-10",
-                            "mac_onu": "GPON00a31548",
+                            "id": 234,
+                            "id_login": 567,
+                            "id_cliente": 890,
+                            "status": utils.enums.rotulos.StatusContratoRot.PRE_CONTRATO,
+                            "contrato": "NEWNET PADRAO - 250MB - 06/2025",
+                            "valor": 99.99,
+                            "data_vencimento": "2025-12-31",
+                            "mac_onu": "BC2341112345",
                         },
                     ],
                     "meta": {
