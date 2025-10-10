@@ -55,18 +55,18 @@ class ComercialService(service.Service):
         try:
             id_cliente = await self.get_id_cliente_ixc(protocolo=protocolo)
 
-            contratos_res = await self.comercial_ixc_cliente.get_contratos(
+            res = await self.comercial_ixc_cliente.get_contratos(
                 id_cliente=id_cliente,
                 page=page,
                 per_page=per_page,
                 sortname=sortname,
                 sortorder=sortorder,
             )
-            if not contratos_res.get("registros", []):
+            if not res.get("registros", []):
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND, detail="Sem contrato."
                 )
-            contratos = contratos_res["registros"]
+            contratos = res["registros"]
 
             contratos_tratados = []
             hoje = datetime.now().date()
@@ -136,7 +136,7 @@ class ComercialService(service.Service):
                 }
                 contratos_tratados.append(contrato_tratado)
 
-            total = len(contratos)
+            total = int(res.get("total", 0))
 
             meta = schemas.Meta(
                 total=total,
@@ -145,18 +145,8 @@ class ComercialService(service.Service):
             )
 
             base_url = f"/api/v1/comercial/contratos?protocolo={protocolo}"
-            links = schemas.Links(
-                self=f"{base_url}&page={page}&per_page={per_page}",
-                next=(
-                    f"{base_url}&page={page + 1}&per_page={per_page}"
-                    if (page * per_page) < total
-                    else None
-                ),
-                prev=(
-                    f"{base_url}&page={page - 1}&per_page={per_page}"
-                    if page > 1
-                    else None
-                ),
+            links = utils.make_links(
+                base_url=base_url, page=page, per_page=per_page, total=total
             )
 
             return schemas.ComercialContratoListOut(

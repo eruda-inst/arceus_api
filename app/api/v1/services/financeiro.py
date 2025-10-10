@@ -4,6 +4,9 @@ from .. import clients, schemas, utils
 from fastapi import HTTPException, status
 from pydantic import ValidationError, PositiveInt
 
+from math import ceil
+from pydantic import NonNegativeInt
+
 
 class FinanceiroService(service.Service):
     def __init__(self: Self) -> None:
@@ -22,7 +25,7 @@ class FinanceiroService(service.Service):
         try:
             id_cliente = await self.get_id_cliente_ixc(protocolo=protocolo)
 
-            faturas_abertas = await self.financeiro_ixc_cliente.get_faturas_abertas(
+            res = await self.financeiro_ixc_cliente.get_faturas_abertas(
                 id_cliente=id_cliente,
                 page=page,
                 per_page=per_page,
@@ -30,12 +33,12 @@ class FinanceiroService(service.Service):
                 sortorder=sortorder,
             )
 
-            if not faturas_abertas.get("registros"):
+            if not res.get("registros"):
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND, detail="Cliente sem faturas."
                 )
 
-            faturas_abertas = faturas_abertas["registros"]
+            faturas_abertas = res["registros"]
 
             faturas_abertas_formatadas = []
 
@@ -59,7 +62,7 @@ class FinanceiroService(service.Service):
                     }
                 )
 
-            total = len(faturas_abertas)
+            total = int(res.get("total", 0))
 
             meta = schemas.Meta(
                 total=total,
@@ -67,19 +70,9 @@ class FinanceiroService(service.Service):
                 per_page=per_page,
             )
 
-            base_url = f"/api/v1/financeiro/faturas?protocolo={protocolo}"
-            links = schemas.Links(
-                self=f"{base_url}&page={page}&per_page={per_page}",
-                next=(
-                    f"{base_url}&page={page + 1}&per_page={per_page}"
-                    if (page * per_page) < total
-                    else None
-                ),
-                prev=(
-                    f"{base_url}&page={page - 1}&per_page={per_page}"
-                    if page > 1
-                    else None
-                ),
+            base_url = f"/api/v1/financeiro/faturas_abertas?protocolo={protocolo}"
+            links = utils.make_links(
+                base_url=base_url, page=page, per_page=per_page, total=total
             )
 
             return schemas.FaturaAbertaListOut(

@@ -30,7 +30,7 @@ class SuporteService(service.Service):
                 sortorder=sortorder,
             )
             contratos_ativos = contratos_ativos_res.get("registros", [])
-            total = len(contratos_ativos)
+            total = int(contratos_ativos_res.get("total", 0))
             if total < 1:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
@@ -113,19 +113,9 @@ class SuporteService(service.Service):
                 contrato["status"] = utils.rotular_status_contrato(contrato["status"])
 
             meta = schemas.Meta(total=total, page=page, per_page=per_page)
-            base_url = f"/contratos?protocolo={protocolo}"
-            links = schemas.Links(
-                self=f"{base_url}&page={page}&per_page={per_page}",
-                next=(
-                    f"{base_url}&page={page + 1}&per_page={per_page}"
-                    if (page * per_page) < total
-                    else None
-                ),
-                prev=(
-                    f"{base_url}&page={page - 1}&per_page={per_page}"
-                    if page > 1
-                    else None
-                ),
+            base_url = f"/api/v1/suporte/contratos?protocolo={protocolo}"
+            links = utils.make_links(
+                base_url=base_url, page=page, per_page=per_page, total=total
             )
             return schemas.SuporteContratoListOut(
                 data=[schemas.SuporteContrato(**c) for c in contratos_ativos],
@@ -294,21 +284,11 @@ class SuporteService(service.Service):
                         "data_criacao": a.get("data_criacao"),
                     }
                 )
-            total = len(registros)
+            total = int(res.get("total", 0))
             meta = schemas.Meta(total=total, page=page, per_page=per_page)
-            base_url = f"/atendimentos?id_login={id_login}"
-            links = schemas.Links(
-                self=f"{base_url}&page={page}&per_page={per_page}",
-                next=(
-                    f"{base_url}&page={page + 1}&per_page={per_page}"
-                    if (page * per_page) < total
-                    else None
-                ),
-                prev=(
-                    f"{base_url}&page={page - 1}&per_page={per_page}"
-                    if page > 1
-                    else None
-                ),
+            base_url = f"/api/v1/suporte/atendimentos?id_login={id_login}"
+            links = utils.make_links(
+                base_url=base_url, page=page, per_page=per_page, total=total
             )
             return schemas.AtendimentoOut(
                 data=[schemas.Atendimento(**i) for i in formatted],
