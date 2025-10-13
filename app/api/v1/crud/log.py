@@ -1,4 +1,5 @@
 from .. import models
+from zoneinfo import ZoneInfo
 from datetime import datetime
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
@@ -32,7 +33,9 @@ class LogCRUD:
                 ip=ip,
                 endpoint=endpoint,
                 status_code=status_code,
-                datetime=datetime.now(),
+                datetime=datetime.now(ZoneInfo("America/Sao_Paulo")).replace(
+                    tzinfo=None
+                ),
                 duracao=round(duracao, 4),
             )
             db.add(log_entry)
