@@ -17,6 +17,7 @@ class ComercialService(service.Service):
         """
         super().__init__()
         self.comercial_ixc_cliente = clients.ComercialIXCCliente()
+        self.suporte_ixc_cliente = clients.SuporteIXCCliente()
 
     async def get_status_acesso(
         self: Self, id_contrato: PositiveInt
@@ -163,6 +164,15 @@ class ComercialService(service.Service):
                         ).date(),
                     )
 
+                login = await self.comercial_ixc_cliente.get_login(
+                    id_cliente=contrato["id_cliente"]
+                )
+
+                if not login.get("registros"):
+                    raise HTTPException(
+                        status_code=status.HTTP_404_NOT_FOUND, detail="Sem login."
+                    )
+
                 contrato_tratado = {
                     "id": contrato["id"],
                     "contrato": contrato["contrato"],
@@ -171,6 +181,8 @@ class ComercialService(service.Service):
                         status_acesso_codigo=contrato["status_internet"]
                     ),
                     "data_vencimento": titulo_final.get("data_vencimento"),
+                    "id_cliente": contrato["id_cliente"],
+                    "id_login": login.get("registros")[0]["id"],
                 }
                 contratos_tratados.append(contrato_tratado)
 

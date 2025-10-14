@@ -1,5 +1,6 @@
 import json
 from .. import ixc
+from pydantic import PositiveInt
 from app.api.v1 import schemas, utils
 from typing import Dict, Self, Optional
 
@@ -70,4 +71,12 @@ class ComercialIXCCliente(ixc.IXCCliente):
         data = await self._make_request(
             endpoint="contato", payload=payload, include_ixcsoft=False
         )
+        return data
+
+    async def get_login(self: Self, id_cliente: PositiveInt):
+        grid_param = [{"TB": "radusuarios.id_cliente", "OP": "=", "P": str(id_cliente)}]
+        payload = {
+            "grid_param": json.dumps(obj=grid_param),
+        }
+        data = await self._make_request(endpoint="radusuarios", payload=payload)
         return data

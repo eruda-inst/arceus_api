@@ -12,6 +12,8 @@ class Contrato(BaseModel):
         description="Status do acesso do contrato."
     )
     data_vencimento: str = Field(description="Data de vencimento do contrato.")
+    id_cliente: PositiveInt = Field(description="ID do cliente.")
+    id_login: PositiveInt = Field(description="ID de login.")
 
     model_config = {
         "json_schema_extra": {
@@ -24,6 +26,8 @@ class Contrato(BaseModel):
                             "valor": 99.99,
                             "status_acesso": utils.StatusAcessoRot.ATIVO,
                             "data_vencimento": "2025-12-31",
+                            "id_cliente": 12345,
+                            "id_login": 123456,
                         },
                     ],
                 }
@@ -48,6 +52,8 @@ class ContratoListOut(BaseModel):
                             "valor": 99.99,
                             "status_acesso": utils.StatusAcessoRot.ATIVO,
                             "data_vencimento": "2025-12-31",
+                            "id_cliente": 12345,
+                            "id_login": 123456,
                         },
                         {
                             "id": 12345,
@@ -55,6 +61,8 @@ class ContratoListOut(BaseModel):
                             "valor": 99.9,
                             "status_acesso": utils.StatusAcessoRot.ATIVO,
                             "data_vencimento": "2025-12-31",
+                            "id_cliente": 12345,
+                            "id_login": 123456,
                         },
                     ],
                     "meta": {
