@@ -1,10 +1,11 @@
 from typing import Optional
 from pydantic import PositiveInt
 from .. import utils, services, schemas
-from fastapi import APIRouter, Query, status, Body
+from fastapi import APIRouter, Query, status, Body, Depends
+from ..database import get_db
+from sqlalchemy.orm import Session
 
 comercial_router = APIRouter()
-comercial_service = services.ComercialService()
 
 
 @comercial_router.get(
@@ -14,6 +15,7 @@ comercial_service = services.ComercialService()
 )
 async def get_status_acesso(
     id_contrato: PositiveInt = Query(ge=1, description="ID do contrato."),
+    db: Session = Depends(get_db),
 ) -> schemas.StatusAcessoOut:
     """
     Obtém o status de acesso de um contrato específico.
@@ -24,7 +26,8 @@ async def get_status_acesso(
     Returns:
         O status de acesso do contrato.
     """
-    return await comercial_service.get_status_acesso(id_contrato=id_contrato)
+    comercial_service = services.ComercialService()
+    return await comercial_service.get_status_acesso(id_contrato=id_contrato, db=db)
 
 
 @comercial_router.get(
@@ -50,6 +53,7 @@ async def get_contratos(
     sortorder: Optional[utils.SortOrder] = Query(
         utils.SortOrder.ASC, description="Ordem da ordenação."
     ),
+    db: Session = Depends(get_db),
 ) -> schemas.ComercialContratoListOut:
     """
     Obtém a lista de contratos de um cliente, com base no protocolo de atendimento.
@@ -64,12 +68,14 @@ async def get_contratos(
     Returns:
         Uma lista paginada de contratos do cliente.
     """
+    comercial_service = services.ComercialService()
     return await comercial_service.get_contratos(
         protocolo=protocolo,
         page=page,
         per_page=per_page,
         sortname=sortname,
         sortorder=sortorder,
+        db=db,
     )
 
 
@@ -81,6 +87,7 @@ async def get_contratos(
 )
 async def post_leads(
     lead: schemas.LeadIn = Body(description="Lead a ser cadastrado."),
+    db: Session = Depends(get_db),
 ) -> schemas.LeadCreate:
     """
     Cadastra um novo lead no sistema.
@@ -91,4 +98,5 @@ async def post_leads(
     Returns:
         Os dados do lead recém-criado.
     """
-    return await comercial_service.post_leads(lead=lead)
+    comercial_service = services.ComercialService()
+    return await comercial_service.post_leads(lead=lead, db=db)

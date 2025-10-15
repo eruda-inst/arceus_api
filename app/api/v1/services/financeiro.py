@@ -25,6 +25,7 @@ class FinanceiroService(service.Service):
         per_page: Optional[PositiveInt] = 15,
         sortname: Optional[str] = "fn_areceber.id",
         sortorder: Optional[utils.SortOrder] = utils.SortOrder.ASC,
+        db=None,
     ) -> schemas.FaturaAbertaListOut:
         """
         Obtém uma lista paginada de faturas em aberto para um cliente.
@@ -114,7 +115,7 @@ class FinanceiroService(service.Service):
             )
 
     async def post_desbloqueio_em_confianca(
-        self: Self, id_contrato: PositiveInt
+        self: Self, id_contrato: PositiveInt, db=None
     ) -> schemas.MensagemOut:
         """
         Solicita o desbloqueio em confiança para um contrato.
@@ -149,7 +150,7 @@ class FinanceiroService(service.Service):
             )
 
     async def get_linha_digitavel(
-        self: Self, id_fatura: PositiveInt
+        self: Self, id_fatura: PositiveInt, db=None
     ) -> schemas.LinhaDigitavelOut:
         """
         Obtém a linha digitável de uma fatura específica.
@@ -195,7 +196,9 @@ class FinanceiroService(service.Service):
                 detail=f"Erro interno ao processar solicitação: {str(e)}",
             )
 
-    async def get_chave_pix(self: Self, id_fatura: PositiveInt) -> schemas.ChavePixBase:
+    async def get_chave_pix(
+        self: Self, id_fatura: PositiveInt, db=None
+    ) -> schemas.ChavePixBase:
         """
         Obtém a chave PIX para pagamento de uma fatura.
 
@@ -230,7 +233,9 @@ class FinanceiroService(service.Service):
                 detail=f"Erro interno ao processar solicitação: {str(e)}",
             )
 
-    async def get_credenciais(self: Self, protocolo: str) -> schemas.CredencialOut:
+    async def get_credenciais(
+        self: Self, protocolo: str, db=None
+    ) -> schemas.CredencialOut:
         """
         Obtém as credenciais de acesso à central do assinante de um cliente.
 
@@ -272,7 +277,10 @@ class FinanceiroService(service.Service):
             )
 
     async def put_credenciais(
-        self: Self, id_cliente: PositiveInt, credenciais: schemas.CredencialUpdate
+        self: Self,
+        id_cliente: PositiveInt,
+        credenciais: schemas.CredencialUpdate,
+        db=None,
     ) -> schemas.MensagemOut:
         """
         Atualiza as credenciais de acesso de um cliente.
@@ -319,7 +327,7 @@ class FinanceiroService(service.Service):
                 detail=f"Erro interno ao processar solicitação: {str(e)}",
             )
 
-    async def get_ultima_fatura_paga(self: Self, id_contrato: PositiveInt):
+    async def get_ultima_fatura_paga(self: Self, id_contrato: PositiveInt, db=None):
         """
         Obtém os detalhes da última fatura paga de um contrato.
 

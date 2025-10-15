@@ -25,6 +25,7 @@ class SuporteService(service.Service):
         per_page: Optional[PositiveInt] = 10,
         sortname: Optional[str] = "cliente_contrato.id",
         sortorder: Optional[utils.SortOrder] = utils.SortOrder.ASC,
+        db=None,
     ) -> schemas.SuporteContratoListOut:
         """
         Obtém uma lista paginada de contratos de suporte para um cliente.
@@ -162,7 +163,7 @@ class SuporteService(service.Service):
             )
 
     async def get_status_conexao(
-        self: Self, id_login: PositiveInt
+        self: Self, id_login: PositiveInt, db=None
     ) -> schemas.StatusConexaoOut:
         """
         Obtém e rotula o status de conexão de um cliente.
@@ -209,6 +210,7 @@ class SuporteService(service.Service):
         self: Self,
         id_login: Optional[PositiveInt] = None,
         mac_onu: Optional[str] = None,
+        db=None,
     ) -> schemas.StatusONUOut:
         """
         Obtém e rotula o status do sinal da ONU de um cliente.
@@ -286,7 +288,7 @@ class SuporteService(service.Service):
             )
 
     async def post_desconectar_cliente(
-        self: Self, id_login: PositiveInt
+        self: Self, id_login: PositiveInt, db=None
     ) -> schemas.MensagemOut:
         """
         Envia um comando para desconectar um cliente da rede.
@@ -322,6 +324,7 @@ class SuporteService(service.Service):
         per_page: Optional[PositiveInt] = 10,
         sortname: Optional[str] = "su_ticket.id",
         sortorder: Optional[utils.SortOrder] = utils.SortOrder.ASC,
+        db=None,
     ) -> schemas.AtendimentoOut:
         """
         Obtém uma lista paginada de atendimentos de suporte em aberto.
@@ -392,7 +395,7 @@ class SuporteService(service.Service):
             )
 
     async def post_atendimentos(
-        self: Self, atendimento: schemas.AtendimentoIn
+        self: Self, atendimento: schemas.AtendimentoIn, db=None
     ) -> schemas.AtendimentoCreate:
         """
         Cria um novo ticket de atendimento de suporte.
@@ -426,7 +429,7 @@ class SuporteService(service.Service):
             )
 
     async def put_ip(
-        self: Self, id_login: PositiveInt, ip: schemas.IPUpdate
+        self: Self, id_login: PositiveInt, ip: schemas.IPUpdate, db=None
     ) -> schemas.MensagemOut:
         """
         Atualiza o endereço IP de um login de cliente.
@@ -471,7 +474,9 @@ class SuporteService(service.Service):
                 detail=f"Erro interno: {str(e)}",
             )
 
-    async def post_limpar_mac(self: Self, id_login: PositiveInt) -> schemas.MensagemOut:
+    async def post_limpar_mac(
+        self: Self, id_login: PositiveInt, db=None
+    ) -> schemas.MensagemOut:
         """
         Executa a rotina de limpar o endereço MAC de um login.
 

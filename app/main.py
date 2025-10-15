@@ -19,7 +19,7 @@ async def lifespan(app: FastAPI):
     Args:
         app (FastAPI): A instância da aplicação FastAPI.
     """
-    database.criar_tabelas()
+    await database.criar_tabelas()
     print("Tabelas criadas com sucesso!")
     yield
     print("Encerrando aplicação...")
@@ -30,7 +30,7 @@ app = FastAPI(
     description="""
     API oficial Newnet/Eruda - Simplifica integrações entre a API (Application Programming Interface) da OpaSuite, da IXCSoft e da 7AZ.
     """,
-    version="0.59.4",
+    version="0.59.7",
     lifespan=lifespan,
 )
 

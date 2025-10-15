@@ -1,7 +1,7 @@
 from .. import models
 from zoneinfo import ZoneInfo
 from datetime import datetime
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import SQLAlchemyError
 
 
@@ -9,8 +9,8 @@ class LogCRUD:
     """CRUD (Create, Read, Update, Delete) para o modelo Log."""
 
     @staticmethod
-    def create_log(
-        db: Session,
+    async def create_log(
+        db: AsyncSession,
         ip: str,
         method: str,
         endpoint: str,
@@ -18,7 +18,7 @@ class LogCRUD:
         duracao: float,
     ):
         """
-        Cria uma nova entrada de log no banco de dados.
+        Cria uma nova entrada de log no banco de dados de forma assíncrona.
 
         Args:
             db: A sessão do banco de dados.
@@ -46,11 +46,11 @@ class LogCRUD:
                 duracao=round(duracao, 4),
             )
             db.add(log_entry)
-            db.commit()
-            db.refresh(log_entry)
+            await db.commit()
+            await db.refresh(log_entry)
             return log_entry
         except SQLAlchemyError as e:
-            db.rollback()
+            await db.rollback()
             raise e
 
 

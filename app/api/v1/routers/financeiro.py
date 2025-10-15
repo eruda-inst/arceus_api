@@ -1,12 +1,12 @@
 from typing import Optional
 from pydantic import PositiveInt
 from .. import services, utils, schemas
-from fastapi import APIRouter, Query, Path, Body
+from fastapi import APIRouter, Query, Path, Body, Depends
+from ..database import get_db
+from sqlalchemy.orm import Session
 
 
 financeiro_router = APIRouter()
-financeiro_service = services.FinanceiroService()
-comercial_service = services.ComercialService()
 
 
 @financeiro_router.get(
@@ -30,6 +30,7 @@ async def get_faturas_abertas(
     sortorder: Optional[utils.SortOrder] = Query(
         default=utils.SortOrder.ASC, description="Ordem da ordenação."
     ),
+    db: Session = Depends(get_db),
 ) -> schemas.FaturaAbertaListOut:
     """
     Obtém a lista de faturas em aberto de um cliente.
@@ -44,12 +45,14 @@ async def get_faturas_abertas(
     Returns:
         Uma lista paginada de faturas em aberto do cliente.
     """
+    financeiro_service = services.FinanceiroService()
     return await financeiro_service.get_faturas_abertas(
         protocolo=protocolo,
         page=page,
         per_page=per_page,
         sortname=sortname,
         sortorder=sortorder,
+        db=db,
     )
 
 
@@ -76,6 +79,7 @@ async def get_contratos(
     sortorder: Optional[utils.SortOrder] = Query(
         utils.SortOrder.ASC, description="Ordem da ordenação."
     ),
+    db: Session = Depends(get_db),
 ) -> schemas.ComercialContratoListOut:
     """
     Obtém a lista de contratos de um cliente.
@@ -90,12 +94,14 @@ async def get_contratos(
     Returns:
         Uma lista paginada de contratos do cliente.
     """
+    comercial_service = services.ComercialService()
     return await comercial_service.get_contratos(
         protocolo=protocolo,
         page=page,
         per_page=per_page,
         sortname=sortname,
         sortorder=sortorder,
+        db=db,
     )
 
 
@@ -106,6 +112,7 @@ async def get_contratos(
 )
 async def post_desbloqueio_em_confianca(
     id_contrato: PositiveInt = Query(description="ID do contrato."),
+    db: Session = Depends(get_db),
 ) -> schemas.MensagemOut:
     """
     Solicita o desbloqueio em confiança para um contrato.
@@ -116,8 +123,10 @@ async def post_desbloqueio_em_confianca(
     Returns:
         Uma mensagem de confirmação da solicitação.
     """
+    financeiro_service = services.FinanceiroService()
     return await financeiro_service.post_desbloqueio_em_confianca(
-        id_contrato=id_contrato
+        id_contrato=id_contrato,
+        db=db,
     )
 
 
@@ -127,7 +136,8 @@ async def post_desbloqueio_em_confianca(
     summary="Obtém linha digitável de uma fatura, através do ID da fatura.",
 )
 async def get_linha_digitavel(
-    id_fatura: PositiveInt = Path(ge=1, description="ID da fatura.")
+    id_fatura: PositiveInt = Path(ge=1, description="ID da fatura."),
+    db: Session = Depends(get_db),
 ) -> schemas.LinhaDigitavelOut:
     """
     Obtém a linha digitável de uma fatura específica.
@@ -138,7 +148,8 @@ async def get_linha_digitavel(
     Returns:
         A linha digitável da fatura.
     """
-    return await financeiro_service.get_linha_digitavel(id_fatura=id_fatura)
+    financeiro_service = services.FinanceiroService()
+    return await financeiro_service.get_linha_digitavel(id_fatura=id_fatura, db=db)
 
 
 @financeiro_router.get(
@@ -148,6 +159,7 @@ async def get_linha_digitavel(
 )
 async def get_chave_pix(
     id_fatura: PositiveInt = Query(ge=1, description="ID da fatura."),
+    db: Session = Depends(get_db),
 ) -> schemas.ChavePixBase:
     """
     Obtém a chave PIX para pagamento de uma fatura.
@@ -158,7 +170,8 @@ async def get_chave_pix(
     Returns:
         A chave PIX da fatura.
     """
-    return await financeiro_service.get_chave_pix(id_fatura=id_fatura)
+    financeiro_service = services.FinanceiroService()
+    return await financeiro_service.get_chave_pix(id_fatura=id_fatura, db=db)
 
 
 @financeiro_router.get(
@@ -171,7 +184,8 @@ async def get_credenciais(
         min_length=12,
         max_length=12,
         description="Protocolo de atendimento do cliente no OpaSuite.",
-    )
+    ),
+    db: Session = Depends(get_db),
 ) -> schemas.CredencialOut:
     """
     Obtém as credenciais de acesso à central do assinante de um cliente.
@@ -182,7 +196,8 @@ async def get_credenciais(
     Returns:
         As credenciais de acesso do cliente.
     """
-    return await financeiro_service.get_credenciais(protocolo=protocolo)
+    financeiro_service = services.FinanceiroService()
+    return await financeiro_service.get_credenciais(protocolo=protocolo, db=db)
 
 
 # Por razões de limitações na plataforma opa, o verbo deve ser put, ao invés de patch
@@ -196,6 +211,7 @@ async def put_credenciais(
     credenciais: schemas.CredencialUpdate = Body(
         description="Credenciais a serem atualizadas."
     ),
+    db: Session = Depends(get_db),
 ) -> schemas.MensagemOut:
     """
     Atualiza as credenciais de acesso à central do assinante de um cliente.
@@ -207,8 +223,9 @@ async def put_credenciais(
     Returns:
         Uma mensagem de confirmação da atualização.
     """
+    financeiro_service = services.FinanceiroService()
     return await financeiro_service.put_credenciais(
-        id_cliente=id_cliente, credenciais=credenciais
+        id_cliente=id_cliente, credenciais=credenciais, db=db
     )
 
 
@@ -219,6 +236,7 @@ async def put_credenciais(
 )
 async def get_ultima_fatura_paga(
     id_contrato: PositiveInt = Query(ge=1, description="ID do contrato."),
+    db: Session = Depends(get_db),
 ) -> schemas.FaturaPagaBase:
     """
     Obtém a última fatura paga de um contrato.
@@ -229,4 +247,7 @@ async def get_ultima_fatura_paga(
     Returns:
         Os dados da última fatura paga.
     """
-    return await financeiro_service.get_ultima_fatura_paga(id_contrato=id_contrato)
+    financeiro_service = services.FinanceiroService()
+    return await financeiro_service.get_ultima_fatura_paga(
+        id_contrato=id_contrato, db=db
+    )

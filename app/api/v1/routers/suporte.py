@@ -1,11 +1,12 @@
 from typing import Optional
 from pydantic import PositiveInt
 from .. import schemas, utils, services
-from fastapi import APIRouter, Query, status, Path, Body
+from fastapi import APIRouter, Query, status, Path, Body, Depends
+from ..database import get_db
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 suporte_router = APIRouter()
-suporte_service = services.SuporteService()
 
 
 @suporte_router.get(
@@ -31,6 +32,7 @@ async def get_contratos(
     sortorder: Optional[utils.SortOrder] = Query(
         default=utils.SortOrder.ASC, description="Ordem da ordenação."
     ),
+    db: AsyncSession = Depends(get_db),
 ) -> schemas.SuporteContratoListOut:
     """
     Obtém a lista de contratos ativos de um cliente.
@@ -45,12 +47,14 @@ async def get_contratos(
     Returns:
         Uma lista paginada de contratos ativos do cliente.
     """
+    suporte_service = services.SuporteService()
     return await suporte_service.get_contratos(
         protocolo=protocolo,
         page=page,
         per_page=per_page,
         sortname=sortname,
         sortorder=sortorder,
+        db=db,
     )
 
 
@@ -63,6 +67,7 @@ async def get_status_conexao(
     id_login: PositiveInt = Query(
         ge=1, description="ID de login do cliente no IXCSoft."
     ),
+    db: AsyncSession = Depends(get_db),
 ) -> schemas.StatusConexaoOut:
     """
     Obtém o status de conexão de um cliente.
@@ -73,7 +78,8 @@ async def get_status_conexao(
     Returns:
         O status de conexão do cliente.
     """
-    return await suporte_service.get_status_conexao(id_login=id_login)
+    suporte_service = services.SuporteService()
+    return await suporte_service.get_status_conexao(id_login=id_login, db=db)
 
 
 @suporte_router.get(
@@ -88,6 +94,7 @@ async def get_status_onu(
     mac_onu: Optional[str] = Query(
         min_length=12, max_length=12, default=None, description="MAC Address da ONU."
     ),
+    db: AsyncSession = Depends(get_db),
 ) -> schemas.StatusONUOut:
     """
     Obtém o status da ONU (sinal) de um cliente.
@@ -99,7 +106,10 @@ async def get_status_onu(
     Returns:
         O status da ONU do cliente.
     """
-    return await suporte_service.get_status_onu(id_login=id_login, mac_onu=mac_onu)
+    suporte_service = services.SuporteService()
+    return await suporte_service.get_status_onu(
+        id_login=id_login, mac_onu=mac_onu, db=db
+    )
 
 
 @suporte_router.post(
@@ -111,6 +121,7 @@ async def post_desconectar_cliente(
     id_login: PositiveInt = Query(
         ge=1, description="ID de login do cliente no IXCSoft."
     ),
+    db: AsyncSession = Depends(get_db),
 ) -> schemas.MensagemOut:
     """
     Envia um comando para desconectar um cliente.
@@ -121,7 +132,8 @@ async def post_desconectar_cliente(
     Returns:
         Uma mensagem de confirmação da ação.
     """
-    return await suporte_service.post_desconectar_cliente(id_login=id_login)
+    suporte_service = services.SuporteService()
+    return await suporte_service.post_desconectar_cliente(id_login=id_login, db=db)
 
 
 @suporte_router.get(
@@ -145,6 +157,7 @@ async def get_atendimentos(
     sortorder: Optional[utils.SortOrder] = Query(
         default=utils.SortOrder.ASC, description="Ordem da ordenação."
     ),
+    db: AsyncSession = Depends(get_db),
 ) -> schemas.AtendimentoOut:
     """
     Obtém a lista de atendimentos em aberto para um cliente.
@@ -159,12 +172,14 @@ async def get_atendimentos(
     Returns:
         Uma lista paginada de atendimentos em aberto.
     """
+    suporte_service = services.SuporteService()
     return await suporte_service.get_atendimentos(
         id_login=id_login,
         page=page,
         per_page=per_page,
         sortname=sortname,
         sortorder=sortorder,
+        db=db,
     )
 
 
@@ -176,6 +191,7 @@ async def get_atendimentos(
 )
 async def post_atendimentos(
     atendimento: schemas.AtendimentoIn,
+    db: AsyncSession = Depends(get_db),
 ) -> schemas.AtendimentoCreate:
     """
     Cria um novo ticket de atendimento de suporte.
@@ -186,7 +202,8 @@ async def post_atendimentos(
     Returns:
         Os dados do atendimento recém-criado.
     """
-    return await suporte_service.post_atendimentos(atendimento=atendimento)
+    suporte_service = services.SuporteService()
+    return await suporte_service.post_atendimentos(atendimento=atendimento, db=db)
 
 
 # Por razões de limitações na plataforma opa, o verbo deve ser put, ao invés de patch
@@ -198,6 +215,7 @@ async def post_atendimentos(
 async def put_ip(
     id_login: PositiveInt = Path(ge=1, description="ID de login."),
     ip: schemas.IPUpdate = Body(description="IP a ser atualizado."),
+    db: AsyncSession = Depends(get_db),
 ) -> schemas.MensagemOut:
     """
     Atualiza o endereço IP associado a um login de cliente.
@@ -209,7 +227,8 @@ async def put_ip(
     Returns:
         Uma mensagem de confirmação da atualização.
     """
-    return await suporte_service.put_ip(id_login=id_login, ip=ip)
+    suporte_service = services.SuporteService()
+    return await suporte_service.put_ip(id_login=id_login, ip=ip, db=db)
 
 
 @suporte_router.post(
@@ -220,7 +239,8 @@ async def put_ip(
 async def post_limpar_mac(
     id_login: PositiveInt = Query(
         ge=1, description="ID de login do cliente no IXCSoft."
-    )
+    ),
+    db: AsyncSession = Depends(get_db),
 ) -> schemas.MensagemOut:
     """
     Limpa o endereço MAC associado a um login de cliente.
@@ -231,4 +251,5 @@ async def post_limpar_mac(
     Returns:
         Uma mensagem de confirmação da ação.
     """
-    return await suporte_service.post_limpar_mac(id_login=id_login)
+    suporte_service = services.SuporteService()
+    return await suporte_service.post_limpar_mac(id_login=id_login, db=db)

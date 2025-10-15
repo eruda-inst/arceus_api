@@ -69,9 +69,7 @@ class LogMiddleware(BaseHTTPMiddleware):
         self, request: Request, status_code: int, process_time: float
     ):
         """
-        Chama a função de log do banco de dados em uma thread separada.
-
-        Isso evita o bloqueio do loop de eventos principal para operações de banco de dados.
+        Chama a função de log do banco de dados de forma assíncrona.
 
         Args:
             request: O objeto da requisição.
@@ -79,15 +77,15 @@ class LogMiddleware(BaseHTTPMiddleware):
             process_time: O tempo de processamento da requisição.
         """
         try:
-            await asyncio.to_thread(
-                self._log_to_database, request, status_code, process_time
-            )
+            await self._log_to_database(request, status_code, process_time)
         except Exception as e:
             print(f"Erro ao registrar log: {e}")
 
-    def _log_to_database(self, request: Request, status_code: int, process_time: float):
+    async def _log_to_database(
+        self, request: Request, status_code: int, process_time: float
+    ):
         """
-        Registra os detalhes da requisição no banco de dados.
+        Registra os detalhes da requisição no banco de dados de forma assíncrona.
 
         Obtém uma sessão de banco de dados, cria uma entrada de log e a salva.
         Trata exceções de banco de dados e garante que a sessão seja fechada.
@@ -97,18 +95,20 @@ class LogMiddleware(BaseHTTPMiddleware):
             status_code: O código de status da resposta.
             process_time: O tempo de processamento da requisição.
         """
+        db = None
         try:
-            db = next(database.get_db())
-            crud.log_crud.create_log(
-                db=db,
-                ip=request.client.host if request.client else "unknown",
-                method=request.method,
-                endpoint=request.url.path,
-                status_code=status_code,
-                duracao=process_time,
-            )
+            async for db in database.get_db():
+                await crud.log_crud.create_log(
+                    db=db,
+                    ip=request.client.host if request.client else "unknown",
+                    method=request.method,
+                    endpoint=request.url.path,
+                    status_code=status_code,
+                    duracao=process_time,
+                )
+                break
         except SQLAlchemyError as e:
             print(f"Erro de banco ao registrar log: {e}")
         finally:
-            if "db" in locals():
-                db.close()
+            if db is not None:
+                await db.close()

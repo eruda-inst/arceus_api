@@ -1,5 +1,6 @@
 from . import service
 from typing import Self
+from sqlalchemy.ext.asyncio import AsyncSession
 from .. import schemas, clients, utils
 from fastapi import HTTPException, status
 from pydantic import ValidationError, PositiveInt
@@ -18,7 +19,10 @@ class TriagemService(service.Service):
         self.triagem_ixc_cliente = clients.TriagemIXCCliente()
 
     async def put_contato_cliente(
-        self: Self, id_cliente: PositiveInt, contato: schemas.ContatoUpdate
+        self: Self,
+        id_cliente: PositiveInt,
+        contato: schemas.ContatoUpdate,
+        db: AsyncSession,
     ) -> schemas.MensagemOut:
         """
         Atualiza as informações de contato de um cliente.

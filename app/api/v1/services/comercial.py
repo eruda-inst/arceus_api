@@ -20,7 +20,7 @@ class ComercialService(service.Service):
         self.suporte_ixc_cliente = clients.SuporteIXCCliente()
 
     async def get_status_acesso(
-        self: Self, id_contrato: PositiveInt
+        self: Self, id_contrato: PositiveInt, db=None
     ) -> schemas.StatusAcessoOut:
         """
         Obtém e rotula o status de acesso de um contrato.
@@ -71,6 +71,7 @@ class ComercialService(service.Service):
         per_page: Optional[PositiveInt] = 10,
         sortname: Optional[str] = "cliente_contrato.id",
         sortorder: Optional[utils.SortOrder] = utils.SortOrder.ASC,
+        db=None,
     ) -> schemas.ComercialContratoListOut:
         """
         Obtém uma lista paginada de contratos comerciais para um cliente.
@@ -231,7 +232,9 @@ class ComercialService(service.Service):
                 detail=f"Erro interno ao processar solicitação: {str(e)}",
             )
 
-    async def post_leads(self: Self, lead: schemas.LeadIn) -> schemas.LeadCreate:
+    async def post_leads(
+        self: Self, lead: schemas.LeadIn, db=None
+    ) -> schemas.LeadCreate:
         """
         Formata e cria um novo lead no sistema IXC.
 
