@@ -102,7 +102,8 @@ class LogMiddleware(BaseHTTPMiddleware):
             crud.log_crud.create_log(
                 db=db,
                 ip=request.client.host if request.client else "unknown",
-                endpoint=f"{request.method} {request.url.path}",
+                method=request.method,
+                endpoint=request.url.path,
                 status_code=status_code,
                 duracao=process_time,
             )
