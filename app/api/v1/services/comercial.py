@@ -123,6 +123,15 @@ class ComercialService(service.Service):
                 ]
 
                 if not titulos_nao_quitados:
+                    login = await self.comercial_ixc_cliente.get_login(
+                        id_cliente=contrato["id_cliente"]
+                    )
+
+                    if not login.get("registros"):
+                        raise HTTPException(
+                            status_code=status.HTTP_404_NOT_FOUND, detail="Sem login."
+                        )
+
                     contrato_tratado = {
                         "id": contrato["id"],
                         "contrato": contrato["contrato"],
@@ -131,7 +140,11 @@ class ComercialService(service.Service):
                             status_acesso_codigo=contrato["status_internet"]
                         ),
                         "data_vencimento": "N/A",
+                        "id_cliente": contrato["id_cliente"],
+                        "id_login": login.get("registros")[0]["id"],
                     }
+                    print("caiu aqui")
+                    print(contrato_tratado)
                     contratos_tratados.append(contrato_tratado)
                     continue
 
@@ -176,11 +189,11 @@ class ComercialService(service.Service):
                 contrato_tratado = {
                     "id": contrato["id"],
                     "contrato": contrato["contrato"],
-                    "valor": titulo_final.get("valor"),
+                    "valor": titulo_final.get("valor", 0.00),
                     "status_acesso": utils.rotular_status_acesso(
                         status_acesso_codigo=contrato["status_internet"]
                     ),
-                    "data_vencimento": titulo_final.get("data_vencimento"),
+                    "data_vencimento": titulo_final.get("data_vencimento", "N/A"),
                     "id_cliente": contrato["id_cliente"],
                     "id_login": login.get("registros")[0]["id"],
                 }
