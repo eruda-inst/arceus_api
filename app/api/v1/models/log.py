@@ -11,7 +11,7 @@ class Log(database.base.Base):
     Atributos:
         id: Chave primária autoincrementável.
         ip: Endereço IP do cliente que fez a requisição.
-        method: O método HTTP utilizado na requisição (e.g., 'GET').
+        http_method: O método HTTP utilizado na requisição (e.g., 'GET').
         endpoint: O endpoint da API que foi acessado (e.g., 'GET /items/').
         status_code: O código de status HTTP da resposta.
         datetime: O timestamp de quando a requisição foi registrada.
@@ -22,7 +22,7 @@ class Log(database.base.Base):
 
     id = Column(Integer, primary_key=True, index=True)
     ip = Column(String, nullable=False)
-    method = Column(String, nullable=False)
+    http_method = Column(String, nullable=False)
     endpoint = Column(String, nullable=False)
     status_code = Column(Integer, nullable=False)
     datetime = Column(DateTime, nullable=False)

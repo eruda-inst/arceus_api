@@ -12,7 +12,7 @@ class LogCRUD:
     async def create_log(
         db: AsyncSession,
         ip: str,
-        method: str,
+        http_method: str,
         endpoint: str,
         status_code: int,
         duracao: float,
@@ -23,7 +23,7 @@ class LogCRUD:
         Args:
             db: A sessão do banco de dados.
             ip: O endereço IP da requisição.
-            method: O método HTTP da requisição.
+            http_method: O método HTTP da requisição.
             endpoint: O endpoint da API que foi acessado.
             status_code: O código de status da resposta HTTP.
             duracao: O tempo de duração da requisição em segundos.
@@ -37,7 +37,7 @@ class LogCRUD:
         try:
             log_entry = models.Log(
                 ip=ip,
-                method=method,
+                http_method=http_method,
                 endpoint=endpoint,
                 status_code=status_code,
                 datetime=datetime.now(ZoneInfo("America/Sao_Paulo")).replace(

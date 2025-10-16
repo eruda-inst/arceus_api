@@ -1,5 +1,4 @@
 import time
-import asyncio
 from .. import crud
 from fastapi import Request
 from app.api.v1 import database
@@ -101,7 +100,7 @@ class LogMiddleware(BaseHTTPMiddleware):
                 await crud.log_crud.create_log(
                     db=db,
                     ip=request.client.host if request.client else "unknown",
-                    method=request.method,
+                    http_method=request.method,
                     endpoint=request.url.path,
                     status_code=status_code,
                     duracao=process_time,
