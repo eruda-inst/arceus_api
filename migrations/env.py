@@ -2,13 +2,17 @@ from sqlalchemy import pool
 from alembic import context
 from logging.config import fileConfig
 from sqlalchemy import engine_from_config
+import os
 from app.api.v1 import database, core
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
 
-config.set_main_option("sqlalchemy.url", core.settings.DB_URL)
+# Allow overriding the DB URL for local migrations (useful when not running inside Docker)
+# Example: MIGRATE_DB_URL="postgresql://user:pass@localhost:5432/dbname" alembic upgrade head
+db_url = core.settings.MIGRATE_DB_URL or core.settings.DB_URL
+config.set_main_option("sqlalchemy.url", db_url)
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
@@ -20,6 +24,7 @@ if config.config_file_name is not None:
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
 target_metadata = database.Base.metadata
+
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:

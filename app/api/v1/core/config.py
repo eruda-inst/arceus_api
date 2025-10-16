@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     BASE_URL_7AZ: str
 
     DB_URL: str
+    MIGRATE_DB_URL: str
 
     model_config = SettingsConfigDict(env_file=".env", case_sensitive=True)
 

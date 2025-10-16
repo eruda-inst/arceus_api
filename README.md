@@ -92,6 +92,44 @@ docker compose up -d
 
 Após iniciar, a documentação interativa da API (Swagger UI) estará disponível em [http://localhost:8000/docs](http://localhost:8000/docs).
 
+## Migrações (Alembic)
+
+Este projeto usa Alembic para versionamento do schema do banco de dados. Dependendo de onde o banco está rodando (dentro de containers Docker ou localmente), há duas formas comuns de aplicar as migrações:
+
+1) Executar Alembic dentro do ambiente Docker (recomendado quando o banco está no Docker)
+
+- Primeiro suba o serviço de banco de dados:
+
+```bash
+docker compose up -d db
+```
+
+- Em seguida, execute Alembic no container da aplicação (substitua `api` pelo nome do serviço, se diferente):
+
+```bash
+docker compose run --rm api alembic upgrade head
+```
+
+ou, se a aplicação já estiver rodando, você pode executar:
+
+```bash
+docker compose exec api alembic upgrade head
+```
+
+2) Executar Alembic localmente contra um banco acessível (por exemplo, Postgres em localhost)
+
+- Para evitar tentar resolver o host `db` (nome usado no Docker Compose), use a variável de ambiente `MIGRATE_DB_URL` ao executar Alembic. Exemplo:
+
+```bash
+MIGRATE_DB_URL="postgresql://larissa_user:segurademais@localhost:5432/larissa_db" alembic upgrade head
+```
+
+- Essa variável foi adicionada como um fallback seguro no arquivo `migrations/env.py`. Quando presente, Alembic usará `MIGRATE_DB_URL` em vez do `DB_URL` carregado do `.env`.
+
+3) Alternativa (menos ideal): editar temporariamente o `.env` para apontar `DB_URL` para um host que seu sistema consiga resolver (por exemplo, `localhost`).
+
+Observação: se o banco estiver em Docker e você executar Alembic localmente sem ajuste, o host `db` no `DB_URL` (configurado no `.env`) não será resolvido pelo seu host e causará o erro de resolução de nome que você viu.
+
 ## Estrutura do Projeto
 
 ```
