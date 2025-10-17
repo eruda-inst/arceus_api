@@ -144,8 +144,6 @@ class ComercialService(service.Service):
                         "id_cliente": contrato["id_cliente"],
                         "id_login": login.get("registros")[0]["id"],
                     }
-                    print("caiu aqui")
-                    print(contrato_tratado)
                     contratos_tratados.append(contrato_tratado)
                     continue
 

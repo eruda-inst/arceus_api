@@ -25,6 +25,12 @@ class LogMiddleware(BaseHTTPMiddleware):
             "/favicon.ico",
             "/openapi.json",
         ]
+        self.include_prefixes = [
+            "/api/v1/suporte",
+            "/api/v1/comercial",
+            "/api/v1/financeiro",
+            "/api/v1/triagem",
+        ]
 
     async def dispatch(self, request: Request, call_next):
         """
@@ -40,7 +46,11 @@ class LogMiddleware(BaseHTTPMiddleware):
         Returns:
             A resposta da requisição.
         """
-        if request.url.path in self.exclude_paths:
+        path = request.url.path
+
+        if path in self.exclude_paths or not any(
+            path.startswith(prefix) for prefix in self.include_prefixes
+        ):
             return await call_next(request)
 
         start_time = time.perf_counter()
