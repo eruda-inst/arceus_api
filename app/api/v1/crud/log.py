@@ -1,6 +1,5 @@
 from .. import models
-from zoneinfo import ZoneInfo
-from datetime import datetime
+from datetime import date, time
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -15,6 +14,8 @@ class LogCRUD:
         http_method: str,
         endpoint: str,
         status_code: int,
+        data: date,
+        hora: time,
         duracao: float,
     ):
         """
@@ -26,6 +27,8 @@ class LogCRUD:
             http_method: O método HTTP da requisição.
             endpoint: O endpoint da API que foi acessado.
             status_code: O código de status da resposta HTTP.
+            data: A data da requisição.
+            hora: A hora da requisição.
             duracao: O tempo de duração da requisição em segundos.
 
         Returns:
@@ -40,9 +43,8 @@ class LogCRUD:
                 http_method=http_method,
                 endpoint=endpoint,
                 status_code=status_code,
-                datetime=datetime.now(ZoneInfo("America/Sao_Paulo")).replace(
-                    tzinfo=None
-                ),
+                data=data,
+                hora=hora,
                 duracao=round(duracao, 4),
             )
             db.add(log_entry)

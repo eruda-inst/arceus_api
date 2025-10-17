@@ -1,6 +1,8 @@
 import time
 from .. import crud
 from fastapi import Request
+from zoneinfo import ZoneInfo
+from datetime import datetime
 from app.api.v1 import database
 from sqlalchemy.exc import SQLAlchemyError
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -106,6 +108,7 @@ class LogMiddleware(BaseHTTPMiddleware):
         """
         db = None
         try:
+            now = datetime.now(ZoneInfo("America/Sao_Paulo"))
             async for db in database.get_db():
                 await crud.log_crud.create_log(
                     db=db,
@@ -113,6 +116,8 @@ class LogMiddleware(BaseHTTPMiddleware):
                     http_method=request.method,
                     endpoint=request.url.path,
                     status_code=status_code,
+                    data=now.date(),
+                    hora=now.time(),
                     duracao=process_time,
                 )
                 break

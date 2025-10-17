@@ -1,5 +1,5 @@
 from .. import database
-from sqlalchemy import Column, DateTime, Float, Integer, String
+from sqlalchemy import Column, Date, Float, Integer, String, Time
 
 
 class Log(database.base.Base):
@@ -14,7 +14,8 @@ class Log(database.base.Base):
         http_method: O método HTTP utilizado na requisição (e.g., 'GET').
         endpoint: O endpoint da API que foi acessado (e.g., 'GET /items/').
         status_code: O código de status HTTP da resposta.
-        datetime: O timestamp de quando a requisição foi registrada.
+        data: A data de quando a requisição foi registrada.
+        hora: A hora de quando a requisição foi registrada.
         duracao: O tempo de processamento da requisição em segundos.
     """
 
@@ -25,5 +26,6 @@ class Log(database.base.Base):
     http_method = Column(String, nullable=False)
     endpoint = Column(String, nullable=False)
     status_code = Column(Integer, nullable=False)
-    datetime = Column(DateTime, nullable=False)
+    data = Column(Date, nullable=False)
+    hora = Column(Time, nullable=False)
     duracao = Column(Float, nullable=False)
