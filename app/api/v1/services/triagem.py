@@ -18,17 +18,54 @@ class TriagemService(service.Service):
         super().__init__()
         self.triagem_ixc_cliente = clients.TriagemIXCCliente()
 
+    async def get_contato_cliente(
+        self: Self,
+        protocolo: str,
+    ) -> schemas.ContatoOut:
+        """
+        Busca as informações de contato de um cliente.
+
+        Args:
+            protocolo: O protocolo de atendimento do cliente a ser buscado.
+
+        Returns:
+            Os dados de contato do cliente.
+        """
+        try:
+            id_cliente = await self.get_id_cliente_ixc(protocolo=protocolo)
+
+            res = await self.triagem_ixc_cliente.get_clientes(id_cliente=id_cliente)
+            if not res.get("registros"):
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Cliente não encontrado.",
+                )
+
+            contato = res["registros"][0]["telefone_celular"]
+            return schemas.ContatoOut(telefone_celular=contato)
+        except HTTPException:
+            raise
+        except ValidationError as e:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail=f"Erro de validação: {e}",
+            )
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Erro interno: {str(e)}",
+            )
+
     async def put_contato_cliente(
         self: Self,
-        id_cliente: PositiveInt,
+        protocolo: str,
         contato: schemas.ContatoUpdate,
-        db: AsyncSession,
     ) -> schemas.MensagemOut:
         """
         Atualiza as informações de contato de um cliente.
 
         Args:
-            id_cliente: O ID do cliente a ser atualizado.
+            protocolo: O protocolo de atendimento do cliente a ser atualizado.
             contato: Os novos dados de contato a serem aplicados.
 
         Returns:
@@ -38,6 +75,8 @@ class TriagemService(service.Service):
             HTTPException: Se o cliente não for encontrado ou ocorrer um erro.
         """
         try:
+            id_cliente = await self.get_id_cliente_ixc(protocolo=protocolo)
+
             res = await self.triagem_ixc_cliente.get_clientes(id_cliente=id_cliente)
             if not res.get("registros"):
                 raise HTTPException(

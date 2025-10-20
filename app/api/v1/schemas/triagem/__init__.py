@@ -1,1 +1,1 @@
-from .contato import ContatoUpdate
+from .contato import ContatoUpdate, ContatoOut

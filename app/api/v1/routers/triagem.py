@@ -1,37 +1,53 @@
 from .. import schemas, services
-from pydantic import PositiveInt
-from fastapi import APIRouter, Path, Body, Depends
-from ..database import get_db
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, Body, Query
 
 
 triagem_router = APIRouter()
+triagem_service = services.TriagemService()
+
+
+@triagem_router.get(
+    path="/contato_cliente",
+    response_model=schemas.ContatoOut,
+    summary="Busca os dados de contato de um cliente específico, baseado no protocolo de atendimento.",
+)
+async def get_contato_cliente(
+    protocolo: str = Query(description="Protocolo de atendimento."),
+) -> schemas.ContatoOut:
+    """
+    Busca os dados de contato de um cliente específico.
+
+    Args:
+        protocolo: O protocolo de atendimento.
+
+    Returns:
+        Os dados do cliente.
+    """
+    return await triagem_service.get_contato_cliente(protocolo=protocolo)
 
 
 # Por razões de limitações na plataforma opa, o verbo deve ser put, ao invés de patch
 @triagem_router.put(
-    path="/contato_cliente/{id_cliente}",
+    path="/contato_cliente",
     response_model=schemas.MensagemOut,
-    summary="Atualiza um ou mais campos associado a um cliente específico, por meio do ID de cliente.",
+    summary="Atualiza um ou mais campos associado a um cliente específico, baseado no protocolo de atendimento.",
 )
 async def put_contato_cliente(
-    id_cliente: PositiveInt = Path(ge=1, description="ID de cliente."),
+    protocolo: str = Query(description="Protocolo de atendimento."),
     contato: schemas.ContatoUpdate = Body(
         description="Campos de cliente a serem atualizados."
     ),
-    db: Session = Depends(get_db),
 ) -> schemas.MensagemOut:
     """
     Atualiza os dados de contato de um cliente específico.
 
     Args:
-        id_cliente: O ID do cliente a ser atualizado.
+        protocolo: O protocolo de atendimento.
         contato: Os novos dados de contato do cliente.
 
     Returns:
         Uma mensagem de confirmação da atualização.
     """
-    triagem_service = services.TriagemService()
     return await triagem_service.put_contato_cliente(
-        id_cliente=id_cliente, contato=contato, db=db
+        protocolo=protocolo, contato=contato
     )
