@@ -3,6 +3,7 @@ import httpx
 import base64
 from .. import core
 from typing import Dict, Self
+from pydantic import PositiveInt
 from fastapi import HTTPException, status
 
 
@@ -131,4 +132,19 @@ class IXCCliente:
         ]
         payload = {"grid_param": json.dumps(obj=grid_param)}
         data = await self._make_request(endpoint="fn_areceber", payload=payload)
+        return data
+
+    async def get_id_cliente_ixc(self: Self, cnpj_cpf: str) -> Dict:
+        """
+        Obtém o ID do cliente no IXC a partir do CPF ou CNPJ.
+
+        Args:
+            cnpj_cpf (str): O CPF ou CNPJ do cliente.
+
+        Returns:
+            PositiveInt: O ID do cliente no IXC.
+        """
+        grid_param = [{"TB": "cliente.cnpj_cpf", "OP": "=", "P": str(cnpj_cpf)}]
+        payload = {"grid_param": json.dumps(obj=grid_param)}
+        data = await self._make_request(endpoint="cliente", payload=payload)
         return data

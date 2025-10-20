@@ -1,8 +1,8 @@
 from . import service
-from typing import Self
-from sqlalchemy.ext.asyncio import AsyncSession
+from typing import Self, Optional
 from .. import schemas, clients, utils
 from fastapi import HTTPException, status
+from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import ValidationError, PositiveInt
 
 
@@ -20,19 +20,23 @@ class TriagemService(service.Service):
 
     async def get_contato_cliente(
         self: Self,
-        protocolo: str,
+        protocolo: Optional[str] = None,
+        cnpj_cpf: Optional[str] = None,
     ) -> schemas.ContatoOut:
         """
         Busca as informações de contato de um cliente.
 
         Args:
             protocolo: O protocolo de atendimento do cliente a ser buscado.
+            cnpj_cpf: O CPF ou CNPJ do cliente a ser buscado.
 
         Returns:
             Os dados de contato do cliente.
         """
         try:
-            id_cliente = await self.get_id_cliente_ixc(protocolo=protocolo)
+            id_cliente = await self.get_id_cliente_ixc(
+                protocolo=protocolo, cnpj_cpf=cnpj_cpf
+            )
 
             res = await self.triagem_ixc_cliente.get_clientes(id_cliente=id_cliente)
             if not res.get("registros"):

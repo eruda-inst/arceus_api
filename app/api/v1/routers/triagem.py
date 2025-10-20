@@ -1,3 +1,4 @@
+from typing import Optional
 from .. import schemas, services
 from fastapi import APIRouter, Body, Query
 
@@ -12,18 +13,26 @@ triagem_service = services.TriagemService()
     summary="Busca os dados de contato de um cliente específico, baseado no protocolo de atendimento.",
 )
 async def get_contato_cliente(
-    protocolo: str = Query(description="Protocolo de atendimento."),
+    protocolo: Optional[str] = Query(
+        default=None, description="Protocolo de atendimento."
+    ),
+    cnpj_cpf: Optional[str] = Query(
+        default=None, description="CPF ou CNPJ do cliente."
+    ),
 ) -> schemas.ContatoOut:
     """
     Busca os dados de contato de um cliente específico.
 
     Args:
         protocolo: O protocolo de atendimento.
+        cnpj_cpf: O CPF ou CNPJ do cliente.
 
     Returns:
         Os dados do cliente.
     """
-    return await triagem_service.get_contato_cliente(protocolo=protocolo)
+    return await triagem_service.get_contato_cliente(
+        protocolo=protocolo, cnpj_cpf=cnpj_cpf
+    )
 
 
 # Por razões de limitações na plataforma opa, o verbo deve ser put, ao invés de patch
