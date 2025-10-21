@@ -1,9 +1,9 @@
+from ..database import get_db
 from typing import Optional
 from pydantic import PositiveInt
+from sqlalchemy.orm import Session
 from .. import services, utils, schemas
 from fastapi import APIRouter, Query, Path, Body, Depends
-from ..database import get_db
-from sqlalchemy.orm import Session
 
 
 financeiro_router = APIRouter()
@@ -12,13 +12,17 @@ financeiro_router = APIRouter()
 @financeiro_router.get(
     path="/faturas_abertas",
     response_model=schemas.FaturaAbertaListOut,
-    summary="Obtém faturas associadas a um cliente, através de ID de protocolo de atendimento.",
+    summary="Obtém faturas associadas a um cliente, através de ID de protocolo de atendimento ou CPF/CNPJ.",
 )
 async def get_faturas_abertas(
-    protocolo: str = Query(
+    protocolo: Optional[str] = Query(
+        default=None,
         min_length=12,
         max_length=12,
-        description="Protocolo de atendimento do cliente no OpaSuite.",
+        description="Protocolo de atendimento.",
+    ),
+    cnpj_cpf: Optional[str] = Query(
+        default=None, description="CPF ou CNPJ do cliente."
     ),
     page: Optional[PositiveInt] = Query(default=1, description="Número da página."),
     per_page: Optional[PositiveInt] = Query(
@@ -30,13 +34,13 @@ async def get_faturas_abertas(
     sortorder: Optional[utils.SortOrder] = Query(
         default=utils.SortOrder.ASC, description="Ordem da ordenação."
     ),
-    db: Session = Depends(get_db),
 ) -> schemas.FaturaAbertaListOut:
     """
     Obtém a lista de faturas em aberto de um cliente.
 
     Args:
         protocolo: O protocolo de atendimento do cliente no OpaSuite.
+        cnpj_cpf: O CPF ou CNPJ do cliente.
         page: O número da página para a paginação.
         per_page: A quantidade de itens por página.
         sortname: O campo pelo qual a lista será ordenada.
@@ -48,11 +52,11 @@ async def get_faturas_abertas(
     financeiro_service = services.FinanceiroService()
     return await financeiro_service.get_faturas_abertas(
         protocolo=protocolo,
+        cnpj_cpf=cnpj_cpf,
         page=page,
         per_page=per_page,
         sortname=sortname,
         sortorder=sortorder,
-        db=db,
     )
 
 

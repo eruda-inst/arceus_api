@@ -20,12 +20,12 @@ class FinanceiroService(service.Service):
 
     async def get_faturas_abertas(
         self: Self,
-        protocolo: str,
+        protocolo: Optional[str] = None,
+        cnpj_cpf: Optional[str] = None,
         page: Optional[PositiveInt] = 1,
         per_page: Optional[PositiveInt] = 15,
         sortname: Optional[str] = "fn_areceber.id",
         sortorder: Optional[utils.SortOrder] = utils.SortOrder.ASC,
-        db=None,
     ) -> schemas.FaturaAbertaListOut:
         """
         Obtém uma lista paginada de faturas em aberto para um cliente.
@@ -44,7 +44,9 @@ class FinanceiroService(service.Service):
             HTTPException: Se o cliente ou as faturas não forem encontrados, ou em caso de erro.
         """
         try:
-            id_cliente = await self.get_id_cliente_ixc(protocolo=protocolo)
+            id_cliente = await self.get_id_cliente_ixc(
+                protocolo=protocolo, cnpj_cpf=cnpj_cpf
+            )
 
             res = await self.financeiro_ixc_cliente.get_faturas_abertas(
                 id_cliente=id_cliente,

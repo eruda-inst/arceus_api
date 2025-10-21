@@ -32,7 +32,7 @@ async def get_status_acesso(
 @comercial_router.get(
     path="/contratos",
     response_model=schemas.ComercialContratoListOut,
-    summary="Obtém contratos de um cliente, por meio de ID de login.",
+    summary="Obtém contratos de um cliente, por meio de protocolo de atendimento ou CPF/CNPJ.",
 )
 async def get_contratos(
     protocolo: Optional[str] = Query(
