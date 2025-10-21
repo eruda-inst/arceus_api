@@ -10,7 +10,7 @@ triagem_service = services.TriagemService()
 @triagem_router.get(
     path="/contato_cliente",
     response_model=schemas.ContatoOut,
-    summary="Busca os dados de contato de um cliente específico, baseado no protocolo de atendimento.",
+    summary="Busca os dados de contato de um cliente específico, baseado no protocolo de atendimento e no CPF/CNPJ.",
 )
 async def get_contato_cliente(
     protocolo: Optional[str] = Query(

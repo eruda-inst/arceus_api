@@ -248,10 +248,8 @@ class ComercialService(service.Service):
         try:
             lead_data = lead.model_dump()
             if lead_data.get("cnpj_cpf"):
-                cnpj_ou_cpf = lead_data["cnpj_cpf"]
-                lead_data["cnpj_cpf"] = utils.formatar_cpf_ou_cnpj(
-                    cpf_ou_cnpj=cnpj_ou_cpf
-                )
+                cnpj_cpf = lead_data["cnpj_cpf"]
+                lead_data["cnpj_cpf"] = utils.formatar_cnpj_cpf(cnpj_cpf=cnpj_cpf)
             if lead_data.get("fone_celular"):
                 cel = lead_data["fone_celular"]
                 lead_data["fone_celular"] = utils.formatar_cel(cel=cel)

@@ -54,12 +54,12 @@ def formatar_cnpj(cnpj: str) -> str:
     return cnpj_formatado
 
 
-def formatar_cpf_ou_cnpj(cpf_ou_cnpj: str) -> str:
+def formatar_cnpj_cpf(cnpj_cpf: str) -> str:
     """
     Formata uma string que pode ser um CPF ou CNPJ, aplicando a máscara correta.
 
     Args:
-        cpf_ou_cnpj: A string do CPF ou CNPJ a ser formatada.
+        cnpj_cpf: A string do CPF ou CNPJ a ser formatada.
 
     Returns:
         O CPF ou CNPJ formatado.
@@ -67,18 +67,18 @@ def formatar_cpf_ou_cnpj(cpf_ou_cnpj: str) -> str:
     Raises:
         ValueError: Se a string não tiver 11 (CPF) ou 14 (CNPJ) dígitos.
     """
-    cpf_ou_cnpj_limpo = re.sub(r"\D", "", cpf_ou_cnpj)
+    cnpj_cpf_limpo = re.sub(r"\D", "", cnpj_cpf)
 
-    tamanho = len(cpf_ou_cnpj_limpo)
+    tamanho = len(cnpj_cpf_limpo)
 
     if tamanho == 11:
-        if re.fullmatch(CPF_PATTERN, cpf_ou_cnpj):
-            return cpf_ou_cnpj
-        return formatar_cpf(cpf_ou_cnpj_limpo)
+        if re.fullmatch(CPF_PATTERN, cnpj_cpf):
+            return cnpj_cpf
+        return formatar_cpf(cnpj_cpf_limpo)
     elif tamanho == 14:
-        if re.fullmatch(CNPJ_PATTERN, cpf_ou_cnpj):
-            return cpf_ou_cnpj
-        return formatar_cnpj(cpf_ou_cnpj_limpo)
+        if re.fullmatch(CNPJ_PATTERN, cnpj_cpf):
+            return cnpj_cpf
+        return formatar_cnpj(cnpj_cpf_limpo)
     else:
         raise ValueError("CNPJ/CPF inválido. Deve ter 11 (CPF) ou 14 (CNPJ) dígitos.")
 

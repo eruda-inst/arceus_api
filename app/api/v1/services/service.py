@@ -1,4 +1,4 @@
-from .. import clients
+from .. import clients, utils
 from typing import Self, Optional, Dict
 from fastapi import HTTPException, status
 from pydantic import ValidationError, PositiveInt
@@ -101,7 +101,12 @@ class Service:
                            ou se ocorrer um erro de comunicação ou validação.
         """
         try:
-            if not protocolo and not cnpj_cpf:
+
+            cnpj_cpf_formatado = (
+                utils.formatar_cnpj_cpf(cnpj_cpf=cnpj_cpf) if cnpj_cpf else None
+            )
+
+            if not protocolo and not cnpj_cpf_formatado:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail="Protocolo ou CPF/CNPJ devem ser fornecidos.",
@@ -111,8 +116,8 @@ class Service:
 
             if protocolo:
                 id_cliente_ixc_res = await self._buscar_por_protocolo(protocolo)
-            elif cnpj_cpf:
-                id_cliente_ixc_res = await self._buscar_por_cnpj_cpf(cnpj_cpf)
+            elif cnpj_cpf_formatado:
+                id_cliente_ixc_res = await self._buscar_por_cnpj_cpf(cnpj_cpf_formatado)
 
             return self._extrair_id_cliente_ixc(id_cliente_ixc_res)
 

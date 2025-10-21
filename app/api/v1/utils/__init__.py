@@ -4,7 +4,7 @@ from .helpers import (
     rotular_status_contrato,
     rotular_status_onu,
     rotular_status_acesso,
-    formatar_cpf_ou_cnpj,
+    formatar_cnpj_cpf,
     formatar_cel,
     formatar_cep,
     make_links,
