@@ -20,7 +20,7 @@ class ComercialService(service.Service):
         self.suporte_ixc_cliente = clients.SuporteIXCCliente()
 
     async def get_status_acesso(
-        self: Self, id_contrato: PositiveInt, db=None
+        self: Self, id_contrato: PositiveInt
     ) -> schemas.StatusAcessoOut:
         """
         Obtém e rotula o status de acesso de um contrato.
@@ -66,12 +66,12 @@ class ComercialService(service.Service):
 
     async def get_contratos(
         self: Self,
-        protocolo: str,
+        protocolo: Optional[str] = None,
+        cnpj_cpf: Optional[str] = None,
         page: Optional[PositiveInt] = 1,
         per_page: Optional[PositiveInt] = 10,
         sortname: Optional[str] = "cliente_contrato.id",
         sortorder: Optional[utils.SortOrder] = utils.SortOrder.ASC,
-        db=None,
     ) -> schemas.ComercialContratoListOut:
         """
         Obtém uma lista paginada de contratos comerciais para um cliente.
@@ -93,7 +93,9 @@ class ComercialService(service.Service):
             HTTPException: Se o cliente ou os contratos não forem encontrados, ou em caso de erro.
         """
         try:
-            id_cliente = await self.get_id_cliente_ixc(protocolo=protocolo)
+            id_cliente = await self.get_id_cliente_ixc(
+                protocolo=protocolo, cnpj_cpf=cnpj_cpf
+            )
 
             res = await self.comercial_ixc_cliente.get_contratos(
                 id_cliente=id_cliente,
@@ -230,9 +232,7 @@ class ComercialService(service.Service):
                 detail=f"Erro interno ao processar solicitação: {str(e)}",
             )
 
-    async def post_leads(
-        self: Self, lead: schemas.LeadIn, db=None
-    ) -> schemas.LeadCreate:
+    async def post_leads(self: Self, lead: schemas.LeadIn) -> schemas.LeadCreate:
         """
         Formata e cria um novo lead no sistema IXC.
 

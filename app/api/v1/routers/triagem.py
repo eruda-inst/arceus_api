@@ -14,7 +14,10 @@ triagem_service = services.TriagemService()
 )
 async def get_contato_cliente(
     protocolo: Optional[str] = Query(
-        default=None, description="Protocolo de atendimento."
+        default=None,
+        min_length=12,
+        max_length=12,
+        description="Protocolo de atendimento.",
     ),
     cnpj_cpf: Optional[str] = Query(
         default=None, description="CPF ou CNPJ do cliente."
@@ -43,7 +46,10 @@ async def get_contato_cliente(
 )
 async def put_contato_cliente(
     protocolo: Optional[str] = Query(
-        default=None, description="Protocolo de atendimento."
+        default=None,
+        min_length=12,
+        max_length=12,
+        description="Protocolo de atendimento.",
     ),
     cnpj_cpf: Optional[str] = Query(
         default=None, description="CPF ou CNPJ do cliente."

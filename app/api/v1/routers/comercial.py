@@ -15,7 +15,6 @@ comercial_router = APIRouter()
 )
 async def get_status_acesso(
     id_contrato: PositiveInt = Query(ge=1, description="ID do contrato."),
-    db: Session = Depends(get_db),
 ) -> schemas.StatusAcessoOut:
     """
     Obtém o status de acesso de um contrato específico.
@@ -27,7 +26,7 @@ async def get_status_acesso(
         O status de acesso do contrato.
     """
     comercial_service = services.ComercialService()
-    return await comercial_service.get_status_acesso(id_contrato=id_contrato, db=db)
+    return await comercial_service.get_status_acesso(id_contrato=id_contrato)
 
 
 @comercial_router.get(
@@ -36,10 +35,14 @@ async def get_status_acesso(
     summary="Obtém contratos de um cliente, por meio de ID de login.",
 )
 async def get_contratos(
-    protocolo: str = Query(
+    protocolo: Optional[str] = Query(
+        default=None,
         min_length=12,
         max_length=12,
-        description="Protocolo de atendimento do cliente no OpaSuite.",
+        description="Protocolo de atendimento.",
+    ),
+    cnpj_cpf: Optional[str] = Query(
+        default=None, description="CPF ou CNPJ do cliente."
     ),
     page: Optional[PositiveInt] = Query(
         ge=1, default=1, description="Número da página."
@@ -53,13 +56,13 @@ async def get_contratos(
     sortorder: Optional[utils.SortOrder] = Query(
         utils.SortOrder.ASC, description="Ordem da ordenação."
     ),
-    db: Session = Depends(get_db),
 ) -> schemas.ComercialContratoListOut:
     """
     Obtém a lista de contratos de um cliente, com base no protocolo de atendimento.
 
     Args:
         protocolo: O protocolo de atendimento do cliente no OpaSuite.
+        cnpj_cpf: O CPF ou CNPJ do cliente.
         page: O número da página para a paginação.
         per_page: A quantidade de itens por página.
         sortname: O campo pelo qual a lista será ordenada.
@@ -71,11 +74,11 @@ async def get_contratos(
     comercial_service = services.ComercialService()
     return await comercial_service.get_contratos(
         protocolo=protocolo,
+        cnpj_cpf=cnpj_cpf,
         page=page,
         per_page=per_page,
         sortname=sortname,
         sortorder=sortorder,
-        db=db,
     )
 
 
@@ -87,7 +90,6 @@ async def get_contratos(
 )
 async def post_leads(
     lead: schemas.LeadIn = Body(description="Lead a ser cadastrado."),
-    db: Session = Depends(get_db),
 ) -> schemas.LeadCreate:
     """
     Cadastra um novo lead no sistema.
@@ -99,4 +101,4 @@ async def post_leads(
         Os dados do lead recém-criado.
     """
     comercial_service = services.ComercialService()
-    return await comercial_service.post_leads(lead=lead, db=db)
+    return await comercial_service.post_leads(lead=lead)
