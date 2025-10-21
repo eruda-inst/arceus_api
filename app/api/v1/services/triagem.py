@@ -62,8 +62,9 @@ class TriagemService(service.Service):
 
     async def put_contato_cliente(
         self: Self,
-        protocolo: str,
         contato: schemas.ContatoUpdate,
+        protocolo: Optional[str] = None,
+        cnpj_cpf: Optional[str] = None,
     ) -> schemas.MensagemOut:
         """
         Atualiza as informações de contato de um cliente.
@@ -71,6 +72,7 @@ class TriagemService(service.Service):
         Args:
             protocolo: O protocolo de atendimento do cliente a ser atualizado.
             contato: Os novos dados de contato a serem aplicados.
+            cnpj_cpf: O CPF ou CNPJ do cliente a ser atualizado.
 
         Returns:
             Uma mensagem de confirmação da atualização.
@@ -79,7 +81,9 @@ class TriagemService(service.Service):
             HTTPException: Se o cliente não for encontrado ou ocorrer um erro.
         """
         try:
-            id_cliente = await self.get_id_cliente_ixc(protocolo=protocolo)
+            id_cliente = await self.get_id_cliente_ixc(
+                protocolo=protocolo, cnpj_cpf=cnpj_cpf
+            )
 
             res = await self.triagem_ixc_cliente.get_clientes(id_cliente=id_cliente)
             if not res.get("registros"):

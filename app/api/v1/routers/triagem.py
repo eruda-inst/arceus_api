@@ -10,7 +10,7 @@ triagem_service = services.TriagemService()
 @triagem_router.get(
     path="/contato_cliente",
     response_model=schemas.ContatoOut,
-    summary="Busca os dados de contato de um cliente específico, baseado no protocolo de atendimento e no CPF/CNPJ.",
+    summary="Busca os dados de contato de um cliente específico, baseado no protocolo de atendimento ou no CPF/CNPJ.",
 )
 async def get_contato_cliente(
     protocolo: Optional[str] = Query(
@@ -39,10 +39,15 @@ async def get_contato_cliente(
 @triagem_router.put(
     path="/contato_cliente",
     response_model=schemas.MensagemOut,
-    summary="Atualiza um ou mais campos associado a um cliente específico, baseado no protocolo de atendimento.",
+    summary="Atualiza um ou mais campos associado a um cliente específico, baseado no protocolo de atendimento ou no CPF/CNPJ.",
 )
 async def put_contato_cliente(
-    protocolo: str = Query(description="Protocolo de atendimento."),
+    protocolo: Optional[str] = Query(
+        default=None, description="Protocolo de atendimento."
+    ),
+    cnpj_cpf: Optional[str] = Query(
+        default=None, description="CPF ou CNPJ do cliente."
+    ),
     contato: schemas.ContatoUpdate = Body(
         description="Campos de cliente a serem atualizados."
     ),
@@ -53,10 +58,11 @@ async def put_contato_cliente(
     Args:
         protocolo: O protocolo de atendimento.
         contato: Os novos dados de contato do cliente.
+        cnpj_cpf: O CPF ou CNPJ do cliente.
 
     Returns:
         Uma mensagem de confirmação da atualização.
     """
     return await triagem_service.put_contato_cliente(
-        protocolo=protocolo, contato=contato
+        protocolo=protocolo, cnpj_cpf=cnpj_cpf, contato=contato
     )
