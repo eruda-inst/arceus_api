@@ -26,3 +26,12 @@ class Links(BaseModel):
 
 class MensagemOut(BaseModel):
     mensagem: str = Field(description="Mensagem de sucesso.")
+
+    model_config = {
+        "json_schema_extra": {
+            "examples": [
+                {"mensagem": "Operação realizada com sucesso."},
+                {"mensagem": "Operação falhou."},
+            ]
+        }
+    }

@@ -6,7 +6,7 @@ class CredencialUpdate(BaseModel):
         description="Senha da central de acesso do assinante, a ser atualizada."
     )
 
-    model_config = {"json_schema_extra": {"examples": [{"senha": "12345678"}]}}
+    model_config = {"json_schema_extra": {"example": {"senha": "12345678"}}}
 
 
 class CredencialBase(CredencialUpdate):
@@ -16,7 +16,7 @@ class CredencialBase(CredencialUpdate):
 
     model_config = {
         "json_schema_extra": {
-            "examples": [{"usuario": "12312312312", "senha": "12345678"}]
+            "example": {"usuario": "12312312312", "senha": "12345678"}
         }
     }
 

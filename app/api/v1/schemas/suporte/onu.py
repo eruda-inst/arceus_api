@@ -7,11 +7,9 @@ class StatusONU(BaseModel):
 
     model_config = {
         "json_schema_extra": {
-            "examples": [
-                {
-                    "status_onu": utils.StatusONURot.EXCELENTE,
-                }
-            ]
+            "example": {
+                "status_onu": utils.StatusONURot.EXCELENTE,
+            }
         }
     }
 
@@ -21,12 +19,10 @@ class StatusONUOut(BaseModel):
 
     model_config = {
         "json_schema_extra": {
-            "examples": [
-                {
-                    "data": {
-                        "status_onu": utils.StatusONURot.EXCELENTE,
-                    }
+            "example": {
+                "data": {
+                    "status_onu": utils.StatusONURot.EXCELENTE,
                 }
-            ]
+            }
         }
     }

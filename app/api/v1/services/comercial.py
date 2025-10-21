@@ -81,6 +81,7 @@ class ComercialService(service.Service):
 
         Args:
             protocolo: O protocolo de atendimento para identificar o cliente.
+            cnpj_cpf: O CPF ou CNPJ do cliente.
             page: O número da página para a paginação.
             per_page: A quantidade de itens por página.
             sortname: O campo para ordenação.

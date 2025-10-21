@@ -1,9 +1,7 @@
 from typing import Optional
 from pydantic import PositiveInt
 from .. import utils, services, schemas
-from fastapi import APIRouter, Query, status, Body, Depends
-from ..database import get_db
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, Query, status, Body
 
 comercial_router = APIRouter()
 
@@ -14,7 +12,7 @@ comercial_router = APIRouter()
     summary="Obtém status de acesso, através de ID de contrato.",
 )
 async def get_status_acesso(
-    id_contrato: PositiveInt = Query(ge=1, description="ID do contrato."),
+    id_contrato: PositiveInt = Query(ge=1, description="ID do contrato.")
 ) -> schemas.StatusAcessoOut:
     """
     Obtém o status de acesso de um contrato específico.

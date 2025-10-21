@@ -31,22 +31,20 @@ class LeadIn(BaseModel):
 
     model_config = {
         "json_schema_extra": {
-            "examples": [
-                {
-                    "nome": "John Doe",
-                    "id_filial": 1,
-                    "fone_celular": "+11 (11) 11111-1111",
-                    "cep": "12345-678",
-                    "endereco": "Rua Exemplo",
-                    "numero": "123",
-                    "bairro": "Bairro Exemplo",
-                    "cnpj_cpf": "111.111.111-11",
-                    "data_cadastro": "2023-01-01",
-                    "id_vd_contrato": 123,
-                    "id_responsavel": 456,
-                    "cidade": 789,
-                }
-            ]
+            "example": {
+                "nome": "John Doe",
+                "id_filial": 1,
+                "fone_celular": "+11 (11) 11111-1111",
+                "cep": "12345-678",
+                "endereco": "Rua Exemplo",
+                "numero": "123",
+                "bairro": "Bairro Exemplo",
+                "cnpj_cpf": "111.111.111-11",
+                "data_cadastro": "2023-01-01",
+                "id_vd_contrato": 123,
+                "id_responsavel": 456,
+                "cidade": 789,
+            }
         }
     }
 
@@ -54,4 +52,4 @@ class LeadIn(BaseModel):
 class LeadCreate(BaseModel):
     id: PositiveInt = Field(description="ID do lead criado.")
 
-    model_config = {"json_schema_extra": {"examples": [{"id": 12345}]}}
+    model_config = {"json_schema_extra": {"example": {"id": 12345}}}

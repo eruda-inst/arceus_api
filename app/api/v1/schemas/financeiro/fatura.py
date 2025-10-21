@@ -12,7 +12,7 @@ class Fatura(BaseModel):
 
     model_config = {
         "json_schema_extra": {
-            "examples": [{"id": 123, "data_vencimento": "2025-12-31", "preco": 99.99}]
+            "example": {"id": 123, "data_vencimento": "2025-12-31", "preco": 99.99}
         }
     }
 
@@ -23,15 +23,13 @@ class FaturaAberta(Fatura):
 
     model_config = {
         "json_schema_extra": {
-            "examples": [
-                {
-                    "id": 123,
-                    "data_vencimento": "2025-12-31",
-                    "preco": 99.99,
-                    "id_contrato": 1234,
-                    "contrato": "NEWNET PADRAO - 250MB - 06/2025",
-                }
-            ]
+            "example": {
+                "id": 123,
+                "data_vencimento": "2025-12-31",
+                "preco": 99.99,
+                "id_contrato": 1234,
+                "contrato": "NEWNET PADRAO - 250MB - 06/2025",
+            }
         }
     }
 

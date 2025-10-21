@@ -1,9 +1,7 @@
-from ..database import get_db
 from typing import Optional
 from pydantic import PositiveInt
-from sqlalchemy.orm import Session
 from .. import services, utils, schemas
-from fastapi import APIRouter, Query, Path, Body, Depends
+from fastapi import APIRouter, Query, Path, Body
 
 
 financeiro_router = APIRouter()
@@ -199,6 +197,7 @@ async def get_credenciais(
 
     Args:
         protocolo: O protocolo de atendimento do cliente no OpaSuite.
+        cnpj_cpf: O CPF ou CNPJ do cliente.
 
     Returns:
         As credenciais de acesso do cliente.

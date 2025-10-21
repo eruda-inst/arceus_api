@@ -17,21 +17,19 @@ class Contrato(BaseModel):
 
     model_config = {
         "json_schema_extra": {
-            "examples": [
-                {
-                    "data": [
-                        {
-                            "id": 1234,
-                            "contrato": "NEWNET PADRAO - 250MB - 06/2025",
-                            "valor": 99.99,
-                            "status_acesso": utils.StatusAcessoRot.ATIVO,
-                            "data_vencimento": "2025-12-31",
-                            "id_cliente": 12345,
-                            "id_login": 123456,
-                        },
-                    ],
-                }
-            ]
+            "example": {
+                "data": [
+                    {
+                        "id": 1234,
+                        "contrato": "NEWNET PADRAO - 250MB - 06/2025",
+                        "valor": 99.99,
+                        "status_acesso": utils.StatusAcessoRot.ATIVO,
+                        "data_vencimento": "2025-12-31",
+                        "id_cliente": 12345,
+                        "id_login": 123456,
+                    },
+                ],
+            }
         }
     }
 
@@ -43,39 +41,37 @@ class ContratoListOut(BaseModel):
 
     model_config = {
         "json_schema_extra": {
-            "examples": [
-                {
-                    "data": [
-                        {
-                            "id": 1234,
-                            "contrato": "NEWNET PADRAO - 250MB - 06/2025",
-                            "valor": 99.99,
-                            "status_acesso": utils.StatusAcessoRot.ATIVO,
-                            "data_vencimento": "2025-12-31",
-                            "id_cliente": 12345,
-                            "id_login": 123456,
-                        },
-                        {
-                            "id": 12345,
-                            "contrato": "Newnet 2024 - 350MB",
-                            "valor": 99.9,
-                            "status_acesso": utils.StatusAcessoRot.ATIVO,
-                            "data_vencimento": "2025-12-31",
-                            "id_cliente": 12345,
-                            "id_login": 123456,
-                        },
-                    ],
-                    "meta": {
-                        "total": 2,
-                        "page": 1,
-                        "per_page": 10,
+            "example": {
+                "data": [
+                    {
+                        "id": 1234,
+                        "contrato": "NEWNET PADRAO - 250MB - 06/2025",
+                        "valor": 99.99,
+                        "status_acesso": utils.StatusAcessoRot.ATIVO,
+                        "data_vencimento": "2025-12-31",
+                        "id_cliente": 12345,
+                        "id_login": 123456,
                     },
-                    "links": {
-                        "next": "null",
-                        "prev": "null",
-                        "self": "/api/v1/comercial/contratos?protocolo=NWT202537591&page=1&per_page=10",
+                    {
+                        "id": 12345,
+                        "contrato": "Newnet 2024 - 350MB",
+                        "valor": 99.9,
+                        "status_acesso": utils.StatusAcessoRot.ATIVO,
+                        "data_vencimento": "2025-12-31",
+                        "id_cliente": 12345,
+                        "id_login": 123456,
                     },
-                }
-            ]
+                ],
+                "meta": {
+                    "total": 2,
+                    "page": 1,
+                    "per_page": 10,
+                },
+                "links": {
+                    "next": "null",
+                    "prev": "null",
+                    "self": "/api/v1/comercial/contratos?protocolo=NWT202537591&page=1&per_page=10",
+                },
+            }
         }
     }

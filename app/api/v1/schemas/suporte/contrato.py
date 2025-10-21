@@ -16,18 +16,16 @@ class Contrato(BaseModel):
 
     model_config = {
         "json_schema_extra": {
-            "examples": [
-                {
-                    "id": 123,
-                    "id_login": 456,
-                    "id_cliente": 789,
-                    "status": utils.enums.rotulos.StatusContratoRot.PRE_CONTRATO,
-                    "contrato": "NEWNET PADRAO - 250MB - 06/2025",
-                    "valor": 99.99,
-                    "data_vencimento": "2025-12-31",
-                    "mac_onu": "AB1230001234",
-                }
-            ]
+            "example": {
+                "id": 123,
+                "id_login": 456,
+                "id_cliente": 789,
+                "status": utils.enums.rotulos.StatusContratoRot.PRE_CONTRATO,
+                "contrato": "NEWNET PADRAO - 250MB - 06/2025",
+                "valor": 99.99,
+                "data_vencimento": "2025-12-31",
+                "mac_onu": "AB1230001234",
+            }
         }
     }
 
@@ -39,41 +37,39 @@ class ContratoListOut(BaseModel):
 
     model_config = {
         "json_schema_extra": {
-            "examples": [
-                {
-                    "data": [
-                        {
-                            "id": 123,
-                            "id_login": 456,
-                            "id_cliente": 789,
-                            "status": utils.enums.rotulos.StatusContratoRot.PRE_CONTRATO,
-                            "contrato": "NEWNET PADRAO - 250MB - 06/2025",
-                            "valor": 99.99,
-                            "data_vencimento": "2025-12-31",
-                            "mac_onu": "AB1230001234",
-                        },
-                        {
-                            "id": 234,
-                            "id_login": 567,
-                            "id_cliente": 890,
-                            "status": utils.enums.rotulos.StatusContratoRot.PRE_CONTRATO,
-                            "contrato": "NEWNET PADRAO - 250MB - 06/2025",
-                            "valor": 99.99,
-                            "data_vencimento": "2025-12-31",
-                            "mac_onu": "BC2341112345",
-                        },
-                    ],
-                    "meta": {
-                        "total": 2,
-                        "page": 1,
-                        "per_page": 10,
+            "example": {
+                "data": [
+                    {
+                        "id": 123,
+                        "id_login": 456,
+                        "id_cliente": 789,
+                        "status": utils.enums.rotulos.StatusContratoRot.PRE_CONTRATO,
+                        "contrato": "NEWNET PADRAO - 250MB - 06/2025",
+                        "valor": 99.99,
+                        "data_vencimento": "2025-12-31",
+                        "mac_onu": "AB1230001234",
                     },
-                    "links": {
-                        "next": "null",
-                        "prev": "null",
-                        "self": "/api/v1/suporte/contratos?protocolo=NWT202537245&page=1&per_page=10",
+                    {
+                        "id": 234,
+                        "id_login": 567,
+                        "id_cliente": 890,
+                        "status": utils.enums.rotulos.StatusContratoRot.PRE_CONTRATO,
+                        "contrato": "NEWNET PADRAO - 250MB - 06/2025",
+                        "valor": 99.99,
+                        "data_vencimento": "2025-12-31",
+                        "mac_onu": "BC2341112345",
                     },
-                }
-            ]
+                ],
+                "meta": {
+                    "total": 2,
+                    "page": 1,
+                    "per_page": 10,
+                },
+                "links": {
+                    "next": "null",
+                    "prev": "null",
+                    "self": "/api/v1/suporte/contratos?protocolo=NWT202537245&page=1&per_page=10",
+                },
+            }
         }
     }

@@ -1,9 +1,7 @@
 from typing import Optional
 from pydantic import PositiveInt
 from .. import schemas, utils, services
-from fastapi import APIRouter, Query, status, Path, Body, Depends
-from ..database import get_db
-from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi import APIRouter, Query, status, Path, Body
 
 
 suporte_router = APIRouter()

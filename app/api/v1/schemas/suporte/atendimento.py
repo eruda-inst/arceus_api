@@ -7,7 +7,7 @@ from pydantic import BaseModel, Field, PositiveInt
 class AtendimentoCreate(BaseModel):
     id: PositiveInt = Field(description="ID do atendimento aberto.")
 
-    model_config = {"json_schema_extra": {"examples": [{"id": 123}]}}
+    model_config = {"json_schema_extra": {"example": {"id": 123}}}
 
 
 class AtendimentoIn(BaseModel):
@@ -39,22 +39,20 @@ class AtendimentoIn(BaseModel):
 
     model_config = {
         "json_schema_extra": {
-            "examples": [
-                {
-                    "id_login": 123,
-                    "id_assunto": 1,
-                    "id_cliente": 456,
-                    "menssagem": "Estou com problemas de conexão na minha residência.",
-                    "origem_endereco": utils.OrigemEnderecoCod.LOGIN,
-                    "tipo": utils.TipoCod.CLIENTE,
-                    "titulo": "Problema de conexão",
-                    "prioridade": utils.PrioridadeCod.ALTA,
-                    "su_status": utils.SuStatusCod.NOVO,
-                    "id_ticket_setor": 2,
-                    "id_contrato": 789,
-                    "id_responsavel_tecnico": 987,
-                }
-            ]
+            "example": {
+                "id_login": 123,
+                "id_assunto": 1,
+                "id_cliente": 456,
+                "menssagem": "Estou com problemas de conexão na minha residência.",
+                "origem_endereco": utils.OrigemEnderecoCod.LOGIN,
+                "tipo": utils.TipoCod.CLIENTE,
+                "titulo": "Problema de conexão",
+                "prioridade": utils.PrioridadeCod.ALTA,
+                "su_status": utils.SuStatusCod.NOVO,
+                "id_ticket_setor": 2,
+                "id_contrato": 789,
+                "id_responsavel_tecnico": 987,
+            }
         }
     }
 
@@ -69,16 +67,14 @@ class Atendimento(BaseModel):
 
     model_config = {
         "json_schema_extra": {
-            "examples": [
-                {
-                    "id": 123,
-                    "id_assunto": 1,
-                    "status": utils.StatusAtendimentoCod.NOVO,
-                    "mensagem": "Estou com problemas de conexão na minha residência.",
-                    "titulo": "Problema de conexão",
-                    "data_criacao": "2025-12-31 12:00:00",
-                }
-            ]
+            "example": {
+                "id": 123,
+                "id_assunto": 1,
+                "status": utils.StatusAtendimentoCod.NOVO,
+                "mensagem": "Estou com problemas de conexão na minha residência.",
+                "titulo": "Problema de conexão",
+                "data_criacao": "2025-12-31 12:00:00",
+            }
         }
     }
 
@@ -90,33 +86,31 @@ class AtendimentoOut(BaseModel):
 
     model_config = {
         "json_schema_extra": {
-            "examples": [
-                {
-                    "data": [
-                        {
-                            "id": 123,
-                            "id_assunto": 1,
-                            "status": utils.StatusAtendimentoRot.NOVO,
-                            "mensagem": "Estou com problemas de conexão na minha residência.",
-                            "titulo": "Problema de conexão",
-                            "data_criacao": "2025-12-31 12:00:00",
-                        },
-                        {
-                            "id": 124,
-                            "id_assunto": 1,
-                            "status": utils.StatusAtendimentoRot.NOVO,
-                            "mensagem": "Estou com problemas de conexão na minha residência.",
-                            "titulo": "Problema de conexão",
-                            "data_criacao": "2025-12-31 12:00:00",
-                        },
-                    ],
-                    "meta": {"total": 2, "page": 1, "per_page": 10},
-                    "links": {
-                        "next": "null",
-                        "prev": "null",
-                        "self": "api/v1/suporte/atendimentos?id_login=14717&page=1&per_page=10",
+            "example": {
+                "data": [
+                    {
+                        "id": 123,
+                        "id_assunto": 1,
+                        "status": utils.StatusAtendimentoRot.NOVO,
+                        "mensagem": "Estou com problemas de conexão na minha residência.",
+                        "titulo": "Problema de conexão",
+                        "data_criacao": "2025-12-31 12:00:00",
                     },
-                }
-            ]
+                    {
+                        "id": 124,
+                        "id_assunto": 1,
+                        "status": utils.StatusAtendimentoRot.NOVO,
+                        "mensagem": "Estou com problemas de conexão na minha residência.",
+                        "titulo": "Problema de conexão",
+                        "data_criacao": "2025-12-31 12:00:00",
+                    },
+                ],
+                "meta": {"total": 2, "page": 1, "per_page": 10},
+                "links": {
+                    "next": "null",
+                    "prev": "null",
+                    "self": "api/v1/suporte/atendimentos?id_login=14717&page=1&per_page=10",
+                },
+            }
         }
     }

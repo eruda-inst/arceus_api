@@ -7,11 +7,9 @@ class StatusConexao(BaseModel):
 
     model_config = {
         "json_schema_extra": {
-            "examples": [
-                {
-                    "status_conexao": utils.StatusConexaoRot.CONECTADO,
-                }
-            ]
+            "example": {
+                "status_conexao": utils.StatusConexaoRot.CONECTADO,
+            }
         }
     }
 
@@ -21,12 +19,10 @@ class StatusConexaoOut(BaseModel):
 
     model_config = {
         "json_schema_extra": {
-            "examples": [
-                {
-                    "data": {
-                        "status_conexao": utils.StatusConexaoRot.CONECTADO,
-                    }
+            "example": {
+                "data": {
+                    "status_conexao": utils.StatusConexaoRot.CONECTADO,
                 }
-            ]
+            }
         }
     }
