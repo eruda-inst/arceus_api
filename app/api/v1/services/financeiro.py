@@ -117,7 +117,8 @@ class FinanceiroService(service.Service):
             )
 
     async def post_desbloqueio_em_confianca(
-        self: Self, id_contrato: PositiveInt, db=None
+        self: Self,
+        id_contrato: PositiveInt,
     ) -> schemas.MensagemOut:
         """
         Solicita o desbloqueio em confiança para um contrato.
@@ -152,7 +153,7 @@ class FinanceiroService(service.Service):
             )
 
     async def get_linha_digitavel(
-        self: Self, id_fatura: PositiveInt, db=None
+        self: Self, id_fatura: PositiveInt
     ) -> schemas.LinhaDigitavelOut:
         """
         Obtém a linha digitável de uma fatura específica.
@@ -198,9 +199,7 @@ class FinanceiroService(service.Service):
                 detail=f"Erro interno ao processar solicitação: {str(e)}",
             )
 
-    async def get_chave_pix(
-        self: Self, id_fatura: PositiveInt, db=None
-    ) -> schemas.ChavePixBase:
+    async def get_chave_pix(self: Self, id_fatura: PositiveInt) -> schemas.ChavePixBase:
         """
         Obtém a chave PIX para pagamento de uma fatura.
 
@@ -235,9 +234,7 @@ class FinanceiroService(service.Service):
                 detail=f"Erro interno ao processar solicitação: {str(e)}",
             )
 
-    async def get_credenciais(
-        self: Self, protocolo: str, db=None
-    ) -> schemas.CredencialOut:
+    async def get_credenciais(self: Self, protocolo: str) -> schemas.CredencialOut:
         """
         Obtém as credenciais de acesso à central do assinante de um cliente.
 
@@ -282,7 +279,6 @@ class FinanceiroService(service.Service):
         self: Self,
         id_cliente: PositiveInt,
         credenciais: schemas.CredencialUpdate,
-        db=None,
     ) -> schemas.MensagemOut:
         """
         Atualiza as credenciais de acesso de um cliente.
@@ -329,7 +325,7 @@ class FinanceiroService(service.Service):
                 detail=f"Erro interno ao processar solicitação: {str(e)}",
             )
 
-    async def get_ultima_fatura_paga(self: Self, id_contrato: PositiveInt, db=None):
+    async def get_ultima_fatura_paga(self: Self, id_contrato: PositiveInt):
         """
         Obtém os detalhes da última fatura paga de um contrato.
 
