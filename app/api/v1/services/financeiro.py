@@ -234,12 +234,15 @@ class FinanceiroService(service.Service):
                 detail=f"Erro interno ao processar solicitação: {str(e)}",
             )
 
-    async def get_credenciais(self: Self, protocolo: str) -> schemas.CredencialOut:
+    async def get_credenciais(
+        self: Self, protocolo: Optional[str] = None, cnpj_cpf: Optional[str] = None
+    ) -> schemas.CredencialOut:
         """
         Obtém as credenciais de acesso à central do assinante de um cliente.
 
         Args:
             protocolo: O protocolo de atendimento para identificar o cliente.
+            cnpj_cpf: O CPF ou CNPJ do cliente.
 
         Returns:
             As credenciais de acesso (usuário e senha).
@@ -248,7 +251,9 @@ class FinanceiroService(service.Service):
             HTTPException: Se as credenciais não forem encontradas ou ocorrer um erro.
         """
         try:
-            id_cliente = await self.get_id_cliente_ixc(protocolo=protocolo)
+            id_cliente = await self.get_id_cliente_ixc(
+                protocolo=protocolo, cnpj_cpf=cnpj_cpf
+            )
 
             res = await self.financeiro_ixc_cliente.get_credenciais(
                 id_cliente=id_cliente

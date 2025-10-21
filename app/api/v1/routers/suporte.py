@@ -70,8 +70,7 @@ async def get_contratos(
 async def get_status_conexao(
     id_login: PositiveInt = Query(
         ge=1, description="ID de login do cliente no IXCSoft."
-    ),
-    db: AsyncSession = Depends(get_db),
+    )
 ) -> schemas.StatusConexaoOut:
     """
     Obtém o status de conexão de um cliente.
@@ -83,7 +82,7 @@ async def get_status_conexao(
         O status de conexão do cliente.
     """
     suporte_service = services.SuporteService()
-    return await suporte_service.get_status_conexao(id_login=id_login, db=db)
+    return await suporte_service.get_status_conexao(id_login=id_login)
 
 
 @suporte_router.get(
@@ -98,7 +97,6 @@ async def get_status_onu(
     mac_onu: Optional[str] = Query(
         min_length=12, max_length=12, default=None, description="MAC Address da ONU."
     ),
-    db: AsyncSession = Depends(get_db),
 ) -> schemas.StatusONUOut:
     """
     Obtém o status da ONU (sinal) de um cliente.
@@ -111,9 +109,7 @@ async def get_status_onu(
         O status da ONU do cliente.
     """
     suporte_service = services.SuporteService()
-    return await suporte_service.get_status_onu(
-        id_login=id_login, mac_onu=mac_onu, db=db
-    )
+    return await suporte_service.get_status_onu(id_login=id_login, mac_onu=mac_onu)
 
 
 @suporte_router.post(
@@ -125,7 +121,6 @@ async def post_desconectar_cliente(
     id_login: PositiveInt = Query(
         ge=1, description="ID de login do cliente no IXCSoft."
     ),
-    db: AsyncSession = Depends(get_db),
 ) -> schemas.MensagemOut:
     """
     Envia um comando para desconectar um cliente.
@@ -137,7 +132,7 @@ async def post_desconectar_cliente(
         Uma mensagem de confirmação da ação.
     """
     suporte_service = services.SuporteService()
-    return await suporte_service.post_desconectar_cliente(id_login=id_login, db=db)
+    return await suporte_service.post_desconectar_cliente(id_login=id_login)
 
 
 @suporte_router.get(
@@ -161,7 +156,6 @@ async def get_atendimentos(
     sortorder: Optional[utils.SortOrder] = Query(
         default=utils.SortOrder.ASC, description="Ordem da ordenação."
     ),
-    db: AsyncSession = Depends(get_db),
 ) -> schemas.AtendimentoOut:
     """
     Obtém a lista de atendimentos em aberto para um cliente.
@@ -183,7 +177,6 @@ async def get_atendimentos(
         per_page=per_page,
         sortname=sortname,
         sortorder=sortorder,
-        db=db,
     )
 
 
@@ -195,7 +188,6 @@ async def get_atendimentos(
 )
 async def post_atendimentos(
     atendimento: schemas.AtendimentoIn,
-    db: AsyncSession = Depends(get_db),
 ) -> schemas.AtendimentoCreate:
     """
     Cria um novo ticket de atendimento de suporte.
@@ -207,7 +199,7 @@ async def post_atendimentos(
         Os dados do atendimento recém-criado.
     """
     suporte_service = services.SuporteService()
-    return await suporte_service.post_atendimentos(atendimento=atendimento, db=db)
+    return await suporte_service.post_atendimentos(atendimento=atendimento)
 
 
 # Por razões de limitações na plataforma opa, o verbo deve ser put, ao invés de patch
@@ -219,7 +211,6 @@ async def post_atendimentos(
 async def put_ip(
     id_login: PositiveInt = Path(ge=1, description="ID de login."),
     ip: schemas.IPUpdate = Body(description="IP a ser atualizado."),
-    db: AsyncSession = Depends(get_db),
 ) -> schemas.MensagemOut:
     """
     Atualiza o endereço IP associado a um login de cliente.
@@ -232,7 +223,7 @@ async def put_ip(
         Uma mensagem de confirmação da atualização.
     """
     suporte_service = services.SuporteService()
-    return await suporte_service.put_ip(id_login=id_login, ip=ip, db=db)
+    return await suporte_service.put_ip(id_login=id_login, ip=ip)
 
 
 @suporte_router.post(
@@ -243,8 +234,7 @@ async def put_ip(
 async def post_limpar_mac(
     id_login: PositiveInt = Query(
         ge=1, description="ID de login do cliente no IXCSoft."
-    ),
-    db: AsyncSession = Depends(get_db),
+    )
 ) -> schemas.MensagemOut:
     """
     Limpa o endereço MAC associado a um login de cliente.
@@ -256,4 +246,4 @@ async def post_limpar_mac(
         Uma mensagem de confirmação da ação.
     """
     suporte_service = services.SuporteService()
-    return await suporte_service.post_limpar_mac(id_login=id_login, db=db)
+    return await suporte_service.post_limpar_mac(id_login=id_login)

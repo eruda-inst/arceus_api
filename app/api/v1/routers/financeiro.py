@@ -184,10 +184,14 @@ async def get_chave_pix(
     summary="Obtém credenciais de acesso à central do assinante de um cliente, através de protocolo de atendimento.",
 )
 async def get_credenciais(
-    protocolo: str = Query(
+    protocolo: Optional[str] = Query(
+        default=None,
         min_length=12,
         max_length=12,
-        description="Protocolo de atendimento do cliente no OpaSuite.",
+        description="Protocolo de atendimento.",
+    ),
+    cnpj_cpf: Optional[str] = Query(
+        default=None, description="CPF ou CNPJ do cliente."
     ),
 ) -> schemas.CredencialOut:
     """
@@ -200,7 +204,9 @@ async def get_credenciais(
         As credenciais de acesso do cliente.
     """
     financeiro_service = services.FinanceiroService()
-    return await financeiro_service.get_credenciais(protocolo=protocolo)
+    return await financeiro_service.get_credenciais(
+        protocolo=protocolo, cnpj_cpf=cnpj_cpf
+    )
 
 
 # Por razões de limitações na plataforma opa, o verbo deve ser put, ao invés de patch
