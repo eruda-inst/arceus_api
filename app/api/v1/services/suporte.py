@@ -20,12 +20,12 @@ class SuporteService(service.Service):
 
     async def get_contratos(
         self: Self,
-        protocolo: str,
+        protocolo: Optional[str] = None,
+        cnpj_cpf: Optional[str] = None,
         page: Optional[PositiveInt] = 1,
         per_page: Optional[PositiveInt] = 10,
         sortname: Optional[str] = "cliente_contrato.id",
         sortorder: Optional[utils.SortOrder] = utils.SortOrder.ASC,
-        db=None,
     ) -> schemas.SuporteContratoListOut:
         """
         Obtém uma lista paginada de contratos de suporte para um cliente.
@@ -35,6 +35,7 @@ class SuporteService(service.Service):
 
         Args:
             protocolo: O protocolo de serviço para identificar o cliente.
+            cnpj_cpf: O CPF ou CNPJ do cliente.
             page: O número da página para paginação.
             per_page: O número de itens por página.
             sortname: O campo para ordenação.
@@ -47,7 +48,9 @@ class SuporteService(service.Service):
             HTTPException: Se o cliente ou os contratos não forem encontrados, ou em caso de erro.
         """
         try:
-            id_cliente = await self.get_id_cliente_ixc(protocolo=protocolo)
+            id_cliente = await self.get_id_cliente_ixc(
+                protocolo=protocolo, cnpj_cpf=cnpj_cpf
+            )
 
             contratos_ativos_res = await self.suporte_ixc_cliente.get_contratos(
                 id_cliente=id_cliente,

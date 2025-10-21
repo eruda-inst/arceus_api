@@ -15,10 +15,14 @@ suporte_router = APIRouter()
     summary="Obtém contratos ativos de um cliente, através de protocolo de atendimento.",
 )
 async def get_contratos(
-    protocolo: str = Query(
+    protocolo: Optional[str] = Query(
+        default=None,
         min_length=12,
         max_length=12,
-        description="Protocolo de atendimento do cliente no OpaSuite.",
+        description="Protocolo de atendimento.",
+    ),
+    cnpj_cpf: Optional[str] = Query(
+        default=None, description="CPF ou CNPJ do cliente."
     ),
     page: Optional[PositiveInt] = Query(
         ge=1, default=1, description="Número da página."
@@ -32,13 +36,13 @@ async def get_contratos(
     sortorder: Optional[utils.SortOrder] = Query(
         default=utils.SortOrder.ASC, description="Ordem da ordenação."
     ),
-    db: AsyncSession = Depends(get_db),
 ) -> schemas.SuporteContratoListOut:
     """
     Obtém a lista de contratos ativos de um cliente.
 
     Args:
         protocolo: O protocolo de atendimento do cliente no OpaSuite.
+        cnpj_cpf: O CPF ou CNPJ do cliente.
         page: O número da página para a paginação.
         per_page: A quantidade de itens por página.
         sortname: O campo pelo qual a lista será ordenada.
@@ -50,11 +54,11 @@ async def get_contratos(
     suporte_service = services.SuporteService()
     return await suporte_service.get_contratos(
         protocolo=protocolo,
+        cnpj_cpf=cnpj_cpf,
         page=page,
         per_page=per_page,
         sortname=sortname,
         sortorder=sortorder,
-        db=db,
     )
 
 
