@@ -1,5 +1,7 @@
+import re
 import time
 from .. import crud
+from typing import Final
 from fastapi import Request
 from zoneinfo import ZoneInfo
 from datetime import datetime
@@ -107,7 +109,15 @@ class LogMiddleware(BaseHTTPMiddleware):
             process_time: O tempo de processamento da requisição.
         """
         db = None
+
+        query = request.url.query
+        protocolo = None
+
         try:
+            if query:
+                pattern: Final = r"NWT\d{9}"
+                match = re.search(pattern=pattern, string=query)
+                protocolo = match.group(0)
             now = datetime.now(ZoneInfo("America/Sao_Paulo"))
             async for db in database.get_db():
                 await crud.log_crud.create_log(
@@ -119,6 +129,7 @@ class LogMiddleware(BaseHTTPMiddleware):
                     data=now.date(),
                     hora=now.time(),
                     duracao=process_time,
+                    protocolo=protocolo if protocolo else "unknown",
                 )
                 break
         except SQLAlchemyError as e:

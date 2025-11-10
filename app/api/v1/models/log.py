@@ -17,6 +17,7 @@ class Log(database.base.Base):
         data: A data de quando a requisição foi registrada.
         hora: A hora de quando a requisição foi registrada.
         duracao: O tempo de processamento da requisição em segundos.
+        protocolo: O protocolo de atendimento associado à requisição.
     """
 
     __tablename__ = "logs"
@@ -29,3 +30,4 @@ class Log(database.base.Base):
     data = Column(Date, nullable=False)
     hora = Column(Time, nullable=False)
     duracao = Column(Float, nullable=False)
+    protocolo = Column(String, nullable=False)

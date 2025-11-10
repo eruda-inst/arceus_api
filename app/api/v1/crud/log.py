@@ -17,6 +17,7 @@ class LogCRUD:
         data: date,
         hora: time,
         duracao: float,
+        protocolo: str,
     ):
         """
         Cria uma nova entrada de log no banco de dados de forma assíncrona.
@@ -30,6 +31,7 @@ class LogCRUD:
             data: A data da requisição.
             hora: A hora da requisição.
             duracao: O tempo de duração da requisição em segundos.
+            protocolo: O protocolo de atendimento associado à requisição.
 
         Returns:
             O objeto de log criado.
@@ -46,6 +48,7 @@ class LogCRUD:
                 data=data,
                 hora=hora,
                 duracao=round(duracao, 4),
+                protocolo=protocolo,
             )
             db.add(log_entry)
             await db.commit()
