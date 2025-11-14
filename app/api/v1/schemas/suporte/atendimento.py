@@ -82,7 +82,6 @@ class Atendimento(BaseModel):
 class AtendimentoOut(BaseModel):
     data: List[Atendimento]
     meta: misc.Meta
-    links: misc.Links
 
     model_config = {
         "json_schema_extra": {
@@ -106,11 +105,6 @@ class AtendimentoOut(BaseModel):
                     },
                 ],
                 "meta": {"total": 2, "page": 1, "per_page": 10},
-                "links": {
-                    "next": "null",
-                    "prev": "null",
-                    "self": "api/v1/suporte/atendimentos?id_login=14717&page=1&per_page=10",
-                },
             }
         }
     }

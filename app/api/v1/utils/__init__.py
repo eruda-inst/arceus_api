@@ -7,7 +7,6 @@ from .helpers import (
     formatar_cnpj_cpf,
     formatar_cel,
     formatar_cep,
-    make_links,
 )
 from .enums import (
     StatusAtendimentoCod,

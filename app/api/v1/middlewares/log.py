@@ -117,7 +117,8 @@ class LogMiddleware(BaseHTTPMiddleware):
             if query:
                 pattern: Final = r"NWT\d{9}"
                 match = re.search(pattern=pattern, string=query)
-                protocolo = match.group(0)
+                if match:
+                    protocolo = match.group(0)
             now = datetime.now(ZoneInfo("America/Sao_Paulo"))
             async for db in database.get_db():
                 await crud.log_crud.create_log(

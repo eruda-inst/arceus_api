@@ -143,14 +143,9 @@ class SuporteService(service.Service):
                 contrato["status"] = utils.rotular_status_contrato(contrato["status"])
 
             meta = schemas.Meta(total=total, page=page, per_page=per_page)
-            base_url = f"/api/v1/suporte/contratos?protocolo={protocolo}"
-            links = utils.make_links(
-                base_url=base_url, page=page, per_page=per_page, total=total
-            )
             return schemas.SuporteContratoListOut(
                 data=[schemas.SuporteContrato(**c) for c in contratos_ativos],
                 meta=meta,
-                links=links,
             )
         except HTTPException:
             raise

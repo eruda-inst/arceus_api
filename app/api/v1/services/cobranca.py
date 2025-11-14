@@ -107,15 +107,9 @@ class CobrancaService(service.Service):
                 per_page=per_page,
             )
 
-            base_url = f"/api/v1/cobranca/faturas_vencidas?protocolo={protocolo}"
-            links = utils.make_links(
-                base_url=base_url, page=page, per_page=per_page, total=total
-            )
-
             return schemas.FaturaAbertaListOut(
                 data=[schemas.FaturaAberta(**f) for f in faturas_abertas_formatadas],
                 meta=meta,
-                links=links,
             )
         except HTTPException:
             raise

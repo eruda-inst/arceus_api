@@ -11,17 +11,14 @@ class Meta(BaseModel):
         default=10, description="Número de itens exibidos por página."
     )
 
-
-class Links(BaseModel):
-    self: str = Field(description="URL da página atual de resultados.")
-    next: Optional[str] = Field(
-        default=None,
-        description="URL para a próxima página de resultados, se disponível.",
-    )
-    prev: Optional[str] = Field(
-        default=None,
-        description="URL para a página anterior de resultados, se disponível.",
-    )
+    model_config = {
+        "json_schema_extra": {
+            "examples": [
+                {"total": 1, "page": 1, "per_page": 10},
+                {"total": 1, "page": 2, "per_page": 10},
+            ]
+        }
+    }
 
 
 class MensagemOut(BaseModel):

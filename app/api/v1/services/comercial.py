@@ -209,15 +209,9 @@ class ComercialService(service.Service):
                 per_page=per_page,
             )
 
-            base_url = f"/api/v1/comercial/contratos?protocolo={protocolo}"
-            links = utils.make_links(
-                base_url=base_url, page=page, per_page=per_page, total=total
-            )
-
             return schemas.ComercialContratoListOut(
                 data=[schemas.ComercialContrato(**ct) for ct in contratos_tratados],
                 meta=meta,
-                links=links,
             )
 
         except HTTPException:

@@ -37,7 +37,6 @@ class Contrato(BaseModel):
 class ContratoListOut(BaseModel):
     data: List[Contrato] = Field(description="Lista de contratos")
     meta: misc.Meta
-    links: misc.Links
 
     model_config = {
         "json_schema_extra": {
@@ -66,11 +65,6 @@ class ContratoListOut(BaseModel):
                     "total": 2,
                     "page": 1,
                     "per_page": 10,
-                },
-                "links": {
-                    "next": "null",
-                    "prev": "null",
-                    "self": "/api/v1/comercial/contratos?protocolo=NWT202537591&page=1&per_page=10",
                 },
             }
         }
