@@ -1,5 +1,4 @@
 import time
-import json
 from .. import crud, database
 from zoneinfo import ZoneInfo
 from datetime import datetime
@@ -104,17 +103,10 @@ class LogMiddleware(BaseHTTPMiddleware):
             process_time: O tempo de processamento da requisição.
         """
         db = None
-        protocolo = None
         try:
-            # Extrai o protocolo do corpo da requisição para TODOS os métodos HTTP
-            body = await request.body()
-            if body:
-                try:
-                    body_json = json.loads(body)
-                    protocolo = body_json.get("protocolo")
-                except json.JSONDecodeError:
-                    # Se não for JSON válido, ignora
-                    pass
+            # Extrai o protocolo do header x-protocolo
+            protocolo = request.headers.get("x-protocolo", "desconhecido")
+
             now = datetime.now(ZoneInfo("America/Sao_Paulo"))
             async for db in database.get_db():
                 await crud.log_crud.create_log(
@@ -126,7 +118,7 @@ class LogMiddleware(BaseHTTPMiddleware):
                     data=now.date(),
                     hora=now.time(),
                     duracao=process_time,
-                    protocolo=protocolo if protocolo else "desconhecido",
+                    protocolo=protocolo,
                 )
                 break
         except SQLAlchemyError as e:
