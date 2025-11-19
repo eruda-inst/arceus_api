@@ -1,11 +1,9 @@
-import re
 import time
-from .. import crud
-from typing import Final
-from fastapi import Request
+import json
+from .. import crud, database
 from zoneinfo import ZoneInfo
 from datetime import datetime
-from app.api.v1 import database
+from fastapi import Request, status
 from sqlalchemy.exc import SQLAlchemyError
 from starlette.middleware.base import BaseHTTPMiddleware
 
@@ -34,6 +32,7 @@ class LogMiddleware(BaseHTTPMiddleware):
             "/api/v1/comercial",
             "/api/v1/financeiro",
             "/api/v1/triagem",
+            "/api/v1/cobranca",
         ]
 
     async def dispatch(self, request: Request, call_next):
@@ -51,21 +50,18 @@ class LogMiddleware(BaseHTTPMiddleware):
             A resposta da requisição.
         """
         path = request.url.path
-
         if path in self.exclude_paths or not any(
             path.startswith(prefix) for prefix in self.include_prefixes
         ):
             return await call_next(request)
-
         start_time = time.perf_counter()
         response = None
-
         try:
             response = await call_next(request)
         except Exception as e:
             await self._log_request(
                 request=request,
-                status_code=500,
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 process_time=time.perf_counter() - start_time,
             )
             raise e
@@ -75,7 +71,6 @@ class LogMiddleware(BaseHTTPMiddleware):
                 status_code=response.status_code,
                 process_time=time.perf_counter() - start_time,
             )
-
         return response
 
     async def _log_request(
@@ -109,28 +104,29 @@ class LogMiddleware(BaseHTTPMiddleware):
             process_time: O tempo de processamento da requisição.
         """
         db = None
-
-        query = request.url.query
         protocolo = None
-
         try:
-            if query:
-                pattern: Final = r"NWT\d{9}"
-                match = re.search(pattern=pattern, string=query)
-                if match:
-                    protocolo = match.group(0)
+            # Extrai o protocolo do corpo da requisição para TODOS os métodos HTTP
+            body = await request.body()
+            if body:
+                try:
+                    body_json = json.loads(body)
+                    protocolo = body_json.get("protocolo")
+                except json.JSONDecodeError:
+                    # Se não for JSON válido, ignora
+                    pass
             now = datetime.now(ZoneInfo("America/Sao_Paulo"))
             async for db in database.get_db():
                 await crud.log_crud.create_log(
                     db=db,
-                    ip=request.client.host if request.client else "unknown",
+                    ip=request.client.host if request.client else "desconhecido",
                     http_method=request.method,
                     endpoint=request.url.path,
                     status_code=status_code,
                     data=now.date(),
                     hora=now.time(),
                     duracao=process_time,
-                    protocolo=protocolo if protocolo else "unknown",
+                    protocolo=protocolo if protocolo else "desconhecido",
                 )
                 break
         except SQLAlchemyError as e:
