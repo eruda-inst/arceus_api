@@ -1,4 +1,125 @@
-venv
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Distribution / packaging
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+*.manifest
+*.spec
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Environments
 .env
-__pycache__
-media
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# UV-specific (Python package management)
+.uv/
+__pypackages__/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# PostgreSQL data directory (if storing in project)
+postgres_data/
+pgdata/
+
+# Docker
+**/data/
+**/logs/
+docker-compose.override.yml
+
+# Alembic - auto-generated revision files (optional)
+# Uncomment if you don't want to track generated migration files
+# alembic/versions/*.py
+
+# Local settings
+local_settings.py
+settings.local.py
+
+# Secrets
+secrets.yml
+secrets.yaml
+secrets.json
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Project specific
+*.log
+logs/
+*.pid
+*.seed
+*.pid.lock
+
+# Temp files
+*.tmp
+*.temp
+.cache/
+.temp/
+tmp/
+temp/
+
+# Another ones
+media/
