@@ -19,6 +19,7 @@ services:
     networks:
       - net-bot
   api:
+    image: zolppy/aggregator-api:latest
     container_name: api-bot
     environment:
       - BASE_URL_7AZ=${BASE_URL_7AZ}
