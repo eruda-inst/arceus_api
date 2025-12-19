@@ -70,9 +70,9 @@ class FinanceiroIXCCliente(ixc.IXCCliente):
         Returns:
             Dict: A resposta da API IXC após a solicitação.
         """
-        payload = {"id_contrato": id_contrato}
+        payload = {"id": id_contrato}
         data = await self._make_request(
-            endpoint="cliente_contrato_15464", payload=payload, include_ixcsoft=False
+            endpoint="desbloqueio_confianca", payload=payload, include_ixcsoft=False
         )
         return data
 
