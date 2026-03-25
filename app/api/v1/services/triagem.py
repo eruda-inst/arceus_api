@@ -2,8 +2,7 @@ from . import service
 from typing import Self, Optional
 from .. import schemas, clients, utils
 from fastapi import HTTPException, status
-from sqlalchemy.ext.asyncio import AsyncSession
-from pydantic import ValidationError, PositiveInt
+from pydantic import ValidationError
 
 
 class TriagemService(service.Service):

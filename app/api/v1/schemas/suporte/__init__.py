@@ -6,3 +6,17 @@ from .contrato import (
 from .conexao import StatusConexao, StatusConexaoOut
 from .atendimento import Atendimento, AtendimentoIn, AtendimentoOut, AtendimentoCreate
 from .ip import IPUpdate
+
+__all__ = [
+    "SuporteContrato",
+    "SuporteContratoListOut",
+    "StatusONU",
+    "StatusONUOut",
+    "StatusConexao",
+    "StatusConexaoOut",
+    "Atendimento",
+    "AtendimentoIn",
+    "AtendimentoOut",
+    "AtendimentoCreate",
+    "IPUpdate",
+]

@@ -3,7 +3,6 @@ import httpx
 import base64
 from .. import core
 from typing import Dict, Self
-from pydantic import PositiveInt
 from fastapi import HTTPException, status
 
 

@@ -3,3 +3,11 @@ from .comercial import ComercialService
 from .financeiro import FinanceiroService
 from .triagem import TriagemService
 from .cobranca import CobrancaService
+
+__all__ = [
+    "SuporteService",
+    "ComercialService",
+    "FinanceiroService",
+    "TriagemService",
+    "CobrancaService",
+]

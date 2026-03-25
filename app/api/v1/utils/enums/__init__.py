@@ -17,3 +17,21 @@ from .rotulos import (
     StatusAcessoRot,
 )
 from .default import Default
+
+__all__ = [
+    "SortOrder",
+    "TipoCod",
+    "SuStatusCod",
+    "PrioridadeCod",
+    "StatusConexaoCod",
+    "StatusContratoCod",
+    "OrigemEnderecoCod",
+    "StatusAtendimentoCod",
+    "StatusAcessoCod",
+    "StatusAtendimentoRot",
+    "StatusConexaoRot",
+    "StatusContratoRot",
+    "StatusONURot",
+    "StatusAcessoRot",
+    "Default",
+]

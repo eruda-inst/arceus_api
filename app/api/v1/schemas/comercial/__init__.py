@@ -4,3 +4,12 @@ from .contrato import (
 )
 from .acesso import StatusAcesso, StatusAcessoOut
 from .lead import LeadIn, LeadCreate
+
+__all__ = [
+    "ComercialContrato",
+    "ComercialContratoListOut",
+    "StatusAcesso",
+    "StatusAcessoOut",
+    "LeadIn",
+    "LeadCreate",
+]

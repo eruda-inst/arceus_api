@@ -8,3 +8,18 @@ from .ixc import IXCCliente
 from .opa import OpaCliente
 from .triagem import TriagemIXCCliente
 from .cobranca import CobrancaIXCCliente
+
+
+__all__ = [
+    "IXCCliente",
+    "OpaCliente",
+    "ComercialIXCCliente",
+    "SuporteIXCCliente",
+    "FinanceiroIXCCliente",
+    "FinanceiroAZ7Cliente",
+    "TriagemIXCCliente",
+    "CobrancaIXCCliente",
+    "AtendimentoIn",
+    "SortOrder",
+    "settings",
+]

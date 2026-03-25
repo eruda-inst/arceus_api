@@ -6,3 +6,14 @@ from .status_contrato import StatusContratoCod
 from .su_status import SuStatusCod
 from .tipo import TipoCod
 from .status_acesso import StatusAcessoCod
+
+__all__ = [
+    "OrigemEnderecoCod",
+    "PrioridadeCod",
+    "StatusAtendimentoCod",
+    "StatusConexaoCod",
+    "StatusContratoCod",
+    "SuStatusCod",
+    "TipoCod",
+    "StatusAcessoCod",
+]

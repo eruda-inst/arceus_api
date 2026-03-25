@@ -13,7 +13,6 @@ AsyncSessionLocal = async_sessionmaker(
 
 async def criar_tabelas() -> None:
     """Cria todas as tabelas no banco de dados com base nos modelos definidos."""
-    from .. import models
 
     async with engine.begin() as conn:
         await conn.run_sync(base.Base.metadata.create_all)
