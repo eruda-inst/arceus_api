@@ -35,6 +35,7 @@ from .financeiro import (
 from .triagem import ContatoUpdate, ContatoOut
 from .cliente import ClienteUpdate
 from .login import LoginUpdate
+from .root import RootOut
 
 __all__ = [
     "Meta",
@@ -70,4 +71,5 @@ __all__ = [
     "ContatoOut",
     "ClienteUpdate",
     "LoginUpdate",
+    "RootOut",
 ]

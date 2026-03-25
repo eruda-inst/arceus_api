@@ -1,7 +1,7 @@
-from typing import Dict
-from app.api import api_v1_router
-from app.api.v1 import middlewares
+from .api import api_v1_router
+from pydantic import AnyHttpUrl
 from fastapi import FastAPI, Request
+from .api.v1 import schemas, middlewares
 from fastapi.middleware.cors import CORSMiddleware
 
 
@@ -26,23 +26,12 @@ app.add_middleware(
 
 @app.get(
     path="/",
-    summary="Rota padrão, mostra mensagem de boas-vindas e URL para acessar página de documentação.",
+    response_model=schemas.RootOut,
+    summary="Endpoint Raiz da API",
+    description="Retorna os links para a documentação interativa da API",
 )
-def index(request: Request) -> Dict:
-    """
-    Endpoint da raiz que fornece URLs para a documentação da API.
-
-    Args:
-        request (Request): O objeto da requisição FastAPI.
-
-    Returns:
-        Dict: Um dicionário contendo uma mensagem de boas-vindas
-              e as URLs para a documentação (Swagger e Redoc).
-    """
+def root(request: Request) -> schemas.RootOut:
     base_url = str(request.base_url).rstrip("/")
-
-    return {
-        "mensagem": "Bem-vindo(a) ao Aggregator.",
-        "docs_url": f"{base_url}{app.docs_url}",
-        "redoc_url": f"{base_url}{app.redoc_url}",
-    }
+    docs_url = AnyHttpUrl(base_url + str(app.docs_url))
+    redoc_url = AnyHttpUrl(base_url + str(app.redoc_url))
+    return schemas.RootOut(docs_url=docs_url, redoc_url=redoc_url)
