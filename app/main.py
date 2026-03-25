@@ -10,10 +10,12 @@ app = FastAPI(
     description="""
     API oficial Newnet/Eruda - Simplifica integrações entre a API (Application Programming Interface) da OpaSuite, da IXCSoft e da 7AZ.
     """,
-    version="0.66.2",
+    version="0.67.2",
     routes=api_v1_router.routes,
-    middlewar=middlewares.LogMiddleware,
 )
+
+
+app.add_middleware(middlewares.LogMiddleware)
 
 app.add_middleware(
     CORSMiddleware,

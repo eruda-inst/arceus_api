@@ -1,8 +1,8 @@
-from .. import database
-from sqlalchemy import Column, Date, Float, Integer, String, Time
+from .. import db
+from sqlalchemy import Column, Date, Numeric, Integer, String, Time
 
 
-class Log(database.base.Base):
+class Log(db.base.Base):
     """
     Modelo SQLAlchemy para a tabela 'logs'.
 
@@ -29,5 +29,5 @@ class Log(database.base.Base):
     status_code = Column(Integer, nullable=False)
     data = Column(Date, nullable=False)
     hora = Column(Time, nullable=False)
-    duracao = Column(Float, nullable=False)
+    duracao = Column(Numeric(10, 2), nullable=False)
     protocolo = Column(String, nullable=False)

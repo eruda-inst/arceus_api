@@ -1,5 +1,6 @@
 import time
-from .. import crud, database
+from .. import crud
+from ..db import get_db
 from zoneinfo import ZoneInfo
 from datetime import datetime
 from fastapi import Request, status
@@ -108,7 +109,8 @@ class LogMiddleware(BaseHTTPMiddleware):
             protocolo = request.headers.get("x-protocolo", "desconhecido")
 
             now = datetime.now(ZoneInfo("America/Sao_Paulo"))
-            async for db in database.get_db():
+
+            async for db in get_db():
                 await crud.log_crud.create_log(
                     db=db,
                     ip=request.client.host if request.client else "desconhecido",
