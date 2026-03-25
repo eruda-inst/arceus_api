@@ -62,6 +62,9 @@ venv.bak/
 .uv/
 __pypackages__/
 
+# Ruff
+.ruff_cache
+
 # IDE
 .vscode/
 .idea/
