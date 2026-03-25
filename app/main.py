@@ -10,7 +10,7 @@ app = FastAPI(
     description="""
     API oficial Newnet/Eruda - Simplifica integrações entre a API (Application Programming Interface) da OpaSuite, da IXCSoft e da 7AZ.
     """,
-    version="0.67.2",
+    version="0.67.3",
     routes=api_v1_router.routes,
 )
 

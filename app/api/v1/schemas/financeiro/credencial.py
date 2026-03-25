@@ -3,22 +3,16 @@ from pydantic import BaseModel, Field
 
 class CredencialUpdate(BaseModel):
     senha: str = Field(
-        description="Senha da central de acesso do assinante, a ser atualizada."
+        description="Senha da central de acesso do assinante, a ser atualizada.",
+        examples=["12345678"],
     )
-
-    model_config = {"json_schema_extra": {"example": {"senha": "12345678"}}}
 
 
 class CredencialBase(CredencialUpdate):
     usuario: str = Field(
-        description="Usuário da central de acesso do assinante, a ser atualizado."
+        description="Usuário da central de acesso do assinante, a ser atualizado.",
+        examples=["usuario"],
     )
-
-    model_config = {
-        "json_schema_extra": {
-            "example": {"usuario": "12312312312", "senha": "12345678"}
-        }
-    }
 
 
 class CredencialOut(CredencialBase):

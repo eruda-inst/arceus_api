@@ -4,10 +4,12 @@ from pydantic import BaseModel, Field
 
 class LoginUpdate(BaseModel):
     autenticacao: Optional[str] = Field(
-        default="L", description="Tipo de autenticação."
+        default="L",
+        description="Tipo de autenticação.",
     )
     tipo_conexao_mapa: Optional[str] = Field(
-        default=None, description="Tipo de conexão do mapa."
+        default=None,
+        description="Tipo de conexão do mapa.",
     )
     id_integracao: Optional[str] = Field(default=None, description="ID de integração.")
     lte_id: Optional[str] = Field(default=None, description="ID LTE.")
@@ -33,7 +35,7 @@ class LoginUpdate(BaseModel):
     ativo: Optional[str] = Field(default="S", description="Indica se está ativo.")
     online: Optional[str] = Field(default="SS", description="Status online.")
     login_simultaneo: Optional[str] = Field(
-        default=1, description="Número de logins simultâneos."
+        default="1", description="Número de logins simultâneos."
     )
     ultima_atualizacao: Optional[str] = Field(
         default="CURRENT_TIMESTAMP", description="Data da última atualização."
@@ -126,7 +128,7 @@ class LoginUpdate(BaseModel):
     service_tag_vlan: Optional[str] = Field(
         default="S", description="Service tag VLAN."
     )
-    mtu: Optional[str] = Field(default=1500, description="MTU.")
+    mtu: Optional[str] = Field(default="1500", description="MTU.")
     concentrador: Optional[str] = Field(default=None, description="Concentrador.")
     conexao: Optional[str] = Field(default=None, description="Conexão.")
     tipo_conexao: Optional[str] = Field(default=None, description="Tipo de conexão.")

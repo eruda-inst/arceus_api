@@ -4,119 +4,47 @@ from pydantic import BaseModel, Field, PositiveInt, NonNegativeInt, PositiveFloa
 
 
 class Fatura(BaseModel):
-    id: PositiveInt = Field(description="ID da fatura.")
+    id: PositiveInt = Field(description="ID da fatura.", examples=[123])
     data_vencimento: str = Field(
-        max_length=10, description="Data de vencimento da fatura."
+        max_length=10,
+        description="Data de vencimento da fatura.",
+        examples=["2025-12-31"],
     )
-    preco: float = Field(description="Preço da fatura.")
-
-    model_config = {
-        "json_schema_extra": {
-            "example": {"id": 123, "data_vencimento": "2025-12-31", "preco": 99.99}
-        }
-    }
+    preco: float = Field(description="Preço da fatura.", examples=[99.99])
 
 
 class FaturaAberta(Fatura):
-    id_contrato: NonNegativeInt = Field(description="ID de contrato associado à fatura")
-    contrato: str = Field(description="Nome do contrato associado à fatura.")
-
-    model_config = {
-        "json_schema_extra": {
-            "example": {
-                "id": 123,
-                "data_vencimento": "2025-12-31",
-                "preco": 99.99,
-                "id_contrato": 1234,
-                "contrato": "NEWNET PADRAO - 250MB - 06/2025",
-            }
-        }
-    }
+    id_contrato: NonNegativeInt = Field(
+        description="ID de contrato associado à fatura", examples=[1234]
+    )
+    contrato: str = Field(
+        description="Nome do contrato associado à fatura.",
+        examples=["NEWNET PADRAO - 250MB - 06/2025"],
+    )
 
 
 class FaturaAbertaListOut(BaseModel):
     data: List[FaturaAberta]
     meta: misc.Meta
 
-    model_config = {
-        "json_schema_extra": {
-            "examples": [
-                {
-                    "data": [
-                        {
-                            "id": 123,
-                            "data_vencimento": "2025-12-31",
-                            "preco": 99.99,
-                            "id_contrato": 1234,
-                            "contrato": "NEWNET PREMIUM+ - 500MB - 06/2025",
-                        },
-                        {
-                            "id": 124,
-                            "data_vencimento": "2025-12-31",
-                            "preco": 99.99,
-                            "id_contrato": 1234,
-                            "contrato": "NEWNET PREMIUM+ - 500MB - 06/2025",
-                        },
-                    ],
-                    "meta": {
-                        "total": 2,
-                        "page": 1,
-                        "per_page": 10,
-                    },
-                }
-            ]
-        }
-    }
-
 
 class LinhaDigitavelBase(BaseModel):
     linha_digitavel: str = Field(
-        min_length=47, max_length=47, description="Linha digitável."
+        min_length=47,
+        max_length=47,
+        description="Linha digitável.",
+        examples=["12345678901234567890123456789012345678901234567"],
     )
-
-    model_config = {
-        "json_schema_extra": {
-            "examples": [
-                {"linha_digitavel": "12345678901234567890123456789012345678901234567"}
-            ]
-        }
-    }
 
 
 class LinhaDigitavelOut(BaseModel):
-    data: LinhaDigitavelBase
-
-    model_config = {
-        "json_schema_extra": {
-            "examples": [
-                {
-                    "data": [
-                        {
-                            "linha_digitavel": "12345678901234567890123456789012345678901234567"
-                        }
-                    ]
-                }
-            ]
-        }
-    }
+    data: LinhaDigitavelBase = Field()
 
 
 class FaturaPagaBase(Fatura):
-    valor_pago: PositiveFloat = Field(description="Valor pago.")
+    valor_pago: PositiveFloat = Field(description="Valor pago.", examples=[99.99])
     data_pagamento: str = Field(
-        max_length=10, description="Data de pagamento da fatura."
+        max_length=10,
+        description="Data de pagamento da fatura.",
+        examples=["2025-12-31"],
     )
-
-    model_config = {
-        "json_schema_extra": {
-            "examples": [
-                {
-                    "id": 123,
-                    "data_vencimento": "2025-12-31",
-                    "preco": 99.99,
-                    "valor_pago": 99.99,
-                    "data_pagamento": "2025-12-31",
-                }
-            ]
-        }
-    }

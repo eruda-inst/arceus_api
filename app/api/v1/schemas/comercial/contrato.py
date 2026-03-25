@@ -5,67 +5,24 @@ from pydantic import BaseModel, Field, PositiveInt
 
 
 class Contrato(BaseModel):
-    id: PositiveInt = Field(description="ID único do contrato.")
-    contrato: str = Field(max_length=100, description="Número do contrato.")
-    valor: float = Field(description="Valor do contrato.")
-    status_acesso: utils.StatusAcessoRot = Field(
-        description="Status do acesso do contrato."
+    id: PositiveInt = Field(description="ID único do contrato.", examples=[1234])
+    contrato: str = Field(
+        max_length=100,
+        description="Número do contrato.",
+        examples=["NEWNET PADRAO - 250MB - 06/2025"],
     )
-    data_vencimento: str = Field(description="Data de vencimento do contrato.")
-    id_cliente: PositiveInt = Field(description="ID do cliente.")
-    id_login: PositiveInt = Field(description="ID de login.")
-
-    model_config = {
-        "json_schema_extra": {
-            "example": {
-                "data": [
-                    {
-                        "id": 1234,
-                        "contrato": "NEWNET PADRAO - 250MB - 06/2025",
-                        "valor": 99.99,
-                        "status_acesso": utils.StatusAcessoRot.ATIVO,
-                        "data_vencimento": "2025-12-31",
-                        "id_cliente": 12345,
-                        "id_login": 123456,
-                    },
-                ],
-            }
-        }
-    }
+    valor: float = Field(description="Valor do contrato.", examples=[99.99])
+    status_acesso: utils.StatusAcessoRot = Field(
+        description="Status do acesso do contrato.",
+        examples=[utils.StatusAcessoRot.ATIVO],
+    )
+    data_vencimento: str = Field(
+        description="Data de vencimento do contrato.", examples=["2025-12-31"]
+    )
+    id_cliente: PositiveInt = Field(description="ID do cliente.", examples=[12345])
+    id_login: PositiveInt = Field(description="ID de login.", examples=[123456])
 
 
 class ContratoListOut(BaseModel):
     data: List[Contrato] = Field(description="Lista de contratos")
     meta: misc.Meta
-
-    model_config = {
-        "json_schema_extra": {
-            "example": {
-                "data": [
-                    {
-                        "id": 1234,
-                        "contrato": "NEWNET PADRAO - 250MB - 06/2025",
-                        "valor": 99.99,
-                        "status_acesso": utils.StatusAcessoRot.ATIVO,
-                        "data_vencimento": "2025-12-31",
-                        "id_cliente": 12345,
-                        "id_login": 123456,
-                    },
-                    {
-                        "id": 12345,
-                        "contrato": "Newnet 2024 - 350MB",
-                        "valor": 99.9,
-                        "status_acesso": utils.StatusAcessoRot.ATIVO,
-                        "data_vencimento": "2025-12-31",
-                        "id_cliente": 12345,
-                        "id_login": 123456,
-                    },
-                ],
-                "meta": {
-                    "total": 2,
-                    "page": 1,
-                    "per_page": 10,
-                },
-            }
-        }
-    }
