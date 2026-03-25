@@ -23,16 +23,6 @@ async def get_contato_cliente(
         default=None, description="CPF ou CNPJ do cliente."
     ),
 ) -> schemas.ContatoOut:
-    """
-    Busca os dados de contato de um cliente específico.
-
-    Args:
-        protocolo: O protocolo de atendimento.
-        cnpj_cpf: O CPF ou CNPJ do cliente.
-
-    Returns:
-        Os dados do cliente.
-    """
     return await triagem_service.get_contato_cliente(
         protocolo=protocolo, cnpj_cpf=cnpj_cpf
     )
@@ -58,17 +48,6 @@ async def put_contato_cliente(
         description="Campos de cliente a serem atualizados."
     ),
 ) -> schemas.MensagemOut:
-    """
-    Atualiza os dados de contato de um cliente específico.
-
-    Args:
-        protocolo: O protocolo de atendimento.
-        contato: Os novos dados de contato do cliente.
-        cnpj_cpf: O CPF ou CNPJ do cliente.
-
-    Returns:
-        Uma mensagem de confirmação da atualização.
-    """
     return await triagem_service.put_contato_cliente(
         protocolo=protocolo, cnpj_cpf=cnpj_cpf, contato=contato
     )

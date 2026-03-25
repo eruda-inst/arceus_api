@@ -7,14 +7,7 @@ from pydantic import ValidationError, PositiveInt
 
 
 class SuporteService(service.Service):
-    """
-    Serviço para encapsular a lógica de negócios relacionada às operações de suporte.
-    """
-
     def __init__(self: Self) -> None:
-        """
-        Inicializa o serviço de suporte e o cliente IXC correspondente.
-        """
         super().__init__()
         self.suporte_ixc_cliente = clients.SuporteIXCCliente()
 
@@ -27,26 +20,6 @@ class SuporteService(service.Service):
         sortname: Optional[str] = "cliente_contrato.id",
         sortorder: Optional[utils.SortOrder] = utils.SortOrder.ASC,
     ) -> schemas.SuporteContratoListOut:
-        """
-        Obtém uma lista paginada de contratos de suporte para um cliente.
-
-        Enriquece os dados do contrato com informações de login, MAC da ONU e
-        detalhes da próxima fatura a vencer.
-
-        Args:
-            protocolo: O protocolo de serviço para identificar o cliente.
-            cnpj_cpf: O CPF ou CNPJ do cliente.
-            page: O número da página para paginação.
-            per_page: O número de itens por página.
-            sortname: O campo para ordenação.
-            sortorder: A ordem de ordenação.
-
-        Returns:
-            Uma lista paginada e formatada de contratos de suporte.
-
-        Raises:
-            HTTPException: Se o cliente ou os contratos não forem encontrados, ou em caso de erro.
-        """
         try:
             id_cliente = await self.get_id_cliente_ixc(
                 protocolo=protocolo, cnpj_cpf=cnpj_cpf
@@ -163,18 +136,6 @@ class SuporteService(service.Service):
     async def get_status_conexao(
         self: Self, id_login: PositiveInt
     ) -> schemas.StatusConexaoOut:
-        """
-        Obtém e rotula o status de conexão de um cliente.
-
-        Args:
-            id_login: O ID de login do cliente no IXC.
-
-        Returns:
-            O status de conexão rotulado.
-
-        Raises:
-            HTTPException: Se o status não for encontrado ou ocorrer um erro.
-        """
         try:
             res = await self.suporte_ixc_cliente.get_status_conexao(
                 id_login=id_login,
@@ -209,23 +170,6 @@ class SuporteService(service.Service):
         id_login: Optional[PositiveInt] = None,
         mac_onu: Optional[str] = None,
     ) -> schemas.StatusONUOut:
-        """
-        Obtém e rotula o status do sinal da ONU de um cliente.
-
-        A busca pode ser feita pelo ID de login ou pelo MAC da ONU. Há uma tentativa
-        de fallback do ID de login para o MAC, se o primeiro falhar.
-
-        Args:
-            id_login: O ID de login do cliente (opcional).
-            mac_onu: O endereço MAC da ONU (opcional).
-
-        Returns:
-            O status do sinal da ONU rotulado.
-
-        Raises:
-            HTTPException: Se nenhum parâmetro for fornecido, a ONU não for encontrada,
-                           ou ocorrer um erro.
-        """
         if not id_login and not mac_onu:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -287,18 +231,6 @@ class SuporteService(service.Service):
     async def post_desconectar_cliente(
         self: Self, id_login: PositiveInt
     ) -> schemas.MensagemOut:
-        """
-        Envia um comando para desconectar um cliente da rede.
-
-        Args:
-            id_login: O ID de login do cliente a ser desconectado.
-
-        Returns:
-            Uma mensagem de confirmação da ação.
-
-        Raises:
-            HTTPException: Se a ação falhar ou ocorrer um erro.
-        """
         try:
             res = await self.suporte_ixc_cliente.post_desconectar_cliente(
                 id_login=id_login
@@ -322,22 +254,6 @@ class SuporteService(service.Service):
         sortname: Optional[str] = "su_ticket.id",
         sortorder: Optional[utils.SortOrder] = utils.SortOrder.ASC,
     ) -> schemas.AtendimentoOut:
-        """
-        Obtém uma lista paginada de atendimentos de suporte em aberto.
-
-        Args:
-            id_login: O ID de login do cliente.
-            page: O número da página para a paginação.
-            per_page: A quantidade de itens por página.
-            sortname: O campo para ordenação.
-            sortorder: A ordem de ordenação.
-
-        Returns:
-            Uma lista paginada e formatada de atendimentos.
-
-        Raises:
-            HTTPException: Se não houver atendimentos ou ocorrer um erro.
-        """
         try:
             res = await self.suporte_ixc_cliente.get_atendimentos(
                 id_login=id_login,
@@ -393,18 +309,6 @@ class SuporteService(service.Service):
     async def post_atendimentos(
         self: Self, atendimento: schemas.AtendimentoIn
     ) -> schemas.AtendimentoCreate:
-        """
-        Cria um novo ticket de atendimento de suporte.
-
-        Args:
-            atendimento: Os dados do atendimento a ser criado.
-
-        Returns:
-            O ID do atendimento recém-criado.
-
-        Raises:
-            HTTPException: Se a criação falhar ou ocorrer um erro.
-        """
         try:
             res = await self.suporte_ixc_cliente.post_atendimentos(
                 atendimento=atendimento
@@ -427,19 +331,6 @@ class SuporteService(service.Service):
     async def put_ip(
         self: Self, id_login: PositiveInt, ip: schemas.IPUpdate
     ) -> schemas.MensagemOut:
-        """
-        Atualiza o endereço IP de um login de cliente.
-
-        Args:
-            id_login: O ID do login a ser atualizado.
-            ip: Os novos dados de IP a serem aplicados.
-
-        Returns:
-            Uma mensagem de confirmação da atualização.
-
-        Raises:
-            HTTPException: Se o login não for encontrado ou ocorrer um erro.
-        """
         try:
             res = await self.suporte_ixc_cliente.get_login(id_login=id_login)
             if not res.get("registros"):
@@ -471,18 +362,6 @@ class SuporteService(service.Service):
             )
 
     async def post_limpar_mac(self: Self, id_login: PositiveInt) -> schemas.MensagemOut:
-        """
-        Executa a rotina de limpar o endereço MAC de um login.
-
-        Args:
-            id_login: O ID do login para o qual o MAC será limpo.
-
-        Returns:
-            Uma mensagem de confirmação da ação.
-
-        Raises:
-            HTTPException: Se a ação falhar ou ocorrer um erro.
-        """
         try:
             res = await self.suporte_ixc_cliente.post_limpar_mac(id_login=id_login)
             mensagem = "Nenhuma mensagem retornada."

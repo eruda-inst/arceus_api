@@ -36,21 +36,6 @@ async def get_faturas_abertas(
         default=utils.SortOrder.ASC, description="Ordem da ordenação."
     ),
 ) -> schemas.FaturaAbertaListOut:
-    """
-    Obtém a lista de faturas em aberto de um cliente.
-
-    Args:
-        protocolo: O protocolo de atendimento do cliente no OpaSuite.
-        cnpj_cpf: O CPF ou CNPJ do cliente.
-        page: O número da página para a paginação.
-        per_page: A quantidade de itens por página.
-        sortname: O campo pelo qual a lista será ordenada.
-        sortorder: A ordem de ordenação (ascendente ou descendente).
-
-    Returns:
-        Uma lista paginada de faturas em aberto do cliente.
-    """
-    # TODO: transformar isto em um método da superclasse, no futuro
     return await financeiro_service.get_faturas_abertas(
         protocolo=protocolo,
         cnpj_cpf=cnpj_cpf,

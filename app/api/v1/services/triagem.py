@@ -6,14 +6,7 @@ from pydantic import ValidationError
 
 
 class TriagemService(service.Service):
-    """
-    Serviço para encapsular a lógica de negócios relacionada à triagem de clientes.
-    """
-
     def __init__(self: Self) -> None:
-        """
-        Inicializa o serviço de triagem e o cliente IXC correspondente.
-        """
         super().__init__()
         self.triagem_ixc_cliente = clients.TriagemIXCCliente()
 
@@ -22,16 +15,6 @@ class TriagemService(service.Service):
         protocolo: Optional[str] = None,
         cnpj_cpf: Optional[str] = None,
     ) -> schemas.ContatoOut:
-        """
-        Busca as informações de contato de um cliente.
-
-        Args:
-            protocolo: O protocolo de atendimento do cliente a ser buscado.
-            cnpj_cpf: O CPF ou CNPJ do cliente a ser buscado.
-
-        Returns:
-            Os dados de contato do cliente.
-        """
         try:
             id_cliente = await self.get_id_cliente_ixc(
                 protocolo=protocolo, cnpj_cpf=cnpj_cpf
@@ -65,20 +48,6 @@ class TriagemService(service.Service):
         protocolo: Optional[str] = None,
         cnpj_cpf: Optional[str] = None,
     ) -> schemas.MensagemOut:
-        """
-        Atualiza as informações de contato de um cliente.
-
-        Args:
-            protocolo: O protocolo de atendimento do cliente a ser atualizado.
-            contato: Os novos dados de contato a serem aplicados.
-            cnpj_cpf: O CPF ou CNPJ do cliente a ser atualizado.
-
-        Returns:
-            Uma mensagem de confirmação da atualização.
-
-        Raises:
-            HTTPException: Se o cliente não for encontrado ou ocorrer um erro.
-        """
         try:
             id_cliente = await self.get_id_cliente_ixc(
                 protocolo=protocolo, cnpj_cpf=cnpj_cpf

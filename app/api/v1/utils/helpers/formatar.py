@@ -7,18 +7,6 @@ CEP_PATTERN = r"^\d{5}-\d{3}$"
 
 
 def formatar_cpf(cpf: str) -> str:
-    """
-    Formata uma string de CPF, adicionando a pontuação padrão.
-
-    Args:
-        cpf: A string do CPF a ser formatada (pode conter ou não pontuação).
-
-    Returns:
-        O CPF formatado (ex: '123.456.789-00').
-
-    Raises:
-        ValueError: Se o CPF não contiver 11 dígitos após a limpeza.
-    """
     if re.fullmatch(CPF_PATTERN, cpf):
         return cpf
 
@@ -31,18 +19,6 @@ def formatar_cpf(cpf: str) -> str:
 
 
 def formatar_cnpj(cnpj: str) -> str:
-    """
-    Formata uma string de CNPJ, adicionando a pontuação padrão.
-
-    Args:
-        cnpj: A string do CNPJ a ser formatada (pode conter ou não pontuação).
-
-    Returns:
-        O CNPJ formatado (ex: '12.345.678/0001-90').
-
-    Raises:
-        ValueError: Se o CNPJ não contiver 14 dígitos após a limpeza.
-    """
     if re.fullmatch(CNPJ_PATTERN, cnpj):
         return cnpj
 
@@ -55,18 +31,6 @@ def formatar_cnpj(cnpj: str) -> str:
 
 
 def formatar_cnpj_cpf(cnpj_cpf: str) -> str:
-    """
-    Formata uma string que pode ser um CPF ou CNPJ, aplicando a máscara correta.
-
-    Args:
-        cnpj_cpf: A string do CPF ou CNPJ a ser formatada.
-
-    Returns:
-        O CPF ou CNPJ formatado.
-
-    Raises:
-        ValueError: Se a string não tiver 11 (CPF) ou 14 (CNPJ) dígitos.
-    """
     cnpj_cpf_limpo = re.sub(r"\D", "", cnpj_cpf)
 
     tamanho = len(cnpj_cpf_limpo)
@@ -84,18 +48,6 @@ def formatar_cnpj_cpf(cnpj_cpf: str) -> str:
 
 
 def formatar_cel(cel: str) -> str:
-    """
-    Formata um número de celular, adicionando parênteses no DDD e hífen.
-
-    Args:
-        cel: A string do celular a ser formatada.
-
-    Returns:
-        O celular formatado (ex: '(11) 98765-4321').
-
-    Raises:
-        ValueError: Se o número não tiver 10 ou 11 dígitos.
-    """
     tel_limpo = re.sub(r"\D", "", cel)
 
     if re.fullmatch(r"^\(\d{2}\) \d{4,5}-\d{4}$", cel):
@@ -119,18 +71,6 @@ def formatar_cel(cel: str) -> str:
 
 
 def formatar_cep(cep: str) -> str:
-    """
-    Formata uma string de CEP, adicionando o hífen.
-
-    Args:
-        cep: A string do CEP a ser formatada.
-
-    Returns:
-        O CEP formatado (ex: '12345-678').
-
-    Raises:
-        ValueError: Se o CEP não tiver 8 dígitos após a limpeza.
-    """
     if re.fullmatch(CEP_PATTERN, cep):
         return cep
 

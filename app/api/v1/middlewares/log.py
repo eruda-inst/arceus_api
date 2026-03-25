@@ -9,16 +9,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 
 
 class LogMiddleware(BaseHTTPMiddleware):
-    """Middleware para registrar requisições HTTP em um banco de dados."""
-
     def __init__(self, app, exclude_paths: list = None):
-        """
-        Inicializa o middleware de log.
-
-        Args:
-            app: A aplicação ASGI.
-            exclude_paths: Uma lista de caminhos de URL a serem excluídos do log.
-        """
         super().__init__(app)
         self.exclude_paths = exclude_paths or [
             "/",
@@ -36,19 +27,6 @@ class LogMiddleware(BaseHTTPMiddleware):
         ]
 
     async def dispatch(self, request: Request, call_next):
-        """
-        Intercepta, processa e registra uma requisição.
-
-        Mede o tempo de processamento da requisição e chama a função de log
-        após a conclusão. Exclui caminhos específicos do log.
-
-        Args:
-            request: O objeto da requisição.
-            call_next: A próxima chamada no pipeline de middleware.
-
-        Returns:
-            A resposta da requisição.
-        """
         path = request.url.path
         if path in self.exclude_paths or not any(
             path.startswith(prefix) for prefix in self.include_prefixes
@@ -76,14 +54,6 @@ class LogMiddleware(BaseHTTPMiddleware):
     async def _log_request(
         self, request: Request, status_code: int, process_time: float
     ):
-        """
-        Chama a função de log do banco de dados de forma assíncrona.
-
-        Args:
-            request: O objeto da requisição.
-            status_code: O código de status da resposta.
-            process_time: O tempo de processamento da requisição.
-        """
         try:
             await self._log_to_database(request, status_code, process_time)
         except Exception as e:
@@ -92,17 +62,6 @@ class LogMiddleware(BaseHTTPMiddleware):
     async def _log_to_database(
         self, request: Request, status_code: int, process_time: float
     ):
-        """
-        Registra os detalhes da requisição no banco de dados de forma assíncrona.
-
-        Obtém uma sessão de banco de dados, cria uma entrada de log e a salva.
-        Trata exceções de banco de dados e garante que a sessão seja fechada.
-
-        Args:
-            request: O objeto da requisição.
-            status_code: O código de status da resposta.
-            process_time: O tempo de processamento da requisição.
-        """
         db = None
         try:
             # Extrai o protocolo do header x-protocolo

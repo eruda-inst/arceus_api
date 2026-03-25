@@ -5,22 +5,11 @@ from pydantic import ValidationError, PositiveInt
 
 
 class Service:
-    """
-    Classe de serviço base que fornece funcionalidades compartilhadas.
-
-    Esta classe inicializa o cliente OPA e fornece um método para traduzir
-    o protocolo de atendimento do OPA para o ID do cliente no sistema IXC.
-    """
-
     def __init__(self: Self) -> None:
-        """
-        Inicializa o serviço base e o cliente da API OPA.
-        """
         self.opa_cliente = clients.OpaCliente()
         self.ixc_cliente = clients.IXCCliente()
 
     async def _buscar_por_protocolo(self, protocolo: str) -> Dict:
-        """Busca ID do cliente via protocolo OPA."""
         # Busca ID do cliente no OPA
         id_cliente_opa_res = await self.opa_cliente.get_id_cliente_opa(
             protocolo=protocolo
@@ -48,7 +37,6 @@ class Service:
         return id_cliente_ixc_res
 
     async def _buscar_por_cnpj_cpf(self, cnpj_cpf: str) -> Dict:
-        """Busca ID do cliente diretamente no IXC via CPF/CNPJ."""
         id_cliente_ixc_res = await self.ixc_cliente.get_id_cliente_ixc(
             cnpj_cpf=cnpj_cpf
         )
@@ -62,7 +50,6 @@ class Service:
         return id_cliente_ixc_res
 
     def _extrair_id_cliente_ixc(self, resposta: Dict) -> PositiveInt:
-        """Extrai o ID do cliente da resposta validando a estrutura."""
         try:
             data = resposta.get("data")
             registros = resposta.get("registros", None)
@@ -82,24 +69,6 @@ class Service:
     async def get_id_cliente_ixc(
         self: Self, protocolo: Optional[str] = None, cnpj_cpf: Optional[str] = None
     ) -> PositiveInt:
-        """
-        Obtém o ID do cliente no IXC a partir do protocolo de atendimento do OPA ou CPF/CNPJ.
-
-        Realiza um dos seguintes processos:
-        1. Via protocolo: Busca o ID do cliente no OPA e depois no IXC
-        2. Via CPF/CNPJ: Busca diretamente no IXC
-
-        Args:
-            protocolo: O número do protocolo de atendimento do OPA.
-            cnpj_cpf: O CPF ou CNPJ do cliente.
-
-        Returns:
-            O ID do cliente no sistema IXC.
-
-        Raises:
-            HTTPException: Se o cliente não for encontrado em qualquer uma das etapas
-                           ou se ocorrer um erro de comunicação ou validação.
-        """
         try:
 
             cnpj_cpf_formatado = (

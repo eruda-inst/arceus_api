@@ -3,23 +3,6 @@ from sqlalchemy import Column, Date, Numeric, Integer, String, Time
 
 
 class Log(db.base.Base):
-    """
-    Modelo SQLAlchemy para a tabela 'logs'.
-
-    Esta tabela armazena registros de requisições HTTP feitas à API.
-
-    Atributos:
-        id: Chave primária autoincrementável.
-        ip: Endereço IP do cliente que fez a requisição.
-        http_method: O método HTTP utilizado na requisição (e.g., 'GET').
-        endpoint: O endpoint da API que foi acessado (e.g., 'GET /items/').
-        status_code: O código de status HTTP da resposta.
-        data: A data de quando a requisição foi registrada.
-        hora: A hora de quando a requisição foi registrada.
-        duracao: O tempo de processamento da requisição em segundos.
-        protocolo: O protocolo de atendimento associado à requisição.
-    """
-
     __tablename__ = "logs"
 
     id = Column(Integer, primary_key=True, index=True)

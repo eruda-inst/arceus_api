@@ -7,14 +7,7 @@ from pydantic import ValidationError, PositiveInt
 
 
 class ComercialService(service.Service):
-    """
-    Serviço para encapsular a lógica de negócios relacionada às operações comerciais.
-    """
-
     def __init__(self: Self) -> None:
-        """
-        Inicializa o serviço comercial e o cliente IXC correspondente.
-        """
         super().__init__()
         self.comercial_ixc_cliente = clients.ComercialIXCCliente()
         self.suporte_ixc_cliente = clients.SuporteIXCCliente()
@@ -22,18 +15,6 @@ class ComercialService(service.Service):
     async def get_status_acesso(
         self: Self, id_contrato: PositiveInt
     ) -> schemas.StatusAcessoOut:
-        """
-        Obtém e rotula o status de acesso de um contrato.
-
-        Args:
-            id_contrato: O ID do contrato a ser consultado.
-
-        Returns:
-            O status de acesso rotulado.
-
-        Raises:
-            HTTPException: Se o status de acesso não for encontrado ou ocorrer um erro.
-        """
         try:
             res = await self.comercial_ixc_cliente.get_status_acesso(
                 id_contrato=id_contrato
@@ -73,26 +54,6 @@ class ComercialService(service.Service):
         sortname: Optional[str] = "cliente_contrato.id",
         sortorder: Optional[utils.SortOrder] = utils.SortOrder.ASC,
     ) -> schemas.ComercialContratoListOut:
-        """
-        Obtém uma lista paginada de contratos comerciais para um cliente.
-
-        Para cada contrato, busca a próxima fatura a vencer ou a última vencida
-        para exibir o valor e a data de vencimento.
-
-        Args:
-            protocolo: O protocolo de atendimento para identificar o cliente.
-            cnpj_cpf: O CPF ou CNPJ do cliente.
-            page: O número da página para a paginação.
-            per_page: A quantidade de itens por página.
-            sortname: O campo para ordenação.
-            sortorder: A ordem de ordenação.
-
-        Returns:
-            Uma lista paginada e formatada de contratos.
-
-        Raises:
-            HTTPException: Se o cliente ou os contratos não forem encontrados, ou em caso de erro.
-        """
         try:
             id_cliente = await self.get_id_cliente_ixc(
                 protocolo=protocolo, cnpj_cpf=cnpj_cpf
@@ -228,18 +189,6 @@ class ComercialService(service.Service):
             )
 
     async def post_leads(self: Self, lead: schemas.LeadIn) -> schemas.LeadCreate:
-        """
-        Formata e cria um novo lead no sistema IXC.
-
-        Args:
-            lead: Os dados do lead a ser criado.
-
-        Returns:
-            O ID do lead criado.
-
-        Raises:
-            HTTPException: Se a criação do lead falhar ou a resposta for inválida.
-        """
         try:
             lead_data = lead.model_dump()
             if lead_data.get("cnpj_cpf"):

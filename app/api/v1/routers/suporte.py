@@ -35,20 +35,6 @@ async def get_contratos(
         default=utils.SortOrder.ASC, description="Ordem da ordenação."
     ),
 ) -> schemas.SuporteContratoListOut:
-    """
-    Obtém a lista de contratos ativos de um cliente.
-
-    Args:
-        protocolo: O protocolo de atendimento do cliente no OpaSuite.
-        cnpj_cpf: O CPF ou CNPJ do cliente.
-        page: O número da página para a paginação.
-        per_page: A quantidade de itens por página.
-        sortname: O campo pelo qual a lista será ordenada.
-        sortorder: A ordem de ordenação (ascendente ou descendente).
-
-    Returns:
-        Uma lista paginada de contratos ativos do cliente.
-    """
     suporte_service = services.SuporteService()
     return await suporte_service.get_contratos(
         protocolo=protocolo,
@@ -70,15 +56,6 @@ async def get_status_conexao(
         ge=1, description="ID de login do cliente no IXCSoft."
     )
 ) -> schemas.StatusConexaoOut:
-    """
-    Obtém o status de conexão de um cliente.
-
-    Args:
-        id_login: O ID de login do cliente no IXCSoft.
-
-    Returns:
-        O status de conexão do cliente.
-    """
     suporte_service = services.SuporteService()
     return await suporte_service.get_status_conexao(id_login=id_login)
 
@@ -96,16 +73,6 @@ async def get_status_onu(
         min_length=12, max_length=12, default=None, description="MAC Address da ONU."
     ),
 ) -> schemas.StatusONUOut:
-    """
-    Obtém o status da ONU (sinal) de um cliente.
-
-    Args:
-        id_login: O ID de login do cliente no IXCSoft (opcional).
-        mac_onu: O endereço MAC da ONU (opcional).
-
-    Returns:
-        O status da ONU do cliente.
-    """
     suporte_service = services.SuporteService()
     return await suporte_service.get_status_onu(id_login=id_login, mac_onu=mac_onu)
 
@@ -120,15 +87,6 @@ async def post_desconectar_cliente(
         ge=1, description="ID de login do cliente no IXCSoft."
     ),
 ) -> schemas.MensagemOut:
-    """
-    Envia um comando para desconectar um cliente.
-
-    Args:
-        id_login: O ID de login do cliente a ser desconectado.
-
-    Returns:
-        Uma mensagem de confirmação da ação.
-    """
     suporte_service = services.SuporteService()
     return await suporte_service.post_desconectar_cliente(id_login=id_login)
 
@@ -155,19 +113,6 @@ async def get_atendimentos(
         default=utils.SortOrder.ASC, description="Ordem da ordenação."
     ),
 ) -> schemas.AtendimentoOut:
-    """
-    Obtém a lista de atendimentos em aberto para um cliente.
-
-    Args:
-        id_login: O ID de login do cliente no IXCSoft.
-        page: O número da página para a paginação.
-        per_page: A quantidade de itens por página.
-        sortname: O campo pelo qual a lista será ordenada.
-        sortorder: A ordem de ordenação (ascendente ou descendente).
-
-    Returns:
-        Uma lista paginada de atendimentos em aberto.
-    """
     suporte_service = services.SuporteService()
     return await suporte_service.get_atendimentos(
         id_login=id_login,
@@ -187,15 +132,6 @@ async def get_atendimentos(
 async def post_atendimentos(
     atendimento: schemas.AtendimentoIn,
 ) -> schemas.AtendimentoCreate:
-    """
-    Cria um novo ticket de atendimento de suporte.
-
-    Args:
-        atendimento: Os dados do atendimento a ser criado.
-
-    Returns:
-        Os dados do atendimento recém-criado.
-    """
     suporte_service = services.SuporteService()
     return await suporte_service.post_atendimentos(atendimento=atendimento)
 
@@ -210,16 +146,6 @@ async def put_ip(
     id_login: PositiveInt = Path(ge=1, description="ID de login."),
     ip: schemas.IPUpdate = Body(description="IP a ser atualizado."),
 ) -> schemas.MensagemOut:
-    """
-    Atualiza o endereço IP associado a um login de cliente.
-
-    Args:
-        id_login: O ID de login do cliente a ser atualizado.
-        ip: Os novos dados de IP.
-
-    Returns:
-        Uma mensagem de confirmação da atualização.
-    """
     suporte_service = services.SuporteService()
     return await suporte_service.put_ip(id_login=id_login, ip=ip)
 
@@ -234,14 +160,5 @@ async def post_limpar_mac(
         ge=1, description="ID de login do cliente no IXCSoft."
     )
 ) -> schemas.MensagemOut:
-    """
-    Limpa o endereço MAC associado a um login de cliente.
-
-    Args:
-        id_login: O ID de login do cliente.
-
-    Returns:
-        Uma mensagem de confirmação da ação.
-    """
     suporte_service = services.SuporteService()
     return await suporte_service.post_limpar_mac(id_login=id_login)

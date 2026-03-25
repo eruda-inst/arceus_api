@@ -8,14 +8,7 @@ from pydantic import ValidationError, PositiveInt
 
 
 class CobrancaService(service.Service):
-    """
-    Serviço para encapsular a lógica de negócios relacionada às operações de cobrança.
-    """
-
     def __init__(self: Self) -> None:
-        """
-        Inicializa o serviço financeiro com o cliente IXC correspondente.
-        """
         super().__init__()
         self.financeiro_ixc_cliente = clients.FinanceiroIXCCliente()
 
@@ -28,23 +21,6 @@ class CobrancaService(service.Service):
         sortname: Optional[str] = "fn_areceber.id",
         sortorder: Optional[utils.SortOrder] = utils.SortOrder.ASC,
     ) -> schemas.FaturaAbertaListOut:
-        """
-        Obtém uma lista paginada de faturas vencidas para um cliente.
-
-        Args:
-            protocolo: O protocolo de atendimento para identificar o cliente.
-            cnpj_cpf: O CPF ou CNPJ do cliente.
-            page: O número da página para a paginação.
-            per_page: A quantidade de itens por página.
-            sortname: O campo para ordenação.
-            sortorder: A ordem de ordenação.
-
-        Returns:
-            Uma lista paginada e formatada de faturas vencidas.
-
-        Raises:
-            HTTPException: Se o cliente ou as faturas não forem encontrados, ou em caso de erro.
-        """
         try:
             id_cliente = await self.get_id_cliente_ixc(
                 protocolo=protocolo, cnpj_cpf=cnpj_cpf
