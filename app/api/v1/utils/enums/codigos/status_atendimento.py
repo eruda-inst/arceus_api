@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class StatusAtendimentoCod(str, Enum):
+class StatusAtendimentoCod(StrEnum):
     NOVO = "N"
     PENDENTE = "P"
     EM_PROGRESSO = "EP"

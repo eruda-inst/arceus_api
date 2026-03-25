@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class StatusConexaoCod(str, Enum):
+class StatusConexaoCod(StrEnum):
     CONECTADO = "S"
     SEM_STATUS = "SS"
     DESCONECTADO = "N"

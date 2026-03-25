@@ -3,13 +3,14 @@ from .. import crud
 from ..db import get_db
 from zoneinfo import ZoneInfo
 from datetime import datetime
-from fastapi import Request, status
 from sqlalchemy.exc import SQLAlchemyError
+from typing import List, Self, Awaitable, Callable, Any
+from fastapi import Request, status, Response
 from starlette.middleware.base import BaseHTTPMiddleware
 
 
 class LogMiddleware(BaseHTTPMiddleware):
-    def __init__(self, app, exclude_paths: list = None):
+    def __init__(self: Self, app: Any, exclude_paths: List[str] = []):
         super().__init__(app)
         self.exclude_paths = exclude_paths or [
             "/",
@@ -26,7 +27,11 @@ class LogMiddleware(BaseHTTPMiddleware):
             "/api/v1/cobranca",
         ]
 
-    async def dispatch(self, request: Request, call_next):
+    async def dispatch(
+        self: Self,
+        request: Request,
+        call_next: Callable[[Request], Awaitable[Response]],
+    ):
         path = request.url.path
         if path in self.exclude_paths or not any(
             path.startswith(prefix) for prefix in self.include_prefixes

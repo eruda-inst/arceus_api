@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class StatusAcessoRot(str, Enum):
+class StatusAcessoRot(StrEnum):
     ATIVO = "Ativo"
     DESATIVADO = "Desativado"
     BLOQUEIO_MANUAL = "Bloqueio Manual"

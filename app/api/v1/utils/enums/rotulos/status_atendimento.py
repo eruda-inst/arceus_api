@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class StatusAtendimentoRot(str, Enum):
+class StatusAtendimentoRot(StrEnum):
     NOVO = "Novo"
     PENDENTE = "Pendente"
     EM_PROGRESSO = "Em progresso"

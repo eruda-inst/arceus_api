@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class StatusConexaoRot(str, Enum):
+class StatusConexaoRot(StrEnum):
     CONECTADO = "Conectado"
     SEM_STATUS = "Sem status"
     DESCONECTADO = "Desconectado"

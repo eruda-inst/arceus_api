@@ -1,11 +1,12 @@
 from enum import Enum
-from typing import Union
+from typing import TypeVar, Dict
 from .. import maps, enums
 
+K = TypeVar("K", bound=Enum)
+V = TypeVar("V", bound=Enum)
 
-def get_label(
-    code: Enum, mapping: dict
-) -> Union[enums.StatusConexaoRot, enums.StatusContratoRot, enums.StatusAtendimentoRot]:
+
+def get_label(code: K, mapping: Dict[K, V]) -> V:
     return mapping[code]
 
 

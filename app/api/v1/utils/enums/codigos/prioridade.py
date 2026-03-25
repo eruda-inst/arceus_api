@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class PrioridadeCod(str, Enum):
+class PrioridadeCod(StrEnum):
     BAIXA = "B"
     NORMAL = "M"
     ALTA = "A"

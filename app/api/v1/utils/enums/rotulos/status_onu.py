@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class StatusONURot(str, Enum):
+class StatusONURot(StrEnum):
     SATURADO = "Saturado"
     EXCELENTE = "Excelente"
     BOM = "Bom"

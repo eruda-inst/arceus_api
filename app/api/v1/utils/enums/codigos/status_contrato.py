@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class StatusContratoCod(str, Enum):
+class StatusContratoCod(StrEnum):
     PRE_CONTRATO = "P"
     ATIVO = "A"
     INATIVO = "I"

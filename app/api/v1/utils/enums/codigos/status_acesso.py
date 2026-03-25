@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class StatusAcessoCod(str, Enum):
+class StatusAcessoCod(StrEnum):
     ATIVO = "A"
     DESATIVADO = "D"
     BLOQUEIO_MANUAL = "CM"

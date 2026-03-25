@@ -1,6 +1,6 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class TipoCod(str, Enum):
+class TipoCod(StrEnum):
     CLIENTE = "C"
     ESTRUTURA_PROPRIA = "E"
