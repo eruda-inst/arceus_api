@@ -9,9 +9,9 @@ class LogCRUD:
     async def create_log(
         db: AsyncSession,
         ip: str,
-        http_method: str,
+        metodo: str,
         endpoint: str,
-        status_code: int,
+        codigo: int,
         data: date,
         hora: time,
         duracao: float,
@@ -20,9 +20,9 @@ class LogCRUD:
         try:
             log_entry = models.Log(
                 ip=ip,
-                http_method=http_method,
+                metodo=metodo,
                 endpoint=endpoint,
-                status_code=status_code,
+                codigo=codigo,
                 data=data,
                 hora=hora,
                 duracao=round(duracao, 4),

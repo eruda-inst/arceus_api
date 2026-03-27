@@ -7,9 +7,9 @@ class Log(db.base.Base):
 
     id = Column(Integer, primary_key=True, index=True)
     ip = Column(String, nullable=False)
-    http_method = Column(String, nullable=False)
+    metodo = Column(String, nullable=False)
     endpoint = Column(String, nullable=False)
-    status_code = Column(Integer, nullable=False)
+    codigo = Column(Integer, nullable=False)
     data = Column(Date, nullable=False)
     hora = Column(Time, nullable=False)
     duracao = Column(Numeric(10, 2), nullable=False)

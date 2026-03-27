@@ -44,28 +44,26 @@ class LogMiddleware(BaseHTTPMiddleware):
         except Exception as e:
             await self._log_request(
                 request=request,
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                codigo=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 process_time=time.perf_counter() - start_time,
             )
             raise e
         else:
             await self._log_request(
                 request=request,
-                status_code=response.status_code,
+                codigo=response.status_code,
                 process_time=time.perf_counter() - start_time,
             )
         return response
 
-    async def _log_request(
-        self, request: Request, status_code: int, process_time: float
-    ):
+    async def _log_request(self, request: Request, codigo: int, process_time: float):
         try:
-            await self._log_to_database(request, status_code, process_time)
+            await self._log_to_database(request, codigo, process_time)
         except Exception as e:
             print(f"Erro ao registrar log: {e}")
 
     async def _log_to_database(
-        self, request: Request, status_code: int, process_time: float
+        self, request: Request, codigo: int, process_time: float
     ):
         db = None
         try:
@@ -78,9 +76,9 @@ class LogMiddleware(BaseHTTPMiddleware):
                 await crud.log_crud.create_log(
                     db=db,
                     ip=request.client.host if request.client else "desconhecido",
-                    http_method=request.method,
+                    metodo=request.method,
                     endpoint=request.url.path,
-                    status_code=status_code,
+                    codigo=codigo,
                     data=now.date(),
                     hora=now.time(),
                     duracao=process_time,
