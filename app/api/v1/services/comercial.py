@@ -1,6 +1,6 @@
 from . import service
 from datetime import datetime
-from typing import Self, Optional
+from typing import Self, Optional, Any
 from .. import utils, schemas, clients
 from fastapi import HTTPException, status
 from pydantic import ValidationError, PositiveInt
@@ -72,7 +72,7 @@ class ComercialService(service.Service):
                 )
             contratos = res["registros"]
 
-            contratos_tratados = []
+            contratos_tratados: Any = []
             hoje = datetime.now().date()
 
             for contrato in contratos:
@@ -97,7 +97,7 @@ class ComercialService(service.Service):
                             status_code=status.HTTP_404_NOT_FOUND, detail="Sem login."
                         )
 
-                    contrato_tratado = {
+                    contrato_tratado: Any = {
                         "id": contrato["id"],
                         "contrato": contrato["contrato"],
                         "valor": 0.00,

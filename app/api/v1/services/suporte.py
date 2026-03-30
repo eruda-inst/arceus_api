@@ -1,6 +1,6 @@
 from . import service
 from datetime import datetime
-from typing import Self, Optional
+from typing import Self, Optional, Any
 from .. import utils, schemas, clients
 from fastapi import HTTPException, status
 from pydantic import ValidationError, PositiveInt
@@ -268,7 +268,7 @@ class SuporteService(service.Service):
                     status_code=status.HTTP_404_NOT_FOUND,
                     detail="Sem atendimentos abertos.",
                 )
-            formatted = []
+            formatted: Any = []
             for a in registros:
                 formatted.append(
                     {
@@ -284,14 +284,10 @@ class SuporteService(service.Service):
                 )
             total = int(res.get("total", 0))
             meta = schemas.Meta(total=total, page=page, per_page=per_page)
-            base_url = f"/api/v1/suporte/atendimentos?id_login={id_login}"
-            links = utils.make_links(
-                base_url=base_url, page=page, per_page=per_page, total=total
-            )
+
             return schemas.AtendimentoOut(
                 data=[schemas.Atendimento(**i) for i in formatted],
                 meta=meta,
-                links=links,
             )
         except HTTPException:
             raise
@@ -340,7 +336,7 @@ class SuporteService(service.Service):
                 )
             login_antigo = res["registros"][0]
             novo_ip = ip.model_dump()
-            login_atualizado = {**login_antigo, **novo_ip}
+            login_atualizado: Any = {**login_antigo, **novo_ip}
             del login_atualizado["id"]
             res = await self.suporte_ixc_cliente.put_ip(
                 id_login=id_login, ip=login_atualizado

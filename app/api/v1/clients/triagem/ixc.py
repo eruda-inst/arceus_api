@@ -1,12 +1,12 @@
 import json
 from .. import ixc
-from typing import Self, Dict
+from typing import Self, Any
 from app.api.v1 import schemas
 from pydantic import PositiveInt
 
 
 class TriagemIXCCliente(ixc.IXCCliente):
-    async def get_clientes(self: Self, id_cliente: PositiveInt) -> Dict:
+    async def get_clientes(self: Self, id_cliente: PositiveInt) -> Any:
         grid_param = [{"TB": "cliente.id", "OP": "=", "P": str(id_cliente)}]
         payload = {"grid_param": json.dumps(obj=grid_param)}
         data = await self._make_request("cliente", payload)
@@ -14,7 +14,7 @@ class TriagemIXCCliente(ixc.IXCCliente):
 
     async def put_clientes(
         self: Self, id_cliente: PositiveInt, cliente: schemas.ClienteUpdate
-    ) -> Dict:
+    ) -> Any:
         data = await self._make_request(
             endpoint=f"cliente/{id_cliente}",
             payload=cliente,

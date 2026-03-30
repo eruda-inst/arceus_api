@@ -34,16 +34,16 @@ def rotular_status_acesso(
     return get_label(status_acesso_codigo, maps.STATUS_ACESSO)
 
 
-def rotular_status_onu(sinal_rx: float) -> str:
+def rotular_status_onu(sinal_rx: float) -> enums.rotulos.StatusONURot:
     if sinal_rx >= -15:
-        return "Saturado"
+        return enums.rotulos.StatusONURot.SATURADO
     elif sinal_rx >= -21:
-        return "Excelente"
+        return enums.rotulos.StatusONURot.EXCELENTE
     elif sinal_rx >= -26:
-        return "Bom"
+        return enums.rotulos.StatusONURot.BOM
     elif sinal_rx >= -29:
-        return "Regular"
+        return enums.rotulos.StatusONURot.REGULAR
     elif sinal_rx >= -31:
-        return "Ruim"
+        return enums.rotulos.StatusONURot.RUIM
     else:
-        return "Péssimo"
+        return enums.rotulos.StatusONURot.PESSIMO

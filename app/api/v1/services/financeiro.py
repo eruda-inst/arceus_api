@@ -1,5 +1,5 @@
 from . import service
-from typing import Self, Optional
+from typing import Self, Optional, Any
 from .. import clients, schemas, utils
 from fastapi import HTTPException, status
 from pydantic import ValidationError, PositiveInt
@@ -40,7 +40,7 @@ class FinanceiroService(service.Service):
 
             faturas_abertas = res["registros"]
 
-            faturas_abertas_formatadas = []
+            faturas_abertas_formatadas: Any = []
 
             for fatura_aberta in faturas_abertas:
                 id_contrato = fatura_aberta["id_contrato"]
@@ -218,7 +218,7 @@ class FinanceiroService(service.Service):
                 )
             cliente_antigo = res["registros"][0]
             novas_credenciais = credenciais.model_dump()
-            cliente_atualizado = {**cliente_antigo, **novas_credenciais}
+            cliente_atualizado: Any = {**cliente_antigo, **novas_credenciais}
             del cliente_atualizado["id"]
             res = await self.financeiro_ixc_cliente.put_clientes(
                 id_cliente=id_cliente, cliente=cliente_atualizado

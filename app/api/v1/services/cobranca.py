@@ -1,9 +1,9 @@
 from . import service
 from datetime import datetime
 from zoneinfo import ZoneInfo
-from typing import Self, Optional
 from .. import utils, schemas, clients
 from fastapi import HTTPException, status
+from typing import Self, Optional, List, Any
 from pydantic import ValidationError, PositiveInt
 
 
@@ -41,7 +41,7 @@ class CobrancaService(service.Service):
 
             faturas_abertas_e_parciais = res["registros"]
 
-            faturas_abertas_formatadas = []
+            faturas_abertas_formatadas: List[Any] = []
 
             for fatura_aberta_e_parcial in faturas_abertas_e_parciais:
                 data_hoje = (

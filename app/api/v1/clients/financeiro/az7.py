@@ -1,6 +1,6 @@
 import httpx
 from app.api.v1 import core
-from typing import Self, Dict
+from typing import Self, Any
 from pydantic import PositiveInt
 
 
@@ -11,13 +11,13 @@ class FinanceiroAZ7Cliente:
         self.timeout = httpx.Timeout(connect=5.0, read=30.0, write=10.0, pool=1.0)
         self.async_client = httpx.AsyncClient(timeout=self.timeout)
 
-    def _get_headers(self: Self) -> Dict:
+    def _get_headers(self: Self) -> Any:
         return {"X-API-Key": self.api_key}
 
     def _get_url(self: Self, endpoint: str) -> str:
         return f"{self.base_url}/{endpoint}"
 
-    async def get_chave_pix(self: Self, id_fatura: PositiveInt) -> Dict:
+    async def get_chave_pix(self: Self, id_fatura: PositiveInt) -> Any:
         url = self._get_url(
             endpoint=f"v2/integrations/omnichannel/invoices/{id_fatura}/payment-data"
         )

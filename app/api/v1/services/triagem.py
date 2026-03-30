@@ -1,8 +1,8 @@
 from . import service
-from typing import Self, Optional
+from pydantic import ValidationError
+from typing import Self, Optional, Any
 from .. import schemas, clients, utils
 from fastapi import HTTPException, status
-from pydantic import ValidationError
 
 
 class TriagemService(service.Service):
@@ -63,7 +63,7 @@ class TriagemService(service.Service):
             cliente_antigo = res["registros"][0]
             novo_contato = contato.model_dump()
 
-            cliente_atualizado = {**cliente_antigo, **novo_contato}
+            cliente_atualizado: Any = {**cliente_antigo, **novo_contato}
 
             if "cep" in cliente_atualizado:
                 cliente_atualizado["cep"] = utils.formatar_cep(

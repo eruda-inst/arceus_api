@@ -1,5 +1,5 @@
 from .. import clients, utils
-from typing import Self, Optional, Dict
+from typing import Self, Optional, Any
 from fastapi import HTTPException, status
 from pydantic import ValidationError, PositiveInt
 
@@ -9,7 +9,7 @@ class Service:
         self.opa_cliente = clients.OpaCliente()
         self.ixc_cliente = clients.IXCCliente()
 
-    async def _buscar_por_protocolo(self, protocolo: str) -> Dict:
+    async def _buscar_por_protocolo(self, protocolo: str) -> Any:
         # Busca ID do cliente no OPA
         id_cliente_opa_res = await self.opa_cliente.get_id_cliente_opa(
             protocolo=protocolo
@@ -36,7 +36,7 @@ class Service:
 
         return id_cliente_ixc_res
 
-    async def _buscar_por_cnpj_cpf(self, cnpj_cpf: str) -> Dict:
+    async def _buscar_por_cnpj_cpf(self, cnpj_cpf: str) -> Any:
         id_cliente_ixc_res = await self.ixc_cliente.get_id_cliente_ixc(
             cnpj_cpf=cnpj_cpf
         )
@@ -49,7 +49,7 @@ class Service:
 
         return id_cliente_ixc_res
 
-    def _extrair_id_cliente_ixc(self, resposta: Dict) -> PositiveInt:
+    def _extrair_id_cliente_ixc(self, resposta: Any) -> PositiveInt:
         try:
             data = resposta.get("data")
             registros = resposta.get("registros", None)
