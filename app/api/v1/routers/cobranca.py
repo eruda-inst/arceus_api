@@ -3,7 +3,7 @@ from pydantic import PositiveInt
 from fastapi import APIRouter, Query
 from .. import utils, services, schemas
 
-cobranca_router = APIRouter()
+cobranca_router = APIRouter(prefix="/cobranca", tags=["Cobrança"])
 cobranca_service = services.CobrancaService()
 financeiro_service = services.FinanceiroService()
 

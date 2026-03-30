@@ -3,7 +3,7 @@ from pydantic import PositiveInt
 from .. import utils, services, schemas
 from fastapi import APIRouter, Query, status, Body
 
-comercial_router = APIRouter()
+comercial_router = APIRouter(prefix="/comercial", tags=["Comercial"])
 
 
 @comercial_router.get(

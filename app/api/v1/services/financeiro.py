@@ -239,7 +239,7 @@ class FinanceiroService(service.Service):
                 detail=f"Erro interno ao processar solicitação: {str(e)}",
             )
 
-    async def get_ultima_fatura_paga(self: Self, id_contrato: PositiveInt):
+    async def get_ultima_fatura_paga(self: Self, id_contrato: PositiveInt) -> Any:
         try:
             res = await self.financeiro_ixc_cliente.get_ultima_fatura_paga(
                 id_contrato=id_contrato

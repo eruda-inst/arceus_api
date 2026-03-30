@@ -4,7 +4,7 @@ from .. import services, utils, schemas
 from fastapi import APIRouter, Query, Path, Body
 
 
-financeiro_router = APIRouter()
+financeiro_router = APIRouter(prefix="/financeiro", tags=["Financeiro"])
 
 
 @financeiro_router.get(

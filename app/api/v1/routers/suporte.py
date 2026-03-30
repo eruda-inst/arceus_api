@@ -4,7 +4,7 @@ from .. import schemas, utils, services
 from fastapi import APIRouter, Query, status, Path, Body
 
 
-suporte_router = APIRouter()
+suporte_router = APIRouter(prefix="/suporte", tags=["Suporte"])
 
 
 @suporte_router.get(

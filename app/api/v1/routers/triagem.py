@@ -3,7 +3,7 @@ from .. import schemas, services
 from fastapi import APIRouter, Body, Query
 
 
-triagem_router = APIRouter()
+triagem_router = APIRouter(prefix="/triagem", tags=["Triagem"])
 triagem_service = services.TriagemService()
 
 
