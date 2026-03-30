@@ -1,4 +1,4 @@
-from .misc import Meta, MensagemOut
+from .misc_schema import Meta, MensagemOut
 from .comercial import (
     ComercialContrato,
     ComercialContratoListOut,
@@ -14,12 +14,12 @@ from .suporte import (
     AtendimentoIn,
     AtendimentoOut,
     SuporteContrato,
-    onu,
     StatusConexao,
     StatusONUOut,
     StatusONU,
     StatusConexaoOut,
     IPUpdate,
+    onu_suporte_schema,
 )
 from .financeiro import (
     FaturaAbertaListOut,
@@ -33,9 +33,9 @@ from .financeiro import (
     FaturaPagaBase,
 )
 from .triagem import ContatoUpdate, ContatoOut
-from .cliente import ClienteUpdate
-from .login import LoginUpdate
-from .root import RootOut
+from .cliente_schema import ClienteUpdate
+from .login_schema import LoginUpdate
+from .root_schema import RootOut
 
 __all__ = [
     "Meta",
@@ -52,7 +52,7 @@ __all__ = [
     "AtendimentoIn",
     "AtendimentoOut",
     "SuporteContrato",
-    "onu",
+    "onu_suporte_schema",
     "StatusConexao",
     "StatusONUOut",
     "StatusONU",

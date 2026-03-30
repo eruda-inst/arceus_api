@@ -1,5 +1,5 @@
 import time
-from .. import crud
+from .. import cruds
 from ..db import get_db
 from zoneinfo import ZoneInfo
 from datetime import datetime
@@ -65,7 +65,7 @@ class LogMiddleware(BaseHTTPMiddleware):
             now = datetime.now(ZoneInfo("America/Bahia"))
 
             async for db in get_db():
-                await crud.log_crud.create_log(
+                await cruds.log_crud.create_log(
                     db=db,
                     ip=request.client.host if request.client else "---",
                     metodo=request.method,

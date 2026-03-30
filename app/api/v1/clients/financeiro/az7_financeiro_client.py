@@ -1,13 +1,13 @@
 import httpx
-from app.api.v1 import core
+from app.api.v1 import cores
 from typing import Self, Any
 from pydantic import PositiveInt
 
 
 class FinanceiroAZ7Cliente:
     def __init__(self: Self) -> None:
-        self.base_url = core.settings.BASE_URL_7AZ
-        self.api_key = core.settings.API_KEY_7AZ
+        self.base_url = cores.settings.BASE_URL_7AZ
+        self.api_key = cores.settings.API_KEY_7AZ
         self.timeout = httpx.Timeout(connect=5.0, read=30.0, write=10.0, pool=1.0)
         self.async_client = httpx.AsyncClient(timeout=self.timeout)
 

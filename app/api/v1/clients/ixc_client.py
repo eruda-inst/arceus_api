@@ -1,15 +1,15 @@
 import json
 import httpx
 import base64
-from .. import core
+from .. import cores
 from typing import Self, Any
 from fastapi import HTTPException, status
 
 
 class IXCCliente:
     def __init__(self: Self) -> None:
-        self.token = core.settings.IXC_TOKEN
-        self.host = core.settings.IXC_HOST
+        self.token = cores.settings.IXC_TOKEN
+        self.host = cores.settings.IXC_HOST
         self.base_url = f"https://{self.host}/webservice/v1"
         self.auth_header = self._create_auth_header()
 

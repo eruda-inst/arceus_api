@@ -1,11 +1,11 @@
 import json
-from .. import ixc
+from .. import ixc_client
 from pydantic import PositiveInt
 from app.api.v1 import schemas, utils
 from typing import Any, Self, Optional
 
 
-class ComercialIXCCliente(ixc.IXCCliente):
+class ComercialIXCCliente(ixc_client.IXCCliente):
     async def get_status_acesso(self: Self, id_contrato: int) -> Any:
 
         grid_param = [{"TB": "cliente_contrato.id", "OP": "=", "P": str(id_contrato)}]

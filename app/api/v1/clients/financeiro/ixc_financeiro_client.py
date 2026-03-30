@@ -1,11 +1,11 @@
 import json
-from .. import SortOrder, ixc
+from .. import SortOrder, ixc_client
 from app.api.v1 import schemas
 from pydantic import PositiveInt
 from typing import Self, Optional, Any
 
 
-class FinanceiroIXCCliente(ixc.IXCCliente):
+class FinanceiroIXCCliente(ixc_client.IXCCliente):
     async def get_contrato(self: Self, id_contrato: PositiveInt) -> Any:
         grid_param = [{"TB": "cliente_contrato.id", "OP": "=", "P": str(id_contrato)}]
         payload = {"grid_param": json.dumps(obj=grid_param)}

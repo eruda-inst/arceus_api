@@ -1,11 +1,11 @@
-from .origem_endereco import OrigemEnderecoCod
-from .prioridade import PrioridadeCod
-from .status_atendimento import StatusAtendimentoCod
-from .status_conexao import StatusConexaoCod
-from .status_contrato import StatusContratoCod
-from .su_status import SuStatusCod
-from .tipo import TipoCod
-from .status_acesso import StatusAcessoCod
+from .origem_endereco_enum import OrigemEnderecoCod
+from .prioridade_enum import PrioridadeCod
+from .status_atendimento_enum import StatusAtendimentoCod
+from .status_conexao_enum import StatusConexaoCod
+from .status_contrato_enum import StatusContratoCod
+from .su_status_enum import SuStatusCod
+from .tipo_cod_enum import TipoCod
+from .status_acesso_enum import StatusAcessoCod
 
 __all__ = [
     "OrigemEnderecoCod",

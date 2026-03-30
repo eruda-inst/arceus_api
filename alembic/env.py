@@ -18,8 +18,8 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-from app.api.v1.db.base import Base
-from app.api.v1.core.config import settings
+from app.api.v1.db.base_db import Base
+from app.api.v1.cores.config_core import settings
 
 database_url = settings.MIGRATE_DB_URL
 config.set_main_option("sqlalchemy.url", database_url)

@@ -1,7 +1,7 @@
-from .status_atendimento import STATUS_ATENDIMENTO
-from .status_conexao import STATUS_CONEXAO
-from .status_contrato import STATUS_CONTRATO
-from .status_acesso import STATUS_ACESSO
+from .status_atendimento_map import STATUS_ATENDIMENTO
+from .status_conexao_map import STATUS_CONEXAO
+from .status_contrato_map import STATUS_CONTRATO
+from .status_acesso_map import STATUS_ACESSO
 
 __all__ = [
     "STATUS_ATENDIMENTO",

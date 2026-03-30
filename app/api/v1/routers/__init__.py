@@ -1,8 +1,8 @@
-from .suporte import suporte_router
-from .comercial import comercial_router
-from .financeiro import financeiro_router
-from .triagem import triagem_router
-from .cobranca import cobranca_router
+from .suporte_router import suporte_router
+from .comercial_router import comercial_router
+from .financeiro_router import financeiro_router
+from .triagem_router import triagem_router
+from .cobranca_router import cobranca_router
 
 __all__ = [
     "suporte_router",

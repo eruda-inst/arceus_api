@@ -1,4 +1,4 @@
-from .sortorder import SortOrder
+from .sortorder_enum import SortOrder
 from .codigos import (
     TipoCod,
     SuStatusCod,
@@ -16,7 +16,7 @@ from .rotulos import (
     StatusONURot,
     StatusAcessoRot,
 )
-from .default import Default
+from .default_enum import Default
 
 __all__ = [
     "SortOrder",

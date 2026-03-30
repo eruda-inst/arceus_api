@@ -1,11 +1,11 @@
-from . import service
+from . import service_service
 from pydantic import ValidationError
 from typing import Self, Optional, Any
 from .. import schemas, clients, utils
 from fastapi import HTTPException, status
 
 
-class TriagemService(service.Service):
+class TriagemService(service_service.Service):
     def __init__(self: Self) -> None:
         super().__init__()
         self.triagem_ixc_cliente = clients.TriagemIXCCliente()

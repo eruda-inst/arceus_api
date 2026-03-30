@@ -1,10 +1,10 @@
 import json
-from .. import ixc
+from .. import ixc_client
 from app.api.v1 import schemas, utils
 from typing import Any, Self, Optional
 
 
-class SuporteIXCCliente(ixc.IXCCliente):
+class SuporteIXCCliente(ixc_client.IXCCliente):
     async def get_contratos(
         self: Self,
         id_cliente: int,

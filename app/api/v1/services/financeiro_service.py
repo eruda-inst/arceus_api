@@ -1,11 +1,11 @@
-from . import service
+from . import service_service
 from typing import Self, Optional, Any
 from .. import clients, schemas, utils
 from fastapi import HTTPException, status
 from pydantic import ValidationError, PositiveInt
 
 
-class FinanceiroService(service.Service):
+class FinanceiroService(service_service.Service):
     def __init__(self: Self) -> None:
         super().__init__()
         self.financeiro_ixc_cliente = clients.FinanceiroIXCCliente()

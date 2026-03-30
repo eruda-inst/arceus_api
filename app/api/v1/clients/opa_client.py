@@ -1,13 +1,13 @@
 import httpx
-from .. import core
+from .. import cores
 from typing import Any, Self
 from fastapi import HTTPException, status
 
 
 class OpaCliente:
     def __init__(self: Self) -> None:
-        self.token = core.settings.OPA_TOKEN
-        self.host = core.settings.OPA_HOST
+        self.token = cores.settings.OPA_TOKEN
+        self.host = cores.settings.OPA_HOST
         self.base_url = f"https://{self.host}/api/v1"
         self.headers = {"Authorization": f"Bearer {self.token}"}
 

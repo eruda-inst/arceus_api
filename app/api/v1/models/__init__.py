@@ -1,3 +1,3 @@
-from .log import Log
+from .log_model import Log
 
 __all__ = ["Log"]

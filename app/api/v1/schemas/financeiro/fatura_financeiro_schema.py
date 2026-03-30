@@ -1,4 +1,4 @@
-from .. import misc
+from .. import misc_schema
 from typing import List
 from pydantic import BaseModel, Field, PositiveInt, NonNegativeInt, PositiveFloat
 
@@ -25,7 +25,7 @@ class FaturaAberta(Fatura):
 
 class FaturaAbertaListOut(BaseModel):
     data: List[FaturaAberta]
-    meta: misc.Meta
+    meta: misc_schema.Meta
 
 
 class LinhaDigitavelBase(BaseModel):

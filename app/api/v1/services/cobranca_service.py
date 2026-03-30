@@ -1,4 +1,4 @@
-from . import service
+from . import service_service
 from datetime import datetime
 from zoneinfo import ZoneInfo
 from .. import utils, schemas, clients
@@ -7,7 +7,7 @@ from typing import Self, Optional, List, Any
 from pydantic import ValidationError, PositiveInt
 
 
-class CobrancaService(service.Service):
+class CobrancaService(service_service.Service):
     def __init__(self: Self) -> None:
         super().__init__()
         self.financeiro_ixc_cliente = clients.FinanceiroIXCCliente()

@@ -2,7 +2,7 @@ from .. import db
 from sqlalchemy import Column, Date, Numeric, Integer, String, Time
 
 
-class Log(db.base.Base):
+class Log(db.base_db.Base):
     __tablename__ = "logs"
 
     id = Column(Integer, primary_key=True, index=True)

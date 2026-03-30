@@ -1,4 +1,4 @@
-from .. import misc
+from .. import misc_schema
 from app.api.v1 import utils
 from typing import Optional, List
 from pydantic import BaseModel, Field, PositiveInt
@@ -80,4 +80,4 @@ class Atendimento(BaseModel):
 
 class AtendimentoOut(BaseModel):
     data: List[Atendimento] = Field()
-    meta: misc.Meta = Field()
+    meta: misc_schema.Meta = Field()

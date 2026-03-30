@@ -1,4 +1,4 @@
-from . import service
+from . import service_service
 from datetime import datetime
 from typing import Self, Optional, Any
 from .. import utils, schemas, clients
@@ -6,7 +6,7 @@ from fastapi import HTTPException, status
 from pydantic import ValidationError, PositiveInt
 
 
-class SuporteService(service.Service):
+class SuporteService(service_service.Service):
     def __init__(self: Self) -> None:
         super().__init__()
         self.suporte_ixc_cliente = clients.SuporteIXCCliente()
