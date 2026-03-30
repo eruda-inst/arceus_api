@@ -3,22 +3,16 @@ from .. import crud
 from ..db import get_db
 from zoneinfo import ZoneInfo
 from datetime import datetime
+from fastapi.logger import logger
 from sqlalchemy.exc import SQLAlchemyError
-from typing import List, Self, Awaitable, Callable, Any
 from fastapi import Request, status, Response
+from typing import Self, Awaitable, Callable, Any
 from starlette.middleware.base import BaseHTTPMiddleware
 
 
 class LogMiddleware(BaseHTTPMiddleware):
-    def __init__(self: Self, app: Any, exclude_paths: List[str] = []):
+    def __init__(self: Self, app: Any):
         super().__init__(app)
-        self.exclude_paths = exclude_paths or [
-            "/",
-            "/docs",
-            "/redoc",
-            "/favicon.ico",
-            "/openapi.json",
-        ]
         self.include_prefixes = [
             "/api/v1/suporte",
             "/api/v1/comercial",
@@ -33,9 +27,7 @@ class LogMiddleware(BaseHTTPMiddleware):
         call_next: Callable[[Request], Awaitable[Response]],
     ):
         path = request.url.path
-        if path in self.exclude_paths or not any(
-            path.startswith(prefix) for prefix in self.include_prefixes
-        ):
+        if not any(path.startswith(prefix) for prefix in self.include_prefixes):
             return await call_next(request)
         start_time = time.perf_counter()
         response = None
@@ -60,7 +52,7 @@ class LogMiddleware(BaseHTTPMiddleware):
         try:
             await self._log_to_database(request, codigo, process_time)
         except Exception as e:
-            print(f"Erro ao registrar log: {e}")
+            logger.error(f"Erro ao registrar log: {e}")
 
     async def _log_to_database(
         self, request: Request, codigo: int, process_time: float
@@ -68,14 +60,14 @@ class LogMiddleware(BaseHTTPMiddleware):
         db = None
         try:
             # Extrai o protocolo do header x-protocolo
-            protocolo = request.headers.get("x-protocolo", "desconhecido")
+            protocolo = request.headers.get("x-protocolo", "---")
 
-            now = datetime.now(ZoneInfo("America/Sao_Paulo"))
+            now = datetime.now(ZoneInfo("America/Bahia"))
 
             async for db in get_db():
                 await crud.log_crud.create_log(
                     db=db,
-                    ip=request.client.host if request.client else "desconhecido",
+                    ip=request.client.host if request.client else "---",
                     metodo=request.method,
                     endpoint=request.url.path,
                     codigo=codigo,
@@ -86,7 +78,9 @@ class LogMiddleware(BaseHTTPMiddleware):
                 )
                 break
         except SQLAlchemyError as e:
-            print(f"Erro de banco ao registrar log: {e}")
+            if db:
+                await db.rollback()
+            logger.error(f"Erro de banco ao registrar log: {e}")
         finally:
             if db is not None:
                 await db.close()
