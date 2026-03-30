@@ -10,7 +10,8 @@ financeiro_router = APIRouter()
 @financeiro_router.get(
     path="/faturas_abertas",
     response_model=schemas.FaturaAbertaListOut,
-    summary="Obtém faturas associadas a um cliente, através de ID de protocolo de atendimento ou CPF/CNPJ.",
+    summary="Obtém faturas associadas a um cliente.",
+    description="Obtém faturas abertas de todos os contratos de um cliente, através de protocolo de atendimento ou CPF/CNPJ.",
 )
 async def get_faturas_abertas(
     protocolo: Optional[str] = Query(
@@ -47,7 +48,8 @@ async def get_faturas_abertas(
 @financeiro_router.get(
     path="/contratos",
     response_model=schemas.ComercialContratoListOut,
-    summary="Obtém contratos de um cliente, por meio de ID de login.",
+    summary="Obtém contratos de um cliente.",
+    description="Obtém contratos de todos os clientes, atravé de protocolo de atendimento ou CPF/CNPJ.",
 )
 async def get_contratos(
     protocolo: Optional[str] = Query(
@@ -86,7 +88,8 @@ async def get_contratos(
 @financeiro_router.post(
     path="/desbloqueio_em_confianca",
     response_model=schemas.MensagemOut,
-    summary="Realiza desbloqueio em confiança de um determinado contrato, através do ID do contrato.",
+    summary="Realiza desbloqueio em confiança de um determinado contrato.",
+    description="Realiza desbloqueio em confiança de um determinado contrato, atravé do ID do contrato.",
 )
 async def post_desbloqueio_em_confianca(
     id_contrato: PositiveInt = Query(description="ID do contrato."),
@@ -100,7 +103,8 @@ async def post_desbloqueio_em_confianca(
 @financeiro_router.get(
     path="/linha_digitavel/{id_fatura}",
     response_model=schemas.LinhaDigitavelOut,
-    summary="Obtém linha digitável de uma fatura, através do ID da fatura.",
+    summary="Obtém linha digitável de uma fatura.",
+    description="Obtém linha digitável de uma fatura, atravé do ID da fatura.",
 )
 async def get_linha_digitavel(
     id_fatura: PositiveInt = Path(ge=1, description="ID da fatura."),
@@ -112,7 +116,8 @@ async def get_linha_digitavel(
 @financeiro_router.get(
     path="/chave_pix",
     response_model=schemas.ChavePixBase,
-    summary="Obtém chave pix de uma fatura, através do ID da fatura.",
+    summary="Obtém chave pix de uma fatura.",
+    description="Obtém chave pix de uma fatura, atravé do ID da fatura.",
 )
 async def get_chave_pix(
     id_fatura: PositiveInt = Query(ge=1, description="ID da fatura.")
@@ -124,7 +129,8 @@ async def get_chave_pix(
 @financeiro_router.get(
     path="/credenciais",
     response_model=schemas.CredencialOut,
-    summary="Obtém credenciais de acesso à central do assinante de um cliente, através de protocolo de atendimento.",
+    summary="Obtém credenciais de acesso à central do assinante de um cliente.",
+    description="Obtém credenciais de acesso à central do assinante de um cliente, atravé de protocolo de atendimento.",
 )
 async def get_credenciais(
     protocolo: Optional[str] = Query(
@@ -147,7 +153,8 @@ async def get_credenciais(
 @financeiro_router.put(
     path="/credenciais/{id_cliente}",
     response_model=schemas.MensagemOut,
-    summary="Atualiza credenciais de acesso à central do assinante de um cliente, através do ID do cliente.",
+    summary="Atualiza credenciais de acesso à central do assinante de um cliente.",
+    description="Atualiza credenciais de acesso à central do assinante de um cliente, atravé do ID do cliente.",
 )
 async def put_credenciais(
     id_cliente: PositiveInt = Path(ge=1, description="ID do cliente."),
@@ -164,7 +171,8 @@ async def put_credenciais(
 @financeiro_router.get(
     path="/ultima_fatura_paga",
     response_model=schemas.FaturaPagaBase,
-    summary="Obtém última fatura paga de um contrato, através do ID do contrato.",
+    summary="Obtém última fatura paga de um contrato.",
+    description="Obtém última fatura paga de um contrato, atravé do ID do contrato.",
 )
 async def get_ultima_fatura_paga(
     id_contrato: PositiveInt = Query(ge=1, description="ID do contrato.")

@@ -10,7 +10,8 @@ suporte_router = APIRouter()
 @suporte_router.get(
     path="/contratos",
     response_model=schemas.SuporteContratoListOut,
-    summary="Obtém contratos ativos de um cliente, através de protocolo de atendimento.",
+    summary="Obtém contratos ativos de um cliente.",
+    description="Obtém contratos ativos de todos os clientes, atravé de protocolo de atendimento.",
 )
 async def get_contratos(
     protocolo: Optional[str] = Query(
@@ -49,7 +50,8 @@ async def get_contratos(
 @suporte_router.get(
     path="/status_conexao",
     response_model=schemas.StatusConexaoOut,
-    summary="Obtém status de conexão de um cliente, através de ID de login.",
+    summary="Obtém status de conexão de um cliente.",
+    description="Obtém status de conexão de um cliente, atravé do ID de login.",
 )
 async def get_status_conexao(
     id_login: PositiveInt = Query(
@@ -63,7 +65,8 @@ async def get_status_conexao(
 @suporte_router.get(
     path="/status_onu",
     response_model=schemas.StatusONUOut,
-    summary="Obtém status de ONU (sinal rx) de um cliente, através de ID de login, ou MAC Address de ONU.",
+    summary="Obtém status de ONU (sinal rx) de um cliente.",
+    description="Obtém status de ONU (sinal rx) de um cliente, atravé do ID de login, ou MAC Address de ONU.",
 )
 async def get_status_onu(
     id_login: Optional[PositiveInt] = Query(
@@ -80,7 +83,8 @@ async def get_status_onu(
 @suporte_router.post(
     path="/desconectar_cliente",
     response_model=schemas.MensagemOut,
-    summary="Envia sinal de desconexão para um cliente, através de ID de login.",
+    summary="Envia sinal de desconexão para um cliente.",
+    description="Envia sinal de desconexão para um cliente, atravé do ID de login.",
 )
 async def post_desconectar_cliente(
     id_login: PositiveInt = Query(
@@ -94,7 +98,8 @@ async def post_desconectar_cliente(
 @suporte_router.get(
     path="/atendimentos",
     response_model=schemas.AtendimentoOut,
-    summary="Checa atendimentos abertos de um cliente, através de ID de login.",
+    summary="Checa atendimentos abertos de um cliente.",
+    description="Checa atendimentos abertos de um cliente, atravé do ID de login.",
 )
 async def get_atendimentos(
     id_login: PositiveInt = Query(
@@ -127,7 +132,8 @@ async def get_atendimentos(
     path="/atendimentos",
     status_code=status.HTTP_201_CREATED,
     response_model=schemas.AtendimentoCreate,
-    summary="Abre ticket de atendimento, através de dados do atendimento.",
+    summary="Abre ticket de atendimento.",
+    description="Abre ticket de atendimento, atravé de dados do atendimento.",
 )
 async def post_atendimentos(
     atendimento: schemas.AtendimentoIn,
@@ -140,7 +146,8 @@ async def post_atendimentos(
 @suporte_router.put(
     path="/ip/{id_login}",
     response_model=schemas.MensagemOut,
-    summary="Atualiza um ou mais campos associado a um login específico, por meio do ID de login.",
+    summary="Atualiza um ou mais campos associado a um login específico.",
+    description="Atualiza um ou mais campos associado a um login específico, por meio do ID de login.",
 )
 async def put_ip(
     id_login: PositiveInt = Path(ge=1, description="ID de login."),
@@ -153,7 +160,8 @@ async def put_ip(
 @suporte_router.post(
     path="/limpar_mac",
     response_model=schemas.MensagemOut,
-    summary="Limpa MAC Address, através do ID de login.",
+    summary="Limpa MAC Address.",
+    description="Limpa MAC Address, atravé do ID de login.",
 )
 async def post_limpar_mac(
     id_login: PositiveInt = Query(

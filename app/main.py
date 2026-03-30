@@ -7,10 +7,8 @@ from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(
     title="Aggregator",
-    description="""
-    API oficial Newnet/Eruda - Simplifica integrações entre a API (Application Programming Interface) da OpaSuite, da IXCSoft e da 7AZ.
-    """,
-    version="0.68.7",
+    description="API oficial Newnet/Eruda - Simplifica integrações entre a API (Application Programming Interface) da OpaSuite, da IXCSoft e da 7AZ.",
+    version="0.69.0",
     routes=api_v1_router.routes,
 )
 
@@ -29,8 +27,8 @@ app.add_middleware(
 @app.get(
     path="/",
     response_model=schemas.RootOut,
-    summary="Endpoint Raiz da API",
-    description="Retorna os links para a documentação interativa da API",
+    summary="Endpoint Raiz da API.",
+    description="Retorna os links para a documentação interativa da API.",
 )
 def root(request: Request) -> schemas.RootOut:
     base_url = str(request.base_url).rstrip("/")

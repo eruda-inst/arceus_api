@@ -9,7 +9,8 @@ comercial_router = APIRouter()
 @comercial_router.get(
     path="/status_acesso",
     response_model=schemas.StatusAcessoOut,
-    summary="Obtém status de acesso, através de ID de contrato.",
+    summary="Obtém status de acesso do contrato.",
+    description="Obtém status de acesso de um contrato, atravé do ID do contrato.",
 )
 async def get_status_acesso(
     id_contrato: PositiveInt = Query(ge=1, description="ID do contrato.")
@@ -22,6 +23,7 @@ async def get_status_acesso(
     path="/contratos",
     response_model=schemas.ComercialContratoListOut,
     summary="Obtém contratos de um cliente, por meio de protocolo de atendimento ou CPF/CNPJ.",
+    description="Obtém contratos de todos os clientes, atravé de protocolo de atendimento ou CPF/CNPJ.",
 )
 async def get_contratos(
     protocolo: Optional[str] = Query(
@@ -62,6 +64,7 @@ async def get_contratos(
     status_code=status.HTTP_201_CREATED,
     response_model=schemas.LeadCreate,
     summary="Cadastra novo lead, a partir de lead submetido.",
+    description="Cria um lead a partir do lead submetido, retornando o ID do lead criado.",
 )
 async def post_leads(
     lead: schemas.LeadIn = Body(description="Lead a ser cadastrado."),

@@ -11,7 +11,8 @@ financeiro_service = services.FinanceiroService()
 @cobranca_router.get(
     path="/faturas_abertas",
     response_model=schemas.FaturaAbertaListOut,
-    summary="Obtém faturas abertas de todos os contratos de um cliente, através de protocolo de atendimento ou CPF/CNPJ.",
+    summary="Obtém faturas abertas de um cliente.",
+    description="Obtém faturas abertas de todos os contratos de um cliente, através de protocolo de atendimento ou CPF/CNPJ.",
 )
 async def get_faturas_abertas(
     protocolo: Optional[str] = Query(
@@ -49,7 +50,8 @@ async def get_faturas_abertas(
 @cobranca_router.get(
     path="/faturas_vencidas",
     response_model=schemas.FaturaAbertaListOut,
-    summary="Obtém faturas vencidas de todos os contratos de um cliente.",
+    summary="Obtém faturas vencidas de um cliente.",
+    description="Obtém faturas vencidas de todos os contratos de um cliente, através de protocolo de atendimento ou CPF/CNPJ.",
 )
 async def get_faturas_vencidas(
     protocolo: Optional[str] = Query(
