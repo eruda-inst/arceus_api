@@ -1,86 +1,84 @@
 import time
 from .. import cruds
 from ..db import get_db
-from zoneinfo import ZoneInfo
 from datetime import datetime
+from zoneinfo import ZoneInfo
 from fastapi.logger import logger
 from sqlalchemy.exc import SQLAlchemyError
-from fastapi import Request, status, Response
+from fastapi import Request, Response
 from typing import Self, Awaitable, Callable, Any
 from starlette.middleware.base import BaseHTTPMiddleware
+
+
+INCLUDE_PREFIXES = (
+    "/api/v1/suporte",
+    "/api/v1/comercial",
+    "/api/v1/financeiro",
+    "/api/v1/triagem",
+    "/api/v1/cobranca",
+)
 
 
 class LogMiddleware(BaseHTTPMiddleware):
     def __init__(self: Self, app: Any):
         super().__init__(app)
-        self.include_prefixes = [
-            "/api/v1/suporte",
-            "/api/v1/comercial",
-            "/api/v1/financeiro",
-            "/api/v1/triagem",
-            "/api/v1/cobranca",
-        ]
 
     async def dispatch(
         self: Self,
         request: Request,
         call_next: Callable[[Request], Awaitable[Response]],
     ):
-        path = request.url.path
-        if not any(path.startswith(prefix) for prefix in self.include_prefixes):
+        if not request.url.path.startswith(INCLUDE_PREFIXES):
             return await call_next(request)
+
         start_time = time.perf_counter()
-        response = None
         try:
             response = await call_next(request)
-        except Exception as e:
+        except Exception:
             await self._log_request(
-                request=request,
-                codigo=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                request,
+                status_code=500,
                 process_time=time.perf_counter() - start_time,
             )
-            raise e
-        else:
-            await self._log_request(
-                request=request,
-                codigo=response.status_code,
-                process_time=time.perf_counter() - start_time,
-            )
+            raise
+
+        await self._log_request(
+            request,
+            status_code=response.status_code,
+            process_time=time.perf_counter() - start_time,
+        )
         return response
 
-    async def _log_request(self, request: Request, codigo: int, process_time: float):
+    async def _log_request(
+        self, request: Request, status_code: int, process_time: float
+    ):
         try:
-            await self._log_to_database(request, codigo, process_time)
-        except Exception as e:
-            logger.error(f"Erro ao registrar log: {e}")
+            await self._log_to_database(request, status_code, process_time)
+        except Exception as err:
+            logger.error(f"Erro ao registrar log: {err}")
 
     async def _log_to_database(
-        self, request: Request, codigo: int, process_time: float
+        self, request: Request, status_code: int, process_time: float
     ):
-        db = None
-        try:
-            # Extrai o protocolo do header x-protocolo
-            protocolo = request.headers.get("x-protocolo", "---")
+        protocolo = request.headers.get("x-protocolo", "---")
+        now = datetime.now(ZoneInfo("America/Bahia"))
 
-            now = datetime.now(ZoneInfo("America/Bahia"))
-
-            async for db in get_db():
+        async for db in get_db():
+            try:
                 await cruds.log_crud.create_log(
                     db=db,
                     ip=request.client.host if request.client else "---",
                     metodo=request.method,
                     endpoint=request.url.path,
-                    codigo=codigo,
+                    codigo=status_code,
                     data=now.date(),
                     hora=now.time(),
                     duracao=process_time,
                     protocolo=protocolo,
                 )
-                break
-        except SQLAlchemyError as e:
-            if db:
+            except SQLAlchemyError as err:
                 await db.rollback()
-            logger.error(f"Erro de banco ao registrar log: {e}")
-        finally:
-            if db is not None:
+                logger.error(f"Erro de banco ao registrar log: {err}")
+            finally:
                 await db.close()
+            break
