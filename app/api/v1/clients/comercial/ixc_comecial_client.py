@@ -1,13 +1,15 @@
 import json
+import httpx
 from .. import ixc_client
+from app.api.v1 import cores
 from pydantic import PositiveInt
 from app.api.v1 import schemas, utils
 from typing import Any, Self, Optional
+from fastapi import HTTPException, status
 
 
 class ComercialIXCCliente(ixc_client.IXCCliente):
     async def get_status_acesso(self: Self, id_contrato: int) -> Any:
-
         grid_param = [{"TB": "cliente_contrato.id", "OP": "=", "P": str(id_contrato)}]
         payload = {"grid_param": json.dumps(obj=grid_param)}
         data = await self._make_request(endpoint="cliente_contrato", payload=payload)
@@ -47,4 +49,11 @@ class ComercialIXCCliente(ixc_client.IXCCliente):
             "grid_param": json.dumps(obj=grid_param),
         }
         data = await self._make_request(endpoint="radusuarios", payload=payload)
+        return data
+
+    async def create_cliente(self: Self, cliente: schemas.ClienteCreate) -> Any:
+        payload = cliente.model_dump()
+        data = await self._make_request(
+            endpoint="cliente", payload=payload, include_ixcsoft=False
+        )
         return data

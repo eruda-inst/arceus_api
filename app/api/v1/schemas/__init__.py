@@ -33,7 +33,7 @@ from .financeiro import (
     FaturaPagaBase,
 )
 from .triagem import ContatoUpdate, ContatoOut
-from .cliente_schema import ClienteUpdate
+from .cliente_schema import ClienteUpdate, ClienteCreate, ClienteCreateOut
 from .login_schema import LoginUpdate
 from .root_schema import RootOut
 
@@ -72,4 +72,6 @@ __all__ = [
     "ClienteUpdate",
     "LoginUpdate",
     "RootOut",
+    "ClienteCreate",
+    "ClienteCreateOut",
 ]

@@ -225,3 +225,45 @@ class ComercialService(service_service.Service):
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=f"Erro interno ao processar solicitação: {str(e)}",
             )
+
+    async def create_cliente(
+        self: Self, cliente: schemas.ClienteCreate
+    ) -> schemas.ClienteCreateOut:
+        try:
+            cliente_data = cliente.model_dump()
+            if cliente_data.get("cnpj_cpf"):
+                cnpj_cpf = cliente_data["cnpj_cpf"]
+                cliente_data["cnpj_cpf"] = utils.formatar_cnpj_cpf(cnpj_cpf=cnpj_cpf)
+            if cliente_data.get("cep"):
+                cep = cliente_data["cep"]
+                cliente_data["cep"] = utils.formatar_cep(cep=cep)
+            if cliente_data.get("telefone"):
+                telefone = cliente_data["telefone"]
+                cliente_data["telefone"] = utils.formatar_cel(cel=telefone)
+
+            formatted_cliente = schemas.ClienteCreate(**cliente_data)
+
+            res = await self.comercial_ixc_cliente.create_cliente(
+                cliente=formatted_cliente
+            )
+
+            id_cliente = res.get("id", None)
+            if not id_cliente:
+                error_message = res.get("message", "")
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail=f"Não foi possível retornar o ID do cliente criado: {error_message}. Payload {formatted_cliente}",
+                )
+            return schemas.ClienteCreateOut(id=id_cliente)
+        except HTTPException:
+            raise
+        except ValidationError as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Validação da resposta falhou: {e}",
+            )
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Erro interno ao processar solicitação: {str(e)}",
+            )
