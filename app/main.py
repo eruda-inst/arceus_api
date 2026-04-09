@@ -8,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 app = FastAPI(
     title="Aggregator",
     description="API oficial Newnet/Eruda - Simplifica integrações entre a API (Application Programming Interface) da OpaSuite, da IXCSoft e da 7AZ.",
-    version="0.71.0",
+    version="0.72.1",
     routes=api_v1_router.routes,
 )
 

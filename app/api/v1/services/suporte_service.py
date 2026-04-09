@@ -376,5 +376,31 @@ class SuporteService(service_service.Service):
                 detail=f"Erro interno: {str(e)}",
             )
 
-    async def get_dados_wifi(self: Self, id_login: PositiveInt):
-        pass
+    async def get_dados_wifi(self: Self, id_login: PositiveInt) -> schemas.WifiOut:
+        try:
+            res = await self.suporte_ixc_cliente.get_dados_wifi(id_login=id_login)
+
+            if not res.get("registros"):
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Dados não encontrados.",
+                )
+
+            ssid_wifi_2g = res.get("registros")[0].get("ssid_router_wifi")
+            senha_wifi_2g = res.get("registros")[0].get("senha_rede_sem_fio")
+            ssid_wifi_5g = res.get("registros")[0].get("ssid_router_wifi_5ghz")
+            senha_wifi_5g = res.get("registros")[0].get("senha_rede_sem_fio_5ghz")
+
+            return schemas.WifiOut(
+                ssid_wifi_2g=ssid_wifi_2g,
+                senha_wifi_2g=senha_wifi_2g,
+                ssid_wifi_5g=ssid_wifi_5g,
+                senha_wifi_5g=senha_wifi_5g,
+            )
+        except HTTPException:
+            raise
+        except Exception:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Erro interno ao processar solicitação.",
+            )

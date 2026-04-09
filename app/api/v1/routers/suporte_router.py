@@ -170,3 +170,18 @@ async def post_limpar_mac(
 ) -> schemas.MensagemOut:
     suporte_service = services.SuporteService()
     return await suporte_service.post_limpar_mac(id_login=id_login)
+
+
+@suporte_router.get(
+    path="/dados_wifi",
+    response_model=schemas.WifiOut,
+    summary="Obtém dados de WiFi de um cliente.",
+    description="Obtém dados de WiFi de um cliente, atravé do ID de login.",
+)
+async def get_dados_wifi(
+    id_login: PositiveInt = Query(
+        ge=1, description="ID de login do cliente no IXCSoft."
+    ),
+):
+    suporte_service = services.SuporteService()
+    return await suporte_service.get_dados_wifi(id_login=id_login)

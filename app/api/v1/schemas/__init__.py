@@ -20,6 +20,7 @@ from .suporte import (
     StatusConexaoOut,
     IPUpdate,
     onu_suporte_schema,
+    WifiOut,
 )
 from .financeiro import (
     FaturaAbertaListOut,
@@ -74,4 +75,5 @@ __all__ = [
     "RootOut",
     "ClienteCreate",
     "ClienteCreateOut",
+    "WifiOut",
 ]
