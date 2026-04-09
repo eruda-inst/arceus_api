@@ -26,12 +26,12 @@ class ClienteCreate(BaseModel):
     ativo: Optional[str] = Field(
         default="S", max_length=1, description="Cliente ativo (S ou N).", examples=["S"]
     )
-    cliente_agendamento: str = Field(
+    """ cliente_agendamento: str = Field(
         default="N",
         max_length=1,
         description="Cliente permite agendamento (S ou N).",
         examples=["N"],
-    )
+    ) """
     endereco: str = Field(
         description="Endereço (Rua, Av, etc).", examples=["Av. Avenida"]
     )

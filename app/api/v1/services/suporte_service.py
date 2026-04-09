@@ -375,3 +375,6 @@ class SuporteService(service_service.Service):
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=f"Erro interno: {str(e)}",
             )
+
+    async def get_dados_wifi(self: Self, id_login: PositiveInt):
+        pass
