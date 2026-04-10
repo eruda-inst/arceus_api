@@ -1,5 +1,5 @@
-from typing import Dict
 from .. import enums
+from typing import Dict
 
 
 STATUS_CONTRATO: Dict[enums.StatusContratoCod, enums.StatusContratoRot] = {

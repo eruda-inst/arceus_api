@@ -1,5 +1,5 @@
-from .. import misc_schema
 from typing import List
+from .. import misc_schema
 from pydantic import BaseModel, Field, PositiveInt, NonNegativeInt, PositiveFloat
 
 

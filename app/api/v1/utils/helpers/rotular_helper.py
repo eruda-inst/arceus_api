@@ -1,6 +1,6 @@
 from enum import Enum
-from typing import TypeVar, Dict
 from .. import maps, enums
+from typing import TypeVar, Dict
 
 K = TypeVar("K", bound=Enum)
 V = TypeVar("V", bound=Enum)

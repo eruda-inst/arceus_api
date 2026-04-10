@@ -1,5 +1,4 @@
 import json
-import httpx
 from .. import ixc_client
 from pydantic import PositiveInt
 from typing import Any, Optional

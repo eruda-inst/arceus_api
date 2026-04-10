@@ -1,7 +1,7 @@
 from .. import models
 from datetime import date, time
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 class LogCRUD:
