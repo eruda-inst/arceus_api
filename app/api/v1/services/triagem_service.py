@@ -1,17 +1,17 @@
 from . import service_service
+from typing import Optional, Any
 from pydantic import ValidationError
-from typing import Self, Optional, Any
 from .. import schemas, clients, utils
 from fastapi import HTTPException, status
 
 
 class TriagemService(service_service.Service):
-    def __init__(self: Self) -> None:
+    def __init__(self) -> None:
         super().__init__()
         self.triagem_ixc_cliente = clients.TriagemIXCCliente()
 
     async def get_contato_cliente(
-        self: Self,
+        self,
         protocolo: Optional[str] = None,
         cnpj_cpf: Optional[str] = None,
     ) -> schemas.ContatoOut:
@@ -43,7 +43,7 @@ class TriagemService(service_service.Service):
             )
 
     async def put_contato_cliente(
-        self: Self,
+        self,
         contato: schemas.ContatoUpdate,
         protocolo: Optional[str] = None,
         cnpj_cpf: Optional[str] = None,

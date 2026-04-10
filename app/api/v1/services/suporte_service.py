@@ -1,18 +1,18 @@
 from . import service_service
 from datetime import datetime
-from typing import Self, Optional, Any
+from typing import Optional, Any
 from .. import utils, schemas, clients
 from fastapi import HTTPException, status
 from pydantic import ValidationError, PositiveInt
 
 
 class SuporteService(service_service.Service):
-    def __init__(self: Self) -> None:
+    def __init__(self) -> None:
         super().__init__()
         self.suporte_ixc_cliente = clients.SuporteIXCCliente()
 
     async def get_contratos(
-        self: Self,
+        self,
         protocolo: Optional[str] = None,
         cnpj_cpf: Optional[str] = None,
         page: Optional[PositiveInt] = 1,
@@ -134,7 +134,7 @@ class SuporteService(service_service.Service):
             )
 
     async def get_status_conexao(
-        self: Self, id_login: PositiveInt
+        self, id_login: PositiveInt
     ) -> schemas.StatusConexaoOut:
         try:
             res = await self.suporte_ixc_cliente.get_status_conexao(
@@ -166,7 +166,7 @@ class SuporteService(service_service.Service):
             )
 
     async def get_status_onu(
-        self: Self,
+        self,
         id_login: Optional[PositiveInt] = None,
         mac_onu: Optional[str] = None,
     ) -> schemas.StatusONUOut:
@@ -229,7 +229,7 @@ class SuporteService(service_service.Service):
             )
 
     async def post_desconectar_cliente(
-        self: Self, id_login: PositiveInt
+        self, id_login: PositiveInt
     ) -> schemas.MensagemOut:
         try:
             res = await self.suporte_ixc_cliente.post_desconectar_cliente(
@@ -247,7 +247,7 @@ class SuporteService(service_service.Service):
             )
 
     async def get_atendimentos(
-        self: Self,
+        self,
         id_login: PositiveInt,
         page: Optional[PositiveInt] = 1,
         per_page: Optional[PositiveInt] = 10,
@@ -303,7 +303,7 @@ class SuporteService(service_service.Service):
             )
 
     async def post_atendimentos(
-        self: Self, atendimento: schemas.AtendimentoIn
+        self, atendimento: schemas.AtendimentoIn
     ) -> schemas.AtendimentoCreate:
         try:
             res = await self.suporte_ixc_cliente.post_atendimentos(
@@ -325,7 +325,7 @@ class SuporteService(service_service.Service):
             )
 
     async def put_ip(
-        self: Self, id_login: PositiveInt, ip: schemas.IPUpdate
+        self, id_login: PositiveInt, ip: schemas.IPUpdate
     ) -> schemas.MensagemOut:
         try:
             res = await self.suporte_ixc_cliente.get_login(id_login=id_login)
@@ -357,7 +357,7 @@ class SuporteService(service_service.Service):
                 detail=f"Erro interno: {str(e)}",
             )
 
-    async def post_limpar_mac(self: Self, id_login: PositiveInt) -> schemas.MensagemOut:
+    async def post_limpar_mac(self, id_login: PositiveInt) -> schemas.MensagemOut:
         try:
             res = await self.suporte_ixc_cliente.post_limpar_mac(id_login=id_login)
             mensagem = "Nenhuma mensagem retornada."
@@ -376,7 +376,7 @@ class SuporteService(service_service.Service):
                 detail=f"Erro interno: {str(e)}",
             )
 
-    async def get_dados_wifi(self: Self, id_login: PositiveInt) -> schemas.WifiOut:
+    async def get_dados_wifi(self, id_login: PositiveInt) -> schemas.WifiOut:
         try:
             res = await self.suporte_ixc_cliente.get_dados_wifi(id_login=id_login)
 

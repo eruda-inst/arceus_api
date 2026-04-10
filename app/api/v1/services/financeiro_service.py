@@ -1,18 +1,18 @@
 from . import service_service
-from typing import Self, Optional, Any
+from typing import Optional, Any
 from .. import clients, schemas, utils
 from fastapi import HTTPException, status
 from pydantic import ValidationError, PositiveInt
 
 
 class FinanceiroService(service_service.Service):
-    def __init__(self: Self) -> None:
+    def __init__(self) -> None:
         super().__init__()
         self.financeiro_ixc_cliente = clients.FinanceiroIXCCliente()
         self.financeiro_az7_cliente = clients.FinanceiroAZ7Cliente()
 
     async def get_faturas_abertas(
-        self: Self,
+        self,
         protocolo: Optional[str] = None,
         cnpj_cpf: Optional[str] = None,
         page: Optional[PositiveInt] = 1,
@@ -88,7 +88,7 @@ class FinanceiroService(service_service.Service):
             )
 
     async def post_desbloqueio_em_confianca(
-        self: Self,
+        self,
         id_contrato: PositiveInt,
     ) -> schemas.MensagemOut:
         try:
@@ -112,7 +112,7 @@ class FinanceiroService(service_service.Service):
             )
 
     async def get_linha_digitavel(
-        self: Self, id_fatura: PositiveInt
+        self, id_fatura: PositiveInt
     ) -> schemas.LinhaDigitavelOut:
         try:
             res = await self.financeiro_ixc_cliente.get_linha_digitavel(
@@ -146,7 +146,7 @@ class FinanceiroService(service_service.Service):
                 detail=f"Erro interno ao processar solicitação: {str(e)}",
             )
 
-    async def get_chave_pix(self: Self, id_fatura: PositiveInt) -> schemas.ChavePixBase:
+    async def get_chave_pix(self, id_fatura: PositiveInt) -> schemas.ChavePixBase:
         try:
             res = await self.financeiro_az7_cliente.get_chave_pix(id_fatura=id_fatura)
             if len(res) < 1 or not res.get("pixCode"):
@@ -170,7 +170,7 @@ class FinanceiroService(service_service.Service):
             )
 
     async def get_credenciais(
-        self: Self, protocolo: Optional[str] = None, cnpj_cpf: Optional[str] = None
+        self, protocolo: Optional[str] = None, cnpj_cpf: Optional[str] = None
     ) -> schemas.CredencialOut:
         try:
             id_cliente = await self.get_id_cliente_ixc(
@@ -203,7 +203,7 @@ class FinanceiroService(service_service.Service):
             )
 
     async def put_credenciais(
-        self: Self,
+        self,
         id_cliente: PositiveInt,
         credenciais: schemas.CredencialUpdate,
     ) -> schemas.MensagemOut:
@@ -239,7 +239,7 @@ class FinanceiroService(service_service.Service):
                 detail=f"Erro interno ao processar solicitação: {str(e)}",
             )
 
-    async def get_ultima_fatura_paga(self: Self, id_contrato: PositiveInt) -> Any:
+    async def get_ultima_fatura_paga(self, id_contrato: PositiveInt) -> Any:
         try:
             res = await self.financeiro_ixc_cliente.get_ultima_fatura_paga(
                 id_contrato=id_contrato

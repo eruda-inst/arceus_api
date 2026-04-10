@@ -4,9 +4,9 @@ from ..db import get_db
 from datetime import datetime
 from zoneinfo import ZoneInfo
 from fastapi.logger import logger
-from sqlalchemy.exc import SQLAlchemyError
 from fastapi import Request, Response
-from typing import Self, Awaitable, Callable, Any
+from sqlalchemy.exc import SQLAlchemyError
+from typing import Awaitable, Callable, Any
 from starlette.middleware.base import BaseHTTPMiddleware
 
 
@@ -20,11 +20,11 @@ INCLUDE_PREFIXES = (
 
 
 class LogMiddleware(BaseHTTPMiddleware):
-    def __init__(self: Self, app: Any):
+    def __init__(self, app: Any):
         super().__init__(app)
 
     async def dispatch(
-        self: Self,
+        self,
         request: Request,
         call_next: Callable[[Request], Awaitable[Response]],
     ):

@@ -1,19 +1,19 @@
 import json
-from .. import SortOrder, ixc_client
 from app.api.v1 import schemas
 from pydantic import PositiveInt
-from typing import Self, Optional, Any
+from typing import Optional, Any
+from .. import SortOrder, ixc_client
 
 
 class FinanceiroIXCCliente(ixc_client.IXCCliente):
-    async def get_contrato(self: Self, id_contrato: PositiveInt) -> Any:
+    async def get_contrato(self, id_contrato: PositiveInt) -> Any:
         grid_param = [{"TB": "cliente_contrato.id", "OP": "=", "P": str(id_contrato)}]
         payload = {"grid_param": json.dumps(obj=grid_param)}
         data = await self._make_request(endpoint="cliente_contrato", payload=payload)
         return data
 
     async def get_faturas_abertas(
-        self: Self,
+        self,
         id_cliente: PositiveInt,
         page: Optional[PositiveInt] = 1,
         per_page: Optional[PositiveInt] = 15,
@@ -34,29 +34,27 @@ class FinanceiroIXCCliente(ixc_client.IXCCliente):
         data = await self._make_request(endpoint="fn_areceber", payload=payload)
         return data
 
-    async def post_desbloqueio_em_confianca(
-        self: Self, id_contrato: PositiveInt
-    ) -> Any:
+    async def post_desbloqueio_em_confianca(self, id_contrato: PositiveInt) -> Any:
         payload = {"id": id_contrato}
         data = await self._make_request(
             endpoint="desbloqueio_confianca", payload=payload, include_ixcsoft=False
         )
         return data
 
-    async def get_linha_digitavel(self: Self, id_fatura: PositiveInt) -> Any:
+    async def get_linha_digitavel(self, id_fatura: PositiveInt) -> Any:
         grid_param = [{"TB": "fn_areceber.id", "OP": "=", "P": str(id_fatura)}]
         payload = {"grid_param": json.dumps(obj=grid_param)}
         data = await self._make_request(endpoint="fn_areceber", payload=payload)
         return data
 
-    async def get_credenciais(self: Self, id_cliente: PositiveInt) -> Any:
+    async def get_credenciais(self, id_cliente: PositiveInt) -> Any:
         grid_param = [{"TB": "cliente.id", "OP": "=", "P": str(id_cliente)}]
         payload = {"grid_param": json.dumps(obj=grid_param)}
         data = await self._make_request(endpoint="cliente", payload=payload)
         return data
 
     async def put_clientes(
-        self: Self, id_cliente: PositiveInt, cliente: schemas.ClienteUpdate
+        self, id_cliente: PositiveInt, cliente: schemas.ClienteUpdate
     ) -> Any:
         data = await self._make_request(
             endpoint=f"cliente/{id_cliente}",
@@ -66,7 +64,7 @@ class FinanceiroIXCCliente(ixc_client.IXCCliente):
         )
         return data
 
-    async def get_ultima_fatura_paga(self: Self, id_contrato: PositiveInt) -> Any:
+    async def get_ultima_fatura_paga(self, id_contrato: PositiveInt) -> Any:
         grid_param = [
             {"TB": "fn_areceber.id_contrato", "OP": "=", "P": str(id_contrato)},
             {"TB": "fn_areceber.status", "OP": "=", "P": "R"},

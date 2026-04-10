@@ -1,19 +1,19 @@
 from . import service_service
 from datetime import datetime
-from typing import Self, Optional, Any
+from typing import Optional, Any
 from .. import utils, schemas, clients
 from fastapi import HTTPException, status
 from pydantic import ValidationError, PositiveInt
 
 
 class ComercialService(service_service.Service):
-    def __init__(self: Self) -> None:
+    def __init__(self) -> None:
         super().__init__()
         self.comercial_ixc_cliente = clients.ComercialIXCCliente()
         self.suporte_ixc_cliente = clients.SuporteIXCCliente()
 
     async def get_status_acesso(
-        self: Self, id_contrato: PositiveInt
+        self, id_contrato: PositiveInt
     ) -> schemas.StatusAcessoOut:
         try:
             res = await self.comercial_ixc_cliente.get_status_acesso(
@@ -46,7 +46,7 @@ class ComercialService(service_service.Service):
             )
 
     async def get_contratos(
-        self: Self,
+        self,
         protocolo: Optional[str] = None,
         cnpj_cpf: Optional[str] = None,
         page: Optional[PositiveInt] = 1,
@@ -188,7 +188,7 @@ class ComercialService(service_service.Service):
                 detail=f"Erro interno ao processar solicitação: {str(e)}",
             )
 
-    async def post_leads(self: Self, lead: schemas.LeadIn) -> schemas.LeadCreate:
+    async def post_leads(self, lead: schemas.LeadIn) -> schemas.LeadCreate:
         try:
             lead_data = lead.model_dump()
             if lead_data.get("cnpj_cpf"):
@@ -227,7 +227,7 @@ class ComercialService(service_service.Service):
             )
 
     async def create_cliente(
-        self: Self, cliente: schemas.ClienteCreate
+        self, cliente: schemas.ClienteCreate
     ) -> schemas.ClienteCreateOut:
         try:
             cliente_data = cliente.model_dump()

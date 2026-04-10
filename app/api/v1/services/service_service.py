@@ -1,11 +1,11 @@
 from .. import clients, utils
-from typing import Self, Optional, Any
+from typing import Optional, Any
 from fastapi import HTTPException, status
 from pydantic import ValidationError, PositiveInt
 
 
 class Service:
-    def __init__(self: Self) -> None:
+    def __init__(self) -> None:
         self.opa_cliente = clients.OpaCliente()
         self.ixc_cliente = clients.IXCCliente()
 
@@ -67,7 +67,7 @@ class Service:
             )
 
     async def get_id_cliente_ixc(
-        self: Self, protocolo: Optional[str] = None, cnpj_cpf: Optional[str] = None
+        self, protocolo: Optional[str] = None, cnpj_cpf: Optional[str] = None
     ) -> PositiveInt:
         try:
 

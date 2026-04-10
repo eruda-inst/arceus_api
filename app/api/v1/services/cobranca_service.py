@@ -2,18 +2,18 @@ from . import service_service
 from datetime import datetime
 from zoneinfo import ZoneInfo
 from .. import utils, schemas, clients
+from typing import Optional, List, Any
 from fastapi import HTTPException, status
-from typing import Self, Optional, List, Any
 from pydantic import ValidationError, PositiveInt
 
 
 class CobrancaService(service_service.Service):
-    def __init__(self: Self) -> None:
+    def __init__(self) -> None:
         super().__init__()
         self.financeiro_ixc_cliente = clients.FinanceiroIXCCliente()
 
     async def get_faturas_vencidas(
-        self: Self,
+        self,
         protocolo: Optional[str] = None,
         cnpj_cpf: Optional[str] = None,
         page: Optional[PositiveInt] = 1,
