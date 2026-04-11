@@ -7,7 +7,7 @@ from .routers import (
     cobranca_router,
 )
 
-api_v1_router = APIRouter()
+api_v1_router = APIRouter(prefix="/api/v1")
 
 api_v1_router.include_router(router=suporte_router)
 api_v1_router.include_router(router=comercial_router)
