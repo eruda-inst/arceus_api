@@ -16,6 +16,11 @@ class LogCRUD:
         hora: time,
         duracao: float,
         protocolo: str,
+        payload: str | None = None,
+        url: str = "---",
+        cliente: str = "---",
+        dominio: str = "---",
+        setor: str = "---",
     ):
         try:
             log_entry = models.Log(
@@ -27,6 +32,11 @@ class LogCRUD:
                 hora=hora,
                 duracao=round(duracao, 4),
                 protocolo=protocolo,
+                payload=payload,
+                url=url,
+                cliente=cliente,
+                dominio=dominio,
+                setor=setor,
             )
             db.add(log_entry)
             await db.commit()
