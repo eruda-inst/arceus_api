@@ -14,3 +14,9 @@ class Log(db.base_db.Base):
     hora = Column(Time, nullable=False)
     duracao = Column(Numeric(10, 2), nullable=False)
     protocolo = Column(String, nullable=False)
+
+    payload = Column(String, nullable=True)
+    url = Column(String, nullable=False)
+    cliente = Column(String, nullable=False)
+    dominio = Column(String, nullable=False)
+    setor = Column(String, nullable=False)
