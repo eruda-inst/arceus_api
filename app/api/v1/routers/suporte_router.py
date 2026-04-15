@@ -151,10 +151,15 @@ async def post_atendimentos(
 )
 async def put_ip(
     id_login: PositiveInt = Path(ge=1, description="ID de login."),
-    ip: schemas.IPUpdate = Body(description="IP a ser atualizado."),
+    ip: Optional[str] = Body(default="", description="IP do login a ser atualizado."),
+    pool_radius: Optional[str] = Body(
+        default="", description="Radius do login a ser atualizado."
+    ),
 ) -> schemas.MensagemOut:
     suporte_service = services.SuporteService()
-    return await suporte_service.put_ip(id_login=id_login, ip=ip)
+    return await suporte_service.put_ip(
+        id_login=id_login, ip=ip, pool_radius=pool_radius
+    )
 
 
 @suporte_router.post(

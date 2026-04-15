@@ -18,7 +18,6 @@ from .suporte import (
     StatusONUOut,
     StatusONU,
     StatusConexaoOut,
-    IPUpdate,
     onu_suporte_schema,
     WifiOut,
 )
@@ -58,7 +57,6 @@ __all__ = [
     "StatusONUOut",
     "StatusONU",
     "StatusConexaoOut",
-    "IPUpdate",
     "FaturaAbertaListOut",
     "FaturaAberta",
     "LinhaDigitavelBase",

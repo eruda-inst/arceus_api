@@ -325,7 +325,10 @@ class SuporteService(service_service.Service):
             )
 
     async def put_ip(
-        self, id_login: PositiveInt, ip: schemas.IPUpdate
+        self,
+        id_login: PositiveInt,
+        ip: Optional[str] = "",
+        pool_radius: Optional[str] = "",
     ) -> schemas.MensagemOut:
         try:
             res = await self.suporte_ixc_cliente.get_login(id_login=id_login)
@@ -335,8 +338,15 @@ class SuporteService(service_service.Service):
                     detail="Login não encontrado.",
                 )
             login_antigo = res["registros"][0]
-            novo_ip = ip.model_dump()
-            login_atualizado: Any = {**login_antigo, **novo_ip}
+            print(f"ip: {ip}, pool_radius: {pool_radius}")
+            novo_ip = ip if ip else login_antigo["ip"]
+            novo_radius = pool_radius if pool_radius else login_antigo["pool_radius"]
+            print(f"novo_ip: {novo_ip}, novo_radius: {novo_radius}")
+            login_atualizado: Any = {
+                **login_antigo,
+                "ip": novo_ip,
+                "pool_radius": novo_radius,
+            }
             del login_atualizado["id"]
             res = await self.suporte_ixc_cliente.put_ip(
                 id_login=id_login, ip=login_atualizado

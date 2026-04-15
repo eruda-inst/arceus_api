@@ -112,7 +112,7 @@ class SuporteIXCCliente(ixc_client.IXCCliente):
         data = await self._make_request(endpoint="radusuarios", payload=payload)
         return data
 
-    async def put_ip(self, id_login: PositiveInt, ip: schemas.IPUpdate) -> Any:
+    async def put_ip(self, id_login: PositiveInt, ip: Any) -> Any:
         data = await self._make_request(
             endpoint=f"radusuarios/{id_login}",
             payload=ip,

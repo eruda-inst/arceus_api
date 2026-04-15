@@ -10,7 +10,6 @@ from .atendimento_suporte_schema import (
     AtendimentoOut,
     AtendimentoCreate,
 )
-from .ip_suporte_schema import IPUpdate
 from .wifi_suporte_schema import WifiOut
 
 __all__ = [
@@ -24,6 +23,5 @@ __all__ = [
     "AtendimentoIn",
     "AtendimentoOut",
     "AtendimentoCreate",
-    "IPUpdate",
     "WifiOut",
 ]
