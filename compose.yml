@@ -30,6 +30,7 @@ services:
       - OPA_HOST=${OPA_HOST}
       - MIGRATE_DB_URL=${MIGRATE_DB_URL}
       - IXC_TOKEN=${IXC_TOKEN}
+      - RUN_MIGRATIONS=1
     ports:
       - 8000:8000
     depends_on:
