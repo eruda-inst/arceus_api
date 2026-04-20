@@ -71,3 +71,52 @@ async def post_leads(
 ) -> schemas.LeadCreate:
     comercial_service = services.ComercialService()
     return await comercial_service.post_leads(lead=lead)
+
+
+"""
+CPFs:
+- 03050848014:
+    - Expected: false
+    - Received: false
+    - Check: ✅
+- 767.654.580-34:
+    - Expected: false
+    - Reeceived: false
+    - Check: ✅
+- 49185776874:
+    - Expected: true
+    - Received: true
+    - Check: ✅
+- 491.857.768-74:
+    - Expected: true
+    - Received: true
+    - Check: ✅
+
+CNPJs:
+- 21531258000194:
+    - Expected: false
+    - Received: false
+    - Check: ✅
+- 70.162.103/0001-33
+    - Expected: false
+    - Received: false
+    - Check: ✅
+- 10.267.513/0001-17
+    - Expected: true
+    - Received: true
+    - Check: ✅
+- 10267513000117
+    - Expected: true
+    - Received: true
+    - Check: ✅
+"""
+
+
+@comercial_router.get(
+    path="/cliente_existe",
+    response_model=schemas.ClienteExisteOut,
+    summary="Verifica se um cliente existe no Opa.",
+    description="Verifica se um cliente existe no Opa, através do CPF/CNPJ.",
+)
+async def cliente_existe(cpf_cnpj: str) -> schemas.ClienteExisteOut:
+    return await services.ComercialService.cliente_existe(cpf_cnpj=cpf_cnpj)

@@ -4,6 +4,7 @@ from .contrato_comercial_schema import (
 )
 from .acesso_comercial_schema import StatusAcesso, StatusAcessoOut
 from .lead_comercial_schema import LeadIn, LeadCreate
+from .cliente_comercial_schema import ClienteExisteOut
 
 __all__ = [
     "ComercialContrato",
@@ -12,4 +13,5 @@ __all__ = [
     "StatusAcessoOut",
     "LeadIn",
     "LeadCreate",
+    "ClienteExisteOut",
 ]

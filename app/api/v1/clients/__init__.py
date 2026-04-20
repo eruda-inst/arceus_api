@@ -1,7 +1,7 @@
 from app.api.v1.cores import settings
 from app.api.v1.utils import SortOrder
 from app.api.v1.schemas import AtendimentoIn
-from .comercial import ComercialIXCCliente
+from .comercial import ComercialIXCCliente, ComercialOpaCliente
 from .suporte import SuporteIXCCliente
 from .financeiro import FinanceiroIXCCliente, FinanceiroAZ7Cliente
 from .ixc_client import IXCCliente
@@ -22,4 +22,5 @@ __all__ = [
     "AtendimentoIn",
     "SortOrder",
     "settings",
+    "ComercialOpaCliente",
 ]

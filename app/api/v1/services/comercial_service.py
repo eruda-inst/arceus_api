@@ -228,3 +228,17 @@ class ComercialService(service_service.Service):
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=f"Erro interno ao processar solicitação: {str(e)}",
             )
+
+    @staticmethod
+    async def cliente_existe(cpf_cnpj: str) -> schemas.ClienteExisteOut:
+        try:
+            cpf_cnpj_limpo = utils.limpar_string(cpf_cnpj)
+            cliente_existe = await clients.ComercialOpaCliente.cliente_existe(
+                cpf_cnpj_limpo=cpf_cnpj_limpo
+            )
+            return schemas.ClienteExisteOut(cliente_existe=cliente_existe)
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Erro interno ao processar solicitação: {str(e)}",
+            )

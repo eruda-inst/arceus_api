@@ -7,6 +7,10 @@ CEL_PATTERN = r"^\(\d{2}\) \d{4,5}-\d{4}$"
 CEP_PATTERN = r"^\d{5}-\d{3}$"
 
 
+def limpar_string(string: str) -> str:
+    return re.sub(r"\D", "", string)
+
+
 def formatar_cpf(cpf: str) -> str:
     if re.fullmatch(CPF_PATTERN, cpf):
         return cpf

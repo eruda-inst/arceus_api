@@ -8,6 +8,7 @@ from .helpers import (
     formatar_cel,
     formatar_cep,
     formatar_data,
+    limpar_string,
 )
 from .enums import (
     StatusAtendimentoCod,
@@ -57,4 +58,5 @@ __all__ = [
     "formatar_cel",
     "formatar_cep",
     "formatar_data",
+    "limpar_string",
 ]

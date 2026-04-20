@@ -6,6 +6,7 @@ from .comercial import (
     LeadIn,
     StatusAcessoOut,
     LeadCreate,
+    ClienteExisteOut,
 )
 from .suporte import (
     SuporteContratoListOut,
@@ -36,6 +37,7 @@ from .triagem import ContatoUpdate, ContatoOut
 from .cliente_schema import ClienteUpdate
 from .login_schema import LoginUpdate
 from .root_schema import RootOut
+
 
 __all__ = [
     "Meta",
@@ -72,4 +74,5 @@ __all__ = [
     "LoginUpdate",
     "RootOut",
     "WifiOut",
+    "ClienteExisteOut",
 ]
