@@ -17,6 +17,10 @@ class Settings(BaseSettings):
 
     SECRET_KEY: SecretStr = SecretStr("")
 
+    POSTGRES_USER: str = ""
+    POSTGRES_PASSWORD: str = ""
+    POSTGRES_DB: str = ""
+
     @field_validator("DB_URL")
     def change_db_schema(cls, v: str) -> str:
         if v.startswith("postgresql://"):
