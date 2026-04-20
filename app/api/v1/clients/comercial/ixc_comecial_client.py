@@ -47,10 +47,3 @@ class ComercialIXCCliente(ixc_client.IXCCliente):
         }
         data = await self._make_request(endpoint="radusuarios", payload=payload)
         return data
-
-    async def create_cliente(self, cliente: schemas.ClienteCreate) -> Any:
-        payload = cliente.model_dump()
-        data = await self._make_request(
-            endpoint="cliente", payload=payload, include_ixcsoft=False
-        )
-        return data

@@ -71,17 +71,3 @@ async def post_leads(
 ) -> schemas.LeadCreate:
     comercial_service = services.ComercialService()
     return await comercial_service.post_leads(lead=lead)
-
-
-@comercial_router.post(
-    path="/cliente",
-    status_code=status.HTTP_201_CREATED,
-    response_model=schemas.ClienteCreateOut,
-    summary="Cadastra um novo cliente.",
-    description="Cria um cliente a partir dos dados submetidos, retornando o ID do cliente criado.",
-)
-async def create_cliente(
-    cliente: schemas.ClienteCreate = Body(description="Cliente a ser cadastrado."),
-) -> schemas.ClienteCreateOut:
-    comercial_service = services.ComercialService()
-    return await comercial_service.create_cliente(cliente=cliente)
