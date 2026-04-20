@@ -35,6 +35,12 @@ class ComercialIXCCliente(ixc_client.IXCCliente):
 
     async def post_leads(self, lead: schemas.LeadIn) -> Any:
         payload = lead.model_dump()
+        """
+        Este campo "data_cadastro" é obrigatório na API do IXC (temos que mandar alguma coisa), porém o que é mandado é descartado e a data é gerada automaticamente pela própria API deles.
+
+        Só mais uma esquisitice da API do IXC.
+        """
+        payload["data_cadastro"] = "N/A"
         data = await self._make_request(
             endpoint="contato", payload=payload, include_ixcsoft=False
         )

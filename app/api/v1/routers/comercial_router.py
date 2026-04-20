@@ -63,8 +63,8 @@ async def get_contratos(
     path="/leads",
     status_code=status.HTTP_201_CREATED,
     response_model=schemas.LeadCreate,
-    summary="Cadastra novo lead, a partir de lead submetido.",
-    description="Cria um lead a partir do lead submetido, retornando o ID do lead criado.",
+    summary="Cadastra novo lead.",
+    description="Cadastra novo lead e retorna o ID do lead criado.",
 )
 async def post_leads(
     lead: schemas.LeadIn = Body(description="Lead a ser cadastrado."),

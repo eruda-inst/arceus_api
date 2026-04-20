@@ -1,4 +1,5 @@
 import re
+from datetime import date
 
 CNPJ_PATTERN = r"^\d{2}\.\d{3}\.\d{3}\/\d{4}\-\d{2}$"
 CPF_PATTERN = r"^\d{3}\.\d{3}\.\d{3}\-\d{2}$"
@@ -80,3 +81,12 @@ def formatar_cep(cep: str) -> str:
 
     cep_formatado = f"{cep_limpo[:5]}-{cep_limpo[5:]}"
     return cep_formatado
+
+
+def formatar_data(data: str) -> str:
+    if re.fullmatch(r"\d{2}/\d{2}/\d{4}", data):
+        return data
+    ano = data[:4]
+    mes = data[5:7]
+    dia = data[8:]
+    return f"{dia}/{mes}/{ano}"
