@@ -197,6 +197,9 @@ class ComercialService(service_service.Service):
             if lead_data.get("fone_whatsapp"):
                 cel = lead_data["fone_whatsapp"]
                 lead_data["fone_whatsapp"] = utils.formatar_cel(cel=cel)
+            if lead_data.get("fone_celular"):
+                cel = lead_data["fone_celular"]
+                lead_data["fone_celular"] = utils.formatar_cel(cel=cel)
             if lead_data.get("cep"):
                 cep = lead_data["cep"]
                 lead_data["cep"] = utils.formatar_cep(cep=cep)

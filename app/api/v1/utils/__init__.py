@@ -26,6 +26,10 @@ from .enums import (
     StatusAcessoRot,
     StatusAcessoCod,
     Default,
+    AtivoCod,
+    LeadCod,
+    PrincipalCod,
+    TipoPessoaCod,
 )
 from .maps import STATUS_ATENDIMENTO, STATUS_CONEXAO, STATUS_CONTRATO, STATUS_ACESSO
 
@@ -59,4 +63,8 @@ __all__ = [
     "formatar_cep",
     "formatar_data",
     "limpar_string",
+    "AtivoCod",
+    "LeadCod",
+    "PrincipalCod",
+    "TipoPessoaCod",
 ]

@@ -8,6 +8,10 @@ from .codigos import (
     OrigemEnderecoCod,
     StatusAtendimentoCod,
     StatusAcessoCod,
+    AtivoCod,
+    TipoPessoaCod,
+    PrincipalCod,
+    LeadCod,
 )
 from .rotulos import (
     StatusAtendimentoRot,
@@ -34,4 +38,8 @@ __all__ = [
     "StatusONURot",
     "StatusAcessoRot",
     "Default",
+    "AtivoCod",
+    "TipoPessoaCod",
+    "PrincipalCod",
+    "LeadCod",
 ]
