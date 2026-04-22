@@ -39,8 +39,8 @@ class LeadIn(BaseModel):
         examples=["01/01/2000"],
     )
     # Campo obrigatório para a API do IXC: id_filial
-    id_filial: PositiveInt = Field(
-        description="ID da filial associada ao lead.", examples=[1]
+    id_filial: Optional[PositiveInt] = Field(
+        default=1, description="ID da filial associada ao lead.", examples=[1]
     )
     fone_celular: str = Field(
         max_length=20,
