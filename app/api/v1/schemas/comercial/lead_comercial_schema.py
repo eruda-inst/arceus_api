@@ -11,10 +11,10 @@ class LeadIn(BaseModel):
         examples=[utils.enums.codigos.lead_cod_enum.AtivoCod.SIM],
     )
     principal: Optional[utils.enums.codigos.lead_cod_enum.PrincipalCod] = Field(
-        default=utils.enums.codigos.lead_cod_enum.PrincipalCod.NAO,
+        default=utils.enums.codigos.lead_cod_enum.PrincipalCod.SIM,
         max_length=1,
         description="Indica se o lead é o principal (S para Sim, N para Não).",
-        examples=[utils.enums.codigos.lead_cod_enum.PrincipalCod.NAO],
+        examples=[utils.enums.codigos.lead_cod_enum.PrincipalCod.SIM],
     )
     lead: Optional[utils.enums.codigos.lead_cod_enum.LeadCod] = Field(
         default=utils.enums.codigos.lead_cod_enum.LeadCod.SIM,
