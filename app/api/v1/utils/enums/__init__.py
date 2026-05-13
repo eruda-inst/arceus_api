@@ -19,6 +19,10 @@ from .rotulos import (
     StatusContratoRot,
     StatusONURot,
     StatusAcessoRot,
+    TipoPessoaRot,
+    PrincipalRot,
+    AtivoRot,
+    LeadRot,
 )
 from .default_enum import Default
 
@@ -42,4 +46,8 @@ __all__ = [
     "TipoPessoaCod",
     "PrincipalCod",
     "LeadCod",
+    "TipoPessoaRot",
+    "PrincipalRot",
+    "AtivoRot",
+    "LeadRot",
 ]

@@ -245,3 +245,59 @@ class ComercialService(service_service.Service):
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=f"Erro interno ao processar solicitação: {str(e)}",
             )
+
+    @staticmethod
+    async def put_lead(cnpj_cpf: str, lead: schemas.LeadUpdate) -> schemas.LeadOut:
+        try:
+            cliente = clients.ComercialIXCCliente()
+            # 1. Buscar lead existente pelo CNPJ/CPF
+            response = await cliente.get_lead_by_cpf_cnpj(
+                cnpj_cpf=utils.formatar_cnpj_cpf(cnpj_cpf)
+            )
+            registros = response.get("registros", [])
+            if not registros:
+                raise HTTPException(
+                    status.HTTP_404_NOT_FOUND, detail="Lead não encontrado."
+                )
+
+            lead_antigo = registros[0]
+            lead_id = lead_antigo["id"]
+
+            # 2. Mesclar dados antigos com os novos (excluindo None)
+            dados_atualizados = {**lead_antigo, **lead.model_dump(exclude_none=True)}
+            # Remove campos que não devem ser enviados (ex: o próprio id, data_cadastro etc.)
+            dados_atualizados.pop("id", None)
+
+            # 3. Aplicar formatações (igual ao post_leads)
+            if dados_atualizados.get("cnpj_cpf"):
+                dados_atualizados["cnpj_cpf"] = utils.formatar_cnpj_cpf(
+                    cnpj_cpf=dados_atualizados["cnpj_cpf"]
+                )
+            if dados_atualizados.get("fone_whatsapp"):
+                dados_atualizados["fone_whatsapp"] = utils.formatar_cel(
+                    cel=dados_atualizados["fone_whatsapp"]
+                )
+            if dados_atualizados.get("fone_celular"):
+                dados_atualizados["fone_celular"] = utils.formatar_cel(
+                    cel=dados_atualizados["fone_celular"]
+                )
+            if dados_atualizados.get("cep"):
+                dados_atualizados["cep"] = utils.formatar_cep(
+                    cep=dados_atualizados["cep"]
+                )
+            if dados_atualizados.get("data_nascimento"):
+                dados_atualizados["data_nascimento"] = utils.formatar_data(
+                    data=dados_atualizados["data_nascimento"]
+                )
+
+            # 4. Chamar o método de atualização no cliente
+            await cliente.put_lead(lead_id=lead_id, lead=dados_atualizados)
+
+            return schemas.LeadOut(**dados_atualizados)
+        except HTTPException:
+            raise
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Erro interno ao processar solicitação: {str(e)}",
+            )

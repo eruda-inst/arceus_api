@@ -1,5 +1,5 @@
-from typing import Optional
 from pydantic import PositiveInt
+from typing import Optional, Annotated
 from .. import utils, services, schemas
 from fastapi import APIRouter, Query, status, Body
 
@@ -81,3 +81,16 @@ async def post_leads(
 )
 async def cliente_existe(cpf_cnpj: str) -> schemas.ClienteExisteOut:
     return await services.ComercialService.cliente_existe(cpf_cnpj=cpf_cnpj)
+
+
+# Por razões de limitações na plataforma opa, o verbo deve ser put, ao invés de patch
+@comercial_router.put(
+    path="/leads",
+    summary="Atualiza um ou mais campos associado a um lead específico.",
+    description="Atualiza um ou mais campos associado a um lead específico, baseado no CPF/CNPJ.",
+)
+async def put_lead(
+    cnpj_cpf: Annotated[str, Query(description="CPF ou CNPJ associado ao lead.")],
+    lead: Annotated[schemas.LeadUpdate, Body(description="Dados do lead.")],
+) -> schemas.LeadOut:
+    return await services.ComercialService.put_lead(cnpj_cpf=cnpj_cpf, lead=lead)

@@ -341,7 +341,6 @@ class SuporteService(service_service.Service):
             print(f"ip: {ip}, pool_radius: {pool_radius}")
             novo_ip = ip if ip else login_antigo["ip"]
             novo_radius = pool_radius if pool_radius else login_antigo["pool_radius"]
-            print(f"novo_ip: {novo_ip}, novo_radius: {novo_radius}")
             login_atualizado: Any = {
                 **login_antigo,
                 "ip": novo_ip,

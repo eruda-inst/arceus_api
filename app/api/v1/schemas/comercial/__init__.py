@@ -3,7 +3,7 @@ from .contrato_comercial_schema import (
     ContratoListOut as ComercialContratoListOut,
 )
 from .acesso_comercial_schema import StatusAcesso, StatusAcessoOut
-from .lead_comercial_schema import LeadIn, LeadCreate
+from .lead_comercial_schema import LeadIn, LeadCreate, LeadOut, LeadUpdate
 from .cliente_comercial_schema import ClienteExisteOut
 
 __all__ = [
@@ -14,4 +14,6 @@ __all__ = [
     "LeadIn",
     "LeadCreate",
     "ClienteExisteOut",
+    "LeadOut",
+    "LeadUpdate",
 ]

@@ -30,6 +30,10 @@ from .enums import (
     LeadCod,
     PrincipalCod,
     TipoPessoaCod,
+    AtivoRot,
+    LeadRot,
+    PrincipalRot,
+    TipoPessoaRot,
 )
 from .maps import STATUS_ATENDIMENTO, STATUS_CONEXAO, STATUS_CONTRATO, STATUS_ACESSO
 
@@ -67,4 +71,8 @@ __all__ = [
     "LeadCod",
     "PrincipalCod",
     "TipoPessoaCod",
+    "AtivoRot",
+    "LeadRot",
+    "PrincipalRot",
+    "TipoPessoaRot",
 ]
