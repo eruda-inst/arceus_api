@@ -105,6 +105,11 @@ class LeadIn(BaseModel):
         description="Canal de venda",
         examples=[utils.Default.ID_CANAL_VENDA],
     )
+    obs: str | None = Field(
+        default=None,
+        description="Observação associada ao lead.",
+        examples=["Observação associada ao lead."],
+    )
 
     @field_serializer("ativo")
     def formatar_ativo(self, v):
