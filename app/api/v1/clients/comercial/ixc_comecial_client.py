@@ -68,7 +68,6 @@ class ComercialIXCCliente(ixc_client.IXCCliente):
 
         Só mais uma esquisitice da API do IXC.
         """
-        lead["data_cadastro"] = "N/A"
         data = await self._make_request(
             endpoint=f"contato/{lead_id}",
             payload=lead,
