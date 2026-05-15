@@ -312,7 +312,8 @@ class LeadIn(BaseModel):
         description="Número do celular do potencial cliente associado ao lead.",
         examples=["(12) 93456-7890"],
     )
-    cep: str = Field(
+    cep: Optional[str] = Field(
+        default="44700-000",
         max_length=20,
         description="CEP do potencial cliente associado ao lead.",
         examples=["12345-678"],
