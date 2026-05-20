@@ -7,12 +7,9 @@ from pydantic import ValidationError, PositiveInt
 
 
 class SuporteService(service_service.Service):
-    def __init__(self) -> None:
-        super().__init__()
-        self.suporte_ixc_cliente = clients.SuporteIXCCliente()
-
+    @classmethod
     async def get_contratos(
-        self,
+        cls,
         protocolo: str | None = None,
         cnpj_cpf: str | None = None,
         page: PositiveInt | None = 1,
@@ -21,11 +18,11 @@ class SuporteService(service_service.Service):
         sortorder: utils.SortOrder | None = utils.SortOrder.ASC,
     ) -> schemas.SuporteContratoListOut:
         try:
-            id_cliente = await self.get_id_cliente_ixc(
+            id_cliente = await cls.get_id_cliente_ixc(
                 protocolo=protocolo, cnpj_cpf=cnpj_cpf
             )
 
-            contratos_ativos_res = await self.suporte_ixc_cliente.get_contratos(
+            contratos_ativos_res = await clients.SuporteIXCCliente.get_contratos(
                 id_cliente=id_cliente,
                 page=page,
                 per_page=per_page,
@@ -42,11 +39,11 @@ class SuporteService(service_service.Service):
 
             for contrato in contratos_ativos:
                 a_receber_res = (
-                    await self.suporte_ixc_cliente.get_valor_e_data_vencimento(
+                    await clients.SuporteIXCCliente.get_valor_e_data_vencimento(
                         id_contrato=contrato.get("id")
                     )
                 )
-                id_login_res = await self.suporte_ixc_cliente.get_id_login(
+                id_login_res = await clients.SuporteIXCCliente.get_id_login(
                     id_contrato=contrato.get("id")
                 )
                 if not id_login_res.get("registros", []):
@@ -55,7 +52,7 @@ class SuporteService(service_service.Service):
                         detail="Sem ID login.",
                     )
                 id_login = id_login_res.get("registros")[0]["id"]
-                onu_mac_res = await self.suporte_ixc_cliente.get_onu_mac(
+                onu_mac_res = await clients.SuporteIXCCliente.get_onu_mac(
                     id_login=id_login
                 )
 
@@ -133,11 +130,10 @@ class SuporteService(service_service.Service):
                 detail=f"Erro interno ao processar solicitação: {str(e)}",
             )
 
-    async def get_status_conexao(
-        self, id_login: PositiveInt
-    ) -> schemas.StatusConexaoOut:
+    @staticmethod
+    async def get_status_conexao(id_login: PositiveInt) -> schemas.StatusConexaoOut:
         try:
-            res = await self.suporte_ixc_cliente.get_status_conexao(
+            res = await clients.SuporteIXCCliente.get_status_conexao(
                 id_login=id_login,
             )
             registros = res.get("registros", [])
@@ -165,10 +161,9 @@ class SuporteService(service_service.Service):
                 detail=f"Erro interno ao processar solicitação: {str(e)}",
             )
 
+    @staticmethod
     async def get_status_onu(
-        self,
-        id_login: PositiveInt | None = None,
-        mac_onu: str | None = None,
+        id_login: PositiveInt | None = None, mac_onu: str | None = None
     ) -> schemas.StatusONUOut:
         if not id_login and not mac_onu:
             raise HTTPException(
@@ -178,7 +173,7 @@ class SuporteService(service_service.Service):
         try:
             if id_login is not None:
                 try:
-                    res = await self.suporte_ixc_cliente.get_status_onu(
+                    res = await clients.SuporteIXCCliente.get_status_onu(
                         id_login=id_login
                     )
                     registros = res.get("registros", [])
@@ -198,7 +193,7 @@ class SuporteService(service_service.Service):
                     if not mac_onu:
                         raise
             if mac_onu is not None:
-                res = await self.suporte_ixc_cliente.get_status_onu(mac_onu=mac_onu)
+                res = await clients.SuporteIXCCliente.get_status_onu(mac_onu=mac_onu)
                 registros = res.get("registros", [])
                 if registros and "sinal_rx" in registros[0]:
                     codigo = registros[0].get("sinal_rx")
@@ -228,11 +223,10 @@ class SuporteService(service_service.Service):
                 detail=f"Erro interno ao processar solicitação: {str(e)}",
             )
 
-    async def post_desconectar_cliente(
-        self, id_login: PositiveInt
-    ) -> schemas.MensagemOut:
+    @staticmethod
+    async def post_desconectar_cliente(id_login: PositiveInt) -> schemas.MensagemOut:
         try:
-            res = await self.suporte_ixc_cliente.post_desconectar_cliente(
+            res = await clients.SuporteIXCCliente.post_desconectar_cliente(
                 id_login=id_login
             )
             mensagem = "Nenhuma mensagem retornada."
@@ -246,8 +240,8 @@ class SuporteService(service_service.Service):
                 detail=f"Erro interno ao processar solicitação: {str(e)}",
             )
 
+    @staticmethod
     async def get_atendimentos(
-        self,
         id_login: PositiveInt,
         page: PositiveInt | None = 1,
         per_page: PositiveInt | None = 10,
@@ -255,7 +249,7 @@ class SuporteService(service_service.Service):
         sortorder: utils.SortOrder | None = utils.SortOrder.ASC,
     ) -> schemas.AtendimentoOut:
         try:
-            res = await self.suporte_ixc_cliente.get_atendimentos(
+            res = await clients.SuporteIXCCliente.get_atendimentos(
                 id_login=id_login,
                 page=page,
                 per_page=per_page,
@@ -302,11 +296,12 @@ class SuporteService(service_service.Service):
                 detail=f"Erro interno ao processar solicitação: {str(e)}",
             )
 
+    @staticmethod
     async def post_atendimentos(
-        self, atendimento: schemas.AtendimentoIn
+        atendimento: schemas.AtendimentoIn,
     ) -> schemas.AtendimentoCreate:
         try:
-            res = await self.suporte_ixc_cliente.post_atendimentos(
+            res = await clients.SuporteIXCCliente.post_atendimentos(
                 atendimento=atendimento
             )
             id_atendimento = res.get("id", None)
@@ -324,14 +319,14 @@ class SuporteService(service_service.Service):
                 detail=f"Erro interno ao processar solicitação: {str(e)}",
             )
 
+    @staticmethod
     async def put_ip(
-        self,
         id_login: PositiveInt,
         ip: str | None = "",
         pool_radius: str | None = "",
     ) -> schemas.MensagemOut:
         try:
-            res = await self.suporte_ixc_cliente.get_login(id_login=id_login)
+            res = await clients.SuporteIXCCliente.get_login(id_login=id_login)
             if not res.get("registros"):
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
@@ -347,7 +342,7 @@ class SuporteService(service_service.Service):
                 "pool_radius": novo_radius,
             }
             del login_atualizado["id"]
-            res = await self.suporte_ixc_cliente.put_ip(
+            res = await clients.SuporteIXCCliente.put_ip(
                 id_login=id_login, ip=login_atualizado
             )
             mensagem = "Nenhuma mensagem retornada."
@@ -366,9 +361,10 @@ class SuporteService(service_service.Service):
                 detail=f"Erro interno: {str(e)}",
             )
 
-    async def post_limpar_mac(self, id_login: PositiveInt) -> schemas.MensagemOut:
+    @staticmethod
+    async def post_limpar_mac(id_login: PositiveInt) -> schemas.MensagemOut:
         try:
-            res = await self.suporte_ixc_cliente.post_limpar_mac(id_login=id_login)
+            res = await clients.SuporteIXCCliente.post_limpar_mac(id_login=id_login)
             mensagem = "Nenhuma mensagem retornada."
             mensagem = res.get("message")
             return schemas.MensagemOut(mensagem=mensagem)
@@ -385,9 +381,10 @@ class SuporteService(service_service.Service):
                 detail=f"Erro interno: {str(e)}",
             )
 
-    async def get_dados_wifi(self, id_login: PositiveInt) -> schemas.WifiOut:
+    @staticmethod
+    async def get_dados_wifi(id_login: PositiveInt) -> schemas.WifiOut:
         try:
-            res = await self.suporte_ixc_cliente.get_dados_wifi(id_login=id_login)
+            res = await clients.SuporteIXCCliente.get_dados_wifi(id_login=id_login)
 
             if not res.get("registros"):
                 raise HTTPException(
