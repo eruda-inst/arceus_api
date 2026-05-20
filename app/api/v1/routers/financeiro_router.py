@@ -31,8 +31,7 @@ async def get_faturas_abertas(
     """
     Obtém faturas abertas de todos os contratos de um cliente, através de protocolo de atendimento ou CPF/CNPJ.
     """
-    financeiro_service = services.FinanceiroService()
-    return await financeiro_service.get_faturas_abertas(
+    return await services.FinanceiroService.get_faturas_abertas(
         protocolo=protocolo,
         cnpj_cpf=cnpj_cpf,
         page=page,
@@ -67,8 +66,7 @@ async def get_contratos(
     """
     Obtém contratos de todos os clientes, atravé de protocolo de atendimento ou CPF/CNPJ.
     """
-    comercial_service = services.ComercialService()
-    return await comercial_service.get_contratos(
+    return await services.ComercialService.get_contratos(
         protocolo=protocolo,
         cnpj_cpf=cnpj_cpf,
         page=page,
@@ -88,8 +86,7 @@ async def post_desbloqueio_em_confianca(
     """
     Realiza desbloqueio em confiança de um determinado contrato, atravé do ID do contrato.
     """
-    financeiro_service = services.FinanceiroService()
-    return await financeiro_service.post_desbloqueio_em_confianca(
+    return await services.FinanceiroService.post_desbloqueio_em_confianca(
         id_contrato=id_contrato,
     )
 
@@ -103,8 +100,7 @@ async def get_linha_digitavel(
     """
     Obtém linha digitável de uma fatura, atravé do ID da fatura.
     """
-    financeiro_service = services.FinanceiroService()
-    return await financeiro_service.get_linha_digitavel(id_fatura=id_fatura)
+    return await services.FinanceiroService.get_linha_digitavel(id_fatura=id_fatura)
 
 
 @financeiro_router.get(path="/chave_pix", summary="Obtém chave pix de uma fatura.")
@@ -114,8 +110,7 @@ async def get_chave_pix(
     """
     Obtém chave pix de uma fatura, atravé do ID da fatura.
     """
-    financeiro_service = services.FinanceiroService()
-    return await financeiro_service.get_chave_pix(id_fatura=id_fatura)
+    return await services.FinanceiroService.get_chave_pix(id_fatura=id_fatura)
 
 
 @financeiro_router.get(
@@ -134,8 +129,7 @@ async def get_credenciais(
     """
     Obtém credenciais de acesso à central do assinante de um cliente, atravé de protocolo de atendimento.
     """
-    financeiro_service = services.FinanceiroService()
-    return await financeiro_service.get_credenciais(
+    return await services.FinanceiroService.get_credenciais(
         protocolo=protocolo, cnpj_cpf=cnpj_cpf
     )
 
@@ -154,8 +148,7 @@ async def put_credenciais(
     """
     Atualiza credenciais de acesso à central do assinante de um cliente, atravé do ID do cliente.
     """
-    financeiro_service = services.FinanceiroService()
-    return await financeiro_service.put_credenciais(
+    return await services.FinanceiroService.put_credenciais(
         id_cliente=id_cliente, credenciais=credenciais
     )
 
@@ -169,5 +162,6 @@ async def get_ultima_fatura_paga(
     """
     Obtém última fatura paga de um contrato, atravé do ID do contrato.
     """
-    financeiro_service = services.FinanceiroService()
-    return await financeiro_service.get_ultima_fatura_paga(id_contrato=id_contrato)
+    return await services.FinanceiroService.get_ultima_fatura_paga(
+        id_contrato=id_contrato
+    )
