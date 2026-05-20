@@ -3,7 +3,6 @@ from .. import schemas, services
 from fastapi import APIRouter, Body, Query
 
 triagem_router = APIRouter(prefix="/triagem", tags=["Triagem"])
-triagem_service = services.TriagemService()
 
 
 @triagem_router.get(
@@ -22,7 +21,7 @@ async def get_contato_cliente(
     """
     Busca os dados de contato de um cliente específico, baseado no protocolo de atendimento ou no CPF/CNPJ.
     """
-    return await triagem_service.get_contato_cliente(
+    return await services.TriagemService.get_contato_cliente(
         protocolo=protocolo, cnpj_cpf=cnpj_cpf
     )
 
@@ -48,6 +47,6 @@ async def put_contato_cliente(
     """
     Atualiza um ou mais campos associado a um cliente específico, baseado no protocolo de atendimento ou no CPF/CNPJ.
     """
-    return await triagem_service.put_contato_cliente(
+    return await services.TriagemService.put_contato_cliente(
         protocolo=protocolo, cnpj_cpf=cnpj_cpf, contato=contato
     )
