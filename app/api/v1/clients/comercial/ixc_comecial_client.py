@@ -1,8 +1,8 @@
 import json
 from .. import ixc_client
+from typing import Any, Dict
 from pydantic import PositiveInt
 from app.api.v1 import schemas, utils
-from typing import Any, Optional, Dict
 
 
 class ComercialIXCCliente(ixc_client.IXCCliente):
@@ -14,11 +14,11 @@ class ComercialIXCCliente(ixc_client.IXCCliente):
 
     async def get_contratos(
         self,
-        id_cliente: int,
-        page: Optional[int] = 1,
-        per_page: Optional[int] = 10,
-        sortname: Optional[str] = "cliente_contrato.id",
-        sortorder: Optional[utils.SortOrder] = utils.SortOrder.ASC,
+        id_cliente: PositiveInt,
+        page: PositiveInt | None = 1,
+        per_page: PositiveInt | None = 10,
+        sortname: str | None = "cliente_contrato.id",
+        sortorder: utils.SortOrder | None = utils.SortOrder.ASC,
     ) -> Any:
         grid_param = [
             {"TB": "cliente_contrato.id_cliente", "OP": "=", "P": str(id_cliente)}
