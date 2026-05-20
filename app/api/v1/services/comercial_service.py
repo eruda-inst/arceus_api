@@ -7,16 +7,10 @@ from pydantic import ValidationError, PositiveInt
 
 
 class ComercialService(service_service.Service):
-    def __init__(self) -> None:
-        super().__init__()
-        self.comercial_ixc_cliente = clients.ComercialIXCCliente()
-        self.suporte_ixc_cliente = clients.SuporteIXCCliente()
-
-    async def get_status_acesso(
-        self, id_contrato: PositiveInt
-    ) -> schemas.StatusAcessoOut:
+    @staticmethod
+    async def get_status_acesso(id_contrato: PositiveInt) -> schemas.StatusAcessoOut:
         try:
-            res = await self.comercial_ixc_cliente.get_status_acesso(
+            res = await clients.ComercialIXCCliente.get_status_acesso(
                 id_contrato=id_contrato
             )
             status_acesso = res.get("registros", [])
@@ -45,8 +39,9 @@ class ComercialService(service_service.Service):
                 detail=f"Erro interno ao processar solicitação: {str(e)}",
             )
 
+    @classmethod
     async def get_contratos(
-        self,
+        cls,
         protocolo: str | None = None,
         cnpj_cpf: str | None = None,
         page: PositiveInt | None = 1,
@@ -55,11 +50,11 @@ class ComercialService(service_service.Service):
         sortorder: utils.SortOrder | None = utils.SortOrder.ASC,
     ) -> schemas.ComercialContratoListOut:
         try:
-            id_cliente = await self.get_id_cliente_ixc(
+            id_cliente = await cls.get_id_cliente_ixc(
                 protocolo=protocolo, cnpj_cpf=cnpj_cpf
             )
 
-            res = await self.comercial_ixc_cliente.get_contratos(
+            res = await clients.ComercialIXCCliente.get_contratos(
                 id_cliente=id_cliente,
                 page=page,
                 per_page=per_page,
@@ -77,7 +72,7 @@ class ComercialService(service_service.Service):
 
             for contrato in contratos:
                 a_receber_res = (
-                    await self.comercial_ixc_cliente.get_valor_e_data_vencimento(
+                    await clients.ComercialIXCCliente.get_valor_e_data_vencimento(
                         id_contrato=contrato["id"]
                     )
                 )
@@ -88,7 +83,7 @@ class ComercialService(service_service.Service):
                 ]
 
                 if not titulos_nao_quitados:
-                    login = await self.comercial_ixc_cliente.get_login(
+                    login = await clients.ComercialIXCCliente.get_login(
                         id_cliente=contrato["id_cliente"]
                     )
 
@@ -140,7 +135,7 @@ class ComercialService(service_service.Service):
                         ).date(),
                     )
 
-                login = await self.comercial_ixc_cliente.get_login(
+                login = await clients.ComercialIXCCliente.get_login(
                     id_cliente=contrato["id_cliente"]
                 )
 
@@ -188,7 +183,8 @@ class ComercialService(service_service.Service):
                 detail=f"Erro interno ao processar solicitação: {str(e)}",
             )
 
-    async def post_leads(self, lead: schemas.LeadIn) -> schemas.LeadCreate:
+    @staticmethod
+    async def post_leads(lead: schemas.LeadIn) -> schemas.LeadCreate:
         try:
             lead_data = lead.model_dump()
             if lead_data.get("cnpj_cpf"):
@@ -209,7 +205,7 @@ class ComercialService(service_service.Service):
 
             formatted_lead = schemas.LeadIn(**lead_data)
 
-            res = await self.comercial_ixc_cliente.post_leads(lead=formatted_lead)
+            res = await clients.ComercialIXCCliente.post_leads(lead=formatted_lead)
 
             id_lead = res.get("id", None)
             if not id_lead:
