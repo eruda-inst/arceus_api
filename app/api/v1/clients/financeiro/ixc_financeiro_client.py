@@ -1,7 +1,7 @@
 import json
+from typing import Any
 from app.api.v1 import schemas
 from pydantic import PositiveInt
-from typing import Optional, Any
 from .. import SortOrder, ixc_client
 
 
@@ -15,10 +15,10 @@ class FinanceiroIXCCliente(ixc_client.IXCCliente):
     async def get_faturas_abertas(
         self,
         id_cliente: PositiveInt,
-        page: Optional[PositiveInt] = 1,
-        per_page: Optional[PositiveInt] = 15,
-        sortname: Optional[str] = "fn_areceber.id",
-        sortorder: Optional[SortOrder] = SortOrder.ASC,
+        page: PositiveInt | None = 1,
+        per_page: PositiveInt | None = 15,
+        sortname: str | None = "fn_areceber.id",
+        sortorder: SortOrder | None = SortOrder.ASC,
     ) -> Any:
         grid_param = [
             {"TB": "fn_areceber.id_cliente", "OP": "=", "P": str(id_cliente)},
