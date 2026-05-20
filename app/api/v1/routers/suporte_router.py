@@ -31,8 +31,7 @@ async def get_contratos(
     """
     Obtém contratos ativos de todos os clientes, atravé de protocolo de atendimento.
     """
-    suporte_service = services.SuporteService()
-    return await suporte_service.get_contratos(
+    return await services.SuporteService.get_contratos(
         protocolo=protocolo,
         cnpj_cpf=cnpj_cpf,
         page=page,
@@ -53,8 +52,7 @@ async def get_status_conexao(
     """
     Obtém status de conexão de um cliente, atravé do ID de login.
     """
-    suporte_service = services.SuporteService()
-    return await suporte_service.get_status_conexao(id_login=id_login)
+    return await services.SuporteService.get_status_conexao(id_login=id_login)
 
 
 @suporte_router.get(
@@ -73,8 +71,9 @@ async def get_status_onu(
     """
     Obtém status de ONU (sinal rx) de um cliente, atravé do ID de login, ou MAC Address de ONU.
     """
-    suporte_service = services.SuporteService()
-    return await suporte_service.get_status_onu(id_login=id_login, mac_onu=mac_onu)
+    return await services.SuporteService.get_status_onu(
+        id_login=id_login, mac_onu=mac_onu
+    )
 
 
 @suporte_router.post(
@@ -88,8 +87,7 @@ async def post_desconectar_cliente(
     """
     Envia sinal de desconexão para um cliente, atravé do ID de login.
     """
-    suporte_service = services.SuporteService()
-    return await suporte_service.post_desconectar_cliente(id_login=id_login)
+    return await services.SuporteService.post_desconectar_cliente(id_login=id_login)
 
 
 @suporte_router.get(
@@ -115,8 +113,7 @@ async def get_atendimentos(
     """
     Checa atendimentos abertos de um cliente, atravé do ID de login.
     """
-    suporte_service = services.SuporteService()
-    return await suporte_service.get_atendimentos(
+    return await services.SuporteService.get_atendimentos(
         id_login=id_login,
         page=page,
         per_page=per_page,
@@ -138,8 +135,7 @@ async def post_atendimentos(
     """
     Abre ticket de atendimento, atravé de dados do atendimento.
     """
-    suporte_service = services.SuporteService()
-    return await suporte_service.post_atendimentos(atendimento=atendimento)
+    return await services.SuporteService.post_atendimentos(atendimento=atendimento)
 
 
 # Por razões de limitações na plataforma opa, o verbo deve ser put, ao invés de patch
@@ -157,8 +153,7 @@ async def put_ip(
     """
     Atualiza um ou mais campos associado a um login específico, por meio do ID de login.
     """
-    suporte_service = services.SuporteService()
-    return await suporte_service.put_ip(
+    return await services.SuporteService.put_ip(
         id_login=id_login, ip=ip, pool_radius=pool_radius
     )
 
@@ -172,8 +167,7 @@ async def post_limpar_mac(
     """
     Limpa MAC Address, atravé do ID de login.
     """
-    suporte_service = services.SuporteService()
-    return await suporte_service.post_limpar_mac(id_login=id_login)
+    return await services.SuporteService.post_limpar_mac(id_login=id_login)
 
 
 @suporte_router.get(path="/dados_wifi", summary="Obtém dados de WiFi de um cliente.")
@@ -185,5 +179,4 @@ async def get_dados_wifi(
     """
     Obtém dados de WiFi de um cliente, atravé do ID de login.
     """
-    suporte_service = services.SuporteService()
-    return await suporte_service.get_dados_wifi(id_login=id_login)
+    return await services.SuporteService.get_dados_wifi(id_login=id_login)
