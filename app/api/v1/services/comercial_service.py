@@ -1,6 +1,6 @@
+from typing import Any
 from . import service_service
 from datetime import datetime
-from typing import Optional, Any
 from .. import utils, schemas, clients
 from fastapi import HTTPException, status
 from pydantic import ValidationError, PositiveInt
@@ -47,12 +47,12 @@ class ComercialService(service_service.Service):
 
     async def get_contratos(
         self,
-        protocolo: Optional[str] = None,
-        cnpj_cpf: Optional[str] = None,
-        page: Optional[PositiveInt] = 1,
-        per_page: Optional[PositiveInt] = 10,
-        sortname: Optional[str] = "cliente_contrato.id",
-        sortorder: Optional[utils.SortOrder] = utils.SortOrder.ASC,
+        protocolo: str | None = None,
+        cnpj_cpf: str | None = None,
+        page: PositiveInt | None = 1,
+        per_page: PositiveInt | None = 10,
+        sortname: str | None = "cliente_contrato.id",
+        sortorder: utils.SortOrder | None = utils.SortOrder.ASC,
     ) -> schemas.ComercialContratoListOut:
         try:
             id_cliente = await self.get_id_cliente_ixc(
