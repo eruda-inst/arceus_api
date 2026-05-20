@@ -1,24 +1,25 @@
 import httpx
 from .. import cores
 from typing import Any
+from pydantic import PositiveInt
 from fastapi import HTTPException, status
 
 
 class OpaCliente:
-    def __init__(self) -> None:
-        self.token = cores.settings.OPA_TOKEN
-        self.host = cores.settings.OPA_HOST
-        self.base_url = f"https://{self.host}/api/v1"
-        self.headers = {"Authorization": f"Bearer {self.token}"}
+    token = cores.settings.OPA_TOKEN
+    host = cores.settings.OPA_HOST
+    base_url = f"https://{host}/api/v1"
+    headers = {"Authorization": f"Bearer {token}"}
 
-    async def _make_request(self, endpoint: str, payload: Any) -> Any:
-        url = f"{self.base_url}/{endpoint}"
+    @classmethod
+    async def _make_request(cls, endpoint: str, payload: Any) -> Any:
+        url = f"{cls.base_url}/{endpoint}"
         try:
             async with httpx.AsyncClient(timeout=30.0) as async_client:
                 res = await async_client.request(
                     method="GET",
                     url=url,
-                    headers=self.headers,
+                    headers=cls.headers,
                     json=payload,
                 )
                 res.raise_for_status()
@@ -29,12 +30,14 @@ class OpaCliente:
                 detail=f"Erro na API do OPA: {str(e)}",
             )
 
-    async def get_id_cliente_opa(self, protocolo: str) -> Any:
+    @classmethod
+    async def get_id_cliente_opa(cls, protocolo: str) -> Any:
         payload = {"filter": {"protocolo": protocolo}}
-        data = await self._make_request(endpoint="atendimento", payload=payload)
+        data = await cls._make_request(endpoint="atendimento", payload=payload)
         return data
 
-    async def get_id_cliente_ixc(self, id_cliente_opa: int) -> Any:
+    @classmethod
+    async def get_id_cliente_ixc(cls, id_cliente_opa: PositiveInt) -> Any:
         payload = {"filter": {"_id": id_cliente_opa}}
-        data = await self._make_request(endpoint="cliente", payload=payload)
+        data = await cls._make_request(endpoint="cliente", payload=payload)
         return data
