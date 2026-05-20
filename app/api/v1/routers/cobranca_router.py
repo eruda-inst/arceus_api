@@ -4,8 +4,6 @@ from fastapi import APIRouter, Query
 from .. import utils, services, schemas
 
 cobranca_router = APIRouter(prefix="/cobranca", tags=["Cobrança"])
-cobranca_service = services.CobrancaService()
-financeiro_service = services.FinanceiroService()
 
 
 @cobranca_router.get(
@@ -35,7 +33,7 @@ async def get_faturas_abertas(
     """
     Obtém faturas abertas de todos os contratos de um cliente, através de protocolo de atendimento ou CPF/CNPJ.
     """
-    return await financeiro_service.get_faturas_abertas(
+    return await services.FinanceiroService.get_faturas_abertas(
         protocolo=protocolo,
         cnpj_cpf=cnpj_cpf,
         page=page,
@@ -72,7 +70,7 @@ async def get_faturas_vencidas(
     """
     Obtém faturas vencidas de todos os contratos de um cliente, através de protocolo de atendimento ou CPF/CNPJ.
     """
-    return await cobranca_service.get_faturas_vencidas(
+    return await services.CobrancaService.get_faturas_vencidas(
         protocolo=protocolo,
         cnpj_cpf=cnpj_cpf,
         page=page,
