@@ -1,7 +1,7 @@
 [project]
 name = "arceus-api"
 version = "0.1.0"
-description = "Add your description here"
+description = "API oficial Newnet/Eruda — Simplifica integrações entre a API da OpaSuite, da IXCSoft e da 7AZ."
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
