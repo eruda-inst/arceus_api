@@ -38,7 +38,7 @@ from .financeiro import (
 from .triagem import ContatoUpdate, ContatoOut
 from .cliente_schema import ClienteUpdate
 from .login_schema import LoginUpdate
-from .root_schema import RootOut
+from .index_schema import IndexOut
 
 __all__ = [
     "Meta",
@@ -73,7 +73,7 @@ __all__ = [
     "ContatoOut",
     "ClienteUpdate",
     "LoginUpdate",
-    "RootOut",
+    "IndexOut",
     "WifiOut",
     "ClienteExisteOut",
     "LeadOut",

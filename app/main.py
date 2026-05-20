@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 app = FastAPI(
     title="API do Arceus",
     description="API oficial Newnet/Eruda — Simplifica integrações entre a API da OpaSuite, da IXCSoft e da 7AZ.",
-    version="0.867.0",
+    version="Mark I (0.87.2)",
     routes=api_v1_router.routes,
 )
 
@@ -23,14 +23,19 @@ app.add_middleware(
 )
 
 
-@app.get(
-    path="/",
-    response_model=schemas.RootOut,
-    summary="Endpoint Raiz da API.",
-    description="Retorna os links para a documentação interativa da API.",
-)
-def root(request: Request) -> schemas.RootOut:
+@app.get(path="/", summary="Endpoint Raiz da API.")
+def index(request: Request) -> schemas.IndexOut:
+    """
+    Retorna os links para a documentação interativa da API.
+    """
+    titulo = app.title
+    descricao = app.description
     base_url = str(request.base_url).rstrip("/")
-    docs_url = HttpUrl(base_url + str(app.docs_url))
-    redoc_url = HttpUrl(base_url + str(app.redoc_url))
-    return schemas.RootOut(docs_url=docs_url, redoc_url=redoc_url)
+    url_documentacao_docs = HttpUrl(base_url + str(app.docs_url))
+    url_documentacao_redoc = HttpUrl(base_url + str(app.redoc_url))
+    return schemas.IndexOut(
+        titulo=titulo,
+        descricao=descricao,
+        url_documentacao_docs=url_documentacao_docs,
+        url_documentacao_redoc=url_documentacao_redoc,
+    )
