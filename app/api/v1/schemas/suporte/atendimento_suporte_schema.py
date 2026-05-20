@@ -1,6 +1,6 @@
+from typing import List
 from .. import misc_schema
 from app.api.v1 import utils
-from typing import Optional, List
 from pydantic import BaseModel, Field, PositiveInt
 
 
@@ -17,12 +17,12 @@ class AtendimentoIn(BaseModel):
     menssagem: str = Field(
         description="Mensagem descritiva.", examples=["Estou com problemas."]
     )
-    origem_endereco: Optional[utils.OrigemEnderecoCod] = Field(
+    origem_endereco: utils.OrigemEnderecoCod | None = Field(
         default=utils.OrigemEnderecoCod.LOGIN,
         description="Origem de endereço.",
         examples=[utils.OrigemEnderecoCod.LOGIN],
     )
-    tipo: Optional[utils.TipoCod] = Field(
+    tipo: utils.TipoCod | None = Field(
         default=utils.TipoCod.CLIENTE,
         description="Tipo do atendimento.",
         examples=[utils.TipoCod.CLIENTE],
@@ -30,17 +30,17 @@ class AtendimentoIn(BaseModel):
     titulo: str = Field(
         description="Título do atendimento.", examples=["Problema de conexão."]
     )
-    prioridade: Optional[utils.PrioridadeCod] = Field(
+    prioridade: utils.PrioridadeCod | None = Field(
         default=utils.PrioridadeCod.NORMAL,
         description="Pioridade do atendimento.",
         examples=[utils.PrioridadeCod.NORMAL],
     )
-    su_status: Optional[utils.SuStatusCod] = Field(
+    su_status: utils.SuStatusCod | None = Field(
         default=utils.SuStatusCod.NOVO,
         description="Status do atendimento.",
         examples=[utils.SuStatusCod.NOVO],
     )
-    id_ticket_setor: Optional[PositiveInt] = Field(
+    id_ticket_setor: PositiveInt | None = Field(
         default=utils.Default.ID_TICKET_SETOR,
         description="Setor do atendimento.",
         examples=[2],
@@ -48,7 +48,7 @@ class AtendimentoIn(BaseModel):
     id_contrato: PositiveInt = Field(
         description="ID de contrato do cliente.", examples=[789]
     )
-    id_responsavel_tecnico: Optional[PositiveInt] = Field(
+    id_responsavel_tecnico: PositiveInt | None = Field(
         default=utils.Default.ID_RESPONSAVEL_ARCEUS,
         description="ID do responsável técnico.",
         examples=[987],
