@@ -7,31 +7,32 @@ from fastapi import HTTPException, status
 
 
 class IXCCliente:
-    def __init__(self) -> None:
-        self.token = cores.settings.IXC_TOKEN
-        self.host = cores.settings.IXC_HOST
-        self.base_url = f"https://{self.host}/webservice/v1"
-        self.auth_header = self._create_auth_header()
+    token = cores.settings.IXC_TOKEN
+    host = cores.settings.IXC_HOST
+    base_url = f"https://{host}/webservice/v1"
 
-    def _create_auth_header(self) -> str:
-        token_encoded = base64.b64encode(self.token.encode("utf-8")).decode("utf-8")
+    @classmethod
+    def _create_auth_header(cls) -> str:
+        token_encoded = base64.b64encode(cls.token.encode("utf-8")).decode("utf-8")
         return f"Basic {token_encoded}"
 
-    def _get_headers(self, include_ixcsoft: bool = True) -> Any:
-        headers = {"Authorization": self.auth_header}
+    @classmethod
+    def _get_headers(cls, include_ixcsoft: bool = True) -> Any:
+        headers = {"Authorization": cls._create_auth_header()}
         if include_ixcsoft:
             headers["ixcsoft"] = "listar"
         return headers
 
+    @classmethod
     async def _make_request(
-        self,
+        cls,
         endpoint: str,
         payload: Any,
         method: str = "POST",
         include_ixcsoft: bool = True,
     ) -> Any:
-        url = f"{self.base_url}/{endpoint}"
-        headers = self._get_headers(include_ixcsoft=include_ixcsoft)
+        url = f"{cls.base_url}/{endpoint}"
+        headers = cls._get_headers(include_ixcsoft=include_ixcsoft)
 
         try:
             async with httpx.AsyncClient(timeout=30.0) as async_client:
@@ -62,16 +63,18 @@ class IXCCliente:
                 detail=f"Resposta inválida do servidor IXC: {e}",
             ) from e
 
-    async def get_valor_e_data_vencimento(self, id_contrato: int) -> Any:
+    @classmethod
+    async def get_valor_e_data_vencimento(cls, id_contrato: int) -> Any:
         grid_param = [
             {"TB": "fn_areceber.id_contrato", "OP": "=", "P": str(id_contrato)}
         ]
         payload = {"grid_param": json.dumps(obj=grid_param)}
-        data = await self._make_request(endpoint="fn_areceber", payload=payload)
+        data = await cls._make_request(endpoint="fn_areceber", payload=payload)
         return data
 
-    async def get_id_cliente_ixc(self, cnpj_cpf: str) -> Any:
+    @classmethod
+    async def get_id_cliente_ixc(cls, cnpj_cpf: str) -> Any:
         grid_param = [{"TB": "cliente.cnpj_cpf", "OP": "=", "P": str(cnpj_cpf)}]
         payload = {"grid_param": json.dumps(obj=grid_param)}
-        data = await self._make_request(endpoint="cliente", payload=payload)
+        data = await cls._make_request(endpoint="cliente", payload=payload)
         return data
