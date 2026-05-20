@@ -1,5 +1,5 @@
+from typing import Any
 from .. import clients, utils
-from typing import Optional, Any
 from fastapi import HTTPException, status
 from pydantic import ValidationError, PositiveInt
 
@@ -67,7 +67,7 @@ class Service:
             )
 
     async def get_id_cliente_ixc(
-        self, protocolo: Optional[str] = None, cnpj_cpf: Optional[str] = None
+        self, protocolo: str | None = None, cnpj_cpf: str | None = None
     ) -> PositiveInt:
         try:
 
