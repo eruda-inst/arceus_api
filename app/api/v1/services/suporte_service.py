@@ -1,6 +1,6 @@
+from typing import Any
 from . import service_service
 from datetime import datetime
-from typing import Optional, Any
 from .. import utils, schemas, clients
 from fastapi import HTTPException, status
 from pydantic import ValidationError, PositiveInt
@@ -13,12 +13,12 @@ class SuporteService(service_service.Service):
 
     async def get_contratos(
         self,
-        protocolo: Optional[str] = None,
-        cnpj_cpf: Optional[str] = None,
-        page: Optional[PositiveInt] = 1,
-        per_page: Optional[PositiveInt] = 10,
-        sortname: Optional[str] = "cliente_contrato.id",
-        sortorder: Optional[utils.SortOrder] = utils.SortOrder.ASC,
+        protocolo: str | None = None,
+        cnpj_cpf: str | None = None,
+        page: PositiveInt | None = 1,
+        per_page: PositiveInt | None = 10,
+        sortname: str | None = "cliente_contrato.id",
+        sortorder: utils.SortOrder | None = utils.SortOrder.ASC,
     ) -> schemas.SuporteContratoListOut:
         try:
             id_cliente = await self.get_id_cliente_ixc(
@@ -167,8 +167,8 @@ class SuporteService(service_service.Service):
 
     async def get_status_onu(
         self,
-        id_login: Optional[PositiveInt] = None,
-        mac_onu: Optional[str] = None,
+        id_login: PositiveInt | None = None,
+        mac_onu: str | None = None,
     ) -> schemas.StatusONUOut:
         if not id_login and not mac_onu:
             raise HTTPException(
@@ -249,10 +249,10 @@ class SuporteService(service_service.Service):
     async def get_atendimentos(
         self,
         id_login: PositiveInt,
-        page: Optional[PositiveInt] = 1,
-        per_page: Optional[PositiveInt] = 10,
-        sortname: Optional[str] = "su_ticket.id",
-        sortorder: Optional[utils.SortOrder] = utils.SortOrder.ASC,
+        page: PositiveInt | None = 1,
+        per_page: PositiveInt | None = 10,
+        sortname: str | None = "su_ticket.id",
+        sortorder: utils.SortOrder | None = utils.SortOrder.ASC,
     ) -> schemas.AtendimentoOut:
         try:
             res = await self.suporte_ixc_cliente.get_atendimentos(
@@ -327,8 +327,8 @@ class SuporteService(service_service.Service):
     async def put_ip(
         self,
         id_login: PositiveInt,
-        ip: Optional[str] = "",
-        pool_radius: Optional[str] = "",
+        ip: str | None = "",
+        pool_radius: str | None = "",
     ) -> schemas.MensagemOut:
         try:
             res = await self.suporte_ixc_cliente.get_login(id_login=id_login)
