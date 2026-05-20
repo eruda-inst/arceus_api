@@ -1,8 +1,8 @@
+from typing import List, Any
 from . import service_service
 from datetime import datetime
 from zoneinfo import ZoneInfo
 from .. import utils, schemas, clients
-from typing import Optional, List, Any
 from fastapi import HTTPException, status
 from pydantic import ValidationError, PositiveInt
 
@@ -14,12 +14,12 @@ class CobrancaService(service_service.Service):
 
     async def get_faturas_vencidas(
         self,
-        protocolo: Optional[str] = None,
-        cnpj_cpf: Optional[str] = None,
-        page: Optional[PositiveInt] = 1,
-        per_page: Optional[PositiveInt] = 15,
-        sortname: Optional[str] = "fn_areceber.id",
-        sortorder: Optional[utils.SortOrder] = utils.SortOrder.ASC,
+        protocolo: str | None = None,
+        cnpj_cpf: str | None = None,
+        page: PositiveInt | None = 1,
+        per_page: PositiveInt | None = 15,
+        sortname: str | None = "fn_areceber.id",
+        sortorder: utils.SortOrder | None = utils.SortOrder.ASC,
     ) -> schemas.FaturaAbertaListOut:
         try:
             id_cliente = await self.get_id_cliente_ixc(
