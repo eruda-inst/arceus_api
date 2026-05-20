@@ -1,6 +1,5 @@
 import re
 from app.api.v1 import utils
-from typing import Optional, Union
 from pydantic import BaseModel, Field, PositiveInt, EmailStr, field_serializer
 
 
@@ -135,114 +134,112 @@ class LeadOut(BaseModel):
 
 
 class LeadUpdate(BaseModel):
-    ativo: Optional[utils.enums.codigos.lead_cod_enum.AtivoCod] = Field(
+    ativo: utils.enums.codigos.lead_cod_enum.AtivoCod | None = Field(
         default=None,
         max_length=1,
         description="Indica se o lead esta ativo (S para Sim, N para Não).",
         examples=[utils.enums.codigos.lead_cod_enum.AtivoCod.SIM],
     )
-    principal: Optional[utils.enums.codigos.lead_cod_enum.PrincipalCod] = Field(
+    principal: utils.enums.codigos.lead_cod_enum.PrincipalCod | None = Field(
         default=None,
         max_length=1,
         description="Indica se o lead é o principal (S para Sim, N para Não).",
         examples=[utils.enums.codigos.lead_cod_enum.PrincipalCod.SIM],
     )
-    lead: Optional[utils.enums.codigos.lead_cod_enum.LeadCod] = Field(
+    lead: utils.enums.codigos.lead_cod_enum.LeadCod | None = Field(
         default=None,
         description="ID do tipo de contato.",
         examples=[utils.enums.codigos.lead_cod_enum.LeadCod.SIM],
     )
-    tipo_pessoa: Optional[str] = Field(
+    tipo_pessoa: str | None = Field(
         default=None,
         examples=[utils.enums.codigos.TipoPessoaCod.FISICA],
         description="Tipo de pessoa (F para Física, J para Jurídica, E para Estrangeiro).",
     )
-    nome: Optional[str] = Field(
+    nome: str | None = Field(
         default=None,
         max_length=200,
         description="Nome do potencial cliente associado ao lead.",
         examples=["João"],
     )
-    data_nascimento: Optional[str] = Field(
+    data_nascimento: str | None = Field(
         default=None,
         max_length=20,
         description="Data de nascimento do cliente.",
         examples=["01/01/2000"],
     )
-    id_filial: Optional[PositiveInt] = Field(
+    id_filial: PositiveInt | None = Field(
         default=None, description="ID da filial associada ao lead.", examples=[1]
     )
-    fone_celular: Optional[str] = Field(
+    fone_celular: str | None = Field(
         default=None,
         max_length=20,
         description="Número do celular do potencial cliente associado ao lead.",
         examples=["(12) 93456-7890"],
     )
-    fone_whatsapp: Optional[str] = Field(
+    fone_whatsapp: str | None = Field(
         default=None,
         max_length=20,
         description="Número do celular do potencial cliente associado ao lead.",
         examples=["(12) 93456-7890"],
     )
-    cep: Optional[str] = Field(
+    cep: str | None = Field(
         default=None,
         min_length=8,
         max_length=9,
         description="CEP do potencial cliente associado ao lead.",
         examples=["12345-678"],
     )
-    endereco: Optional[str] = Field(
+    endereco: str | None = Field(
         default=None,
         max_length=200,
         description="Endereço do potencial cliente associado ao lead.",
         examples=["Rua do Lead"],
     )
-    numero: Optional[Union[str, PositiveInt]] = Field(
+    numero: str | PositiveInt | None = Field(
         default=None,
         description="Número da casa do potencial cliente associado ao lead.",
         examples=["123"],
     )
-    bairro: Optional[str] = Field(
+    bairro: str | None = Field(
         default=None,
         max_length=200,
         description="Bairro do potencial cliente associado ao lead.",
         examples=["Bairro do Lead"],
     )
-    uf: Optional[PositiveInt] = Field(
-        default=None, description="UF do potencial cliente."
-    )
-    cnpj_cpf: Optional[str] = Field(
+    uf: PositiveInt | None = Field(default=None, description="UF do potencial cliente.")
+    cnpj_cpf: str | None = Field(
         default=None,
         max_length=30,
         description="CNPJ ou CPF do potencial cliente associado ao lead.",
         examples=["123.456.789-00"],
     )
-    cidade: Optional[PositiveInt] = Field(
+    cidade: PositiveInt | None = Field(
         default=None,
         description="ID da cidade associada ao lead.",
         examples=[utils.Default.ID_CIDADE_JACOBINA],
     )
-    id_vd_contrato: Optional[PositiveInt] = Field(
+    id_vd_contrato: PositiveInt | None = Field(
         default=None,
         description="ID do plano de contrato associado ao lead.",
         examples=[utils.Default.ID_VD_CONTRATO],
     )
-    id_responsavel: Optional[PositiveInt] = Field(
+    id_responsavel: PositiveInt | None = Field(
         default=None,
         description="ID do responsável técnico associado ao lead.",
         examples=[utils.Default.ID_RESPONSAVEL_ARCEUS],
     )
-    email: Optional[EmailStr] = Field(
+    email: EmailStr | None = Field(
         default=None,
         description="Email do potencial cliente associado ao lead.",
         examples=["exemplo@examplo.com"],
     )
-    id_candidato_tipo: Optional[PositiveInt] = Field(
+    id_candidato_tipo: PositiveInt | None = Field(
         default=None,
         description="Canal de venda",
         examples=[utils.Default.ID_CANAL_VENDA],
     )
-    obs: Optional[str] = Field(
+    obs: str | None = Field(
         default=None,
         description="Observação associada ao lead.",
         examples=["Observação associada ao lead."],
@@ -275,24 +272,24 @@ class LeadUpdate(BaseModel):
 
 
 class LeadIn(BaseModel):
-    ativo: Optional[utils.enums.codigos.lead_cod_enum.AtivoCod] = Field(
+    ativo: utils.enums.codigos.lead_cod_enum.AtivoCod | None = Field(
         default=utils.enums.codigos.lead_cod_enum.AtivoCod.SIM,
         max_length=1,
         description="Indica se o lead esta ativo (S para Sim, N para Não).",
         examples=[utils.enums.codigos.lead_cod_enum.AtivoCod.SIM],
     )
-    principal: Optional[utils.enums.codigos.lead_cod_enum.PrincipalCod] = Field(
+    principal: utils.enums.codigos.lead_cod_enum.PrincipalCod | None = Field(
         default=utils.enums.codigos.lead_cod_enum.PrincipalCod.SIM,
         max_length=1,
         description="Indica se o lead é o principal (S para Sim, N para Não).",
         examples=[utils.enums.codigos.lead_cod_enum.PrincipalCod.SIM],
     )
-    lead: Optional[utils.enums.codigos.lead_cod_enum.LeadCod] = Field(
+    lead: utils.enums.codigos.lead_cod_enum.LeadCod | None = Field(
         default=utils.enums.codigos.lead_cod_enum.LeadCod.SIM,
         description="ID do tipo de contato.",
         examples=[utils.enums.codigos.lead_cod_enum.LeadCod.SIM],
     )
-    tipo_pessoa: Optional[str] = Field(
+    tipo_pessoa: str | None = Field(
         default=utils.enums.codigos.TipoPessoaCod.FISICA,
         examples=[utils.enums.codigos.TipoPessoaCod.FISICA],
         description="Tipo de pessoa (F para Física, J para Jurídica, E para Estrangeiro).",
@@ -310,7 +307,7 @@ class LeadIn(BaseModel):
         examples=["01/01/2000"],
     )
     # Campo obrigatório para a API do IXC: id_filial
-    id_filial: Optional[PositiveInt] = Field(
+    id_filial: PositiveInt | None = Field(
         default=1, description="ID da filial associada ao lead.", examples=[1]
     )
     fone_celular: str = Field(
@@ -324,7 +321,7 @@ class LeadIn(BaseModel):
         description="Número do celular do potencial cliente associado ao lead.",
         examples=["(12) 93456-7890"],
     )
-    cep: Optional[str] = Field(
+    cep: str | None = Field(
         default="44700-000",
         min_length=8,
         max_length=9,
@@ -336,7 +333,7 @@ class LeadIn(BaseModel):
         description="Endereço do potencial cliente associado ao lead.",
         examples=["Rua do Lead"],
     )
-    numero: Optional[Union[str, PositiveInt]] = Field(
+    numero: str | PositiveInt | None = Field(
         default="S/N",
         description="Número da casa do potencial cliente associado ao lead.",
         examples=["123"],
@@ -346,25 +343,23 @@ class LeadIn(BaseModel):
         description="Bairro do potencial cliente associado ao lead.",
         examples=["Bairro do Lead"],
     )
-    uf: Optional[PositiveInt] = Field(
-        default=10, description="UF do potencial cliente."
-    )
+    uf: PositiveInt | None = Field(default=10, description="UF do potencial cliente.")
     cnpj_cpf: str = Field(
         max_length=30,
         description="CNPJ ou CPF do potencial cliente associado ao lead.",
         examples=["123.456.789-00"],
     )
-    cidade: Optional[PositiveInt] = Field(
+    cidade: PositiveInt | None = Field(
         utils.Default.ID_CIDADE_JACOBINA,
         description="ID da cidade associada ao lead.",
         examples=[utils.Default.ID_CIDADE_JACOBINA],
     )
-    id_vd_contrato: Optional[PositiveInt] = Field(
+    id_vd_contrato: PositiveInt | None = Field(
         utils.Default.ID_VD_CONTRATO,
         description="ID do plano de contrato associado ao lead.",
         examples=[utils.Default.ID_VD_CONTRATO],
     )
-    id_responsavel: Optional[PositiveInt] = Field(
+    id_responsavel: PositiveInt | None = Field(
         utils.Default.ID_RESPONSAVEL_ARCEUS,
         description="ID do responsável técnico associado ao lead.",
         examples=[utils.Default.ID_RESPONSAVEL_ARCEUS],
@@ -373,12 +368,12 @@ class LeadIn(BaseModel):
         description="Email do potencial cliente associado ao lead.",
         examples=["exemplo@examplo.com"],
     )
-    id_candidato_tipo: Optional[PositiveInt] = Field(
+    id_candidato_tipo: PositiveInt | None = Field(
         default=utils.Default.ID_CANAL_VENDA,
         description="Canal de venda",
         examples=[utils.Default.ID_CANAL_VENDA],
     )
-    obs: Optional[str] = Field(
+    obs: str | None = Field(
         default=None,
         description="Observação associada ao lead.",
         examples=["Observação associada ao lead."],
