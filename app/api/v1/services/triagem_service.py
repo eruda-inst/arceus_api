@@ -6,19 +6,16 @@ from fastapi import HTTPException, status
 
 
 class TriagemService(service_service.Service):
-    def __init__(self) -> None:
-        super().__init__()
-        self.triagem_ixc_cliente = clients.TriagemIXCCliente()
-
+    @classmethod
     async def get_contato_cliente(
-        self, protocolo: str | None = None, cnpj_cpf: str | None = None
+        cls, protocolo: str | None = None, cnpj_cpf: str | None = None
     ) -> schemas.ContatoOut:
         try:
-            id_cliente = await self.get_id_cliente_ixc(
+            id_cliente = await cls.get_id_cliente_ixc(
                 protocolo=protocolo, cnpj_cpf=cnpj_cpf
             )
 
-            res = await self.triagem_ixc_cliente.get_clientes(id_cliente=id_cliente)
+            res = await clients.TriagemIXCCliente.get_clientes(id_cliente=id_cliente)
             if not res.get("registros"):
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
@@ -40,18 +37,19 @@ class TriagemService(service_service.Service):
                 detail=f"Erro interno: {str(e)}",
             )
 
+    @classmethod
     async def put_contato_cliente(
-        self,
+        cls,
         contato: schemas.ContatoUpdate,
         protocolo: str | None = None,
         cnpj_cpf: str | None = None,
     ) -> schemas.MensagemOut:
         try:
-            id_cliente = await self.get_id_cliente_ixc(
+            id_cliente = await cls.get_id_cliente_ixc(
                 protocolo=protocolo, cnpj_cpf=cnpj_cpf
             )
 
-            res = await self.triagem_ixc_cliente.get_clientes(id_cliente=id_cliente)
+            res = await clients.TriagemIXCCliente.get_clientes(id_cliente=id_cliente)
             if not res.get("registros"):
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
@@ -70,7 +68,7 @@ class TriagemService(service_service.Service):
 
             del cliente_atualizado["id"]
 
-            res = await self.triagem_ixc_cliente.put_clientes(
+            res = await clients.TriagemIXCCliente.put_clientes(
                 id_cliente=id_cliente, cliente=cliente_atualizado
             )
 
