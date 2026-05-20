@@ -6,14 +6,16 @@ from .. import SortOrder, ixc_client
 
 
 class FinanceiroIXCCliente(ixc_client.IXCCliente):
-    async def get_contrato(self, id_contrato: PositiveInt) -> Any:
+    @classmethod
+    async def get_contrato(cls, id_contrato: PositiveInt) -> Any:
         grid_param = [{"TB": "cliente_contrato.id", "OP": "=", "P": str(id_contrato)}]
         payload = {"grid_param": json.dumps(obj=grid_param)}
-        data = await self._make_request(endpoint="cliente_contrato", payload=payload)
+        data = await cls._make_request(endpoint="cliente_contrato", payload=payload)
         return data
 
+    @classmethod
     async def get_faturas_abertas(
-        self,
+        cls,
         id_cliente: PositiveInt,
         page: PositiveInt | None = 1,
         per_page: PositiveInt | None = 15,
@@ -31,32 +33,36 @@ class FinanceiroIXCCliente(ixc_client.IXCCliente):
             "sortname": sortname,
             "sortorder": sortorder,
         }
-        data = await self._make_request(endpoint="fn_areceber", payload=payload)
+        data = await cls._make_request(endpoint="fn_areceber", payload=payload)
         return data
 
-    async def post_desbloqueio_em_confianca(self, id_contrato: PositiveInt) -> Any:
+    @classmethod
+    async def post_desbloqueio_em_confianca(cls, id_contrato: PositiveInt) -> Any:
         payload = {"id": id_contrato}
-        data = await self._make_request(
+        data = await cls._make_request(
             endpoint="desbloqueio_confianca", payload=payload, include_ixcsoft=False
         )
         return data
 
-    async def get_linha_digitavel(self, id_fatura: PositiveInt) -> Any:
+    @classmethod
+    async def get_linha_digitavel(cls, id_fatura: PositiveInt) -> Any:
         grid_param = [{"TB": "fn_areceber.id", "OP": "=", "P": str(id_fatura)}]
         payload = {"grid_param": json.dumps(obj=grid_param)}
-        data = await self._make_request(endpoint="fn_areceber", payload=payload)
+        data = await cls._make_request(endpoint="fn_areceber", payload=payload)
         return data
 
-    async def get_credenciais(self, id_cliente: PositiveInt) -> Any:
+    @classmethod
+    async def get_credenciais(cls, id_cliente: PositiveInt) -> Any:
         grid_param = [{"TB": "cliente.id", "OP": "=", "P": str(id_cliente)}]
         payload = {"grid_param": json.dumps(obj=grid_param)}
-        data = await self._make_request(endpoint="cliente", payload=payload)
+        data = await cls._make_request(endpoint="cliente", payload=payload)
         return data
 
+    @classmethod
     async def put_clientes(
-        self, id_cliente: PositiveInt, cliente: schemas.ClienteUpdate
+        cls, id_cliente: PositiveInt, cliente: schemas.ClienteUpdate
     ) -> Any:
-        data = await self._make_request(
+        data = await cls._make_request(
             endpoint=f"cliente/{id_cliente}",
             payload=cliente,
             include_ixcsoft=False,
@@ -64,7 +70,8 @@ class FinanceiroIXCCliente(ixc_client.IXCCliente):
         )
         return data
 
-    async def get_ultima_fatura_paga(self, id_contrato: PositiveInt) -> Any:
+    @classmethod
+    async def get_ultima_fatura_paga(cls, id_contrato: PositiveInt) -> Any:
         grid_param = [
             {"TB": "fn_areceber.id_contrato", "OP": "=", "P": str(id_contrato)},
             {"TB": "fn_areceber.status", "OP": "=", "P": "R"},
@@ -74,5 +81,5 @@ class FinanceiroIXCCliente(ixc_client.IXCCliente):
             "sortname": "fn_areceber.id",
             "sortorder": "DESC",
         }
-        data = await self._make_request(endpoint="fn_areceber", payload=payload)
+        data = await cls._make_request(endpoint="fn_areceber", payload=payload)
         return data
