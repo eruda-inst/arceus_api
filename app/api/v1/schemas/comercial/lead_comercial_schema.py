@@ -1,3 +1,4 @@
+import re
 from app.api.v1 import utils
 from typing import Optional, Union
 from pydantic import BaseModel, Field, PositiveInt, EmailStr, field_serializer
@@ -47,7 +48,8 @@ class LeadOut(BaseModel):
         examples=["(12) 93456-7890"],
     )
     cep: str = Field(
-        max_length=20,
+        min_length=9,
+        max_length=9,
         description="CEP do potencial cliente associado ao lead.",
         examples=["12345-678"],
     )
@@ -184,7 +186,8 @@ class LeadUpdate(BaseModel):
     )
     cep: Optional[str] = Field(
         default=None,
-        max_length=20,
+        min_length=8,
+        max_length=9,
         description="CEP do potencial cliente associado ao lead.",
         examples=["12345-678"],
     )
@@ -244,6 +247,15 @@ class LeadUpdate(BaseModel):
         description="Observação associada ao lead.",
         examples=["Observação associada ao lead."],
     )
+
+    @field_serializer("cep")
+    def formatar_cep(self, v):
+        primeira_parte = v[:5]
+        segunda_parte = v[5:]
+        cep_pattern = r"^\d{5}-\d{3}$"
+        if re.match(pattern=cep_pattern, string=v):
+            return v
+        return f"{primeira_parte}-{segunda_parte}"
 
     @field_serializer("ativo")
     def formatar_ativo(self, v):
@@ -314,7 +326,8 @@ class LeadIn(BaseModel):
     )
     cep: Optional[str] = Field(
         default="44700-000",
-        max_length=20,
+        min_length=8,
+        max_length=9,
         description="CEP do potencial cliente associado ao lead.",
         examples=["12345-678"],
     )
@@ -371,6 +384,15 @@ class LeadIn(BaseModel):
         examples=["Observação associada ao lead."],
     )
 
+    @field_serializer("cep")
+    def formatar_cep(self, v):
+        primeira_parte = v[:5]
+        segunda_parte = v[5:]
+        cep_pattern = r"^\d{5}-\d{3}$"
+        if re.match(pattern=cep_pattern, string=v):
+            return v
+        return f"{primeira_parte}-{segunda_parte}"
+
     @field_serializer("ativo")
     def formatar_ativo(self, v):
         return str.upper(v)
@@ -381,6 +403,10 @@ class LeadIn(BaseModel):
 
     @field_serializer("tipo_pessoa")
     def formatar_tipo_pessoa(self, v):
+        return str.upper(v)
+
+    @field_serializer("lead")
+    def formatar_lead(self, v):
         return str.upper(v)
 
 
