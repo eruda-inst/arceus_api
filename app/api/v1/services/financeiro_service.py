@@ -6,13 +6,9 @@ from pydantic import ValidationError, PositiveInt
 
 
 class FinanceiroService(service_service.Service):
-    def __init__(self) -> None:
-        super().__init__()
-        self.financeiro_ixc_cliente = clients.FinanceiroIXCCliente()
-        self.financeiro_az7_cliente = clients.FinanceiroAZ7Cliente()
-
+    @classmethod
     async def get_faturas_abertas(
-        self,
+        cls,
         protocolo: str | None = None,
         cnpj_cpf: str | None = None,
         page: PositiveInt | None = 1,
@@ -21,11 +17,11 @@ class FinanceiroService(service_service.Service):
         sortorder: utils.SortOrder | None = utils.SortOrder.ASC,
     ) -> schemas.FaturaAbertaListOut:
         try:
-            id_cliente = await self.get_id_cliente_ixc(
+            id_cliente = await cls.get_id_cliente_ixc(
                 protocolo=protocolo, cnpj_cpf=cnpj_cpf
             )
 
-            res = await self.financeiro_ixc_cliente.get_faturas_abertas(
+            res = await clients.FinanceiroIXCCliente.get_faturas_abertas(
                 id_cliente=id_cliente,
                 page=page,
                 per_page=per_page,
@@ -44,7 +40,7 @@ class FinanceiroService(service_service.Service):
 
             for fatura_aberta in faturas_abertas:
                 id_contrato = fatura_aberta["id_contrato"]
-                contrato_res = await self.financeiro_ixc_cliente.get_contrato(
+                contrato_res = await clients.FinanceiroIXCCliente.get_contrato(
                     id_contrato=id_contrato
                 )
                 contrato = (
@@ -87,11 +83,12 @@ class FinanceiroService(service_service.Service):
                 detail=f"Erro interno ao processar solicitação: {str(e)}",
             )
 
+    @staticmethod
     async def post_desbloqueio_em_confianca(
-        self, id_contrato: PositiveInt
+        id_contrato: PositiveInt,
     ) -> schemas.MensagemOut:
         try:
-            res = await self.financeiro_ixc_cliente.post_desbloqueio_em_confianca(
+            res = await clients.FinanceiroIXCCliente.post_desbloqueio_em_confianca(
                 id_contrato=id_contrato
             )
             mensagem = "Nenhuma mensagem retornada."
@@ -110,11 +107,10 @@ class FinanceiroService(service_service.Service):
                 detail=f"Erro interno ao processar solicitação: {str(e)}",
             )
 
-    async def get_linha_digitavel(
-        self, id_fatura: PositiveInt
-    ) -> schemas.LinhaDigitavelOut:
+    @staticmethod
+    async def get_linha_digitavel(id_fatura: PositiveInt) -> schemas.LinhaDigitavelOut:
         try:
-            res = await self.financeiro_ixc_cliente.get_linha_digitavel(
+            res = await clients.FinanceiroIXCCliente.get_linha_digitavel(
                 id_fatura=id_fatura
             )
             reg = res.get("registros")
@@ -145,9 +141,10 @@ class FinanceiroService(service_service.Service):
                 detail=f"Erro interno ao processar solicitação: {str(e)}",
             )
 
-    async def get_chave_pix(self, id_fatura: PositiveInt) -> schemas.ChavePixBase:
+    @staticmethod
+    async def get_chave_pix(id_fatura: PositiveInt) -> schemas.ChavePixBase:
         try:
-            res = await self.financeiro_az7_cliente.get_chave_pix(id_fatura=id_fatura)
+            res = await clients.FinanceiroAZ7Cliente.get_chave_pix(id_fatura=id_fatura)
             if len(res) < 1 or not res.get("pixCode"):
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
@@ -168,15 +165,16 @@ class FinanceiroService(service_service.Service):
                 detail=f"Erro interno ao processar solicitação: {str(e)}",
             )
 
+    @classmethod
     async def get_credenciais(
-        self, protocolo: str | None = None, cnpj_cpf: str | None = None
+        cls, protocolo: str | None = None, cnpj_cpf: str | None = None
     ) -> schemas.CredencialOut:
         try:
-            id_cliente = await self.get_id_cliente_ixc(
+            id_cliente = await cls.get_id_cliente_ixc(
                 protocolo=protocolo, cnpj_cpf=cnpj_cpf
             )
 
-            res = await self.financeiro_ixc_cliente.get_credenciais(
+            res = await clients.FinanceiroIXCCliente.get_credenciais(
                 id_cliente=id_cliente
             )
             if not res.get("registros"):
@@ -201,13 +199,12 @@ class FinanceiroService(service_service.Service):
                 detail=f"Erro interno ao processar solicitação: {str(e)}",
             )
 
+    @staticmethod
     async def put_credenciais(
-        self,
-        id_cliente: PositiveInt,
-        credenciais: schemas.CredencialUpdate,
+        id_cliente: PositiveInt, credenciais: schemas.CredencialUpdate
     ) -> schemas.MensagemOut:
         try:
-            res = await self.financeiro_ixc_cliente.get_credenciais(
+            res = await clients.FinanceiroIXCCliente.get_credenciais(
                 id_cliente=id_cliente
             )
             if not res.get("registros"):
@@ -219,7 +216,7 @@ class FinanceiroService(service_service.Service):
             novas_credenciais = credenciais.model_dump()
             cliente_atualizado: Any = {**cliente_antigo, **novas_credenciais}
             del cliente_atualizado["id"]
-            res = await self.financeiro_ixc_cliente.put_clientes(
+            res = await clients.FinanceiroIXCCliente.put_clientes(
                 id_cliente=id_cliente, cliente=cliente_atualizado
             )
             mensagem = "Nenhuma mensagem retornada."
@@ -238,9 +235,10 @@ class FinanceiroService(service_service.Service):
                 detail=f"Erro interno ao processar solicitação: {str(e)}",
             )
 
-    async def get_ultima_fatura_paga(self, id_contrato: PositiveInt) -> Any:
+    @staticmethod
+    async def get_ultima_fatura_paga(id_contrato: PositiveInt) -> Any:
         try:
-            res = await self.financeiro_ixc_cliente.get_ultima_fatura_paga(
+            res = await clients.FinanceiroIXCCliente.get_ultima_fatura_paga(
                 id_contrato=id_contrato
             )
             if not res.get("registros"):
