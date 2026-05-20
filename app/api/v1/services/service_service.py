@@ -5,13 +5,10 @@ from pydantic import ValidationError, PositiveInt
 
 
 class Service:
-    def __init__(self) -> None:
-        self.opa_cliente = clients.OpaCliente()
-        self.ixc_cliente = clients.IXCCliente()
-
-    async def _buscar_por_protocolo(self, protocolo: str) -> Any:
+    @staticmethod
+    async def _buscar_por_protocolo(protocolo: str) -> Any:
         # Busca ID do cliente no OPA
-        id_cliente_opa_res = await self.opa_cliente.get_id_cliente_opa(
+        id_cliente_opa_res = await clients.OpaCliente.get_id_cliente_opa(
             protocolo=protocolo
         )
 
@@ -24,7 +21,7 @@ class Service:
         id_cliente_opa = id_cliente_opa_res["data"][0]["id_cliente"]
 
         # Busca ID do cliente no IXC via OPA
-        id_cliente_ixc_res = await self.opa_cliente.get_id_cliente_ixc(
+        id_cliente_ixc_res = await clients.OpaCliente.get_id_cliente_ixc(
             id_cliente_opa=id_cliente_opa
         )
 
@@ -36,8 +33,9 @@ class Service:
 
         return id_cliente_ixc_res
 
-    async def _buscar_por_cnpj_cpf(self, cnpj_cpf: str) -> Any:
-        id_cliente_ixc_res = await self.ixc_cliente.get_id_cliente_ixc(
+    @staticmethod
+    async def _buscar_por_cnpj_cpf(cnpj_cpf: str) -> Any:
+        id_cliente_ixc_res = await clients.IXCCliente.get_id_cliente_ixc(
             cnpj_cpf=cnpj_cpf
         )
 
@@ -49,7 +47,8 @@ class Service:
 
         return id_cliente_ixc_res
 
-    def _extrair_id_cliente_ixc(self, resposta: Any) -> PositiveInt:
+    @staticmethod
+    def _extrair_id_cliente_ixc(resposta: Any) -> PositiveInt:
         try:
             data = resposta.get("data")
             registros = resposta.get("registros", None)
@@ -66,8 +65,9 @@ class Service:
                 detail=f"Estrutura da resposta inválida: {e}",
             )
 
+    @classmethod
     async def get_id_cliente_ixc(
-        self, protocolo: str | None = None, cnpj_cpf: str | None = None
+        cls, protocolo: str | None = None, cnpj_cpf: str | None = None
     ) -> PositiveInt:
         try:
 
@@ -84,11 +84,11 @@ class Service:
             id_cliente_ixc_res = None
 
             if protocolo:
-                id_cliente_ixc_res = await self._buscar_por_protocolo(protocolo)
+                id_cliente_ixc_res = await cls._buscar_por_protocolo(protocolo)
             elif cnpj_cpf_formatado:
-                id_cliente_ixc_res = await self._buscar_por_cnpj_cpf(cnpj_cpf_formatado)
+                id_cliente_ixc_res = await cls._buscar_por_cnpj_cpf(cnpj_cpf_formatado)
 
-            return self._extrair_id_cliente_ixc(id_cliente_ixc_res)
+            return cls._extrair_id_cliente_ixc(id_cliente_ixc_res)
 
         except HTTPException:
             raise
