@@ -15,8 +15,7 @@ async def get_status_acesso(
     """
     Obtém status de acesso de um contrato, atravé do ID do contrato."
     """
-    comercial_service = services.ComercialService()
-    return await comercial_service.get_status_acesso(id_contrato=id_contrato)
+    return await services.ComercialService.get_status_acesso(id_contrato=id_contrato)
 
 
 @comercial_router.get(
@@ -47,8 +46,7 @@ async def get_contratos(
     """
     Obtém contratos de todos os clientes, atravé de protocolo de atendimento ou CPF/CNPJ.
     """
-    comercial_service = services.ComercialService()
-    return await comercial_service.get_contratos(
+    return await services.ComercialService.get_contratos(
         protocolo=protocolo,
         cnpj_cpf=cnpj_cpf,
         page=page,
@@ -67,8 +65,7 @@ async def post_leads(
     """
     Cadastra novo lead e retorna o ID do lead criado.
     """
-    comercial_service = services.ComercialService()
-    return await comercial_service.post_leads(lead=lead)
+    return await services.ComercialService.post_leads(lead=lead)
 
 
 @comercial_router.get(
