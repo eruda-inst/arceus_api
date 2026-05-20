@@ -1,5 +1,5 @@
+from typing import Any
 from . import service_service
-from typing import Optional, Any
 from pydantic import ValidationError
 from .. import schemas, clients, utils
 from fastapi import HTTPException, status
@@ -11,9 +11,7 @@ class TriagemService(service_service.Service):
         self.triagem_ixc_cliente = clients.TriagemIXCCliente()
 
     async def get_contato_cliente(
-        self,
-        protocolo: Optional[str] = None,
-        cnpj_cpf: Optional[str] = None,
+        self, protocolo: str | None = None, cnpj_cpf: str | None = None
     ) -> schemas.ContatoOut:
         try:
             id_cliente = await self.get_id_cliente_ixc(
@@ -45,8 +43,8 @@ class TriagemService(service_service.Service):
     async def put_contato_cliente(
         self,
         contato: schemas.ContatoUpdate,
-        protocolo: Optional[str] = None,
-        cnpj_cpf: Optional[str] = None,
+        protocolo: str | None = None,
+        cnpj_cpf: str | None = None,
     ) -> schemas.MensagemOut:
         try:
             id_cliente = await self.get_id_cliente_ixc(
