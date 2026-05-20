@@ -1,41 +1,36 @@
-from typing import Optional
+from typing import Annotated
 from pydantic import PositiveInt
 from .. import schemas, utils, services
 from fastapi import APIRouter, Query, status, Path, Body
 
-
 suporte_router = APIRouter(prefix="/suporte", tags=["Suporte"])
 
 
-@suporte_router.get(
-    path="/contratos",
-    response_model=schemas.SuporteContratoListOut,
-    summary="Obtém contratos ativos de um cliente.",
-    description="Obtém contratos ativos de todos os clientes, atravé de protocolo de atendimento.",
-)
+@suporte_router.get(path="/contratos", summary="Obtém contratos ativos de um cliente.")
 async def get_contratos(
-    protocolo: Optional[str] = Query(
-        default=None,
-        min_length=12,
-        max_length=12,
-        description="Protocolo de atendimento.",
-    ),
-    cnpj_cpf: Optional[str] = Query(
-        default=None, description="CPF ou CNPJ do cliente."
-    ),
-    page: Optional[PositiveInt] = Query(
-        ge=1, default=1, description="Número da página."
-    ),
-    per_page: Optional[PositiveInt] = Query(
-        ge=1, default=10, description="Itens por página."
-    ),
-    sortname: Optional[str] = Query(
-        default="cliente_contrato.id", description="Campo para ordenação."
-    ),
-    sortorder: Optional[utils.SortOrder] = Query(
-        default=utils.SortOrder.ASC, description="Ordem da ordenação."
-    ),
+    protocolo: Annotated[
+        str | None,
+        Query(min_length=12, max_length=12, description="Protocolo de atendimento."),
+    ] = None,
+    cnpj_cpf: Annotated[
+        str | None, Query(description="CPF ou CNPJ do cliente.")
+    ] = None,
+    page: Annotated[
+        PositiveInt | None, Query(ge=1, description="Número da página.")
+    ] = 1,
+    per_page: Annotated[
+        PositiveInt | None, Query(ge=1, description="Itens por página.")
+    ] = 10,
+    sortname: Annotated[
+        str | None, Query(description="Campo para ordenação.")
+    ] = "cliente_contrato.id",
+    sortorder: Annotated[
+        utils.SortOrder | None, Query(description="Ordem da ordenação.")
+    ] = utils.SortOrder.ASC,
 ) -> schemas.SuporteContratoListOut:
+    """
+    Obtém contratos ativos de todos os clientes, atravé de protocolo de atendimento.
+    """
     suporte_service = services.SuporteService()
     return await suporte_service.get_contratos(
         protocolo=protocolo,
@@ -48,76 +43,78 @@ async def get_contratos(
 
 
 @suporte_router.get(
-    path="/status_conexao",
-    response_model=schemas.StatusConexaoOut,
-    summary="Obtém status de conexão de um cliente.",
-    description="Obtém status de conexão de um cliente, atravé do ID de login.",
+    path="/status_conexao", summary="Obtém status de conexão de um cliente."
 )
 async def get_status_conexao(
-    id_login: PositiveInt = Query(
-        ge=1, description="ID de login do cliente no IXCSoft."
-    )
+    id_login: Annotated[
+        PositiveInt, Query(ge=1, description="ID de login do cliente no IXCSoft.")
+    ],
 ) -> schemas.StatusConexaoOut:
+    """
+    Obtém status de conexão de um cliente, atravé do ID de login.
+    """
     suporte_service = services.SuporteService()
     return await suporte_service.get_status_conexao(id_login=id_login)
 
 
 @suporte_router.get(
-    path="/status_onu",
-    response_model=schemas.StatusONUOut,
-    summary="Obtém status de ONU (sinal rx) de um cliente.",
-    description="Obtém status de ONU (sinal rx) de um cliente, atravé do ID de login, ou MAC Address de ONU.",
+    path="/status_onu", summary="Obtém status de ONU (sinal rx) de um cliente."
 )
 async def get_status_onu(
-    id_login: Optional[PositiveInt] = Query(
-        ge=1, default=None, description="ID de login do cliente no IXCSoft."
-    ),
-    mac_onu: Optional[str] = Query(
-        min_length=12, max_length=12, default=None, description="MAC Address da ONU."
-    ),
+    id_login: Annotated[
+        PositiveInt | None,
+        Query(ge=1, description="ID de login do cliente no IXCSoft."),
+    ] = None,
+    mac_onu: Annotated[
+        str | None,
+        Query(min_length=12, max_length=12, description="MAC Address da ONU."),
+    ] = None,
 ) -> schemas.StatusONUOut:
+    """
+    Obtém status de ONU (sinal rx) de um cliente, atravé do ID de login, ou MAC Address de ONU.
+    """
     suporte_service = services.SuporteService()
     return await suporte_service.get_status_onu(id_login=id_login, mac_onu=mac_onu)
 
 
 @suporte_router.post(
-    path="/desconectar_cliente",
-    response_model=schemas.MensagemOut,
-    summary="Envia sinal de desconexão para um cliente.",
-    description="Envia sinal de desconexão para um cliente, atravé do ID de login.",
+    path="/desconectar_cliente", summary="Envia sinal de desconexão para um cliente."
 )
 async def post_desconectar_cliente(
-    id_login: PositiveInt = Query(
-        ge=1, description="ID de login do cliente no IXCSoft."
-    ),
+    id_login: Annotated[
+        PositiveInt, Query(ge=1, description="ID de login do cliente no IXCSoft.")
+    ],
 ) -> schemas.MensagemOut:
+    """
+    Envia sinal de desconexão para um cliente, atravé do ID de login.
+    """
     suporte_service = services.SuporteService()
     return await suporte_service.post_desconectar_cliente(id_login=id_login)
 
 
 @suporte_router.get(
-    path="/atendimentos",
-    response_model=schemas.AtendimentoOut,
-    summary="Checa atendimentos abertos de um cliente.",
-    description="Checa atendimentos abertos de um cliente, atravé do ID de login.",
+    path="/atendimentos", summary="Checa atendimentos abertos de um cliente."
 )
 async def get_atendimentos(
-    id_login: PositiveInt = Query(
-        ge=1, description="ID de login do cliente no IXCSoft."
-    ),
-    page: Optional[PositiveInt] = Query(
-        ge=1, default=1, description="Número da página."
-    ),
-    per_page: Optional[PositiveInt] = Query(
-        ge=1, default=10, description="Itens por página."
-    ),
-    sortname: Optional[str] = Query(
-        default="su_ticket.id", description="Campo para ordenação."
-    ),
-    sortorder: Optional[utils.SortOrder] = Query(
-        default=utils.SortOrder.ASC, description="Ordem da ordenação."
-    ),
+    id_login: Annotated[
+        PositiveInt, Query(ge=1, description="ID de login do cliente no IXCSoft.")
+    ],
+    page: Annotated[
+        PositiveInt | None, Query(ge=1, description="Número da página.")
+    ] = 1,
+    per_page: Annotated[
+        PositiveInt | None, Query(ge=1, description="Itens por página.")
+    ] = 10,
+    sortname: Annotated[
+        str | None, Query(description="Campo para ordenação.")
+    ] = "su_ticket.id",
+    sortorder: Annotated[
+        utils.SortOrder | None, Query(description="Ordem da ordenação.")
+    ] = utils.SortOrder.ASC,
 ) -> schemas.AtendimentoOut:
+    """
+    Checa atendimentos abertos de um cliente, atravé do ID de login.
+    """
     suporte_service = services.SuporteService()
     return await suporte_service.get_atendimentos(
         id_login=id_login,
@@ -131,13 +128,16 @@ async def get_atendimentos(
 @suporte_router.post(
     path="/atendimentos",
     status_code=status.HTTP_201_CREATED,
-    response_model=schemas.AtendimentoCreate,
     summary="Abre ticket de atendimento.",
-    description="Abre ticket de atendimento, atravé de dados do atendimento.",
 )
 async def post_atendimentos(
-    atendimento: schemas.AtendimentoIn,
+    atendimento: Annotated[
+        schemas.AtendimentoIn, Body(description="Dados do atendimento.")
+    ],
 ) -> schemas.AtendimentoCreate:
+    """
+    Abre ticket de atendimento, atravé de dados do atendimento.
+    """
     suporte_service = services.SuporteService()
     return await suporte_service.post_atendimentos(atendimento=atendimento)
 
@@ -145,48 +145,45 @@ async def post_atendimentos(
 # Por razões de limitações na plataforma opa, o verbo deve ser put, ao invés de patch
 @suporte_router.put(
     path="/ip/{id_login}",
-    response_model=schemas.MensagemOut,
     summary="Atualiza um ou mais campos associado a um login específico.",
-    description="Atualiza um ou mais campos associado a um login específico, por meio do ID de login.",
 )
 async def put_ip(
-    id_login: PositiveInt = Path(ge=1, description="ID de login."),
-    ip: Optional[str] = Body(default="", description="IP do login a ser atualizado."),
-    pool_radius: Optional[str] = Body(
-        default="", description="Radius do login a ser atualizado."
-    ),
+    id_login: Annotated[PositiveInt, Path(ge=1, description="ID de login.")],
+    ip: Annotated[str | None, Body(description="IP do login a ser atualizado.")] = "",
+    pool_radius: Annotated[
+        str | None, Body(description="Radius do login a ser atualizado.")
+    ] = "",
 ) -> schemas.MensagemOut:
+    """
+    Atualiza um ou mais campos associado a um login específico, por meio do ID de login.
+    """
     suporte_service = services.SuporteService()
     return await suporte_service.put_ip(
         id_login=id_login, ip=ip, pool_radius=pool_radius
     )
 
 
-@suporte_router.post(
-    path="/limpar_mac",
-    response_model=schemas.MensagemOut,
-    summary="Limpa MAC Address.",
-    description="Limpa MAC Address, atravé do ID de login.",
-)
+@suporte_router.post(path="/limpar_mac", summary="Limpa MAC Address.")
 async def post_limpar_mac(
-    id_login: PositiveInt = Query(
-        ge=1, description="ID de login do cliente no IXCSoft."
-    )
+    id_login: Annotated[
+        PositiveInt, Query(ge=1, description="ID de login do cliente no IXCSoft.")
+    ],
 ) -> schemas.MensagemOut:
+    """
+    Limpa MAC Address, atravé do ID de login.
+    """
     suporte_service = services.SuporteService()
     return await suporte_service.post_limpar_mac(id_login=id_login)
 
 
-@suporte_router.get(
-    path="/dados_wifi",
-    response_model=schemas.WifiOut,
-    summary="Obtém dados de WiFi de um cliente.",
-    description="Obtém dados de WiFi de um cliente, atravé do ID de login.",
-)
+@suporte_router.get(path="/dados_wifi", summary="Obtém dados de WiFi de um cliente.")
 async def get_dados_wifi(
-    id_login: PositiveInt = Query(
-        ge=1, description="ID de login do cliente no IXCSoft."
-    ),
-):
+    id_login: Annotated[
+        PositiveInt, Query(ge=1, description="ID de login do cliente no IXCSoft.")
+    ],
+) -> schemas.WifiOut:
+    """
+    Obtém dados de WiFi de um cliente, atravé do ID de login.
+    """
     suporte_service = services.SuporteService()
     return await suporte_service.get_dados_wifi(id_login=id_login)
