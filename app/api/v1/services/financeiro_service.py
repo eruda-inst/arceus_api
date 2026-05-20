@@ -1,5 +1,5 @@
+from typing import Any
 from . import service_service
-from typing import Optional, Any
 from .. import clients, schemas, utils
 from fastapi import HTTPException, status
 from pydantic import ValidationError, PositiveInt
@@ -13,12 +13,12 @@ class FinanceiroService(service_service.Service):
 
     async def get_faturas_abertas(
         self,
-        protocolo: Optional[str] = None,
-        cnpj_cpf: Optional[str] = None,
-        page: Optional[PositiveInt] = 1,
-        per_page: Optional[PositiveInt] = 15,
-        sortname: Optional[str] = "fn_areceber.id",
-        sortorder: Optional[utils.SortOrder] = utils.SortOrder.ASC,
+        protocolo: str | None = None,
+        cnpj_cpf: str | None = None,
+        page: PositiveInt | None = 1,
+        per_page: PositiveInt | None = 15,
+        sortname: str | None = "fn_areceber.id",
+        sortorder: utils.SortOrder | None = utils.SortOrder.ASC,
     ) -> schemas.FaturaAbertaListOut:
         try:
             id_cliente = await self.get_id_cliente_ixc(
@@ -88,8 +88,7 @@ class FinanceiroService(service_service.Service):
             )
 
     async def post_desbloqueio_em_confianca(
-        self,
-        id_contrato: PositiveInt,
+        self, id_contrato: PositiveInt
     ) -> schemas.MensagemOut:
         try:
             res = await self.financeiro_ixc_cliente.post_desbloqueio_em_confianca(
@@ -170,7 +169,7 @@ class FinanceiroService(service_service.Service):
             )
 
     async def get_credenciais(
-        self, protocolo: Optional[str] = None, cnpj_cpf: Optional[str] = None
+        self, protocolo: str | None = None, cnpj_cpf: str | None = None
     ) -> schemas.CredencialOut:
         try:
             id_cliente = await self.get_id_cliente_ixc(
