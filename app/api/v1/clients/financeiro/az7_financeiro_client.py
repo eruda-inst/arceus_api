@@ -5,28 +5,28 @@ from pydantic import PositiveInt
 
 
 class FinanceiroAZ7Cliente:
-    def __init__(self) -> None:
-        self.base_url = cores.settings.BASE_URL_7AZ
-        self.api_key = cores.settings.API_KEY_7AZ
-        self.timeout = httpx.Timeout(connect=5.0, read=30.0, write=10.0, pool=1.0)
-        self.async_client = httpx.AsyncClient(timeout=self.timeout)
+    base_url = cores.settings.BASE_URL_7AZ
+    api_key = cores.settings.API_KEY_7AZ
+    timeout = httpx.Timeout(connect=5.0, read=30.0, write=10.0, pool=1.0)
+    async_client = httpx.AsyncClient(timeout=timeout)
 
-    def _get_headers(self) -> Any:
-        return {"X-API-Key": self.api_key}
+    @classmethod
+    def _get_headers(cls) -> Any:
+        return {"X-API-Key": cls.api_key}
 
-    def _get_url(self, endpoint: str) -> str:
-        return f"{self.base_url}/{endpoint}"
+    @classmethod
+    def _get_url(cls, endpoint: str) -> str:
+        return f"{cls.base_url}/{endpoint}"
 
-    async def get_chave_pix(self, id_fatura: PositiveInt) -> Any:
-        url = self._get_url(
+    @classmethod
+    async def get_chave_pix(cls, id_fatura: PositiveInt) -> Any:
+        url = cls._get_url(
             endpoint=f"v2/integrations/omnichannel/invoices/{id_fatura}/payment-data"
         )
-        headers = self._get_headers()
+        headers = cls._get_headers()
 
         try:
-            res = await self.async_client.request(
-                method="GET", url=url, headers=headers
-            )
+            res = await cls.async_client.request(method="GET", url=url, headers=headers)
             res.raise_for_status()
             return res.json()
         except httpx.HTTPStatusError as e:
@@ -34,5 +34,6 @@ class FinanceiroAZ7Cliente:
         except httpx.RequestError as e:
             return {"error": f"An error occurred while making the request: {str(e)}"}
 
-    async def aclose(self) -> None:
-        await self.async_client.aclose()
+    @classmethod
+    async def aclose(cls) -> None:
+        await cls.async_client.aclose()
