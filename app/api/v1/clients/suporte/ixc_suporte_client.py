@@ -6,8 +6,9 @@ from app.api.v1 import schemas, utils
 
 
 class SuporteIXCCliente(ixc_client.IXCCliente):
+    @classmethod
     async def get_contratos(
-        self,
+        cls,
         id_cliente: PositiveInt,
         page: PositiveInt | None = 1,
         per_page: PositiveInt | None = 10,
@@ -27,17 +28,19 @@ class SuporteIXCCliente(ixc_client.IXCCliente):
             "sortname": sortname,
             "sortorder": sortorder,
         }
-        data = await self._make_request("cliente_contrato", payload)
+        data = await cls._make_request("cliente_contrato", payload)
         return data
 
-    async def get_status_conexao(self, id_login: PositiveInt) -> Any:
+    @classmethod
+    async def get_status_conexao(cls, id_login: PositiveInt) -> Any:
         grid_param = [{"TB": "radusuarios.id", "OP": "=", "P": str(id_login)}]
         payload = {"grid_param": json.dumps(obj=grid_param)}
-        data = await self._make_request("radusuarios", payload)
+        data = await cls._make_request("radusuarios", payload)
         return data
 
+    @classmethod
     async def get_status_onu(
-        self,
+        cls,
         id_login: PositiveInt | None = None,
         mac_onu: str | None = None,
     ) -> Any:
@@ -51,26 +54,29 @@ class SuporteIXCCliente(ixc_client.IXCCliente):
             }
         ]
         payload = {"grid_param": json.dumps(obj=grid_param)}
-        data = await self._make_request(
+        data = await cls._make_request(
             endpoint="radpop_radio_cliente_fibra", payload=payload
         )
         return data
 
-    async def post_atendimentos(self, atendimento: schemas.AtendimentoIn) -> Any:
+    @classmethod
+    async def post_atendimentos(cls, atendimento: schemas.AtendimentoIn) -> Any:
         payload = atendimento.model_dump()
-        return await self._make_request(
+        return await cls._make_request(
             endpoint="su_ticket", payload=payload, include_ixcsoft=False
         )
 
-    async def post_desconectar_cliente(self, id_login: PositiveInt) -> Any:
+    @classmethod
+    async def post_desconectar_cliente(cls, id_login: PositiveInt) -> Any:
         payload = {"id": id_login}
-        data = await self._make_request(
+        data = await cls._make_request(
             endpoint="desconectar_clientes", payload=payload, include_ixcsoft=False
         )
         return data
 
+    @classmethod
     async def get_atendimentos(
-        self,
+        cls,
         id_login: PositiveInt,
         page: PositiveInt | None = 1,
         per_page: PositiveInt | None = 10,
@@ -89,31 +95,35 @@ class SuporteIXCCliente(ixc_client.IXCCliente):
             "sortname": sortname,
             "sortorder": sortorder,
         }
-        data = await self._make_request(endpoint="su_ticket", payload=payload)
+        data = await cls._make_request(endpoint="su_ticket", payload=payload)
         return data
 
-    async def get_id_login(self, id_contrato: PositiveInt) -> Any:
+    @classmethod
+    async def get_id_login(cls, id_contrato: PositiveInt) -> Any:
         grid_param = [
             {"TB": "radusuarios.id_contrato", "OP": "=", "P": str(id_contrato)}
         ]
         payload = {"grid_param": json.dumps(obj=grid_param)}
-        data = await self._make_request(endpoint="radusuarios", payload=payload)
+        data = await cls._make_request(endpoint="radusuarios", payload=payload)
         return data
 
-    async def get_onu_mac(self, id_login: PositiveInt) -> Any:
+    @classmethod
+    async def get_onu_mac(cls, id_login: PositiveInt) -> Any:
         grid_param = [{"TB": "radusuarios.id", "OP": "=", "P": str(id_login)}]
         payload = {"grid_param": json.dumps(obj=grid_param)}
-        data = await self._make_request(endpoint="radusuarios", payload=payload)
+        data = await cls._make_request(endpoint="radusuarios", payload=payload)
         return data
 
-    async def get_login(self, id_login: PositiveInt) -> Any:
+    @classmethod
+    async def get_login(cls, id_login: PositiveInt) -> Any:
         grid_param = [{"TB": "radusuarios.id", "OP": "=", "P": str(id_login)}]
         payload = {"grid_param": json.dumps(obj=grid_param)}
-        data = await self._make_request(endpoint="radusuarios", payload=payload)
+        data = await cls._make_request(endpoint="radusuarios", payload=payload)
         return data
 
-    async def put_ip(self, id_login: PositiveInt, ip: Any) -> Any:
-        data = await self._make_request(
+    @classmethod
+    async def put_ip(cls, id_login: PositiveInt, ip: Any) -> Any:
+        data = await cls._make_request(
             endpoint=f"radusuarios/{id_login}",
             payload=ip,
             include_ixcsoft=False,
@@ -121,15 +131,17 @@ class SuporteIXCCliente(ixc_client.IXCCliente):
         )
         return data
 
-    async def post_limpar_mac(self, id_login: PositiveInt) -> Any:
+    @classmethod
+    async def post_limpar_mac(cls, id_login: PositiveInt) -> Any:
         payload = {"get_id": id_login}
-        data = await self._make_request(
+        data = await cls._make_request(
             endpoint="radusuarios_25452", payload=payload, include_ixcsoft=False
         )
         return data
 
-    async def get_dados_wifi(self, id_login: PositiveInt) -> Any:
+    @classmethod
+    async def get_dados_wifi(cls, id_login: PositiveInt) -> Any:
         grid_param = [{"TB": "radusuarios.id", "OP": "=", "P": str(id_login)}]
         payload = {"grid_param": json.dumps(obj=grid_param)}
-        data = await self._make_request(endpoint="radusuarios", payload=payload)
+        data = await cls._make_request(endpoint="radusuarios", payload=payload)
         return data
