@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Annotated
 from pydantic import PositiveInt
 from fastapi import APIRouter, Query
 from .. import utils, services, schemas
@@ -9,34 +9,32 @@ financeiro_service = services.FinanceiroService()
 
 
 @cobranca_router.get(
-    path="/faturas_abertas",
-    response_model=schemas.FaturaAbertaListOut,
-    summary="Obtém faturas abertas de um cliente.",
-    description="Obtém faturas abertas de todos os contratos de um cliente, através de protocolo de atendimento ou CPF/CNPJ.",
+    path="/faturas_abertas", summary="Obtém faturas abertas de um cliente."
 )
 async def get_faturas_abertas(
-    protocolo: Optional[str] = Query(
-        default=None,
-        min_length=12,
-        max_length=12,
-        description="Protocolo de atendimento.",
-    ),
-    cnpj_cpf: Optional[str] = Query(
-        default=None, description="CPF ou CNPJ do cliente."
-    ),
-    page: Optional[PositiveInt] = Query(
-        ge=1, default=1, description="Número da página."
-    ),
-    per_page: Optional[PositiveInt] = Query(
-        ge=1, default=10, description="Itens por página."
-    ),
-    sortname: Optional[str] = Query(
-        default="fn_areceber.id", description="Campo para ordenação."
-    ),
-    sortorder: Optional[utils.SortOrder] = Query(
-        default=utils.SortOrder.ASC, description="Ordem da ordenação."
-    ),
+    protocolo: Annotated[
+        str | None,
+        Query(min_length=12, max_length=12, description="Protocolo de atendimento."),
+    ] = None,
+    cnpj_cpf: Annotated[
+        str | None, Query(description="CPF ou CNPJ do cliente.")
+    ] = None,
+    page: Annotated[
+        PositiveInt | None, Query(ge=1, description="Número da página.")
+    ] = 1,
+    per_page: Annotated[
+        PositiveInt | None, Query(ge=1, description="Itens por página.")
+    ] = 10,
+    sortname: Annotated[
+        str | None, Query(description="Campo para ordenação.")
+    ] = "fn_areceber.id",
+    sortorder: Annotated[
+        utils.SortOrder | None, Query(description="Ordem da ordenação.")
+    ] = utils.SortOrder.ASC,
 ) -> schemas.FaturaAbertaListOut:
+    """
+    Obtém faturas abertas de todos os contratos de um cliente, através de protocolo de atendimento ou CPF/CNPJ.
+    """
     return await financeiro_service.get_faturas_abertas(
         protocolo=protocolo,
         cnpj_cpf=cnpj_cpf,
@@ -48,34 +46,32 @@ async def get_faturas_abertas(
 
 
 @cobranca_router.get(
-    path="/faturas_vencidas",
-    response_model=schemas.FaturaAbertaListOut,
-    summary="Obtém faturas vencidas de um cliente.",
-    description="Obtém faturas vencidas de todos os contratos de um cliente, através de protocolo de atendimento ou CPF/CNPJ.",
+    path="/faturas_vencidas", summary="Obtém faturas vencidas de um cliente."
 )
 async def get_faturas_vencidas(
-    protocolo: Optional[str] = Query(
-        default=None,
-        min_length=12,
-        max_length=12,
-        description="Protocolo de atendimento.",
-    ),
-    cnpj_cpf: Optional[str] = Query(
-        default=None, description="CPF ou CNPJ do cliente."
-    ),
-    page: Optional[PositiveInt] = Query(
-        ge=1, default=1, description="Número da página."
-    ),
-    per_page: Optional[PositiveInt] = Query(
-        ge=1, default=10, description="Itens por página."
-    ),
-    sortname: Optional[str] = Query(
-        default="fn_areceber.id", description="Campo para ordenação."
-    ),
-    sortorder: Optional[utils.SortOrder] = Query(
-        default=utils.SortOrder.ASC, description="Ordem da ordenação."
-    ),
-):
+    protocolo: Annotated[
+        str | None,
+        Query(min_length=12, max_length=12, description="Protocolo de atendimento."),
+    ] = None,
+    cnpj_cpf: Annotated[
+        str | None, Query(description="CPF ou CNPJ do cliente.")
+    ] = None,
+    page: Annotated[
+        PositiveInt | None, Query(ge=1, description="Número da página.")
+    ] = 1,
+    per_page: Annotated[
+        PositiveInt | None, Query(ge=1, description="Itens por página.")
+    ] = 10,
+    sortname: Annotated[
+        str | None, Query(description="Campo para ordenação.")
+    ] = "fn_areceber.id",
+    sortorder: Annotated[
+        utils.SortOrder | None, Query(description="Ordem da ordenação.")
+    ] = utils.SortOrder.ASC,
+) -> schemas.FaturaAbertaListOut:
+    """
+    Obtém faturas vencidas de todos os contratos de um cliente, através de protocolo de atendimento ou CPF/CNPJ.
+    """
     return await cobranca_service.get_faturas_vencidas(
         protocolo=protocolo,
         cnpj_cpf=cnpj_cpf,
