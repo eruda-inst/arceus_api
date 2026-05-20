@@ -8,12 +8,9 @@ from pydantic import ValidationError, PositiveInt
 
 
 class CobrancaService(service_service.Service):
-    def __init__(self) -> None:
-        super().__init__()
-        self.financeiro_ixc_cliente = clients.FinanceiroIXCCliente()
-
+    @classmethod
     async def get_faturas_vencidas(
-        self,
+        cls,
         protocolo: str | None = None,
         cnpj_cpf: str | None = None,
         page: PositiveInt | None = 1,
@@ -22,11 +19,11 @@ class CobrancaService(service_service.Service):
         sortorder: utils.SortOrder | None = utils.SortOrder.ASC,
     ) -> schemas.FaturaAbertaListOut:
         try:
-            id_cliente = await self.get_id_cliente_ixc(
+            id_cliente = await cls.get_id_cliente_ixc(
                 protocolo=protocolo, cnpj_cpf=cnpj_cpf
             )
 
-            res = await self.financeiro_ixc_cliente.get_faturas_abertas(
+            res = await clients.FinanceiroIXCCliente.get_faturas_abertas(
                 id_cliente=id_cliente,
                 page=page,
                 per_page=per_page,
@@ -57,7 +54,7 @@ class CobrancaService(service_service.Service):
                     continue
 
                 id_contrato = fatura_aberta_e_parcial["id_contrato"]
-                contrato_res = await self.financeiro_ixc_cliente.get_contrato(
+                contrato_res = await clients.FinanceiroIXCCliente.get_contrato(
                     id_contrato=id_contrato
                 )
                 contrato = (
