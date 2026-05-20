@@ -1,7 +1,7 @@
 import json
+from typing import Any
 from .. import ixc_client
 from pydantic import PositiveInt
-from typing import Any, Optional
 from app.api.v1 import schemas, utils
 
 
@@ -9,10 +9,10 @@ class SuporteIXCCliente(ixc_client.IXCCliente):
     async def get_contratos(
         self,
         id_cliente: PositiveInt,
-        page: Optional[int] = 1,
-        per_page: Optional[int] = 10,
-        sortname: Optional[str] = "cliente_contrato.id",
-        sortorder: Optional[utils.SortOrder] = utils.SortOrder.ASC,
+        page: PositiveInt | None = 1,
+        per_page: PositiveInt | None = 10,
+        sortname: str | None = "cliente_contrato.id",
+        sortorder: utils.SortOrder | None = utils.SortOrder.ASC,
     ) -> Any:
         grid_param = [
             {"TB": "cliente_contrato.id_cliente", "OP": "=", "P": str(id_cliente)},
@@ -38,8 +38,8 @@ class SuporteIXCCliente(ixc_client.IXCCliente):
 
     async def get_status_onu(
         self,
-        id_login: Optional[PositiveInt] = None,
-        mac_onu: Optional[str] = None,
+        id_login: PositiveInt | None = None,
+        mac_onu: str | None = None,
     ) -> Any:
         query_field = "id_login" if id_login else "mac"
         query_value = id_login if id_login else mac_onu
@@ -72,10 +72,10 @@ class SuporteIXCCliente(ixc_client.IXCCliente):
     async def get_atendimentos(
         self,
         id_login: PositiveInt,
-        page: Optional[int] = 1,
-        per_page: Optional[int] = 10,
-        sortname: Optional[str] = "su_ticket.id",
-        sortorder: Optional[utils.SortOrder] = utils.SortOrder.ASC,
+        page: PositiveInt | None = 1,
+        per_page: PositiveInt | None = 10,
+        sortname: str | None = "su_ticket.id",
+        sortorder: utils.SortOrder | None = utils.SortOrder.ASC,
     ) -> Any:
         grid_param = [
             {"TB": "su_ticket.id_login", "OP": "=", "P": str(id_login)},
