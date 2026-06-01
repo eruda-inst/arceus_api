@@ -10,7 +10,6 @@ from sqlalchemy.exc import SQLAlchemyError
 from typing import Awaitable, Callable, Any
 from starlette.middleware.base import BaseHTTPMiddleware
 
-
 INCLUDE_PREFIXES = (
     "/api/v1/suporte",
     "/api/v1/comercial",
@@ -45,14 +44,29 @@ class LogMiddleware(BaseHTTPMiddleware):
                 status_code=500,
                 process_time=time.perf_counter() - start_time,
                 payload=payload_str,
+                resposta=None,
             )
             raise
+
+        response_body = b""
+        async for chunk in response.body_iterator:  # type: ignore
+            response_body += chunk
+
+        response = Response(
+            content=response_body,
+            status_code=response.status_code,
+            headers=dict(response.headers),
+            media_type=response.media_type,
+        )
+
+        resposta_str = self._format_payload(response_body)
 
         await self._log_request(
             request,
             status_code=response.status_code,
             process_time=time.perf_counter() - start_time,
             payload=payload_str,
+            resposta=resposta_str,
         )
         return response
 
@@ -62,9 +76,12 @@ class LogMiddleware(BaseHTTPMiddleware):
         status_code: int,
         process_time: float,
         payload: str,
+        resposta: str | None = None,
     ):
         try:
-            await self._log_to_database(request, status_code, process_time, payload)
+            await self._log_to_database(
+                request, status_code, process_time, payload, resposta
+            )
         except Exception as err:
             logger.error(f"Erro ao registrar log: {err}")
 
@@ -74,6 +91,7 @@ class LogMiddleware(BaseHTTPMiddleware):
         status_code: int,
         process_time: float,
         payload: str,
+        resposta: str | None = None,
     ):
         protocolo = request.headers.get("x-protocolo", "---")
         cliente = request.headers.get("user-agent", "---")
@@ -108,6 +126,7 @@ class LogMiddleware(BaseHTTPMiddleware):
                     duracao=process_time,
                     protocolo=protocolo,
                     payload=payload,
+                    resposta=resposta,
                     url=url_completa,
                     cliente=cliente,
                     dominio=dominio,

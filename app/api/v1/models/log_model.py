@@ -16,6 +16,7 @@ class Log(db.base_db.Base):
     protocolo = Column(String, nullable=False)
 
     payload = Column(String, nullable=False)
+    resposta = Column(String, nullable=True)
     url = Column(String, nullable=False)
     cliente = Column(String, nullable=False)
     dominio = Column(String, nullable=False)
