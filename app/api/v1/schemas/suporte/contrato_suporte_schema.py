@@ -12,6 +12,9 @@ class Contrato(BaseModel):
     id_cliente: PositiveInt = Field(
         description="ID do cliente associado ao contrato.", examples=[789]
     )
+    nome_cliente: str = Field(
+        description="Nome do cliente.", examples=["Nome do Cliente"]
+    )
     status: utils.StatusContratoRot = Field(
         description="Status atual do contrato.",
         examples=[utils.enums.rotulos.StatusContratoRot.PRE_CONTRATO],

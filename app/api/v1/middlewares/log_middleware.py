@@ -50,7 +50,7 @@ class LogMiddleware(BaseHTTPMiddleware):
 
         response_body = b""
         async for chunk in response.body_iterator:  # type: ignore
-            response_body += chunk
+            response_body += chunk  # type: ignore
 
         response = Response(
             content=response_body,
@@ -59,7 +59,7 @@ class LogMiddleware(BaseHTTPMiddleware):
             media_type=response.media_type,
         )
 
-        resposta_str = self._format_payload(response_body)
+        resposta_str = self._format_payload(response_body)  # type: ignore
 
         await self._log_request(
             request,

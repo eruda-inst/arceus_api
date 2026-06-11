@@ -22,6 +22,8 @@ class SuporteService(service_service.Service):
                 protocolo=protocolo, cnpj_cpf=cnpj_cpf
             )
 
+            cliente = await clients.SuporteIXCCliente.get_cliente_ixc(id=id_cliente)
+
             contratos_ativos_res = await clients.SuporteIXCCliente.get_contratos(
                 id_cliente=id_cliente,
                 page=page,
@@ -111,6 +113,8 @@ class SuporteService(service_service.Service):
                     contrato["data_vencimento"] = ultimo_titulo.get("data_vencimento")
 
                 contrato["status"] = utils.rotular_status_contrato(contrato["status"])
+
+                contrato["nome_cliente"] = cliente["registros"][0]["razao"]
 
             meta = schemas.Meta(total=total, page=page, per_page=per_page)
             return schemas.SuporteContratoListOut(
@@ -333,7 +337,6 @@ class SuporteService(service_service.Service):
                     detail="Login não encontrado.",
                 )
             login_antigo = res["registros"][0]
-            print(f"ip: {ip}, pool_radius: {pool_radius}")
             novo_ip = ip if ip else login_antigo["ip"]
             novo_radius = pool_radius if pool_radius else login_antigo["pool_radius"]
             login_atualizado: Any = {

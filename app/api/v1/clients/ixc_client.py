@@ -3,6 +3,7 @@ import httpx
 import base64
 from .. import cores
 from typing import Any
+from pydantic import PositiveInt
 from fastapi import HTTPException, status
 
 
@@ -75,6 +76,13 @@ class IXCCliente:
     @classmethod
     async def get_id_cliente_ixc(cls, cnpj_cpf: str) -> Any:
         grid_param = [{"TB": "cliente.cnpj_cpf", "OP": "=", "P": str(cnpj_cpf)}]
+        payload = {"grid_param": json.dumps(obj=grid_param)}
+        data = await cls._make_request(endpoint="cliente", payload=payload)
+        return data
+
+    @classmethod
+    async def get_cliente_ixc(cls, id: PositiveInt) -> Any:
+        grid_param = [{"TB": "cliente.id", "OP": "=", "P": str(id)}]
         payload = {"grid_param": json.dumps(obj=grid_param)}
         data = await cls._make_request(endpoint="cliente", payload=payload)
         return data

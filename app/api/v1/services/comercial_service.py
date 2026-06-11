@@ -54,6 +54,8 @@ class ComercialService(service_service.Service):
                 protocolo=protocolo, cnpj_cpf=cnpj_cpf
             )
 
+            cliente = await clients.SuporteIXCCliente.get_cliente_ixc(id=id_cliente)
+
             res = await clients.ComercialIXCCliente.get_contratos(
                 id_cliente=id_cliente,
                 page=page,
@@ -147,6 +149,7 @@ class ComercialService(service_service.Service):
                 contrato_tratado = {
                     "id": contrato["id"],
                     "contrato": contrato["contrato"],
+                    "nome_cliente": cliente.get("registros")[0].get("razao"),
                     "valor": titulo_final.get("valor", 0.00),
                     "status_acesso": utils.rotular_status_acesso(
                         status_acesso_codigo=contrato["status_internet"]

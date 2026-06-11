@@ -11,6 +11,9 @@ class Contrato(BaseModel):
         description="Número do contrato.",
         examples=["NEWNET PADRAO - 250MB - 06/2025"],
     )
+    nome_cliente: str = Field(
+        description="Nome do cliente.", examples=["Nome do Cliente"]
+    )
     valor: float = Field(description="Valor do contrato.", examples=[99.99])
     status_acesso: utils.StatusAcessoRot = Field(
         description="Status do acesso do contrato.",
