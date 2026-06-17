@@ -1,26 +1,21 @@
-from app.api.v1.cores import settings
-from app.api.v1.utils import SortOrder
-from app.api.v1.schemas import AtendimentoIn
-from .comercial import ComercialIXCCliente, ComercialOpaCliente
-from .suporte import SuporteIXCCliente
-from .financeiro import FinanceiroIXCCliente, FinanceiroAZ7Cliente
 from .ixc_client import IXCCliente
 from .opa_client import OpaCliente
+from .suporte import SuporteIXCCliente
 from .triagem import TriagemIXCCliente
+from .upgrade import UpgradeIXCCliente
 from .cobranca import CobrancaIXCCliente
-
+from .comercial import ComercialIXCCliente, ComercialOpaCliente
+from .financeiro import FinanceiroIXCCliente, FinanceiroAZ7Cliente
 
 __all__ = [
     "IXCCliente",
     "OpaCliente",
-    "ComercialIXCCliente",
     "SuporteIXCCliente",
+    "TriagemIXCCliente",
+    "UpgradeIXCCliente",
+    "CobrancaIXCCliente",
+    "ComercialIXCCliente",
+    "ComercialOpaCliente",
     "FinanceiroIXCCliente",
     "FinanceiroAZ7Cliente",
-    "TriagemIXCCliente",
-    "CobrancaIXCCliente",
-    "AtendimentoIn",
-    "SortOrder",
-    "settings",
-    "ComercialOpaCliente",
 ]

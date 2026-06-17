@@ -1,8 +1,9 @@
 import json
 from typing import Any
+from .. import ixc_client
 from app.api.v1 import schemas
 from pydantic import PositiveInt
-from .. import SortOrder, ixc_client
+from app.api.v1.utils import SortOrder
 
 
 class FinanceiroIXCCliente(ixc_client.IXCCliente):

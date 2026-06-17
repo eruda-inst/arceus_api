@@ -39,6 +39,7 @@ from .triagem import ContatoUpdate, ContatoOut
 from .cliente_schema import ClienteUpdate
 from .login_schema import LoginUpdate
 from .index_schema import IndexOut
+from .upgrade import PlanoSugeridoOut, PlanoSugeridoListOut
 
 __all__ = [
     "Meta",
@@ -78,4 +79,6 @@ __all__ = [
     "ClienteExisteOut",
     "LeadOut",
     "LeadUpdate",
+    "PlanoSugeridoOut",
+    "PlanoSugeridoListOut",
 ]

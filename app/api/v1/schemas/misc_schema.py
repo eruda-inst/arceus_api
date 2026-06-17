@@ -1,8 +1,8 @@
-from pydantic import Field, BaseModel, PositiveInt
+from pydantic import Field, BaseModel, NonNegativeInt, PositiveInt
 
 
 class Meta(BaseModel):
-    total: PositiveInt = Field(
+    total: NonNegativeInt = Field(
         description="Número total de itens em todas as páginas.", ge=1, examples=[1]
     )
     page: PositiveInt | None = Field(
