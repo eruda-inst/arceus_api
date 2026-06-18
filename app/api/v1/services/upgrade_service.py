@@ -1,24 +1,18 @@
+from .. import clients, schemas
 from pydantic import PositiveInt
-from .. import clients, schemas, utils
 from fastapi import HTTPException, status
 
 
 class UpgradeService:
     @staticmethod
     async def get_planos_sugeridos(
-        id_cliente: PositiveInt,
-        page: PositiveInt | None,
-        per_page: PositiveInt | None,
-        sort_name: str | None,
-        sort_order: utils.SortOrder | None,
+        id_cliente: PositiveInt, page: PositiveInt | None, per_page: PositiveInt | None
     ) -> schemas.PlanoSugeridoListOut:
         try:
             contratos_res = await clients.SuporteIXCCliente.get_contratos(
                 id_cliente=id_cliente,
                 page=page,
                 per_page=per_page,
-                sortname=sort_name,
-                sortorder=sort_order,
             )
             contratos = contratos_res.get("registros", [])
 
@@ -27,7 +21,7 @@ class UpgradeService:
             ids_str_tratados = str(",").join(ids_str)
             grid_param = [{"TB": "vd_contratos.id", "OP": "IN", "P": ids_str_tratados}]
             planos_oficiais_res = await clients.UpgradeIXCCliente.get_plano(
-                grid_param=grid_param
+                grid_param=grid_param, page=page, per_page=per_page
             )
             planos_oficiais = planos_oficiais_res.get("registros", [])
 
@@ -49,7 +43,9 @@ class UpgradeService:
                     {"TB": "vd_contratos.id", "OP": "=", "P": str(id_vd_contrato)}
                 ]
                 plano_vigente_res = await clients.UpgradeIXCCliente.get_plano(
-                    grid_param=grid_param
+                    grid_param=grid_param,
+                    page=page,
+                    per_page=per_page,
                 )
                 plano_vigente = plano_vigente_res.get("registros", [])
                 plano_atual = {}
