@@ -7,24 +7,27 @@ class UpgradeService:
     @staticmethod
     async def get_planos_sugeridos(
         id_cliente: PositiveInt,
-        page: int | None = 1,
-        per_page: int | None = 10,
-        sortname: str | None = "cliente_contrato.id",
-        sortorder: utils.SortOrder | None = utils.SortOrder.ASC,
+        page: PositiveInt | None,
+        per_page: PositiveInt | None,
+        sort_name: str | None,
+        sort_order: utils.SortOrder | None,
     ) -> schemas.PlanoSugeridoListOut:
         try:
             contratos_res = await clients.SuporteIXCCliente.get_contratos(
                 id_cliente=id_cliente,
                 page=page,
                 per_page=per_page,
-                sortname=sortname,
-                sortorder=sortorder,
+                sortname=sort_name,
+                sortorder=sort_order,
             )
             contratos = contratos_res.get("registros", [])
 
             ids_planos_oficiais = [277, 278, 279, 280, 281]
-            planos_oficiais_res = await clients.UpgradeIXCCliente.get_planos(
-                ids=ids_planos_oficiais
+            ids_str = (str(id) for id in ids_planos_oficiais)
+            ids_str_tratados = str(",").join(ids_str)
+            grid_param = [{"TB": "vd_contratos.id", "OP": "IN", "P": ids_str_tratados}]
+            planos_oficiais_res = await clients.UpgradeIXCCliente.get_plano(
+                grid_param=grid_param
             )
             planos_oficiais = planos_oficiais_res.get("registros", [])
 
@@ -42,13 +45,18 @@ class UpgradeService:
                 if id_vd_contrato in ids_planos_oficiais:
                     continue
 
+                grid_param = [
+                    {"TB": "vd_contratos.id", "OP": "=", "P": str(id_vd_contrato)}
+                ]
                 plano_vigente_res = await clients.UpgradeIXCCliente.get_plano(
-                    id_vd_contrato=id_vd_contrato
+                    grid_param=grid_param
                 )
                 plano_vigente = plano_vigente_res.get("registros", [])
                 plano_atual = {}
-                plano_atual["nome"] = plano_vigente.get("nome", None)
-                plano_atual["valor"] = float(plano_vigente.get("valor_contrato", None))
+                plano_atual["nome"] = plano_vigente[0].get("nome", None)
+                plano_atual["valor"] = float(
+                    plano_vigente[0].get("valor_contrato", None)
+                )
 
                 plano_sugerido = {}
 

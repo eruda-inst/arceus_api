@@ -1,5 +1,4 @@
 from typing import Annotated
-from pydantic import PositiveInt
 from fastapi import APIRouter, Query
 from .. import services, schemas, utils
 
@@ -11,17 +10,13 @@ upgrade_router = APIRouter(prefix="/upgrade", tags=["Upgrade"])
     summary="Sugere planos oficiais de acordo com planos desatualizados.",
 )
 async def get_planos_sugeridos(
-    id_cliente: Annotated[PositiveInt, Query(description="ID do cliente no IXC.")],
-    page: Annotated[
-        PositiveInt | None, Query(ge=1, description="Número da página.")
-    ] = 1,
-    per_page: Annotated[
-        PositiveInt | None, Query(ge=1, description="Itens por página.")
-    ] = 10,
-    sortname: Annotated[
+    id_cliente: Annotated[int, Query(get=1, description="ID do cliente no IXC.")],
+    page: Annotated[int | None, Query(ge=1, description="Número da página.")] = 1,
+    per_page: Annotated[int | None, Query(ge=1, description="Itens por página.")] = 10,
+    sort_name: Annotated[
         str | None, Query(description="Campo para ordenação.")
     ] = "cliente_contrato.id",
-    sortorder: Annotated[
+    sort_order: Annotated[
         utils.SortOrder | None, Query(description="Ordem da ordenação.")
     ] = utils.SortOrder.ASC,
 ) -> schemas.PlanoSugeridoListOut:
@@ -32,6 +27,6 @@ async def get_planos_sugeridos(
         id_cliente=id_cliente,
         page=page,
         per_page=per_page,
-        sortname=sortname,
-        sortorder=sortorder,
+        sort_name=sort_name,
+        sort_order=sort_order,
     )
