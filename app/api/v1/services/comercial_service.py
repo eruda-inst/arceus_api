@@ -1,18 +1,20 @@
 from typing import Any
 from . import service_service
 from datetime import datetime
+from pydantic import PositiveInt
 from .. import utils, schemas, clients
 from fastapi import HTTPException, status
-from pydantic import ValidationError, PositiveInt
 
 
 class ComercialService(service_service.Service):
     @staticmethod
     async def get_status_acesso(id_contrato: PositiveInt) -> schemas.StatusAcessoOut:
         try:
-            res = await clients.ComercialIXCCliente.get_status_acesso(
-                id_contrato=id_contrato
-            )
+            endpoint = "cliente_contrato"
+            grid_param = [
+                {"TB": "cliente_contrato.id", "OP": "=", "P": str(id_contrato)}
+            ]
+            res = await clients.IXCCliente.get(endpoint=endpoint, grid_param=grid_param)
             status_acesso = res.get("registros", [])
             if not status_acesso:
                 raise HTTPException(
@@ -28,11 +30,6 @@ class ComercialService(service_service.Service):
             )
         except HTTPException:
             raise
-        except ValidationError as e:
-            raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail=f"Validação da resposta falhou: {e}",
-            )
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -46,22 +43,20 @@ class ComercialService(service_service.Service):
         cnpj_cpf: str | None = None,
         page: PositiveInt | None = 1,
         per_page: PositiveInt | None = 10,
-        sortname: str | None = "cliente_contrato.id",
-        sortorder: utils.SortOrder | None = utils.SortOrder.ASC,
     ) -> schemas.ComercialContratoListOut:
         try:
             id_cliente = await cls.get_id_cliente_ixc(
                 protocolo=protocolo, cnpj_cpf=cnpj_cpf
             )
 
-            cliente = await clients.SuporteIXCCliente.get_cliente_ixc(id=id_cliente)
+            cliente = await clients.IXCCliente.get_cliente_ixc(id=id_cliente)
 
-            res = await clients.ComercialIXCCliente.get_contratos(
-                id_cliente=id_cliente,
-                page=page,
-                per_page=per_page,
-                sortname=sortname,
-                sortorder=sortorder,
+            endpoint = "cliente_contrato"
+            grid_param = [
+                {"TB": "cliente_contrato.id_cliente", "OP": "=", "P": str(id_cliente)}
+            ]
+            res = await clients.IXCCliente.get(
+                endpoint=endpoint, grid_param=grid_param, page=page, per_page=per_page
             )
             if not res.get("registros", []):
                 raise HTTPException(
@@ -73,10 +68,15 @@ class ComercialService(service_service.Service):
             hoje = datetime.now().date()
 
             for contrato in contratos:
-                a_receber_res = (
-                    await clients.ComercialIXCCliente.get_valor_e_data_vencimento(
-                        id_contrato=contrato["id"]
-                    )
+                id_contrato = contrato["id"]
+                endpoint = "fn_areceber"
+                grid_param = [
+                    {"TB": "fn_areceber.id_contrato", "OP": "=", "P": str(id_contrato)}
+                ]
+                a_receber_res = await clients.IXCCliente.get(
+                    endpoint=endpoint,
+                    grid_param=grid_param,
+                    sort_order=utils.SortOrder.DESC,
                 )
                 titulos_nao_quitados = [
                     ar
@@ -85,8 +85,16 @@ class ComercialService(service_service.Service):
                 ]
 
                 if not titulos_nao_quitados:
-                    login = await clients.ComercialIXCCliente.get_login(
-                        id_cliente=contrato["id_cliente"]
+                    grid_param = [
+                        {
+                            "TB": "radusuarios.id_cliente",
+                            "OP": "=",
+                            "P": str(contrato["id_cliente"]),
+                        }
+                    ]
+                    endpoint = "radusuarios"
+                    login = await clients.IXCCliente.get(
+                        endpoint=endpoint, grid_param=grid_param
                     )
 
                     if not login.get("registros"):
@@ -137,8 +145,16 @@ class ComercialService(service_service.Service):
                         ).date(),
                     )
 
-                login = await clients.ComercialIXCCliente.get_login(
-                    id_cliente=contrato["id_cliente"]
+                grid_param = [
+                    {
+                        "TB": "radusuarios.id_cliente",
+                        "OP": "=",
+                        "P": str(contrato["id_cliente"]),
+                    }
+                ]
+                endpoint = "radusuarios"
+                login = await clients.IXCCliente.get(
+                    endpoint=endpoint, grid_param=grid_param
                 )
 
                 if not login.get("registros"):
@@ -172,14 +188,8 @@ class ComercialService(service_service.Service):
                 data=[schemas.ComercialContrato(**ct) for ct in contratos_tratados],
                 meta=meta,
             )
-
         except HTTPException:
             raise
-        except ValidationError as e:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Validação da resposta falhou: {e}",
-            )
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -208,7 +218,15 @@ class ComercialService(service_service.Service):
 
             formatted_lead = schemas.LeadIn(**lead_data)
 
-            res = await clients.ComercialIXCCliente.post_leads(lead=formatted_lead)
+            """
+            Este campo "data_cadastro" é obrigatório na API do IXC (temos que mandar alguma coisa), porém o que é mandado é descartado e a data é gerada automaticamente pela própria API deles.
+
+            Só mais uma esquisitice da API do IXC.
+            """
+            endpoint = "contato"
+            payload = formatted_lead.model_dump()
+            payload["data_cadastro"] = "N/A"
+            res = await clients.IXCCliente.post(endpoint=endpoint, payload=payload)
 
             id_lead = res.get("id", None)
             if not id_lead:
@@ -220,11 +238,6 @@ class ComercialService(service_service.Service):
             return schemas.LeadCreate(id=id_lead)
         except HTTPException:
             raise
-        except ValidationError as e:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Validação da resposta falhou: {e}",
-            )
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -235,7 +248,7 @@ class ComercialService(service_service.Service):
     async def cliente_existe(cpf_cnpj: str) -> schemas.ClienteExisteOut:
         try:
             cpf_cnpj_limpo = utils.limpar_string(cpf_cnpj)
-            cliente_existe = await clients.ComercialOpaCliente.cliente_existe(
+            cliente_existe = await clients.OpaCliente.cliente_existe(
                 cpf_cnpj_limpo=cpf_cnpj_limpo
             )
             return schemas.ClienteExisteOut(cliente_existe=cliente_existe)
@@ -248,10 +261,17 @@ class ComercialService(service_service.Service):
     @staticmethod
     async def put_lead(cnpj_cpf: str, lead: schemas.LeadUpdate) -> schemas.LeadOut:
         try:
-            cliente = clients.ComercialIXCCliente()
             # 1. Buscar lead existente pelo CNPJ/CPF
-            response = await cliente.get_lead_by_cpf_cnpj(
-                cnpj_cpf=utils.formatar_cnpj_cpf(cnpj_cpf)
+            endpoint = "contato"
+            grid_param = [
+                {
+                    "TB": "contato.cnpj_cpf",
+                    "OP": "=",
+                    "P": utils.formatar_cnpj_cpf(cnpj_cpf),
+                }
+            ]
+            response = await clients.IXCCliente.get(
+                endpoint=endpoint, grid_param=grid_param
             )
             registros = response.get("registros", [])
             if not registros:
@@ -263,7 +283,10 @@ class ComercialService(service_service.Service):
             lead_id = lead_antigo["id"]
 
             # 2. Mesclar dados antigos com os novos (excluindo None)
-            dados_atualizados = {**lead_antigo, **lead.model_dump(exclude_none=True)}
+            dados_atualizados: Any = {
+                **lead_antigo,
+                **lead.model_dump(exclude_none=True),
+            }
             # Remove campos que não devem ser enviados (ex: o próprio id, data_cadastro etc.)
             dados_atualizados.pop("id", None)
 
@@ -290,7 +313,10 @@ class ComercialService(service_service.Service):
                 )
 
             # 4. Chamar o método de atualização no cliente
-            await cliente.put_lead(lead_id=lead_id, lead=dados_atualizados)
+            id = lead_id
+            endpoint = "contato"
+            payload = dados_atualizados
+            await clients.IXCCliente.put(endpoint=endpoint, id=id, payload=payload)
 
             return schemas.LeadOut(**dados_atualizados)
         except HTTPException:

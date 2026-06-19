@@ -4,7 +4,7 @@ from app.api.v1 import cores
 from pydantic import PositiveInt
 
 
-class FinanceiroAZ7Cliente:
+class SeteAZCliente:
     base_url = cores.settings.BASE_URL_7AZ
     api_key = cores.settings.API_KEY_7AZ
     timeout = httpx.Timeout(connect=5.0, read=30.0, write=10.0, pool=1.0)

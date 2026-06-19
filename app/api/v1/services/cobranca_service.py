@@ -2,7 +2,7 @@ from typing import List, Any
 from . import service_service
 from datetime import datetime
 from zoneinfo import ZoneInfo
-from .. import utils, schemas, clients
+from .. import schemas, clients
 from fastapi import HTTPException, status
 from pydantic import ValidationError, PositiveInt
 
@@ -11,24 +11,26 @@ class CobrancaService(service_service.Service):
     @classmethod
     async def get_faturas_vencidas(
         cls,
-        protocolo: str | None = None,
-        cnpj_cpf: str | None = None,
-        page: PositiveInt | None = 1,
-        per_page: PositiveInt | None = 15,
-        sortname: str | None = "fn_areceber.id",
-        sortorder: utils.SortOrder | None = utils.SortOrder.ASC,
+        protocolo: str | None,
+        cnpj_cpf: str | None,
+        page: PositiveInt | None,
+        per_page: PositiveInt | None,
     ) -> schemas.FaturaAbertaListOut:
         try:
             id_cliente = await cls.get_id_cliente_ixc(
                 protocolo=protocolo, cnpj_cpf=cnpj_cpf
             )
 
-            res = await clients.FinanceiroIXCCliente.get_faturas_abertas(
-                id_cliente=id_cliente,
+            grid_param = [
+                {"TB": "fn_areceber.id_cliente", "OP": "=", "P": str(id_cliente)},
+                {"TB": "fn_areceber.status", "OP": "=", "P": "A"},
+            ]
+
+            res = await clients.IXCCliente.get(
+                endpoint="fn_areceber",
+                grid_param=grid_param,
                 page=page,
                 per_page=per_page,
-                sortname=sortname,
-                sortorder=sortorder,
             )
 
             if not res.get("registros"):
@@ -54,8 +56,12 @@ class CobrancaService(service_service.Service):
                     continue
 
                 id_contrato = fatura_aberta_e_parcial["id_contrato"]
-                contrato_res = await clients.FinanceiroIXCCliente.get_contrato(
-                    id_contrato=id_contrato
+                endpoint = "cliente_contrato"
+                grid_param = [
+                    {"TB": "cliente_contrato.id", "OP": "=", "P": str(id_contrato)}
+                ]
+                contrato_res = await clients.IXCCliente.get(
+                    endpoint=endpoint, grid_param=grid_param
                 )
                 contrato = (
                     contrato_res["registros"][0]["contrato"]

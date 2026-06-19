@@ -1,9 +1,9 @@
 from typing import Any
 from . import service_service
 from datetime import datetime
+from pydantic import PositiveInt
 from .. import utils, schemas, clients
 from fastapi import HTTPException, status
-from pydantic import ValidationError, PositiveInt
 
 
 class SuporteService(service_service.Service):
@@ -14,23 +14,28 @@ class SuporteService(service_service.Service):
         cnpj_cpf: str | None = None,
         page: PositiveInt | None = 1,
         per_page: PositiveInt | None = 10,
-        sortname: str | None = "cliente_contrato.id",
-        sortorder: utils.SortOrder | None = utils.SortOrder.ASC,
     ) -> schemas.SuporteContratoListOut:
         try:
             id_cliente = await cls.get_id_cliente_ixc(
                 protocolo=protocolo, cnpj_cpf=cnpj_cpf
             )
 
-            cliente = await clients.SuporteIXCCliente.get_cliente_ixc(id=id_cliente)
+            cliente = await clients.IXCCliente.get_cliente_ixc(id=id_cliente)
 
-            contratos_ativos_res = await clients.SuporteIXCCliente.get_contratos(
-                id_cliente=id_cliente,
+            grid_param = [
+                {"TB": "cliente_contrato.id_cliente", "OP": "=", "P": str(id_cliente)},
+                {"TB": "cliente_contrato.status", "OP": "!=", "P": "I"},
+                {"TB": "cliente_contrato.status", "OP": "!=", "P": "N"},
+                {"TB": "cliente_contrato.status", "OP": "!=", "P": "D"},
+            ]
+
+            contratos_ativos_res = await clients.IXCCliente.get(
+                endpoint="cliente_contrato",
+                grid_param=grid_param,
                 page=page,
                 per_page=per_page,
-                sortname=sortname,
-                sortorder=sortorder,
             )
+
             contratos_ativos = contratos_ativos_res.get("registros", [])
             total = int(contratos_ativos_res.get("total", 0))
             if total < 1:
@@ -40,13 +45,22 @@ class SuporteService(service_service.Service):
                 )
 
             for contrato in contratos_ativos:
-                a_receber_res = (
-                    await clients.SuporteIXCCliente.get_valor_e_data_vencimento(
-                        id_contrato=contrato.get("id")
-                    )
+                id_contrato = contrato.get("id", None)
+                endpoint = "fn_areceber"
+                grid_param = [
+                    {"TB": "fn_areceber.id_contrato", "OP": "=", "P": str(id_contrato)}
+                ]
+                a_receber_res = await clients.IXCCliente.get(
+                    endpoint=endpoint,
+                    grid_param=grid_param,
+                    sort_order=utils.SortOrder.DESC,
                 )
-                id_login_res = await clients.SuporteIXCCliente.get_id_login(
-                    id_contrato=contrato.get("id")
+
+                grid_param = [
+                    {"TB": "radusuarios.id_contrato", "OP": "=", "P": str(id_contrato)}
+                ]
+                id_login_res = await clients.IXCCliente.get(
+                    endpoint="radusuarios", grid_param=grid_param
                 )
                 if not id_login_res.get("registros", []):
                     raise HTTPException(
@@ -54,8 +68,10 @@ class SuporteService(service_service.Service):
                         detail="Sem ID login.",
                     )
                 id_login = id_login_res.get("registros")[0]["id"]
-                onu_mac_res = await clients.SuporteIXCCliente.get_onu_mac(
-                    id_login=id_login
+
+                grid_param = [{"TB": "radusuarios.id", "OP": "=", "P": str(id_login)}]
+                onu_mac_res = await clients.IXCCliente.get(
+                    endpoint="radusuarios", grid_param=grid_param
                 )
 
                 onu_mac = onu_mac_res["registros"][0]["onu_mac"]
@@ -123,11 +139,6 @@ class SuporteService(service_service.Service):
             )
         except HTTPException:
             raise
-        except ValidationError as e:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Validação da resposta falhou: {e}",
-            )
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -137,9 +148,10 @@ class SuporteService(service_service.Service):
     @staticmethod
     async def get_status_conexao(id_login: PositiveInt) -> schemas.StatusConexaoOut:
         try:
-            res = await clients.SuporteIXCCliente.get_status_conexao(
-                id_login=id_login,
-            )
+
+            grid_param = [{"TB": "radusuarios.id", "OP": "=", "P": str(id_login)}]
+            endpoint = "radusuarios"
+            res = await clients.IXCCliente.get(endpoint=endpoint, grid_param=grid_param)
             registros = res.get("registros", [])
             if not registros:
                 raise HTTPException(
@@ -154,11 +166,6 @@ class SuporteService(service_service.Service):
             )
         except HTTPException:
             raise
-        except ValidationError as e:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Validação da resposta falhou: {e}",
-            )
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -177,8 +184,18 @@ class SuporteService(service_service.Service):
         try:
             if id_login is not None:
                 try:
-                    res = await clients.SuporteIXCCliente.get_status_onu(
-                        id_login=id_login
+                    query_field = "id_login" if id_login else "mac"
+                    query_value = id_login if id_login else mac_onu
+                    grid_param = [
+                        {
+                            "TB": f"radpop_radio_cliente_fibra.{query_field}",
+                            "OP": "=",
+                            "P": str(query_value),
+                        }
+                    ]
+                    endpoint = "radpop_radio_cliente_fibra"
+                    res = await clients.IXCCliente.get(
+                        endpoint=endpoint, grid_param=grid_param
                     )
                     registros = res.get("registros", [])
                     if registros and "sinal_rx" in registros[0]:
@@ -197,7 +214,17 @@ class SuporteService(service_service.Service):
                     if not mac_onu:
                         raise
             if mac_onu is not None:
-                res = await clients.SuporteIXCCliente.get_status_onu(mac_onu=mac_onu)
+                grid_param = [
+                    {
+                        "TB": "radpop_radio_cliente_fibra.mac",
+                        "OP": "=",
+                        "P": str(mac_onu),
+                    }
+                ]
+                endpoint = "radpop_radio_cliente_fibra"
+                res = await clients.IXCCliente.get(
+                    endpoint=endpoint, grid_param=grid_param
+                )
                 registros = res.get("registros", [])
                 if registros and "sinal_rx" in registros[0]:
                     codigo = registros[0].get("sinal_rx")
@@ -216,23 +243,18 @@ class SuporteService(service_service.Service):
             )
         except HTTPException:
             raise
-        except ValidationError as e:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Validação da resposta falhou: {e}",
-            )
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno ao processar solicitação: {str(e)}",
+                detail=f"Erro interno ao processar solicitação: {e}",
             )
 
     @staticmethod
     async def post_desconectar_cliente(id_login: PositiveInt) -> schemas.MensagemOut:
         try:
-            res = await clients.SuporteIXCCliente.post_desconectar_cliente(
-                id_login=id_login
-            )
+            payload = {"id": id_login}
+            endpoint = "desconectar_clientes"
+            res = await clients.IXCCliente.post(endpoint=endpoint, payload=payload)
             mensagem = "Nenhuma mensagem retornada."
             mensagem = res.get("msg")[0]["message"]
             return schemas.MensagemOut(mensagem=mensagem)
@@ -241,7 +263,7 @@ class SuporteService(service_service.Service):
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno ao processar solicitação: {str(e)}",
+                detail=f"Erro interno ao processar solicitação: {e}",
             )
 
     @staticmethod
@@ -249,16 +271,16 @@ class SuporteService(service_service.Service):
         id_login: PositiveInt,
         page: PositiveInt | None = 1,
         per_page: PositiveInt | None = 10,
-        sortname: str | None = "su_ticket.id",
-        sortorder: utils.SortOrder | None = utils.SortOrder.ASC,
     ) -> schemas.AtendimentoOut:
         try:
-            res = await clients.SuporteIXCCliente.get_atendimentos(
-                id_login=id_login,
-                page=page,
-                per_page=per_page,
-                sortname=sortname,
-                sortorder=sortorder,
+            endpoint = "su_ticket"
+            grid_param = [
+                {"TB": "su_ticket.id_login", "OP": "=", "P": str(id_login)},
+                {"TB": "su_ticket.su_status", "OP": "!=", "P": "S"},
+                {"TB": "su_ticket.su_status", "OP": "!=", "P": "C"},
+            ]
+            res = await clients.IXCCliente.get(
+                endpoint=endpoint, grid_param=grid_param, page=page, per_page=per_page
             )
             registros = res.get("registros", [])
             if not registros:
@@ -289,11 +311,6 @@ class SuporteService(service_service.Service):
             )
         except HTTPException:
             raise
-        except ValidationError as e:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Validação da resposta falhou: {e}",
-            )
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -305,18 +322,13 @@ class SuporteService(service_service.Service):
         atendimento: schemas.AtendimentoIn,
     ) -> schemas.AtendimentoCreate:
         try:
-            res = await clients.SuporteIXCCliente.post_atendimentos(
-                atendimento=atendimento
-            )
+            endpoint = "su_ticket"
+            payload = atendimento.model_dump()
+            res = await clients.IXCCliente.post(endpoint=endpoint, payload=payload)
             id_atendimento = res.get("id", None)
             return schemas.AtendimentoCreate(id=int(id_atendimento))
         except HTTPException:
             raise
-        except ValidationError as e:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Validação da resposta falhou: {e}",
-            )
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -330,7 +342,10 @@ class SuporteService(service_service.Service):
         pool_radius: str | None = "",
     ) -> schemas.MensagemOut:
         try:
-            res = await clients.SuporteIXCCliente.get_login(id_login=id_login)
+            grid_param = [{"TB": "radusuarios.id", "OP": "=", "P": str(id_login)}]
+            endpoint = "radusuarios"
+
+            res = await clients.IXCCliente.get(endpoint=endpoint, grid_param=grid_param)
             if not res.get("registros"):
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
@@ -345,19 +360,20 @@ class SuporteService(service_service.Service):
                 "pool_radius": novo_radius,
             }
             del login_atualizado["id"]
-            res = await clients.SuporteIXCCliente.put_ip(
-                id_login=id_login, ip=login_atualizado
+
+            endpoint = "radusuarios"
+            id = id_login
+            payload = login_atualizado
+
+            res = await clients.IXCCliente.put(
+                endpoint=endpoint, id=id, payload=payload
             )
+
             mensagem = "Nenhuma mensagem retornada."
             mensagem = res["message"]
             return schemas.MensagemOut(mensagem=mensagem)
         except HTTPException:
             raise
-        except ValidationError as e:
-            raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail=f"Erro de validação: {e}",
-            )
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -367,17 +383,14 @@ class SuporteService(service_service.Service):
     @staticmethod
     async def post_limpar_mac(id_login: PositiveInt) -> schemas.MensagemOut:
         try:
-            res = await clients.SuporteIXCCliente.post_limpar_mac(id_login=id_login)
+            endpoint = "radusuarios_25452"
+            payload = {"get_id": id_login}
+            res = await clients.IXCCliente.post(endpoint=endpoint, payload=payload)
             mensagem = "Nenhuma mensagem retornada."
             mensagem = res.get("message")
             return schemas.MensagemOut(mensagem=mensagem)
         except HTTPException:
             raise
-        except ValidationError as e:
-            raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail=f"Erro de validação: {e}",
-            )
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -387,7 +400,9 @@ class SuporteService(service_service.Service):
     @staticmethod
     async def get_dados_wifi(id_login: PositiveInt) -> schemas.WifiOut:
         try:
-            res = await clients.SuporteIXCCliente.get_dados_wifi(id_login=id_login)
+            endpoint = "radusuarios"
+            grid_param = [{"TB": "radusuarios.id", "OP": "=", "P": str(id_login)}]
+            res = await clients.IXCCliente.get(endpoint=endpoint, grid_param=grid_param)
 
             if not res.get("registros"):
                 raise HTTPException(

@@ -1,7 +1,6 @@
 from typing import Annotated
-from pydantic import PositiveInt
+from .. import services, schemas
 from fastapi import APIRouter, Query
-from .. import utils, services, schemas
 
 cobranca_router = APIRouter(prefix="/cobranca", tags=["Cobrança"])
 
@@ -17,18 +16,10 @@ async def get_faturas_abertas(
     cnpj_cpf: Annotated[
         str | None, Query(description="CPF ou CNPJ do cliente.")
     ] = None,
-    page: Annotated[
-        PositiveInt | None, Query(ge=1, description="Número da página.")
-    ] = 1,
-    per_page: Annotated[
-        PositiveInt | None, Query(ge=1, description="Itens por página.")
-    ] = 10,
-    sortname: Annotated[
-        str | None, Query(description="Campo para ordenação.")
-    ] = "fn_areceber.id",
-    sortorder: Annotated[
-        utils.SortOrder | None, Query(description="Ordem da ordenação.")
-    ] = utils.SortOrder.ASC,
+    pagina: Annotated[int | None, Query(ge=1, description="Número da página.")] = 1,
+    itens_por_pagina: Annotated[
+        int | None, Query(ge=1, description="Itens por página.")
+    ] = 15,
 ) -> schemas.FaturaAbertaListOut:
     """
     Obtém faturas abertas de todos os contratos de um cliente, através de protocolo de atendimento ou CPF/CNPJ.
@@ -36,10 +27,8 @@ async def get_faturas_abertas(
     return await services.FinanceiroService.get_faturas_abertas(
         protocolo=protocolo,
         cnpj_cpf=cnpj_cpf,
-        page=page,
-        per_page=per_page,
-        sortorder=sortorder,
-        sortname=sortname,
+        page=pagina,
+        per_page=itens_por_pagina,
     )
 
 
@@ -54,18 +43,10 @@ async def get_faturas_vencidas(
     cnpj_cpf: Annotated[
         str | None, Query(description="CPF ou CNPJ do cliente.")
     ] = None,
-    page: Annotated[
-        PositiveInt | None, Query(ge=1, description="Número da página.")
-    ] = 1,
-    per_page: Annotated[
-        PositiveInt | None, Query(ge=1, description="Itens por página.")
-    ] = 10,
-    sortname: Annotated[
-        str | None, Query(description="Campo para ordenação.")
-    ] = "fn_areceber.id",
-    sortorder: Annotated[
-        utils.SortOrder | None, Query(description="Ordem da ordenação.")
-    ] = utils.SortOrder.ASC,
+    pagina: Annotated[int | None, Query(ge=1, description="Número da página.")] = 1,
+    itens_por_pagina: Annotated[
+        int | None, Query(ge=1, description="Itens por página.")
+    ] = 15,
 ) -> schemas.FaturaAbertaListOut:
     """
     Obtém faturas vencidas de todos os contratos de um cliente, através de protocolo de atendimento ou CPF/CNPJ.
@@ -73,8 +54,6 @@ async def get_faturas_vencidas(
     return await services.CobrancaService.get_faturas_vencidas(
         protocolo=protocolo,
         cnpj_cpf=cnpj_cpf,
-        page=page,
-        per_page=per_page,
-        sortorder=sortorder,
-        sortname=sortname,
+        page=pagina,
+        per_page=itens_por_pagina,
     )

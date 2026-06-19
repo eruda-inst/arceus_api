@@ -9,19 +9,32 @@ class UpgradeService:
         id_cliente: PositiveInt, page: PositiveInt | None, per_page: PositiveInt | None
     ) -> schemas.PlanoSugeridoListOut:
         try:
-            contratos_res = await clients.SuporteIXCCliente.get_contratos(
-                id_cliente=id_cliente,
-                page=page,
-                per_page=per_page,
+            grid_param = [
+                {"TB": "cliente_contrato.id_cliente", "OP": "=", "P": str(id_cliente)},
+                {"TB": "cliente_contrato.status", "OP": "!=", "P": "I"},
+                {"TB": "cliente_contrato.status", "OP": "!=", "P": "N"},
+                {"TB": "cliente_contrato.status", "OP": "!=", "P": "D"},
+            ]
+            endpoint = "cliente_contrato"
+            contratos_res = await clients.IXCCliente.get(
+                endpoint=endpoint, grid_param=grid_param, page=page, per_page=per_page
             )
+
             contratos = contratos_res.get("registros", [])
 
-            ids_planos_oficiais = [277, 278, 279, 280, 281]
-            ids_str = (str(id) for id in ids_planos_oficiais)
+            ids_planos_basicos = [277, 278, 279, 280, 281]
+            ids_planos_gamers = [267, 272]
+            ids_planos_oficiais = ids_planos_basicos.copy()
+            ids_planos_oficiais.extend(ids_planos_gamers)
+
+            ids_str = (str(id) for id in ids_planos_basicos)
             ids_str_tratados = str(",").join(ids_str)
             grid_param = [{"TB": "vd_contratos.id", "OP": "IN", "P": ids_str_tratados}]
-            planos_oficiais_res = await clients.UpgradeIXCCliente.get_plano(
-                grid_param=grid_param, page=page, per_page=per_page
+            planos_oficiais_res = await clients.IXCCliente.get(
+                endpoint="vd_contratos",
+                grid_param=grid_param,
+                page=page,
+                per_page=per_page,
             )
             planos_oficiais = planos_oficiais_res.get("registros", [])
 
@@ -42,7 +55,8 @@ class UpgradeService:
                 grid_param = [
                     {"TB": "vd_contratos.id", "OP": "=", "P": str(id_vd_contrato)}
                 ]
-                plano_vigente_res = await clients.UpgradeIXCCliente.get_plano(
+                plano_vigente_res = await clients.IXCCliente.get(
+                    endpoint="vd_contratos",
                     grid_param=grid_param,
                     page=page,
                     per_page=per_page,

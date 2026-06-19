@@ -1,6 +1,5 @@
 from typing import Any
 from . import service_service
-from pydantic import ValidationError
 from .. import schemas, clients, utils
 from fastapi import HTTPException, status
 
@@ -15,7 +14,11 @@ class TriagemService(service_service.Service):
                 protocolo=protocolo, cnpj_cpf=cnpj_cpf
             )
 
-            res = await clients.TriagemIXCCliente.get_clientes(id_cliente=id_cliente)
+            grid_param = [{"TB": "cliente.id", "OP": "=", "P": str(id_cliente)}]
+
+            res = await clients.IXCCliente.get(
+                endpoint="cliente", grid_param=grid_param
+            )
             if not res.get("registros"):
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
@@ -26,11 +29,6 @@ class TriagemService(service_service.Service):
             return schemas.ContatoOut(telefone_celular=contato)
         except HTTPException:
             raise
-        except ValidationError as e:
-            raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail=f"Erro de validação: {e}",
-            )
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -49,7 +47,12 @@ class TriagemService(service_service.Service):
                 protocolo=protocolo, cnpj_cpf=cnpj_cpf
             )
 
-            res = await clients.TriagemIXCCliente.get_clientes(id_cliente=id_cliente)
+            grid_param = [{"TB": "cliente.id", "OP": "=", "P": str(id_cliente)}]
+
+            res = await clients.IXCCliente.get(
+                endpoint="cliente", grid_param=grid_param
+            )
+
             if not res.get("registros"):
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
@@ -68,8 +71,8 @@ class TriagemService(service_service.Service):
 
             del cliente_atualizado["id"]
 
-            res = await clients.TriagemIXCCliente.put_clientes(
-                id_cliente=id_cliente, cliente=cliente_atualizado
+            res = await clients.IXCCliente.put(
+                endpoint="cliente", id=id_cliente, payload=cliente_atualizado
             )
 
             mensagem = "Nenhuma mensagem retornada."
@@ -78,11 +81,6 @@ class TriagemService(service_service.Service):
             return schemas.MensagemOut(mensagem=mensagem)
         except HTTPException:
             raise
-        except ValidationError as e:
-            raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail=f"Erro de validação: {e}",
-            )
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

@@ -1,32 +1,34 @@
 from typing import Any
 from . import service_service
+from pydantic import PositiveInt
 from .. import clients, schemas, utils
 from fastapi import HTTPException, status
-from pydantic import ValidationError, PositiveInt
 
 
 class FinanceiroService(service_service.Service):
     @classmethod
     async def get_faturas_abertas(
         cls,
-        protocolo: str | None = None,
-        cnpj_cpf: str | None = None,
-        page: PositiveInt | None = 1,
-        per_page: PositiveInt | None = 15,
-        sortname: str | None = "fn_areceber.id",
-        sortorder: utils.SortOrder | None = utils.SortOrder.ASC,
+        protocolo: str | None,
+        cnpj_cpf: str | None,
+        page: PositiveInt | None,
+        per_page: PositiveInt | None,
     ) -> schemas.FaturaAbertaListOut:
         try:
             id_cliente = await cls.get_id_cliente_ixc(
                 protocolo=protocolo, cnpj_cpf=cnpj_cpf
             )
 
-            res = await clients.FinanceiroIXCCliente.get_faturas_abertas(
-                id_cliente=id_cliente,
+            grid_param = [
+                {"TB": "fn_areceber.id_cliente", "OP": "=", "P": str(id_cliente)},
+                {"TB": "fn_areceber.status", "OP": "=", "P": "A"},
+            ]
+
+            res = await clients.IXCCliente.get(
+                endpoint="fn_areceber",
+                grid_param=grid_param,
                 page=page,
                 per_page=per_page,
-                sortname=sortname,
-                sortorder=sortorder,
             )
 
             if not res.get("registros"):
@@ -40,8 +42,12 @@ class FinanceiroService(service_service.Service):
 
             for fatura_aberta in faturas_abertas:
                 id_contrato = fatura_aberta["id_contrato"]
-                contrato_res = await clients.FinanceiroIXCCliente.get_contrato(
-                    id_contrato=id_contrato
+                grid_param = [
+                    {"TB": "cliente_contrato.id", "OP": "=", "P": str(id_contrato)}
+                ]
+                endpoint = "cliente_contrato"
+                contrato_res = await clients.IXCCliente.get(
+                    endpoint=endpoint, grid_param=grid_param
                 )
                 contrato = (
                     contrato_res["registros"][0]["contrato"]
@@ -72,11 +78,6 @@ class FinanceiroService(service_service.Service):
             )
         except HTTPException:
             raise
-        except ValidationError as e:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Validação da resposta falhou: {e}",
-            )
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -88,19 +89,14 @@ class FinanceiroService(service_service.Service):
         id_contrato: PositiveInt,
     ) -> schemas.MensagemOut:
         try:
-            res = await clients.FinanceiroIXCCliente.post_desbloqueio_em_confianca(
-                id_contrato=id_contrato
-            )
+            endpoint = "desbloqueio_confianca"
+            payload = {"id": id_contrato}
+            res = await clients.IXCCliente.post(endpoint=endpoint, payload=payload)
             mensagem = "Nenhuma mensagem retornada."
             mensagem = res.get("message")
             return schemas.MensagemOut(mensagem=mensagem)
         except HTTPException:
             raise
-        except ValidationError as e:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Validação da resposta falhou: {e}",
-            )
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -110,9 +106,9 @@ class FinanceiroService(service_service.Service):
     @staticmethod
     async def get_linha_digitavel(id_fatura: PositiveInt) -> schemas.LinhaDigitavelOut:
         try:
-            res = await clients.FinanceiroIXCCliente.get_linha_digitavel(
-                id_fatura=id_fatura
-            )
+            grid_param = [{"TB": "fn_areceber.id", "OP": "=", "P": str(id_fatura)}]
+            endpoint = "fn_areceber"
+            res = await clients.IXCCliente.get(endpoint=endpoint, grid_param=grid_param)
             reg = res.get("registros")
             if not reg:
                 raise HTTPException(
@@ -130,11 +126,6 @@ class FinanceiroService(service_service.Service):
             )
         except HTTPException:
             raise
-        except ValidationError as e:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Validação da resposta falhou: {e}",
-            )
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -144,7 +135,7 @@ class FinanceiroService(service_service.Service):
     @staticmethod
     async def get_chave_pix(id_fatura: PositiveInt) -> schemas.ChavePixBase:
         try:
-            res = await clients.FinanceiroAZ7Cliente.get_chave_pix(id_fatura=id_fatura)
+            res = await clients.SeteAZCliente.get_chave_pix(id_fatura=id_fatura)
             if len(res) < 1 or not res.get("pixCode"):
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
@@ -154,11 +145,6 @@ class FinanceiroService(service_service.Service):
             return schemas.ChavePixBase(chave_pix=chave_pix)
         except HTTPException:
             raise
-        except ValidationError as e:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Validação da resposta falhou: {e}",
-            )
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -174,9 +160,9 @@ class FinanceiroService(service_service.Service):
                 protocolo=protocolo, cnpj_cpf=cnpj_cpf
             )
 
-            res = await clients.FinanceiroIXCCliente.get_credenciais(
-                id_cliente=id_cliente
-            )
+            grid_param = [{"TB": "cliente.id", "OP": "=", "P": str(id_cliente)}]
+            endpoint = "cliente"
+            res = await clients.IXCCliente.get(endpoint=endpoint, grid_param=grid_param)
             if not res.get("registros"):
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
@@ -188,11 +174,6 @@ class FinanceiroService(service_service.Service):
             return schemas.CredencialOut(usuario=hotsite_email, senha=senha)
         except HTTPException:
             raise
-        except ValidationError as e:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Validação da resposta falhou: {e}",
-            )
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -204,9 +185,9 @@ class FinanceiroService(service_service.Service):
         id_cliente: PositiveInt, credenciais: schemas.CredencialUpdate
     ) -> schemas.MensagemOut:
         try:
-            res = await clients.FinanceiroIXCCliente.get_credenciais(
-                id_cliente=id_cliente
-            )
+            grid_param = [{"TB": "cliente.id", "OP": "=", "P": str(id_cliente)}]
+            endpoint = "cliente"
+            res = await clients.IXCCliente.get(endpoint=endpoint, grid_param=grid_param)
             if not res.get("registros"):
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
@@ -216,19 +197,17 @@ class FinanceiroService(service_service.Service):
             novas_credenciais = credenciais.model_dump()
             cliente_atualizado: Any = {**cliente_antigo, **novas_credenciais}
             del cliente_atualizado["id"]
-            res = await clients.FinanceiroIXCCliente.put_clientes(
-                id_cliente=id_cliente, cliente=cliente_atualizado
+
+            endpoint = "cliente"
+            res = await clients.IXCCliente.put(
+                endpoint=endpoint,
+                id=id_cliente,
+                payload=cliente_atualizado,
             )
-            mensagem = "Nenhuma mensagem retornada."
-            mensagem = res.get("message")
+            mensagem = res.get("message", "Nenhuma mensagem retornada.")
             return schemas.MensagemOut(mensagem=mensagem)
         except HTTPException:
             raise
-        except ValidationError as e:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Validação da resposta falhou: {e}",
-            )
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -238,8 +217,15 @@ class FinanceiroService(service_service.Service):
     @staticmethod
     async def get_ultima_fatura_paga(id_contrato: PositiveInt) -> Any:
         try:
-            res = await clients.FinanceiroIXCCliente.get_ultima_fatura_paga(
-                id_contrato=id_contrato
+            grid_param = [
+                {"TB": "fn_areceber.id_contrato", "OP": "=", "P": str(id_contrato)},
+                {"TB": "fn_areceber.status", "OP": "=", "P": "R"},
+            ]
+            endpoint = "fn_areceber"
+            res = await clients.IXCCliente.get(
+                endpoint=endpoint,
+                grid_param=grid_param,
+                sort_order=utils.SortOrder.DESC,
             )
             if not res.get("registros"):
                 raise HTTPException(
@@ -263,11 +249,6 @@ class FinanceiroService(service_service.Service):
             )
         except HTTPException:
             raise
-        except ValidationError as e:
-            raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
-                detail=f"Validação da resposta falhou: {e}",
-            )
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

@@ -1,8 +1,8 @@
 import json
 import httpx
 import base64
-from .. import cores
 from typing import Any
+from .. import cores, utils
 from pydantic import PositiveInt
 from fastapi import HTTPException, status
 
@@ -65,15 +65,6 @@ class IXCCliente:
             ) from e
 
     @classmethod
-    async def get_valor_e_data_vencimento(cls, id_contrato: int) -> Any:
-        grid_param = [
-            {"TB": "fn_areceber.id_contrato", "OP": "=", "P": str(id_contrato)}
-        ]
-        payload = {"grid_param": json.dumps(obj=grid_param)}
-        data = await cls._make_request(endpoint="fn_areceber", payload=payload)
-        return data
-
-    @classmethod
     async def get_id_cliente_ixc(cls, cnpj_cpf: str) -> Any:
         grid_param = [{"TB": "cliente.cnpj_cpf", "OP": "=", "P": str(cnpj_cpf)}]
         payload = {"grid_param": json.dumps(obj=grid_param)}
@@ -85,4 +76,39 @@ class IXCCliente:
         grid_param = [{"TB": "cliente.id", "OP": "=", "P": str(id)}]
         payload = {"grid_param": json.dumps(obj=grid_param)}
         data = await cls._make_request(endpoint="cliente", payload=payload)
+        return data
+
+    @classmethod
+    async def post(cls, endpoint: str, payload: dict[str, Any]) -> Any:
+        data = await cls._make_request(
+            endpoint=endpoint, payload=payload, include_ixcsoft=False
+        )
+        return data
+
+    @classmethod
+    async def put(cls, endpoint: str, id: PositiveInt, payload: dict[str, Any]) -> Any:
+        data = await cls._make_request(
+            endpoint=f"{endpoint}/{id}",
+            payload=payload,
+            include_ixcsoft=False,
+            method="PUT",
+        )
+        return data
+
+    @classmethod
+    async def get(
+        cls,
+        endpoint: str,
+        grid_param: list[dict[str, str]],
+        page: PositiveInt | None = 1,
+        per_page: PositiveInt | None = 10,
+        sort_order: utils.SortOrder | None = utils.SortOrder.ASC,
+    ) -> Any:
+        payload = {
+            "grid_param": json.dumps(obj=grid_param),
+            "page": str(page),
+            "rp": str(per_page),
+            "sortorder": str(sort_order),
+        }
+        data = await cls._make_request(endpoint=endpoint, payload=payload)
         return data

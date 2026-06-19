@@ -1,6 +1,5 @@
 from typing import Annotated
-from pydantic import PositiveInt
-from .. import utils, services, schemas
+from .. import services, schemas
 from fastapi import APIRouter, Query, status, Body
 
 comercial_router = APIRouter(prefix="/comercial", tags=["Comercial"])
@@ -10,7 +9,7 @@ comercial_router = APIRouter(prefix="/comercial", tags=["Comercial"])
     path="/status_acesso", summary="Obtém status de acesso do contrato."
 )
 async def get_status_acesso(
-    id_contrato: Annotated[PositiveInt, Query(ge=1, description="ID do contrato.")],
+    id_contrato: Annotated[int, Query(ge=1, description="ID do contrato.")],
 ) -> schemas.StatusAcessoOut:
     """
     Obtém status de acesso de um contrato, atravé do ID do contrato."
@@ -30,18 +29,8 @@ async def get_contratos(
     cnpj_cpf: Annotated[
         str | None, Query(description="CPF ou CNPJ do cliente.")
     ] = None,
-    page: Annotated[
-        PositiveInt | None, Query(ge=1, description="Número da página.")
-    ] = 1,
-    per_page: Annotated[
-        PositiveInt | None, Query(ge=1, description="Itens por página.")
-    ] = 10,
-    sortname: Annotated[
-        str | None, Query(description="Campo para ordenação.")
-    ] = "cliente_contrato.id",
-    sortorder: Annotated[
-        utils.SortOrder | None, Query(description="Ordem da ordenação.")
-    ] = utils.SortOrder.ASC,
+    page: Annotated[int | None, Query(ge=1, description="Número da página.")] = 1,
+    per_page: Annotated[int | None, Query(ge=1, description="Itens por página.")] = 10,
 ) -> schemas.ComercialContratoListOut:
     """
     Obtém contratos de todos os clientes, atravé de protocolo de atendimento ou CPF/CNPJ.
@@ -51,8 +40,6 @@ async def get_contratos(
         cnpj_cpf=cnpj_cpf,
         page=page,
         per_page=per_page,
-        sortname=sortname,
-        sortorder=sortorder,
     )
 
 

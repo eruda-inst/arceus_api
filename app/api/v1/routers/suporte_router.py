@@ -1,6 +1,5 @@
 from typing import Annotated
-from pydantic import PositiveInt
-from .. import schemas, utils, services
+from .. import schemas, services
 from fastapi import APIRouter, Query, status, Path, Body
 
 suporte_router = APIRouter(prefix="/suporte", tags=["Suporte"])
@@ -15,29 +14,14 @@ async def get_contratos(
     cnpj_cpf: Annotated[
         str | None, Query(description="CPF ou CNPJ do cliente.")
     ] = None,
-    page: Annotated[
-        PositiveInt | None, Query(ge=1, description="Número da página.")
-    ] = 1,
-    per_page: Annotated[
-        PositiveInt | None, Query(ge=1, description="Itens por página.")
-    ] = 10,
-    sortname: Annotated[
-        str | None, Query(description="Campo para ordenação.")
-    ] = "cliente_contrato.id",
-    sortorder: Annotated[
-        utils.SortOrder | None, Query(description="Ordem da ordenação.")
-    ] = utils.SortOrder.ASC,
+    page: Annotated[int | None, Query(ge=1, description="Número da página.")] = 1,
+    per_page: Annotated[int | None, Query(ge=1, description="Itens por página.")] = 10,
 ) -> schemas.SuporteContratoListOut:
     """
     Obtém contratos ativos de todos os clientes, atravé de protocolo de atendimento.
     """
     return await services.SuporteService.get_contratos(
-        protocolo=protocolo,
-        cnpj_cpf=cnpj_cpf,
-        page=page,
-        per_page=per_page,
-        sortname=sortname,
-        sortorder=sortorder,
+        protocolo=protocolo, cnpj_cpf=cnpj_cpf, page=page, per_page=per_page
     )
 
 
@@ -46,7 +30,7 @@ async def get_contratos(
 )
 async def get_status_conexao(
     id_login: Annotated[
-        PositiveInt, Query(ge=1, description="ID de login do cliente no IXCSoft.")
+        int, Query(ge=1, description="ID de login do cliente no IXCSoft.")
     ],
 ) -> schemas.StatusConexaoOut:
     """
@@ -60,7 +44,7 @@ async def get_status_conexao(
 )
 async def get_status_onu(
     id_login: Annotated[
-        PositiveInt | None,
+        int | None,
         Query(ge=1, description="ID de login do cliente no IXCSoft."),
     ] = None,
     mac_onu: Annotated[
@@ -81,7 +65,7 @@ async def get_status_onu(
 )
 async def post_desconectar_cliente(
     id_login: Annotated[
-        PositiveInt, Query(ge=1, description="ID de login do cliente no IXCSoft.")
+        int, Query(ge=1, description="ID de login do cliente no IXCSoft.")
     ],
 ) -> schemas.MensagemOut:
     """
@@ -95,30 +79,16 @@ async def post_desconectar_cliente(
 )
 async def get_atendimentos(
     id_login: Annotated[
-        PositiveInt, Query(ge=1, description="ID de login do cliente no IXCSoft.")
+        int, Query(ge=1, description="ID de login do cliente no IXCSoft.")
     ],
-    page: Annotated[
-        PositiveInt | None, Query(ge=1, description="Número da página.")
-    ] = 1,
-    per_page: Annotated[
-        PositiveInt | None, Query(ge=1, description="Itens por página.")
-    ] = 10,
-    sortname: Annotated[
-        str | None, Query(description="Campo para ordenação.")
-    ] = "su_ticket.id",
-    sortorder: Annotated[
-        utils.SortOrder | None, Query(description="Ordem da ordenação.")
-    ] = utils.SortOrder.ASC,
+    page: Annotated[int | None, Query(ge=1, description="Número da página.")] = 1,
+    per_page: Annotated[int | None, Query(ge=1, description="Itens por página.")] = 10,
 ) -> schemas.AtendimentoOut:
     """
     Checa atendimentos abertos de um cliente, atravé do ID de login.
     """
     return await services.SuporteService.get_atendimentos(
-        id_login=id_login,
-        page=page,
-        per_page=per_page,
-        sortname=sortname,
-        sortorder=sortorder,
+        id_login=id_login, page=page, per_page=per_page
     )
 
 
@@ -144,7 +114,7 @@ async def post_atendimentos(
     summary="Atualiza um ou mais campos associado a um login específico.",
 )
 async def put_ip(
-    id_login: Annotated[PositiveInt, Path(ge=1, description="ID de login.")],
+    id_login: Annotated[int, Path(ge=1, description="ID de login.")],
     ip: Annotated[str | None, Body(description="IP do login a ser atualizado.")] = "",
     pool_radius: Annotated[
         str | None, Body(description="Radius do login a ser atualizado.")
@@ -161,7 +131,7 @@ async def put_ip(
 @suporte_router.post(path="/limpar_mac", summary="Limpa MAC Address.")
 async def post_limpar_mac(
     id_login: Annotated[
-        PositiveInt, Query(ge=1, description="ID de login do cliente no IXCSoft.")
+        int, Query(ge=1, description="ID de login do cliente no IXCSoft.")
     ],
 ) -> schemas.MensagemOut:
     """
@@ -173,7 +143,7 @@ async def post_limpar_mac(
 @suporte_router.get(path="/dados_wifi", summary="Obtém dados de WiFi de um cliente.")
 async def get_dados_wifi(
     id_login: Annotated[
-        PositiveInt, Query(ge=1, description="ID de login do cliente no IXCSoft.")
+        int, Query(ge=1, description="ID de login do cliente no IXCSoft.")
     ],
 ) -> schemas.WifiOut:
     """
