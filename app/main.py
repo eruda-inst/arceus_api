@@ -5,8 +5,8 @@ from .api.v1 import schemas, middlewares
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(
-    title="API do Arceus",
-    description="API oficial Newnet/Eruda — Simplifica integrações entre a API da OpaSuite, da IXCSoft e da 7AZ.",
+    title="Arceus",
+    description="Simplifica integrações entre a API da OpaSuite, IXCSoft e 7AZ.",
     version="1.0.0",
     routes=api_v1_router.routes,
 )
