@@ -1,3 +1,4 @@
+from .vila_router import vila_router
 from .suporte_router import suporte_router
 from .upgrade_router import upgrade_router
 from .triagem_router import triagem_router
@@ -6,6 +7,7 @@ from .comercial_router import comercial_router
 from .financeiro_router import financeiro_router
 
 __all__ = [
+    "vila_router",
     "suporte_router",
     "upgrade_router",
     "triagem_router",
