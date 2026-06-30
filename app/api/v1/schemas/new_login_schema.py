@@ -12,8 +12,10 @@ class StatusConexaoOut(BaseModel):
         Cod = utils.StatusConexaoCod
         Rot = utils.StatusConexaoRot
 
-        s = Rot.CONECTADO
-        s = Rot.DESCONECTADO if v == Cod.DESCONECTADO else s
-        s = Rot.SEM_STATUS if v == Cod.SEM_STATUS else s
+        mapping = {
+            Cod.CONECTADO: Rot.CONECTADO,
+            Cod.DESCONECTADO: Rot.DESCONECTADO,
+            Cod.SEM_STATUS: Rot.SEM_STATUS,
+        }
 
-        return s
+        return mapping[v]
