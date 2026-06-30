@@ -1,4 +1,5 @@
 from .misc_schema import Meta, MensagemOut
+from .new_login_schema import StatusConexaoOut
 from .comercial import (
     ComercialContrato,
     ComercialContratoListOut,
@@ -20,7 +21,6 @@ from .suporte import (
     StatusConexao,
     StatusONUOut,
     StatusONU,
-    StatusConexaoOut,
     onu_suporte_schema,
     WifiOut,
 )
