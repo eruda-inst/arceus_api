@@ -60,8 +60,8 @@ class Atendimento(BaseModel):
     id_assunto: PositiveInt = Field(
         description="ID do assunto do atendimento.", examples=[1]
     )
-    status: utils.StatusAtendimentoRot = Field(
-        description="Status do atendimento.", examples=[utils.StatusAtendimentoRot.NOVO]
+    status: utils.SuStatusRot = Field(
+        description="Status do atendimento.", examples=[utils.SuStatusRot.NOVO]
     )
     mensagem: str = Field(
         max_length=999,

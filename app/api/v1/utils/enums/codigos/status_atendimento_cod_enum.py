@@ -1,7 +1,7 @@
 from enum import StrEnum
 
 
-class StatusAtendimentoCod(StrEnum):
+class SuStatusCod(StrEnum):
     NOVO = "N"
     PENDENTE = "P"
     EM_PROGRESSO = "EP"

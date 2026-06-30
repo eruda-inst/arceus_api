@@ -23,8 +23,8 @@ def rotular_status_contrato(
 
 
 def rotular_status_atendimento(
-    status_atendimento_codigo: enums.StatusAtendimentoCod,
-) -> enums.StatusAtendimentoRot:
+    status_atendimento_codigo: enums.SuStatusCod,
+) -> enums.SuStatusRot:
     return get_label(status_atendimento_codigo, maps.STATUS_ATENDIMENTO)
 
 

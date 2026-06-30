@@ -11,14 +11,13 @@ from .helpers import (
     rotular_status_onu,
 )
 from .enums import (
-    StatusAtendimentoCod,
     StatusContratoCod,
     OrigemEnderecoCod,
     StatusConexaoCod,
     PrioridadeCod,
+    SuStatusRot,
     SuStatusCod,
     TipoCod,
-    StatusAtendimentoRot,
     StatusContratoRot,
     StatusConexaoRot,
     StatusONURot,
@@ -38,16 +37,15 @@ from .enums import (
 from .maps import STATUS_ATENDIMENTO, STATUS_CONEXAO, STATUS_CONTRATO, STATUS_ACESSO
 
 __all__ = [
-    "StatusAtendimentoCod",
     "StatusContratoCod",
     "OrigemEnderecoCod",
     "StatusConexaoCod",
     "PrioridadeCod",
     "SuStatusCod",
     "TipoCod",
-    "StatusAtendimentoRot",
     "StatusContratoRot",
     "StatusConexaoRot",
+    "SuStatusRot",
     "StatusONURot",
     "SortOrder",
     "StatusAcessoRot",

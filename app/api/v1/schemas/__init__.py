@@ -3,6 +3,7 @@ from .new_login_schema import (
     StatusConexaoOut as NewStatusConexaoOut,
     WifiOut as NewWifiOut,
 )
+from .atendimento_schema import Atendimento, AtendimentoOut
 from .onu_schema import StatusOnuOut
 from .comercial import (
     ComercialContrato,
@@ -16,10 +17,8 @@ from .comercial import (
 )
 from .suporte import (
     SuporteContratoListOut,
-    Atendimento,
     AtendimentoCreate,
     AtendimentoIn,
-    AtendimentoOut,
     SuporteContrato,
     StatusConexao,
     StatusONUOut,

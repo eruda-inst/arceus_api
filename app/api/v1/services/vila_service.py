@@ -121,3 +121,66 @@ class VilaService(service_service.Service):
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=f"Erro interno ao processar solicitação: {e}",
             )
+
+    @classmethod
+    async def get_atendimentos(
+        cls,
+        numero_residencia: PositiveInt,
+        page: PositiveInt | None,
+        per_page: PositiveInt | None,
+    ) -> schemas.AtendimentoOut:
+        try:
+            # --- Login ---
+            login = await cls.get_login(numero_residencia=numero_residencia)
+
+            # Exceção já tratada na get_login
+
+            # --- Atendimentos ---
+            endpoint = "su_ticket"
+            grid_param = [
+                {
+                    "TB": "su_ticket.id_login",
+                    "OP": "L",
+                    "P": f"res{str(login['id'])}",
+                },
+                {"TB": "su_ticket.su_status", "OP": "!=", "P": "S"},
+                {"TB": "su_ticket.su_status", "OP": "!=", "P": "C"},
+            ]
+            res = await clients.IXCCliente.get(
+                endpoint=endpoint, grid_param=grid_param, page=page, per_page=per_page
+            )
+            regs = res.get("registros", [])
+            if not regs:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Sem atendimentos abertos.",
+                )
+            total = res["total"]
+            atendimentos = regs
+
+            atendimentos_parciais: list[schemas.Atendimento] = []
+
+            # --- Iteração entre atendimentos ---
+            for atendimento in atendimentos:
+                atendimentos_parciais.append(
+                    schemas.Atendimento(
+                        id=atendimento["id"],
+                        id_assunto=atendimento["id_assunto"],
+                        status=atendimento["su_status"],
+                        mensagem=atendimento["menssagem"],
+                        titulo=atendimento["titulo"],
+                        data_criacao=atendimento["data_criacao"],
+                    ),
+                )
+
+            return schemas.AtendimentoOut(
+                data=atendimentos_parciais,
+                meta=schemas.Meta(total=total, page=page, per_page=per_page),
+            )
+        except HTTPException:
+            raise
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Erro interno ao processar solicitação: {e}",
+            )

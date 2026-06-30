@@ -1,12 +1,11 @@
 from .sortorder_enum import SortOrder
 from .login_enum import StatusConexaoRot, StatusConexaoCod, StatusONURot
+from .atendimento_enum import SuStatusCod, SuStatusRot
 from .codigos import (
     TipoCod,
-    SuStatusCod,
     PrioridadeCod,
     StatusContratoCod,
     OrigemEnderecoCod,
-    StatusAtendimentoCod,
     StatusAcessoCod,
     AtivoCod,
     TipoPessoaCod,
@@ -14,7 +13,6 @@ from .codigos import (
     LeadCod,
 )
 from .rotulos import (
-    StatusAtendimentoRot,
     StatusContratoRot,
     StatusAcessoRot,
     TipoPessoaRot,
@@ -26,15 +24,14 @@ from .default_enum import Default
 
 __all__ = [
     "SortOrder",
+    "SuStatusRot",
     "TipoCod",
     "SuStatusCod",
     "PrioridadeCod",
     "StatusConexaoCod",
     "StatusContratoCod",
     "OrigemEnderecoCod",
-    "StatusAtendimentoCod",
     "StatusAcessoCod",
-    "StatusAtendimentoRot",
     "StatusConexaoRot",
     "StatusContratoRot",
     "StatusONURot",
