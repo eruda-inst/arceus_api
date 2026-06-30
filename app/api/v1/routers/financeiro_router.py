@@ -70,7 +70,7 @@ async def post_desbloqueio_em_confianca(
 )
 async def get_linha_digitavel(
     id_fatura: Annotated[int, Path(ge=1, description="ID da fatura.")],
-) -> schemas.LinhaDigitavelOut:
+) -> schemas.LinhaDigitavelBase:
     """
     Obtém linha digitável de uma fatura, atravé do ID da fatura.
     """

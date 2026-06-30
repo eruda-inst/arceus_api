@@ -24,9 +24,7 @@ class ComercialService(service_service.Service):
             status_acesso_rot = utils.rotular_status_acesso(
                 status_acesso_codigo=status_acesso_cod
             )
-            return schemas.StatusAcessoOut(
-                data=schemas.StatusAcesso(status_acesso=status_acesso_rot)
-            )
+            return schemas.StatusAcessoOut(status_acesso=status_acesso_rot)
         except HTTPException:
             raise
         except Exception as e:

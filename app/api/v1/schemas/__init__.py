@@ -7,7 +7,6 @@ from .onu_schema import StatusOnuOut
 from .comercial import (
     ComercialContrato,
     ComercialContratoListOut,
-    StatusAcesso,
     LeadIn,
     StatusAcessoOut,
     LeadCreate,
@@ -26,7 +25,6 @@ from .suporte import (
     StatusONUOut,
     StatusONU,
     onu_suporte_schema,
-    WifiOut,
     StatusConexaoOut,
 )
 from .financeiro import (
@@ -50,7 +48,6 @@ __all__ = [
     "MensagemOut",
     "ComercialContrato",
     "ComercialContratoListOut",
-    "StatusAcesso",
     "LeadIn",
     "StatusAcessoOut",
     "NewWifiOut",
@@ -81,7 +78,6 @@ __all__ = [
     "ClienteUpdate",
     "LoginUpdate",
     "IndexOut",
-    "WifiOut",
     "ClienteExisteOut",
     "LeadOut",
     "LeadUpdate",

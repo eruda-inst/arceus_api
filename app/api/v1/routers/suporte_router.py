@@ -32,7 +32,7 @@ async def get_status_conexao(
     id_login: Annotated[
         int, Query(ge=1, description="ID de login do cliente no IXCSoft.")
     ],
-) -> schemas.StatusConexaoOut:
+) -> schemas.NewStatusConexaoOut:
     """
     Obtém status de conexão de um cliente, atravé do ID de login.
     """
@@ -51,7 +51,7 @@ async def get_status_onu(
         str | None,
         Query(min_length=12, max_length=12, description="MAC Address da ONU."),
     ] = None,
-) -> schemas.StatusONUOut:
+) -> schemas.StatusOnuOut:
     """
     Obtém status de ONU (sinal rx) de um cliente, atravé do ID de login, ou MAC Address de ONU.
     """
@@ -145,7 +145,7 @@ async def get_dados_wifi(
     id_login: Annotated[
         int, Query(ge=1, description="ID de login do cliente no IXCSoft.")
     ],
-) -> schemas.WifiOut:
+) -> schemas.NewWifiOut:
     """
     Obtém dados de WiFi de um cliente, atravé do ID de login.
     """

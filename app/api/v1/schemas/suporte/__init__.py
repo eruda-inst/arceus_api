@@ -10,7 +10,6 @@ from .atendimento_suporte_schema import (
     AtendimentoOut,
     AtendimentoCreate,
 )
-from .wifi_suporte_schema import WifiOut
 
 __all__ = [
     "SuporteContrato",
@@ -23,5 +22,4 @@ __all__ = [
     "AtendimentoIn",
     "AtendimentoOut",
     "AtendimentoCreate",
-    "WifiOut",
 ]

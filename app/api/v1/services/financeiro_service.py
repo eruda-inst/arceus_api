@@ -210,7 +210,7 @@ class FinanceiroService(service_service.Service):
             )
 
     @staticmethod
-    async def get_linha_digitavel(id_fatura: PositiveInt) -> schemas.LinhaDigitavelOut:
+    async def get_linha_digitavel(id_fatura: PositiveInt) -> schemas.LinhaDigitavelBase:
         try:
             grid_param = [{"TB": "fn_areceber.id", "OP": "=", "P": str(id_fatura)}]
             endpoint = "fn_areceber"
@@ -227,9 +227,8 @@ class FinanceiroService(service_service.Service):
                     status_code=status.HTTP_404_NOT_FOUND,
                     detail="Sem linha digitável.",
                 )
-            return schemas.LinhaDigitavelOut(
-                data=schemas.LinhaDigitavelBase(linha_digitavel=linha_digitavel)
-            )
+            return schemas.LinhaDigitavelBase(linha_digitavel=linha_digitavel)
+
         except HTTPException:
             raise
         except Exception as e:

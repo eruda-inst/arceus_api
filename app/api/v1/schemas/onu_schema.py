@@ -1,9 +1,9 @@
 from .. import utils
-from pydantic import BaseModel, field_serializer, Field, NonNegativeFloat
+from pydantic import BaseModel, field_serializer, Field
 
 
 class StatusOnuOut(BaseModel):
-    status_onu: NonNegativeFloat = Field(
+    status_onu: float = Field(
         description="Status da ONU.", examples=[utils.StatusONURot.EXCELENTE]
     )
 

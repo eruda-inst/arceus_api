@@ -113,7 +113,7 @@ class SuporteService(service_service.Service):
             )
 
     @staticmethod
-    async def get_status_conexao(id_login: PositiveInt) -> schemas.StatusConexaoOut:
+    async def get_status_conexao(id_login: PositiveInt) -> schemas.NewStatusConexaoOut:
         try:
             grid_param = [{"TB": "radusuarios.id", "OP": "=", "P": str(id_login)}]
             endpoint = "radusuarios"
@@ -123,12 +123,8 @@ class SuporteService(service_service.Service):
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND, detail="Nenhum registro."
                 )
-            codigo = registros[0].get("online")
-            rotulo = utils.rotular_status_conexao(
-                status_conexao_codigo=codigo,
-            )
-            return schemas.StatusConexaoOut(
-                data=schemas.StatusConexao(status_conexao=rotulo)
+            return schemas.NewStatusConexaoOut(
+                status_conexao=registros[0].get("online")
             )
         except HTTPException:
             raise
@@ -141,7 +137,7 @@ class SuporteService(service_service.Service):
     @staticmethod
     async def get_status_onu(
         id_login: PositiveInt | None = None, mac_onu: str | None = None
-    ) -> schemas.StatusONUOut:
+    ) -> schemas.StatusOnuOut:
         if not id_login and not mac_onu:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -167,14 +163,12 @@ class SuporteService(service_service.Service):
                     if registros and "sinal_rx" in registros[0]:
                         codigo = registros[0].get("sinal_rx")
                         if not codigo:
-                            return schemas.StatusONUOut(
-                                data=schemas.StatusONU(
-                                    status_onu=utils.StatusONURot.SEM_ONU
-                                )
+                            return schemas.StatusOnuOut(
+                                status_onu=registros[0].get("sinal_rx")
                             )
-                        rotulo = utils.rotular_status_onu(sinal_rx=float(codigo))
-                        return schemas.StatusONUOut(
-                            data=schemas.StatusONU(status_onu=rotulo)
+
+                        return schemas.StatusOnuOut(
+                            status_onu=registros[0].get("sinal_rx")
                         )
                 except HTTPException:
                     if not mac_onu:
@@ -195,15 +189,11 @@ class SuporteService(service_service.Service):
                 if registros and "sinal_rx" in registros[0]:
                     codigo = registros[0].get("sinal_rx")
                     if not codigo:
-                        return schemas.StatusONUOut(
-                            data=schemas.StatusONU(
-                                status_onu=utils.StatusONURot.SEM_ONU
-                            )
+                        return schemas.StatusOnuOut(
+                            status_onu=registros[0].get("sinal_rx")
                         )
-                    rotulo = utils.rotular_status_onu(sinal_rx=float(codigo))
-                    return schemas.StatusONUOut(
-                        data=schemas.StatusONU(status_onu=rotulo)
-                    )
+
+                    return schemas.StatusOnuOut(status_onu=registros[0].get("sinal_rx"))
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="ONU não encontrada."
             )
@@ -364,7 +354,7 @@ class SuporteService(service_service.Service):
             )
 
     @staticmethod
-    async def get_dados_wifi(id_login: PositiveInt) -> schemas.WifiOut:
+    async def get_dados_wifi(id_login: PositiveInt) -> schemas.NewWifiOut:
         try:
             endpoint = "radusuarios"
             grid_param = [{"TB": "radusuarios.id", "OP": "=", "P": str(id_login)}]
@@ -381,7 +371,7 @@ class SuporteService(service_service.Service):
             ssid_wifi_5g = res.get("registros")[0].get("ssid_router_wifi_5ghz")
             senha_wifi_5g = res.get("registros")[0].get("senha_rede_sem_fio_5ghz")
 
-            return schemas.WifiOut(
+            return schemas.NewWifiOut(
                 ssid_wifi_2g=ssid_wifi_2g,
                 senha_wifi_2g=senha_wifi_2g,
                 ssid_wifi_5g=ssid_wifi_5g,
