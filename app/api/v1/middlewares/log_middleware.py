@@ -17,6 +17,7 @@ INCLUDE_PREFIXES = (
     "/api/v1/triagem",
     "/api/v1/cobranca",
     "/api/v1/upgrade",
+    "/api/v1/vila",
 )
 
 
@@ -113,6 +114,8 @@ class LogMiddleware(BaseHTTPMiddleware):
             setor = "Cobrança"
         elif "/upgrade" in path:
             setor = "Upgrade"
+        elif "/vila" in path:
+            setor = "Vila"
 
         now = datetime.now(ZoneInfo("America/Bahia"))
 
