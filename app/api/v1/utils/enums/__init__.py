@@ -1,9 +1,9 @@
 from .sortorder_enum import SortOrder
+from .login_enum import StatusConexaoRot, StatusConexaoCod
 from .codigos import (
     TipoCod,
     SuStatusCod,
     PrioridadeCod,
-    StatusConexaoCod,
     StatusContratoCod,
     OrigemEnderecoCod,
     StatusAtendimentoCod,
@@ -15,7 +15,6 @@ from .codigos import (
 )
 from .rotulos import (
     StatusAtendimentoRot,
-    StatusConexaoRot,
     StatusContratoRot,
     StatusONURot,
     StatusAcessoRot,
