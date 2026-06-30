@@ -33,7 +33,6 @@ from .financeiro import (
     CredencialUpdate,
     CredencialOut,
     CredencialBase,
-    FaturaPagaBase,
 )
 from .triagem import ContatoUpdate, ContatoOut
 from .cliente_schema import ClienteUpdate
@@ -69,7 +68,6 @@ __all__ = [
     "CredencialUpdate",
     "CredencialOut",
     "CredencialBase",
-    "FaturaPagaBase",
     "ContatoUpdate",
     "ContatoOut",
     "ClienteUpdate",

@@ -1,9 +1,8 @@
 from typing import Any
 from . import service_service
-from datetime import datetime
 from pydantic import PositiveInt
-from .. import utils, schemas, clients
 from fastapi import HTTPException, status
+from .. import utils, schemas, clients, services
 
 
 class ComercialService(service_service.Service):
@@ -43,157 +42,102 @@ class ComercialService(service_service.Service):
         cnpj_cpf: str | None = None,
         page: PositiveInt | None = 1,
         per_page: PositiveInt | None = 10,
-    ) -> schemas.ComercialContratoListOut:
+    ):
         try:
+            # --- Cliente ---
             id_cliente = await cls.get_id_cliente_ixc(
                 protocolo=protocolo, cnpj_cpf=cnpj_cpf
             )
+            res = await clients.IXCCliente.get_cliente_ixc(id=id_cliente)
+            regs = res.get("registros", [])
+            if not regs:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Nenum cliente encontrado.",
+                )
+            cliente = regs[0]
 
-            cliente = await clients.IXCCliente.get_cliente_ixc(id=id_cliente)
-
+            # --- Contratos ---
             endpoint = "cliente_contrato"
             grid_param = [
-                {"TB": "cliente_contrato.id_cliente", "OP": "=", "P": str(id_cliente)}
+                {"TB": "cliente_contrato.id_cliente", "OP": "=", "P": str(id_cliente)},
+                {"TB": "cliente_contrato.status", "OP": "!=", "P": "I"},
+                {"TB": "cliente_contrato.status", "OP": "!=", "P": "N"},
+                {"TB": "cliente_contrato.status", "OP": "!=", "P": "D"},
             ]
             res = await clients.IXCCliente.get(
                 endpoint=endpoint, grid_param=grid_param, page=page, per_page=per_page
             )
-            if not res.get("registros", []):
+            regs = res.get("registros", [])
+            if not regs:
                 raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND, detail="Sem contrato."
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Nenhum contrato encontrado.",
                 )
-            contratos = res["registros"]
+            total = res.get("total", 0)
+            contratos = regs
 
-            contratos_tratados: Any = []
-            hoje = datetime.now().date()
+            contratos_parciais: list[schemas.ComercialContrato] = []
 
+            # --- Iteração entre contratos ---
             for contrato in contratos:
-                id_contrato = contrato["id"]
-                endpoint = "fn_areceber"
-                grid_param = [
-                    {"TB": "fn_areceber.id_contrato", "OP": "=", "P": str(id_contrato)}
-                ]
-                a_receber_res = await clients.IXCCliente.get(
-                    endpoint=endpoint,
-                    grid_param=grid_param,
-                    sort_order=utils.SortOrder.DESC,
-                )
-                titulos_nao_quitados = [
-                    ar
-                    for ar in a_receber_res.get("registros", [])
-                    if ar.get("status") != "Q"
-                ]
+                id_contrato = contrato.get("id")
 
-                if not titulos_nao_quitados:
-                    grid_param = [
-                        {
-                            "TB": "radusuarios.id_cliente",
-                            "OP": "=",
-                            "P": str(contrato["id_cliente"]),
-                        }
-                    ]
-                    endpoint = "radusuarios"
-                    login = await clients.IXCCliente.get(
-                        endpoint=endpoint, grid_param=grid_param
-                    )
-
-                    if not login.get("registros"):
-                        raise HTTPException(
-                            status_code=status.HTTP_404_NOT_FOUND, detail="Sem login."
-                        )
-
-                    contrato_tratado: Any = {
-                        "id": contrato["id"],
-                        "contrato": contrato["contrato"],
-                        "valor": 0.00,
-                        "status_acesso": utils.rotular_status_acesso(
-                            status_acesso_codigo=contrato["status_internet"]
-                        ),
-                        "data_vencimento": "N/A",
-                        "id_cliente": contrato["id_cliente"],
-                        "id_login": login.get("registros")[0]["id"],
-                    }
-                    contratos_tratados.append(contrato_tratado)
-                    continue
-
-                proximo_vencimento = None
-                menor_diferenca = None
-
-                for titulo in titulos_nao_quitados:
-                    data_vencimento_str = titulo.get("data_vencimento")
-                    if data_vencimento_str:
-                        try:
-                            data_vencimento = datetime.strptime(
-                                data_vencimento_str, "%Y-%m-%d"
-                            ).date()
-                            diferenca = (data_vencimento - hoje).days
-
-                            if diferenca >= 0 and (
-                                menor_diferenca is None or diferenca < menor_diferenca
-                            ):
-                                menor_diferenca = diferenca
-                                proximo_vencimento = titulo
-                        except ValueError:
-                            continue
-
-                titulo_final = proximo_vencimento
-                if not titulo_final:
-                    titulo_final = max(
-                        titulos_nao_quitados,
-                        key=lambda x: datetime.strptime(
-                            x.get("data_vencimento"), "%Y-%m-%d"
-                        ).date(),
-                    )
-
-                grid_param = [
-                    {
-                        "TB": "radusuarios.id_cliente",
-                        "OP": "=",
-                        "P": str(contrato["id_cliente"]),
-                    }
-                ]
+                # --- Login ---
                 endpoint = "radusuarios"
-                login = await clients.IXCCliente.get(
+                grid_param = [
+                    {"TB": "radusuarios.id_contrato", "OP": "=", "P": str(id_contrato)}
+                ]
+                res = await clients.IXCCliente.get(
                     endpoint=endpoint, grid_param=grid_param
                 )
-
-                if not login.get("registros"):
+                regs = res.get("registros", [])
+                if not regs:
                     raise HTTPException(
-                        status_code=status.HTTP_404_NOT_FOUND, detail="Sem login."
+                        status_code=status.HTTP_404_NOT_FOUND,
+                        detail="Nenhum login encontrado.",
+                    )
+                login = regs[0]
+
+                # --- Proxima fatura aberta ---
+                proxima_fatura_aberta = (
+                    await services.FinanceiroService.get_proxima_fatura_aberta(
+                        id_contrato=id_contrato
+                    )
+                )
+
+                if not proxima_fatura_aberta:
+                    raise HTTPException(
+                        status_code=status.HTTP_404_NOT_FOUND,
+                        detail="Nenhuma fatura aberta encontrada.",
                     )
 
-                contrato_tratado = {
-                    "id": contrato["id"],
-                    "contrato": contrato["contrato"],
-                    "nome_cliente": cliente.get("registros")[0].get("razao"),
-                    "valor": titulo_final.get("valor", 0.00),
-                    "status_acesso": utils.rotular_status_acesso(
-                        status_acesso_codigo=contrato["status_internet"]
-                    ),
-                    "data_vencimento": titulo_final.get("data_vencimento", "N/A"),
-                    "id_cliente": contrato["id_cliente"],
-                    "id_login": login.get("registros")[0]["id"],
-                }
-                contratos_tratados.append(contrato_tratado)
-
-            total = int(res.get("total", 0))
-
-            meta = schemas.Meta(
-                total=total,
-                page=page,
-                per_page=per_page,
-            )
+                # --- Contrato parcial ---
+                contratos_parciais.append(
+                    schemas.ComercialContrato(
+                        id=id_contrato,
+                        contrato=contrato.get("contrato"),
+                        nome_cliente=cliente.get("razao"),
+                        valor=proxima_fatura_aberta["valor"],
+                        status_acesso=utils.rotular_status_acesso(
+                            status_acesso_codigo=contrato.get("status_internet")
+                        ),
+                        data_vencimento=proxima_fatura_aberta["data_vencimento"],
+                        id_cliente=id_cliente,
+                        id_login=login.get("id"),
+                    )
+                )
 
             return schemas.ComercialContratoListOut(
-                data=[schemas.ComercialContrato(**ct) for ct in contratos_tratados],
-                meta=meta,
+                data=contratos_parciais,
+                meta=schemas.Meta(total=total, page=page, per_page=per_page),
             )
         except HTTPException:
             raise
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno ao processar solicitação: {str(e)}",
+                detail=f"Erro interno ao processar solicitação: {e}",
             )
 
     @staticmethod

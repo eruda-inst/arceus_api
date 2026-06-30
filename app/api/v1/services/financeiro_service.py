@@ -1,3 +1,4 @@
+import statistics
 from typing import Any
 from . import service_service
 from pydantic import PositiveInt
@@ -6,6 +7,110 @@ from fastapi import HTTPException, status
 
 
 class FinanceiroService(service_service.Service):
+    @staticmethod
+    async def get_ultima_fatura_paga(
+        id_contrato: PositiveInt,
+    ) -> dict[str, Any] | None:
+        try:
+            endpoint = "fn_areceber"
+            grid_param = [
+                {"TB": "fn_areceber.id_contrato", "OP": "=", "P": str(id_contrato)},
+                {"TB": "fn_areceber.status", "OP": "=", "P": "R"},
+            ]
+            res = await clients.IXCCliente.get(
+                endpoint=endpoint,
+                grid_param=grid_param,
+                sort_order=utils.SortOrder.DESC,
+            )
+
+            regs = res.get("registros", [])
+
+            if not regs:
+                return None
+
+            ultimas_faturas_pagas = regs[:3]
+            ultima_fatura_paga = ultimas_faturas_pagas[0]
+
+            valores = [float(u["valor"]) for u in ultimas_faturas_pagas]
+            valor_mais_frequente = statistics.mode(valores)
+
+            return {
+                "id": int(ultima_fatura_paga["id"]),
+                "status": ultima_fatura_paga["status"],
+                "data_vencimento": ultima_fatura_paga["data_vencimento"],
+                "valor": valor_mais_frequente,
+            }
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Erro interno ao processar solicitação: {e}",
+            )
+
+    @classmethod
+    async def get_proxima_fatura_aberta(
+        cls, id_contrato: PositiveInt
+    ) -> dict[str, Any] | None:
+        try:
+            endpoint = "fn_areceber"
+            grid_param = [
+                {"TB": "fn_areceber.id_contrato", "OP": "=", "P": str(id_contrato)},
+                {"TB": "fn_areceber.status", "OP": "!=", "P": "R"},
+                {"TB": "fn_areceber.status", "OP": "!=", "P": "C"},
+            ]
+            res = await clients.IXCCliente.get(endpoint=endpoint, grid_param=grid_param)
+
+            regs = res.get("registros", [])
+
+            if not regs:
+                return None
+
+            proximas_faturas_abertas = regs[:3]
+            proxima_fatura_aberta = proximas_faturas_abertas[0]
+
+            valores = [float(p["valor"]) for p in proximas_faturas_abertas]
+            valor_mais_frequente = statistics.mode(valores)
+
+            return {
+                "id": int(proxima_fatura_aberta["id"]),
+                "status": proxima_fatura_aberta["status"],
+                "data_vencimento": proxima_fatura_aberta["data_vencimento"],
+                "valor": valor_mais_frequente,
+            }
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Erro interno ao processar solicitação: {e}",
+            )
+
+    @classmethod
+    async def get_valor_contrato(cls, id_contrato: PositiveInt) -> dict[str, float]:
+        try:
+            # --- Ultima Fatura Paga ---
+            ultima_fatura_paga = await cls.get_ultima_fatura_paga(
+                id_contrato=id_contrato
+            )
+
+            valor = 0.00
+
+            if ultima_fatura_paga:
+                valor = ultima_fatura_paga["valor"]
+            else:
+                # --- Proxima Fatura Aberta ---
+                proxima_fatura_aberta = await cls.get_proxima_fatura_aberta(
+                    id_contrato=id_contrato
+                )
+                if proxima_fatura_aberta:
+                    valor = proxima_fatura_aberta["valor"]
+
+            return {"valor": valor}
+        except HTTPException:
+            raise
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Erro interno ao processar solicitação: {e}",
+            )
+
     @classmethod
     async def get_faturas_abertas(
         cls,
@@ -21,7 +126,8 @@ class FinanceiroService(service_service.Service):
 
             grid_param = [
                 {"TB": "fn_areceber.id_cliente", "OP": "=", "P": str(id_cliente)},
-                {"TB": "fn_areceber.status", "OP": "=", "P": "A"},
+                {"TB": "fn_areceber.status", "OP": "!=", "P": "R"},
+                {"TB": "fn_areceber.status", "OP": "!=", "P": "C"},
             ]
 
             res = await clients.IXCCliente.get(
@@ -81,7 +187,7 @@ class FinanceiroService(service_service.Service):
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno ao processar solicitação: {str(e)}",
+                detail=f"Erro interno ao processar solicitação: {e}",
             )
 
     @staticmethod
@@ -100,7 +206,7 @@ class FinanceiroService(service_service.Service):
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno ao processar solicitação: {str(e)}",
+                detail=f"Erro interno ao processar solicitação: {e}",
             )
 
     @staticmethod
@@ -129,7 +235,7 @@ class FinanceiroService(service_service.Service):
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno ao processar solicitação: {str(e)}",
+                detail=f"Erro interno ao processar solicitação: {e}",
             )
 
     @staticmethod
@@ -148,7 +254,7 @@ class FinanceiroService(service_service.Service):
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno ao processar solicitação: {str(e)}",
+                detail=f"Erro interno ao processar solicitação: {e}",
             )
 
     @classmethod
@@ -177,7 +283,7 @@ class FinanceiroService(service_service.Service):
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno ao processar solicitação: {str(e)}",
+                detail=f"Erro interno ao processar solicitação: {e}",
             )
 
     @staticmethod
@@ -211,46 +317,5 @@ class FinanceiroService(service_service.Service):
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno ao processar solicitação: {str(e)}",
-            )
-
-    @staticmethod
-    async def get_ultima_fatura_paga(id_contrato: PositiveInt) -> Any:
-        try:
-            grid_param = [
-                {"TB": "fn_areceber.id_contrato", "OP": "=", "P": str(id_contrato)},
-                {"TB": "fn_areceber.status", "OP": "=", "P": "R"},
-            ]
-            endpoint = "fn_areceber"
-            res = await clients.IXCCliente.get(
-                endpoint=endpoint,
-                grid_param=grid_param,
-                sort_order=utils.SortOrder.DESC,
-            )
-            if not res.get("registros"):
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail="Sem faturas pagas.",
-                )
-            ultima_fatura_paga = res["registros"][0]
-
-            id = ultima_fatura_paga["id"]
-            data_vencimento = ultima_fatura_paga["data_vencimento"]
-            preco = ultima_fatura_paga["valor"]
-            pagamento_valor = ultima_fatura_paga["pagamento_valor"]
-            pagamento_data = ultima_fatura_paga["pagamento_data"]
-
-            return schemas.FaturaPagaBase(
-                id=id,
-                data_vencimento=data_vencimento,
-                preco=preco,
-                valor_pago=pagamento_valor,
-                data_pagamento=pagamento_data,
-            )
-        except HTTPException:
-            raise
-        except Exception as e:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno ao processar solicitação: {str(e)}",
+                detail=f"Erro interno ao processar solicitação: {e}",
             )

@@ -1,9 +1,8 @@
 from typing import Any
 from . import service_service
-from datetime import datetime
 from pydantic import PositiveInt
-from .. import utils, schemas, clients
 from fastapi import HTTPException, status
+from .. import utils, schemas, clients, services
 
 
 class SuporteService(service_service.Service):
@@ -14,141 +13,108 @@ class SuporteService(service_service.Service):
         cnpj_cpf: str | None = None,
         page: PositiveInt | None = 1,
         per_page: PositiveInt | None = 10,
-    ) -> schemas.SuporteContratoListOut:
+    ):
         try:
+            # --- Cliente ---
             id_cliente = await cls.get_id_cliente_ixc(
                 protocolo=protocolo, cnpj_cpf=cnpj_cpf
             )
+            res = await clients.IXCCliente.get_cliente_ixc(id=id_cliente)
+            regs = res.get("registros", [])
+            if not regs:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Nenum cliente encontrado.",
+                )
+            cliente = regs[0]
 
-            cliente = await clients.IXCCliente.get_cliente_ixc(id=id_cliente)
-
+            # --- Contratos ---
+            endpoint = "cliente_contrato"
             grid_param = [
                 {"TB": "cliente_contrato.id_cliente", "OP": "=", "P": str(id_cliente)},
                 {"TB": "cliente_contrato.status", "OP": "!=", "P": "I"},
                 {"TB": "cliente_contrato.status", "OP": "!=", "P": "N"},
                 {"TB": "cliente_contrato.status", "OP": "!=", "P": "D"},
             ]
-
-            contratos_ativos_res = await clients.IXCCliente.get(
-                endpoint="cliente_contrato",
-                grid_param=grid_param,
-                page=page,
-                per_page=per_page,
+            res = await clients.IXCCliente.get(
+                endpoint=endpoint, grid_param=grid_param, page=page, per_page=per_page
             )
-
-            contratos_ativos = contratos_ativos_res.get("registros", [])
-            total = int(contratos_ativos_res.get("total", 0))
-            if total < 1:
+            regs = res.get("registros", [])
+            if not regs:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
-                    detail="Nenhum contrato ativo encontrado.",
+                    detail="Nenhum contrato encontrado.",
+                )
+            total = res.get("total", 0)
+            contratos = regs
+
+            contratos_parciais: list[schemas.SuporteContrato] = []
+
+            # --- Iteração entre contratos ---
+            for contrato in contratos:
+                # --- Pŕoxima fatura aberta ----
+                id_contrato = contrato.get("id")
+
+                proxima_fatura_aberta = (
+                    await services.FinanceiroService.get_proxima_fatura_aberta(
+                        id_contrato=id_contrato
+                    )
                 )
 
-            for contrato in contratos_ativos:
-                id_contrato = contrato.get("id", None)
-                endpoint = "fn_areceber"
-                grid_param = [
-                    {"TB": "fn_areceber.id_contrato", "OP": "=", "P": str(id_contrato)}
-                ]
-                a_receber_res = await clients.IXCCliente.get(
-                    endpoint=endpoint,
-                    grid_param=grid_param,
-                    sort_order=utils.SortOrder.DESC,
-                )
+                if not proxima_fatura_aberta:
+                    raise HTTPException(
+                        status_code=status.HTTP_404_NOT_FOUND,
+                        detail="Nenhuma fatura aberta encontrada.",
+                    )
 
+                # --- Login ---
+                endpoint = "radusuarios"
                 grid_param = [
                     {"TB": "radusuarios.id_contrato", "OP": "=", "P": str(id_contrato)}
                 ]
-                id_login_res = await clients.IXCCliente.get(
-                    endpoint="radusuarios", grid_param=grid_param
+                res = await clients.IXCCliente.get(
+                    endpoint=endpoint, grid_param=grid_param
                 )
-                if not id_login_res.get("registros", []):
+                regs = res.get("registros", [])
+                if not regs:
                     raise HTTPException(
                         status_code=status.HTTP_404_NOT_FOUND,
-                        detail="Sem ID login.",
+                        detail="Nenhum login encontrado.",
                     )
-                id_login = id_login_res.get("registros")[0]["id"]
+                login = regs[0]
 
-                grid_param = [{"TB": "radusuarios.id", "OP": "=", "P": str(id_login)}]
-                onu_mac_res = await clients.IXCCliente.get(
-                    endpoint="radusuarios", grid_param=grid_param
+                # --- Contrato parcial ---
+                contratos_parciais.append(
+                    schemas.SuporteContrato(
+                        id=id_contrato,
+                        id_login=login.get("id"),
+                        id_cliente=contrato.get("id_cliente"),
+                        nome_cliente=cliente.get("razao"),
+                        status=utils.rotular_status_contrato(
+                            status_contrato_codigo=contrato.get("status")
+                        ),
+                        contrato=contrato.get("contrato"),
+                        valor=proxima_fatura_aberta["valor"],
+                        data_vencimento=proxima_fatura_aberta["data_vencimento"],
+                        mac_onu=login.get("onu_mac"),
+                    )
                 )
 
-                onu_mac = onu_mac_res["registros"][0]["onu_mac"]
-                a_receber = a_receber_res.get("registros", [])
-
-                contrato["id_login"] = id_login
-                contrato["mac_onu"] = onu_mac
-                titulos_nao_quitados = [r for r in a_receber if r.get("status") != "Q"]
-
-                if not titulos_nao_quitados:
-                    contrato["valor"] = 0.00
-                    contrato["data_vencimento"] = ""
-                    contrato["status"] = utils.rotular_status_contrato(
-                        status_contrato_codigo=contrato["status"],
-                    )
-                    continue
-
-                hoje = datetime.now().date()
-                proximo_vencimento = None
-                menor_diferenca = None
-
-                for titulo in titulos_nao_quitados:
-                    data_vencimento_str = titulo.get("data_vencimento")
-                    if data_vencimento_str:
-                        try:
-                            data_vencimento = datetime.strptime(
-                                data_vencimento_str,
-                                "%Y-%m-%d",
-                            ).date()
-                            diferenca = (data_vencimento - hoje).days
-
-                            if diferenca >= 0:
-                                if (
-                                    menor_diferenca is None
-                                    or diferenca < menor_diferenca
-                                ):
-                                    menor_diferenca = diferenca
-                                    proximo_vencimento = titulo
-                        except ValueError:
-                            continue
-
-                if proximo_vencimento:
-                    contrato["valor"] = proximo_vencimento.get("valor")
-                    contrato["data_vencimento"] = proximo_vencimento.get(
-                        "data_vencimento"
-                    )
-                else:
-                    ultimo_titulo = max(
-                        titulos_nao_quitados,
-                        key=lambda x: datetime.strptime(
-                            x.get("data_vencimento"), "%Y-%m-%d"
-                        ).date(),
-                    )
-                    contrato["valor"] = ultimo_titulo.get("valor")
-                    contrato["data_vencimento"] = ultimo_titulo.get("data_vencimento")
-
-                contrato["status"] = utils.rotular_status_contrato(contrato["status"])
-
-                contrato["nome_cliente"] = cliente["registros"][0]["razao"]
-
-            meta = schemas.Meta(total=total, page=page, per_page=per_page)
             return schemas.SuporteContratoListOut(
-                data=[schemas.SuporteContrato(**c) for c in contratos_ativos],
-                meta=meta,
+                data=contratos_parciais,
+                meta=schemas.Meta(total=total, page=page, per_page=per_page),
             )
         except HTTPException:
             raise
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno ao processar solicitação: {str(e)}",
+                detail=f"Erro interno ao processar solicitação: {e}",
             )
 
     @staticmethod
     async def get_status_conexao(id_login: PositiveInt) -> schemas.StatusConexaoOut:
         try:
-
             grid_param = [{"TB": "radusuarios.id", "OP": "=", "P": str(id_login)}]
             endpoint = "radusuarios"
             res = await clients.IXCCliente.get(endpoint=endpoint, grid_param=grid_param)
@@ -169,7 +135,7 @@ class SuporteService(service_service.Service):
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno ao processar solicitação: {str(e)}",
+                detail=f"Erro interno ao processar solicitação: {e}",
             )
 
     @staticmethod
@@ -314,7 +280,7 @@ class SuporteService(service_service.Service):
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno ao processar solicitação: {str(e)}",
+                detail=f"Erro interno ao processar solicitação: {e}",
             )
 
     @staticmethod
@@ -332,7 +298,7 @@ class SuporteService(service_service.Service):
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno ao processar solicitação: {str(e)}",
+                detail=f"Erro interno ao processar solicitação: {e}",
             )
 
     @staticmethod
@@ -377,7 +343,7 @@ class SuporteService(service_service.Service):
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno: {str(e)}",
+                detail=f"Erro interno: {e}",
             )
 
     @staticmethod
@@ -394,7 +360,7 @@ class SuporteService(service_service.Service):
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno: {str(e)}",
+                detail=f"Erro interno: {e}",
             )
 
     @staticmethod

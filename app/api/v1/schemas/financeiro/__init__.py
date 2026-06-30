@@ -3,7 +3,6 @@ from .fatura_financeiro_schema import (
     FaturaAbertaListOut,
     LinhaDigitavelBase,
     LinhaDigitavelOut,
-    FaturaPagaBase,
 )
 from .pix_financeiro_schema import ChavePixBase
 from .credencial_financeiro_schema import (
@@ -17,7 +16,6 @@ __all__ = [
     "FaturaAbertaListOut",
     "LinhaDigitavelBase",
     "LinhaDigitavelOut",
-    "FaturaPagaBase",
     "ChavePixBase",
     "CredencialBase",
     "CredencialOut",
