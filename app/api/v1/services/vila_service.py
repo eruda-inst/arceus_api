@@ -30,12 +30,11 @@ class VilaService(service_service.Service):
             return {
                 "id": login["id"],
                 "login": login["login"],
-                "ativo": login["ativo"],
                 "online": login["online"],
-                "ip": login["ip"],
-                "mac": login["mac"],
-                "tipo_conexao": login["tipo_conexao"],
-                "onu_mac": login["onu_mac"],
+                "ssid_router_wifi": login["ssid_router_wifi"],
+                "senha_rede_sem_fio": login["senha_rede_sem_fio"],
+                "ssid_router_wifi_5ghz": login["ssid_router_wifi_5ghz"],
+                "senha_rede_sem_fio_5ghz": login["senha_rede_sem_fio_5ghz"],
             }
         except HTTPException:
             raise
@@ -93,6 +92,28 @@ class VilaService(service_service.Service):
             onu = regs[0]
 
             return schemas.StatusOnuOut(status_onu=onu["sinal_rx"])
+        except HTTPException:
+            raise
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Erro interno ao processar solicitação: {e}",
+            )
+
+    @classmethod
+    async def get_dados_wifi(cls, numero_residencia: PositiveInt) -> schemas.NewWifiOut:
+        try:
+            # --- Login ---
+            login = await cls.get_login(numero_residencia=numero_residencia)
+
+            # Exceção já tratada na get_login
+
+            return schemas.NewWifiOut(
+                ssid_wifi_2g=login["ssid_router_wifi"],
+                senha_wifi_2g=login["senha_rede_sem_fio"],
+                ssid_wifi_5g=login["ssid_router_wifi_5ghz"],
+                senha_wifi_5g=login["senha_rede_sem_fio_5ghz"],
+            )
         except HTTPException:
             raise
         except Exception as e:

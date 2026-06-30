@@ -1,5 +1,8 @@
 from .misc_schema import Meta, MensagemOut
-from .new_login_schema import StatusConexaoOut as NewStatusConexaoOut
+from .new_login_schema import (
+    StatusConexaoOut as NewStatusConexaoOut,
+    WifiOut as NewWifiOut,
+)
 from .onu_schema import StatusOnuOut
 from .comercial import (
     ComercialContrato,
@@ -50,6 +53,7 @@ __all__ = [
     "StatusAcesso",
     "LeadIn",
     "StatusAcessoOut",
+    "NewWifiOut",
     "LeadCreate",
     "SuporteContratoListOut",
     "NewStatusConexaoOut",

@@ -22,10 +22,20 @@ async def get_status_conexao(
 
 
 @vila_router.get(path="/status_onu", summary="Obtém status da ONU de um cliente.")
-async def get_status_onu(numero_residencia: NumeroResidencia):
+async def get_status_onu(numero_residencia: NumeroResidencia) -> schemas.StatusOnuOut:
     """
     Obtém status da ONU de um cliente, através do número de residência.
     """
     return await services.VilaService.get_status_onu(
+        numero_residencia=numero_residencia
+    )
+
+
+@vila_router.get(path="/dados_wifi", summary="Obtém dados do WiFi de um cliente.")
+async def get_dados_wifi(numero_residencia: NumeroResidencia) -> schemas.NewWifiOut:
+    """
+    Obtém dados do WiFi de um cliente, através do número de residência.
+    """
+    return await services.VilaService.get_dados_wifi(
         numero_residencia=numero_residencia
     )
