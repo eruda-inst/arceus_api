@@ -13,7 +13,7 @@ class SuporteService(service_service.Service):
         cnpj_cpf: str | None = None,
         page: PositiveInt | None = 1,
         per_page: PositiveInt | None = 10,
-    ):
+    ) -> schemas.SuporteContratoListOut:
         try:
             # --- Cliente ---
             id_cliente = await cls.get_id_cliente_ixc(
