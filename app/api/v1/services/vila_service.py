@@ -255,9 +255,24 @@ class VilaService(service_service.Service):
     ):
         try:
             # --- Login ---
-            login_antigo = await cls.get_login(numero_residencia=numero_residencia)
+            endpoint = "radusuarios"
+            grid_param = [
+                {
+                    "TB": "radusuarios.login",
+                    "OP": "L",
+                    "P": f"res{str(numero_residencia)}",
+                },
+                {"TB": "radusuarios.ativo", "OP": "=", "P": "S"},
+            ]
+            res = await clients.IXCCliente.get(endpoint=endpoint, grid_param=grid_param)
+            regs = res.get("registros", [])
 
-            # Exceção já tratada na get_login
+            if not regs:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Nenhum login encontrado.",
+                )
+            login_antigo = regs[0]
 
             # --- Login atualizado ---
             novo_ip = ip if ip else login_antigo["ip"]
