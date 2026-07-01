@@ -113,3 +113,9 @@ class ComercialContrato(BaseModel):
 class ComercialContratoListOut(BaseModel):
     data: list[ComercialContrato]
     meta: misc_schema.Meta
+
+
+class VilaContratoOut(BaseModel):
+    id: PositiveInt = Field(description="ID do contrato.", examples=[1])
+    id_login: PositiveInt = Field(description="ID do login do contrato.", examples=[12])
+    id_cliente: PositiveInt = Field(description="ID do cliente.", examples=[123])

@@ -7,6 +7,14 @@ vila_router = APIRouter(prefix="/vila", tags=["Vila"])
 NumeroResidencia = Annotated[int, Query(ge=1, description="Número da residência.")]
 
 
+@vila_router.get(path="/contrato", summary="Obtém contrato de um cliente.")
+async def get_contrato(numero_residencia: NumeroResidencia) -> schemas.VilaContratoOut:
+    """
+    Obtém contrato de um cliente, através do número da residência.
+    """
+    return await services.VilaService.get_contrato(numero_residencia=numero_residencia)
+
+
 @vila_router.get(
     path="/status_conexao", summary="Obtém status da conexão de um cliente."
 )

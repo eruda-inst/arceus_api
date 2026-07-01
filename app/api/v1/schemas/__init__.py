@@ -22,6 +22,7 @@ from .contrato_schema import (
     Contrato,
     ComercialContrato,
     ComercialContratoListOut,
+    VilaContratoOut,
 )
 from .pix_schema import ChavePixOut
 from .fatura_schema import FaturaAberta, FaturaAbertaListOut, LinhaDigitavelBase
@@ -35,6 +36,7 @@ __all__ = [
     "StatusAcessoOut",
     "ComercialContrato",
     "ComercialContratoListOut",
+    "VilaContratoOut",
     "LeadIn",
     "WifiOut",
     "LeadCreate",

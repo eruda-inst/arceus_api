@@ -32,6 +32,7 @@ class VilaService(service_service.Service):
                 "id": int(login["id"]),
                 "login": login["login"],
                 "online": login["online"],
+                "id_cliente": int(login["id_cliente"]),
                 "ssid_router_wifi": login["ssid_router_wifi"],
                 "senha_rede_sem_fio": login["senha_rede_sem_fio"],
                 "ssid_router_wifi_5ghz": login["ssid_router_wifi_5ghz"],
@@ -39,6 +40,45 @@ class VilaService(service_service.Service):
             }
         except HTTPException:
             raise
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Erro interno ao processar solicitação: {e}",
+            )
+
+    @classmethod
+    async def get_contrato(
+        cls, numero_residencia: PositiveInt
+    ) -> schemas.VilaContratoOut:
+        try:
+            # --- Login ---
+            login = await cls._get_login(numero_residencia=numero_residencia)
+
+            # Exceção já tratada na get_login
+
+            # --- Contrato ---
+            endpoint = "cliente_contrato"
+            grid_param = [
+                {
+                    "TB": "cliente_contrato.id_cliente",
+                    "OP": "=",
+                    "P": str(login["id_cliente"]),
+                }
+            ]
+            res = await clients.IXCCliente.get(endpoint=endpoint, grid_param=grid_param)
+            regs = res.get("registros", [])
+            if not regs:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Contrato não encontrado.",
+                )
+            contrato = regs[0]
+
+            return schemas.VilaContratoOut(
+                id=contrato["id"],
+                id_login=login["id"],
+                id_cliente=contrato["id_cliente"],
+            )
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
