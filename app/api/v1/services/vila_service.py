@@ -48,14 +48,14 @@ class VilaService(service_service.Service):
     @classmethod
     async def get_status_conexao(
         cls, numero_residencia: PositiveInt
-    ) -> schemas.NewStatusConexaoOut:
+    ) -> schemas.StatusConexaoOut:
         try:
             # --- Login ---
             login = await cls.get_login(numero_residencia=numero_residencia)
 
             # Exceção já tratada na get_login
 
-            return schemas.NewStatusConexaoOut(status_conexao=login["online"])
+            return schemas.StatusConexaoOut(status_conexao=login["online"])
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -100,14 +100,14 @@ class VilaService(service_service.Service):
             )
 
     @classmethod
-    async def get_dados_wifi(cls, numero_residencia: PositiveInt) -> schemas.NewWifiOut:
+    async def get_dados_wifi(cls, numero_residencia: PositiveInt) -> schemas.WifiOut:
         try:
             # --- Login ---
             login = await cls.get_login(numero_residencia=numero_residencia)
 
             # Exceção já tratada na get_login
 
-            return schemas.NewWifiOut(
+            return schemas.WifiOut(
                 ssid_wifi_2g=login["ssid_router_wifi"],
                 senha_wifi_2g=login["senha_rede_sem_fio"],
                 ssid_wifi_5g=login["ssid_router_wifi_5ghz"],

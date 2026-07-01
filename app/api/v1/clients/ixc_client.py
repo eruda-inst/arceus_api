@@ -100,14 +100,14 @@ class IXCCliente:
         cls,
         endpoint: str,
         grid_param: list[dict[str, str]],
-        page: PositiveInt | None = 1,
-        per_page: PositiveInt | None = 10,
+        pagina: PositiveInt | None = 1,
+        itens_por_pagina: PositiveInt | None = 10,
         sort_order: utils.SortOrder | None = utils.SortOrder.ASC,
     ) -> Any:
         payload = {
             "grid_param": json.dumps(obj=grid_param),
-            "page": str(page),
-            "rp": str(per_page),
+            "page": str(pagina),
+            "rp": str(itens_por_pagina),
             "sortorder": str(sort_order),
         }
         data = await cls._make_request(endpoint=endpoint, payload=payload)

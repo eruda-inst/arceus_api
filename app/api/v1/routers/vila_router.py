@@ -14,7 +14,7 @@ ItensPorPagina = Annotated[int, Query(ge=1, description="Itens por página.")]
 )
 async def get_status_conexao(
     numero_residencia: NumeroResidencia,
-) -> schemas.NewStatusConexaoOut:
+) -> schemas.StatusConexaoOut:
     """
     Obtém status da conexão de um cliente, através do número da residência.
     """
@@ -34,7 +34,7 @@ async def get_status_onu(numero_residencia: NumeroResidencia) -> schemas.StatusO
 
 
 @vila_router.get(path="/dados_wifi", summary="Obtém dados do WiFi de um cliente.")
-async def get_dados_wifi(numero_residencia: NumeroResidencia) -> schemas.NewWifiOut:
+async def get_dados_wifi(numero_residencia: NumeroResidencia) -> schemas.WifiOut:
     """
     Obtém dados do WiFi de um cliente, através do número da residência.
     """

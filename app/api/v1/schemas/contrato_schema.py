@@ -1,4 +1,3 @@
-from typing import List
 from . import misc_schema
 from app.api.v1 import utils
 from pydantic import BaseModel, Field, PositiveInt, field_serializer
@@ -69,10 +68,8 @@ class Contrato(BaseModel):
 
 
 class ContratoListOut(BaseModel):
-    data: List[Contrato] = Field(
-        description="Lista de contratos",
-    )
-    meta: misc_schema.Meta = Field()
+    data: list[Contrato]
+    meta: misc_schema.Meta
 
 
 class ComercialContrato(BaseModel):
@@ -114,5 +111,5 @@ class ComercialContrato(BaseModel):
 
 
 class ComercialContratoListOut(BaseModel):
-    data: List[ComercialContrato] = Field(description="Lista de contratos")
+    data: list[ComercialContrato]
     meta: misc_schema.Meta

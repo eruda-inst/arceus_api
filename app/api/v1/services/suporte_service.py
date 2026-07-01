@@ -9,10 +9,10 @@ class SuporteService(service_service.Service):
     @classmethod
     async def get_contratos(
         cls,
-        protocolo: str | None = None,
-        cnpj_cpf: str | None = None,
-        page: PositiveInt | None = 1,
-        per_page: PositiveInt | None = 10,
+        protocolo: str | None,
+        cnpj_cpf: str | None,
+        pagina: PositiveInt | None,
+        itens_por_pagina: PositiveInt | None,
     ) -> schemas.ContratoListOut:
         try:
             # --- Cliente ---
@@ -24,7 +24,7 @@ class SuporteService(service_service.Service):
             if not regs:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
-                    detail="Nenum cliente encontrado.",
+                    detail="Cliente não encontrado.",
                 )
             cliente = regs[0]
 
@@ -37,13 +37,16 @@ class SuporteService(service_service.Service):
                 {"TB": "cliente_contrato.status", "OP": "!=", "P": "D"},
             ]
             res = await clients.IXCCliente.get(
-                endpoint=endpoint, grid_param=grid_param, page=page, per_page=per_page
+                endpoint=endpoint,
+                grid_param=grid_param,
+                pagina=pagina,
+                itens_por_pagina=itens_por_pagina,
             )
             regs = res.get("registros", [])
             if not regs:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
-                    detail="Nenhum contrato encontrado.",
+                    detail="Contrato não encontrado.",
                 )
             total = res.get("total", 0)
             contratos = regs
@@ -52,7 +55,6 @@ class SuporteService(service_service.Service):
 
             # --- Iteração entre contratos ---
             for contrato in contratos:
-                # --- Pŕoxima fatura aberta ----
                 id_contrato = contrato.get("id")
 
                 # --- Fatura referência ---
@@ -77,7 +79,7 @@ class SuporteService(service_service.Service):
                 if not regs:
                     raise HTTPException(
                         status_code=status.HTTP_404_NOT_FOUND,
-                        detail="Nenhum login encontrado.",
+                        detail="Login não encontrado.",
                     )
                 login = regs[0]
 
@@ -85,20 +87,24 @@ class SuporteService(service_service.Service):
                 contratos_parciais.append(
                     schemas.Contrato(
                         id=id_contrato,
-                        id_login=login.get("id"),
-                        id_cliente=contrato.get("id_cliente"),
-                        nome_cliente=cliente.get("razao"),
-                        status=contrato.get("status"),
-                        contrato=contrato.get("contrato"),
+                        id_login=login["id"],
+                        id_cliente=contrato["id_cliente"],
+                        nome_cliente=cliente["razao"],
+                        status=contrato["status"],
+                        contrato=contrato["contrato"],
                         valor=fatura_referencia["valor"],
                         data_vencimento=fatura_referencia["data_vencimento"],
-                        mac_onu=login.get("onu_mac"),
+                        mac_onu=login["onu_mac"],
                     )
                 )
 
             return schemas.ContratoListOut(
                 data=contratos_parciais,
-                meta=schemas.Meta(total=total, page=page, per_page=per_page),
+                meta=schemas.Meta(
+                    total_itens=total,
+                    pagina_atual=pagina,
+                    itens_por_pagina=itens_por_pagina,
+                ),
             )
         except HTTPException:
             raise
@@ -109,19 +115,21 @@ class SuporteService(service_service.Service):
             )
 
     @staticmethod
-    async def get_status_conexao(id_login: PositiveInt) -> schemas.NewStatusConexaoOut:
+    async def get_status_conexao(id_login: PositiveInt) -> schemas.StatusConexaoOut:
         try:
-            grid_param = [{"TB": "radusuarios.id", "OP": "=", "P": str(id_login)}]
+            # --- Login ---
             endpoint = "radusuarios"
+            grid_param = [{"TB": "radusuarios.id", "OP": "=", "P": str(id_login)}]
             res = await clients.IXCCliente.get(endpoint=endpoint, grid_param=grid_param)
-            registros = res.get("registros", [])
-            if not registros:
+            regs = res.get("registros", [])
+            if not regs:
                 raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND, detail="Nenhum registro."
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Login não encontrado.",
                 )
-            return schemas.NewStatusConexaoOut(
-                status_conexao=registros[0].get("online")
-            )
+            login = regs[0]
+
+            return schemas.StatusConexaoOut(status_conexao=login["online"])
         except HTTPException:
             raise
         except Exception as e:
@@ -130,6 +138,7 @@ class SuporteService(service_service.Service):
                 detail=f"Erro interno ao processar solicitação: {e}",
             )
 
+    # Isto precisa ser limpo?
     @staticmethod
     async def get_status_onu(
         id_login: PositiveInt | None = None, mac_onu: str | None = None
@@ -204,12 +213,19 @@ class SuporteService(service_service.Service):
     @staticmethod
     async def post_desconectar_cliente(id_login: PositiveInt) -> schemas.MensagemOut:
         try:
+            # --- Desconectar cliente ---
             payload = {"id": id_login}
             endpoint = "desconectar_clientes"
             res = await clients.IXCCliente.post(endpoint=endpoint, payload=payload)
-            mensagem = "Nenhuma mensagem retornada."
-            mensagem = res.get("msg")[0]["message"]
-            return schemas.MensagemOut(mensagem=mensagem)
+            msgs = res.get("msg", [])
+            if not msgs:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Mensagem não encontrada.",
+                )
+            msg = msgs[0]
+
+            return schemas.MensagemOut(mensagem=msg["message"])
         except HTTPException:
             raise
         except Exception as e:
@@ -221,10 +237,11 @@ class SuporteService(service_service.Service):
     @staticmethod
     async def get_atendimentos(
         id_login: PositiveInt,
-        page: PositiveInt | None = 1,
-        per_page: PositiveInt | None = 10,
+        pagina: PositiveInt | None,
+        itens_por_pagina: PositiveInt | None,
     ) -> schemas.AtendimentoOut:
         try:
+            # --- Atendimentos ---
             endpoint = "su_ticket"
             grid_param = [
                 {"TB": "su_ticket.id_login", "OP": "=", "P": str(id_login)},
@@ -232,32 +249,43 @@ class SuporteService(service_service.Service):
                 {"TB": "su_ticket.su_status", "OP": "!=", "P": "C"},
             ]
             res = await clients.IXCCliente.get(
-                endpoint=endpoint, grid_param=grid_param, page=page, per_page=per_page
+                endpoint=endpoint,
+                grid_param=grid_param,
+                pagina=pagina,
+                itens_por_pagina=itens_por_pagina,
             )
-            registros = res.get("registros", [])
-            if not registros:
+            regs = res.get("registros", [])
+            if not regs:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
                     detail="Sem atendimentos abertos.",
                 )
-            formatted: Any = []
-            for a in registros:
-                formatted.append(
-                    {
-                        "id": a.get("id"),
-                        "id_assunto": a.get("id_assunto"),
-                        "status": a.get("su_status"),
-                        "mensagem": a.get("menssagem") or a.get("mensagem") or "",
-                        "titulo": a.get("titulo"),
-                        "data_criacao": a.get("data_criacao"),
-                    }
+            total = res.get("total", 0)
+            atendimentos = regs
+
+            atendimentos_parciais: list[schemas.Atendimento] = []
+
+            # --- Iteração entre atendimentos ---
+            for atendimento in atendimentos:
+                # --- Atendimentos parciais ---
+                atendimentos_parciais.append(
+                    schemas.Atendimento(
+                        id=atendimento["id"],
+                        id_assunto=atendimento["id_assunto"],
+                        status=atendimento["su_status"],
+                        mensagem=atendimento["menssagem"],
+                        titulo=atendimento["titulo"],
+                        data_criacao=atendimento["data_criacao"],
+                    )
                 )
-            total = int(res.get("total", 0))
-            meta = schemas.Meta(total=total, page=page, per_page=per_page)
 
             return schemas.AtendimentoOut(
-                data=[schemas.Atendimento(**i) for i in formatted],
-                meta=meta,
+                data=atendimentos_parciais,
+                meta=schemas.Meta(
+                    total_itens=total,
+                    pagina_atual=pagina,
+                    itens_por_pagina=itens_por_pagina,
+                ),
             )
         except HTTPException:
             raise
@@ -272,13 +300,13 @@ class SuporteService(service_service.Service):
         atendimento: schemas.AtendimentoIn,
     ) -> schemas.AtendimentoCreate:
         try:
+            # --- Atendimento ---
             endpoint = "su_ticket"
             payload = atendimento.model_dump()
             res = await clients.IXCCliente.post(endpoint=endpoint, payload=payload)
-            id_atendimento = res.get("id", None)
-            return schemas.AtendimentoCreate(id=int(id_atendimento))
-        except HTTPException:
-            raise
+            data = res.get("data", None)
+
+            return schemas.AtendimentoCreate(id=data["id"])
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -287,21 +315,22 @@ class SuporteService(service_service.Service):
 
     @staticmethod
     async def put_ip(
-        id_login: PositiveInt,
-        ip: str | None = "",
-        pool_radius: str | None = "",
+        id_login: PositiveInt, ip: str | None, pool_radius: str | None
     ) -> schemas.MensagemOut:
         try:
-            grid_param = [{"TB": "radusuarios.id", "OP": "=", "P": str(id_login)}]
+            # --- Login ---
             endpoint = "radusuarios"
-
+            grid_param = [{"TB": "radusuarios.id", "OP": "=", "P": str(id_login)}]
             res = await clients.IXCCliente.get(endpoint=endpoint, grid_param=grid_param)
-            if not res.get("registros"):
+            regs = res.get("registros", [])
+            if not regs:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
                     detail="Login não encontrado.",
                 )
-            login_antigo = res["registros"][0]
+            login_antigo = regs[0]
+
+            # --- Login atualizado ---
             novo_ip = ip if ip else login_antigo["ip"]
             novo_radius = pool_radius if pool_radius else login_antigo["pool_radius"]
             login_atualizado: Any = {
@@ -311,17 +340,16 @@ class SuporteService(service_service.Service):
             }
             del login_atualizado["id"]
 
+            # --- Atualiza login ---
             endpoint = "radusuarios"
             id = id_login
             payload = login_atualizado
-
             res = await clients.IXCCliente.put(
                 endpoint=endpoint, id=id, payload=payload
             )
+            msg = res.get("message", "Nenhuma mensagem retornada.")
 
-            mensagem = "Nenhuma mensagem retornada."
-            mensagem = res["message"]
-            return schemas.MensagemOut(mensagem=mensagem)
+            return schemas.MensagemOut(mensagem=msg)
         except HTTPException:
             raise
         except Exception as e:
@@ -333,11 +361,13 @@ class SuporteService(service_service.Service):
     @staticmethod
     async def post_limpar_mac(id_login: PositiveInt) -> schemas.MensagemOut:
         try:
+            # --- Limpar MAC ---
             endpoint = "radusuarios_25452"
             payload = {"get_id": id_login}
             res = await clients.IXCCliente.post(endpoint=endpoint, payload=payload)
-            mensagem = "Nenhuma mensagem retornada."
-            mensagem = res.get("message")
+
+            mensagem = res.get("message", "Nenhuma mensagem retornada.")
+
             return schemas.MensagemOut(mensagem=mensagem)
         except HTTPException:
             raise
@@ -348,28 +378,25 @@ class SuporteService(service_service.Service):
             )
 
     @staticmethod
-    async def get_dados_wifi(id_login: PositiveInt) -> schemas.NewWifiOut:
+    async def get_dados_wifi(id_login: PositiveInt) -> schemas.WifiOut:
         try:
+            # --- Login ---
             endpoint = "radusuarios"
             grid_param = [{"TB": "radusuarios.id", "OP": "=", "P": str(id_login)}]
             res = await clients.IXCCliente.get(endpoint=endpoint, grid_param=grid_param)
-
-            if not res.get("registros"):
+            regs = res.get("registros", [])
+            if not regs:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
-                    detail="Dados não encontrados.",
+                    detail="Login não encontrado.",
                 )
+            login = regs[0]
 
-            ssid_wifi_2g = res.get("registros")[0].get("ssid_router_wifi")
-            senha_wifi_2g = res.get("registros")[0].get("senha_rede_sem_fio")
-            ssid_wifi_5g = res.get("registros")[0].get("ssid_router_wifi_5ghz")
-            senha_wifi_5g = res.get("registros")[0].get("senha_rede_sem_fio_5ghz")
-
-            return schemas.NewWifiOut(
-                ssid_wifi_2g=ssid_wifi_2g,
-                senha_wifi_2g=senha_wifi_2g,
-                ssid_wifi_5g=ssid_wifi_5g,
-                senha_wifi_5g=senha_wifi_5g,
+            return schemas.WifiOut(
+                ssid_wifi_2g=login["ssid_router_wifi"],
+                senha_wifi_2g=login["senha_rede_sem_fio"],
+                ssid_wifi_5g=login["ssid_router_wifi_5ghz"],
+                senha_wifi_5g=login["senha_rede_sem_fio_5ghz"],
             )
         except HTTPException:
             raise

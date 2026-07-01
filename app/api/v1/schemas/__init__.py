@@ -1,8 +1,5 @@
 from .misc_schema import Meta, MensagemOut
-from .login_schema import (
-    StatusConexaoOut as NewStatusConexaoOut,
-    WifiOut as NewWifiOut,
-)
+from .login_schema import StatusConexaoOut, WifiOut
 from .atendimento_schema import (
     Atendimento,
     AtendimentoOut,
@@ -39,9 +36,9 @@ __all__ = [
     "ComercialContrato",
     "ComercialContratoListOut",
     "LeadIn",
-    "NewWifiOut",
+    "WifiOut",
     "LeadCreate",
-    "NewStatusConexaoOut",
+    "StatusConexaoOut",
     "Atendimento",
     "AtendimentoCreate",
     "AtendimentoIn",
