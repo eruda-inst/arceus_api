@@ -20,5 +20,5 @@ async def get_planos_sugeridos(
     Sugere planos de venda oficiais de acordo com planos de venda desatualizados, para cada cadastro associado a um cliente.
     """
     return await services.UpgradeService.get_planos_sugeridos(
-        id_cliente=id_cliente, page=pagina, per_page=itens_por_pagina
+        id_cliente=id_cliente, pagina=pagina, itens_por_pagina=itens_por_pagina
     )

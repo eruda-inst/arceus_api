@@ -16,8 +16,10 @@ async def get_faturas_abertas(
     cnpj_cpf: Annotated[
         str | None, Query(description="CPF ou CNPJ do cliente.")
     ] = None,
-    page: Annotated[int | None, Query(ge=1, description="Número da página.")] = 1,
-    per_page: Annotated[int | None, Query(ge=1, description="Itens por página.")] = 15,
+    pagina: Annotated[int | None, Query(ge=1, description="Número da página.")] = 1,
+    itens_por_pagina: Annotated[
+        int | None, Query(ge=1, description="Itens por página.")
+    ] = 15,
 ) -> schemas.FaturaAbertaListOut:
     """
     Obtém faturas abertas de todos os contratos de um cliente, através de protocolo de atendimento ou CPF/CNPJ.
@@ -25,8 +27,8 @@ async def get_faturas_abertas(
     return await services.FinanceiroService.get_faturas_abertas(
         protocolo=protocolo,
         cnpj_cpf=cnpj_cpf,
-        page=page,
-        per_page=per_page,
+        pagina=pagina,
+        itens_por_pagina=itens_por_pagina,
     )
 
 
@@ -39,14 +41,19 @@ async def get_contratos(
     cnpj_cpf: Annotated[
         str | None, Query(description="CPF ou CNPJ do cliente.")
     ] = None,
-    page: Annotated[int | None, Query(ge=1, description="Número da página.")] = 1,
-    per_page: Annotated[int | None, Query(ge=1, description="Itens por página.")] = 10,
+    pagina: Annotated[int | None, Query(ge=1, description="Número da página.")] = 1,
+    itens_por_pagina: Annotated[
+        int | None, Query(ge=1, description="Itens por página.")
+    ] = 10,
 ) -> schemas.ComercialContratoListOut:
     """
     Obtém contratos de todos os clientes, atravé de protocolo de atendimento ou CPF/CNPJ.
     """
     return await services.ComercialService.get_contratos(
-        protocolo=protocolo, cnpj_cpf=cnpj_cpf, page=page, per_page=per_page
+        protocolo=protocolo,
+        cnpj_cpf=cnpj_cpf,
+        pagina=pagina,
+        itens_por_pagina=itens_por_pagina,
     )
 
 

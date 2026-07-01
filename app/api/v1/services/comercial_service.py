@@ -34,11 +34,11 @@ class ComercialService(service_service.Service):
     @classmethod
     async def get_contratos(
         cls,
-        protocolo: str | None = None,
-        cnpj_cpf: str | None = None,
-        page: PositiveInt | None = 1,
-        per_page: PositiveInt | None = 10,
-    ):
+        protocolo: str | None,
+        cnpj_cpf: str | None,
+        pagina: PositiveInt | None,
+        itens_por_pagina: PositiveInt | None,
+    ) -> schemas.ComercialContratoListOut:
         try:
             # --- Cliente ---
             id_cliente = await cls.get_id_cliente_ixc(
@@ -62,7 +62,10 @@ class ComercialService(service_service.Service):
                 {"TB": "cliente_contrato.status", "OP": "!=", "P": "D"},
             ]
             res = await clients.IXCCliente.get(
-                endpoint=endpoint, grid_param=grid_param, page=page, per_page=per_page
+                endpoint=endpoint,
+                grid_param=grid_param,
+                pagina=pagina,
+                itens_por_pagina=itens_por_pagina,
             )
             regs = res.get("registros", [])
             if not regs:
@@ -121,7 +124,11 @@ class ComercialService(service_service.Service):
 
             return schemas.ComercialContratoListOut(
                 data=contratos_parciais,
-                meta=schemas.Meta(total=total, page=page, per_page=per_page),
+                meta=schemas.Meta(
+                    total_itens=total,
+                    pagina_atual=pagina,
+                    itens_por_pagina=itens_por_pagina,
+                ),
             )
         except HTTPException:
             raise

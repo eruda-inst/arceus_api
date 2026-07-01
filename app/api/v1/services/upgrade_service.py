@@ -6,7 +6,9 @@ from fastapi import HTTPException, status
 class UpgradeService:
     @staticmethod
     async def get_planos_sugeridos(
-        id_cliente: PositiveInt, page: PositiveInt | None, per_page: PositiveInt | None
+        id_cliente: PositiveInt,
+        pagina: PositiveInt | None,
+        itens_por_pagina: PositiveInt | None,
     ) -> schemas.PlanoSugeridoListOut:
         try:
             grid_param = [
@@ -17,7 +19,10 @@ class UpgradeService:
             ]
             endpoint = "cliente_contrato"
             contratos_res = await clients.IXCCliente.get(
-                endpoint=endpoint, grid_param=grid_param, page=page, per_page=per_page
+                endpoint=endpoint,
+                grid_param=grid_param,
+                pagina=pagina,
+                itens_por_pagina=itens_por_pagina,
             )
 
             contratos = contratos_res.get("registros", [])
@@ -33,8 +38,8 @@ class UpgradeService:
             planos_oficiais_res = await clients.IXCCliente.get(
                 endpoint="vd_contratos",
                 grid_param=grid_param,
-                page=page,
-                per_page=per_page,
+                pagina=pagina,
+                itens_por_pagina=itens_por_pagina,
             )
             planos_oficiais = planos_oficiais_res.get("registros", [])
 
@@ -58,8 +63,8 @@ class UpgradeService:
                 plano_vigente_res = await clients.IXCCliente.get(
                     endpoint="vd_contratos",
                     grid_param=grid_param,
-                    page=page,
-                    per_page=per_page,
+                    pagina=pagina,
+                    itens_por_pagina=itens_por_pagina,
                 )
                 plano_vigente = plano_vigente_res.get("registros", [])
                 plano_atual = {}
@@ -96,7 +101,9 @@ class UpgradeService:
                 )
 
             meta = schemas.Meta(
-                total=len(planos_sugeridos), page=page, per_page=per_page
+                total_itens=len(planos_sugeridos),
+                pagina_atual=pagina,
+                itens_por_pagina=itens_por_pagina,
             )
 
             return schemas.PlanoSugeridoListOut(data=planos_sugeridos, meta=meta)

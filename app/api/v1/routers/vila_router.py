@@ -55,7 +55,9 @@ async def get_atendimentos(
     Obtém atendimentos abertos de um cliente, através do número da residência.
     """
     return await services.VilaService.get_atendimentos(
-        numero_residencia=numero_residencia, page=pagina, per_page=itens_por_pagina
+        numero_residencia=numero_residencia,
+        pagina=pagina,
+        itens_por_pagina=itens_por_pagina,
     )
 
 

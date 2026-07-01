@@ -123,8 +123,8 @@ class VilaService(service_service.Service):
     async def get_atendimentos(
         cls,
         numero_residencia: PositiveInt,
-        page: PositiveInt | None,
-        per_page: PositiveInt | None,
+        pagina: PositiveInt | None,
+        itens_por_pagina: PositiveInt | None,
     ) -> schemas.AtendimentoOut:
         try:
             # --- Login ---
@@ -144,7 +144,10 @@ class VilaService(service_service.Service):
                 {"TB": "su_ticket.su_status", "OP": "!=", "P": "C"},
             ]
             res = await clients.IXCCliente.get(
-                endpoint=endpoint, grid_param=grid_param, page=page, per_page=per_page
+                endpoint=endpoint,
+                grid_param=grid_param,
+                pagina=pagina,
+                itens_por_pagina=itens_por_pagina,
             )
             regs = res.get("registros", [])
             if not regs:
@@ -172,7 +175,11 @@ class VilaService(service_service.Service):
 
             return schemas.AtendimentoOut(
                 data=atendimentos_parciais,
-                meta=schemas.Meta(total=total, page=page, per_page=per_page),
+                meta=schemas.Meta(
+                    total_itens=total,
+                    pagina_atual=pagina,
+                    itens_por_pagina=itens_por_pagina,
+                ),
             )
         except HTTPException:
             raise

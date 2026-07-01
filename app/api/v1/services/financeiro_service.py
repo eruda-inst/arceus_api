@@ -112,8 +112,8 @@ class FinanceiroService(service_service.Service):
         cls,
         protocolo: str | None,
         cnpj_cpf: str | None,
-        page: PositiveInt | None,
-        per_page: PositiveInt | None,
+        pagina: PositiveInt | None,
+        itens_por_pagina: PositiveInt | None,
     ) -> schemas.FaturaAbertaListOut:
         try:
             id_cliente = await cls.get_id_cliente_ixc(
@@ -129,8 +129,8 @@ class FinanceiroService(service_service.Service):
             res = await clients.IXCCliente.get(
                 endpoint="fn_areceber",
                 grid_param=grid_param,
-                page=page,
-                per_page=per_page,
+                pagina=pagina,
+                itens_por_pagina=itens_por_pagina,
             )
 
             if not res.get("registros"):
@@ -169,9 +169,9 @@ class FinanceiroService(service_service.Service):
             total = int(res.get("total", 0))
 
             meta = schemas.Meta(
-                total=total,
-                page=page,
-                per_page=per_page,
+                total_itens=total,
+                pagina_atual=pagina,
+                itens_por_pagina=itens_por_pagina,
             )
 
             return schemas.FaturaAbertaListOut(

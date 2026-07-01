@@ -6,21 +6,18 @@ comercial_router = APIRouter(prefix="/comercial", tags=["Comercial"])
 
 
 @comercial_router.get(
-    path="/status_acesso", summary="Obtém status de acesso do contrato."
+    path="/status_acesso", summary="Obtém status de acesso de um contrato."
 )
 async def get_status_acesso(
     id_contrato: Annotated[int, Query(ge=1, description="ID do contrato.")],
 ) -> schemas.StatusAcessoOut:
     """
-    Obtém status de acesso de um contrato, atravé do ID do contrato."
+    Obtém status de acesso de um contrato, através do ID do contrato.
     """
     return await services.ComercialService.get_status_acesso(id_contrato=id_contrato)
 
 
-@comercial_router.get(
-    path="/contratos",
-    summary="Obtém contratos de um cliente, por meio de protocolo de atendimento ou CPF/CNPJ.",
-)
+@comercial_router.get(path="/contratos", summary="Obtém contratos de um cliente.")
 async def get_contratos(
     protocolo: Annotated[
         str | None,
@@ -29,17 +26,19 @@ async def get_contratos(
     cnpj_cpf: Annotated[
         str | None, Query(description="CPF ou CNPJ do cliente.")
     ] = None,
-    page: Annotated[int | None, Query(ge=1, description="Número da página.")] = 1,
-    per_page: Annotated[int | None, Query(ge=1, description="Itens por página.")] = 10,
+    pagina: Annotated[int | None, Query(ge=1, description="Número da página.")] = 1,
+    itens_por_pagina: Annotated[
+        int | None, Query(ge=1, description="Itens por página.")
+    ] = 10,
 ) -> schemas.ComercialContratoListOut:
     """
-    Obtém contratos de todos os clientes, atravé de protocolo de atendimento ou CPF/CNPJ.
+    Obtém contratos de todos os clientes, através de protocolo de atendimento ou CPF/CNPJ.
     """
     return await services.ComercialService.get_contratos(
         protocolo=protocolo,
         cnpj_cpf=cnpj_cpf,
-        page=page,
-        per_page=per_page,
+        pagina=pagina,
+        itens_por_pagina=itens_por_pagina,
     )
 
 
@@ -50,32 +49,30 @@ async def post_leads(
     lead: Annotated[schemas.LeadIn, Body(description="Lead a ser cadastrado.")],
 ) -> schemas.LeadCreate:
     """
-    Cadastra novo lead e retorna o ID do lead criado.
+    Cadastra novo lead e retorna o ID dele.
     """
     return await services.ComercialService.post_leads(lead=lead)
 
 
 @comercial_router.get(
-    path="/cliente_existe", summary="Verifica se um cliente existe no Opa."
+    path="/cliente_existe", summary="Checa se um cliente existe no Opa."
 )
 async def cliente_existe(
     cpf_cnpj: Annotated[str, Query(description="CPF ou CNPJ.")],
 ) -> schemas.ClienteExisteOut:
     """
-    Verifica se um cliente existe no Opa, através do CPF/CNPJ.
+    Checa se um cliente existe no Opa, através do CPF/CNPJ.
     """
     return await services.ComercialService.cliente_existe(cpf_cnpj=cpf_cnpj)
 
 
 # Por razões de limitações na plataforma opa, o verbo deve ser put, ao invés de patch
-@comercial_router.put(
-    path="/leads", summary="Atualiza um ou mais campos associado a um lead específico."
-)
+@comercial_router.put(path="/leads", summary="Atualiza lead parcialmente.")
 async def put_lead(
     cnpj_cpf: Annotated[str, Query(description="CPF ou CNPJ associado ao lead.")],
     lead: Annotated[schemas.LeadUpdate, Body(description="Dados do lead.")],
 ) -> schemas.LeadOut:
     """
-    Atualiza um ou mais campos associado a um lead específico, baseado no CPF/CNPJ.
+    Atualiza lead parcialmente, através de dados do lead.
     """
     return await services.ComercialService.put_lead(cnpj_cpf=cnpj_cpf, lead=lead)

@@ -27,8 +27,8 @@ async def get_faturas_abertas(
     return await services.FinanceiroService.get_faturas_abertas(
         protocolo=protocolo,
         cnpj_cpf=cnpj_cpf,
-        page=pagina,
-        per_page=itens_por_pagina,
+        pagina=pagina,
+        itens_por_pagina=itens_por_pagina,
     )
 
 
@@ -54,6 +54,6 @@ async def get_faturas_vencidas(
     return await services.CobrancaService.get_faturas_vencidas(
         protocolo=protocolo,
         cnpj_cpf=cnpj_cpf,
-        page=pagina,
-        per_page=itens_por_pagina,
+        pagina=pagina,
+        itens_por_pagina=itens_por_pagina,
     )
