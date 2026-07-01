@@ -72,7 +72,7 @@ class Service:
         try:
 
             cnpj_cpf_formatado = (
-                utils.formatar_cnpj_cpf(cnpj_cpf=cnpj_cpf) if cnpj_cpf else None
+                utils.Formatter.cnpj_cpf(cnpj_cpf=cnpj_cpf) if cnpj_cpf else None
             )
 
             if not protocolo and not cnpj_cpf_formatado:

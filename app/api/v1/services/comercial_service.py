@@ -20,11 +20,9 @@ class ComercialService(service_service.Service):
                     status_code=status.HTTP_404_NOT_FOUND,
                     detail="Sem status de acesso.",
                 )
-            status_acesso_cod = status_acesso[0].get("status_internet")
-            status_acesso_rot = utils.rotular_status_acesso(
-                status_acesso_codigo=status_acesso_cod
+            return schemas.StatusAcessoOut(
+                status_acesso=status_acesso[0].get("status_internet")
             )
-            return schemas.StatusAcessoOut(status_acesso=status_acesso_rot)
         except HTTPException:
             raise
         except Exception as e:
@@ -114,9 +112,7 @@ class ComercialService(service_service.Service):
                         contrato=contrato.get("contrato"),
                         nome_cliente=cliente.get("razao"),
                         valor=fatura_referencia["valor"],
-                        status_acesso=utils.rotular_status_acesso(
-                            status_acesso_codigo=contrato.get("status_internet")
-                        ),
+                        status_acesso=contrato.get("status_internet"),
                         data_vencimento=fatura_referencia["data_vencimento"],
                         id_cliente=id_cliente,
                         id_login=login.get("id"),
@@ -141,19 +137,21 @@ class ComercialService(service_service.Service):
             lead_data = lead.model_dump()
             if lead_data.get("cnpj_cpf"):
                 cnpj_cpf = lead_data["cnpj_cpf"]
-                lead_data["cnpj_cpf"] = utils.formatar_cnpj_cpf(cnpj_cpf=cnpj_cpf)
+                lead_data["cnpj_cpf"] = utils.Formatter.cnpj_cpf(cnpj_cpf=cnpj_cpf)
             if lead_data.get("fone_whatsapp"):
                 cel = lead_data["fone_whatsapp"]
-                lead_data["fone_whatsapp"] = utils.formatar_cel(cel=cel)
+                lead_data["fone_whatsapp"] = utils.Formatter.cell(cell=cel)
             if lead_data.get("fone_celular"):
                 cel = lead_data["fone_celular"]
-                lead_data["fone_celular"] = utils.formatar_cel(cel=cel)
+                lead_data["fone_celular"] = utils.Formatter.cell(cell=cel)
             if lead_data.get("cep"):
                 cep = lead_data["cep"]
-                lead_data["cep"] = utils.formatar_cep(cep=cep)
+                lead_data["cep"] = utils.Formatter.cep(cep=cep)
             if lead_data.get("data_nascimento"):
                 data_nascimento = lead_data["data_nascimento"]
-                lead_data["data_nascimento"] = utils.formatar_data(data=data_nascimento)
+                lead_data["data_nascimento"] = utils.Formatter.data(
+                    data=data_nascimento
+                )
 
             formatted_lead = schemas.LeadIn(**lead_data)
 
@@ -186,7 +184,7 @@ class ComercialService(service_service.Service):
     @staticmethod
     async def cliente_existe(cpf_cnpj: str) -> schemas.ClienteExisteOut:
         try:
-            cpf_cnpj_limpo = utils.limpar_string(cpf_cnpj)
+            cpf_cnpj_limpo = utils.Formatter.only_digits(cpf_cnpj)
             cliente_existe = await clients.OpaCliente.cliente_existe(
                 cpf_cnpj_limpo=cpf_cnpj_limpo
             )
@@ -206,7 +204,7 @@ class ComercialService(service_service.Service):
                 {
                     "TB": "contato.cnpj_cpf",
                     "OP": "=",
-                    "P": utils.formatar_cnpj_cpf(cnpj_cpf),
+                    "P": utils.Formatter.cnpj_cpf(cnpj_cpf),
                 }
             ]
             response = await clients.IXCCliente.get(
@@ -231,23 +229,23 @@ class ComercialService(service_service.Service):
 
             # 3. Aplicar formatações (igual ao post_leads)
             if dados_atualizados.get("cnpj_cpf"):
-                dados_atualizados["cnpj_cpf"] = utils.formatar_cnpj_cpf(
+                dados_atualizados["cnpj_cpf"] = utils.Formatter.cnpj_cpf(
                     cnpj_cpf=dados_atualizados["cnpj_cpf"]
                 )
             if dados_atualizados.get("fone_whatsapp"):
-                dados_atualizados["fone_whatsapp"] = utils.formatar_cel(
-                    cel=dados_atualizados["fone_whatsapp"]
+                dados_atualizados["fone_whatsapp"] = utils.Formatter.cell(
+                    cell=dados_atualizados["fone_whatsapp"]
                 )
             if dados_atualizados.get("fone_celular"):
-                dados_atualizados["fone_celular"] = utils.formatar_cel(
-                    cel=dados_atualizados["fone_celular"]
+                dados_atualizados["fone_celular"] = utils.Formatter.cell(
+                    cell=dados_atualizados["fone_celular"]
                 )
             if dados_atualizados.get("cep"):
-                dados_atualizados["cep"] = utils.formatar_cep(
+                dados_atualizados["cep"] = utils.Formatter.cep(
                     cep=dados_atualizados["cep"]
                 )
             if dados_atualizados.get("data_nascimento"):
-                dados_atualizados["data_nascimento"] = utils.formatar_data(
+                dados_atualizados["data_nascimento"] = utils.Formatter.data(
                     data=dados_atualizados["data_nascimento"]
                 )
 

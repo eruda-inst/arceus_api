@@ -65,7 +65,7 @@ class TriagemService(service_service.Service):
             cliente_atualizado: Any = {**cliente_antigo, **novo_contato}
 
             if "cep" in cliente_atualizado:
-                cliente_atualizado["cep"] = utils.formatar_cep(
+                cliente_atualizado["cep"] = utils.Formatter.cep(
                     cep=cliente_atualizado["cep"]
                 )
 

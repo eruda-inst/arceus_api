@@ -4,23 +4,23 @@ from pydantic import BaseModel, Field, PositiveInt, EmailStr, field_serializer
 
 
 class LeadOut(BaseModel):
-    ativo: utils.enums.codigos.lead_cod_enum.AtivoCod = Field(
+    ativo: utils.enums.AtivoCod = Field(
         max_length=1,
         description="Indica se o lead esta ativo (S para Sim, N para Não).",
-        examples=[utils.enums.codigos.lead_cod_enum.AtivoCod.SIM],
+        examples=[utils.enums.AtivoCod.SIM],
     )
-    principal: utils.enums.codigos.lead_cod_enum.PrincipalCod = Field(
+    principal: utils.enums.PrincipalCod = Field(
         max_length=1,
         description="Indica se o lead é o principal (S para Sim, N para Não).",
-        examples=[utils.enums.codigos.lead_cod_enum.PrincipalCod.SIM],
+        examples=[utils.enums.PrincipalCod.SIM],
     )
-    lead: utils.enums.codigos.lead_cod_enum.LeadCod = Field(
+    lead: utils.enums.LeadCod = Field(
         description="ID do tipo de contato.",
-        examples=[utils.enums.codigos.lead_cod_enum.LeadCod.SIM],
+        examples=[utils.enums.LeadCod.SIM],
     )
     tipo_pessoa: str = Field(
         max_length=1,
-        examples=[utils.enums.codigos.TipoPessoaCod.FISICA],
+        examples=[utils.enums.TipoPessoaCod.FISICA],
         description="Tipo de pessoa (F para Física, J para Jurídica, E para Estrangeiro).",
     )
     nome: str = Field(
@@ -99,14 +99,12 @@ class LeadOut(BaseModel):
     )
 
     @field_serializer("ativo")
-    def formatar_ativo(self, v):
-        v = str.upper(v)
+    def formatar_ativo(self, v: utils.AtivoCod):
         rot = utils.AtivoRot.SIM if v == utils.AtivoCod.SIM else utils.AtivoRot.NAO
         return rot
 
     @field_serializer("principal")
-    def formatar_principal(self, v):
-        v = str.upper(v)
+    def formatar_principal(self, v: utils.PrincipalCod):
         rot = (
             utils.PrincipalRot.SIM
             if v == utils.PrincipalCod.SIM
@@ -115,8 +113,7 @@ class LeadOut(BaseModel):
         return rot
 
     @field_serializer("tipo_pessoa")
-    def formatar_tipo_pessoa(self, v):
-        v = str.upper(v)
+    def formatar_tipo_pessoa(self, v: utils.TipoPessoaCod):
         rot = utils.TipoPessoaRot.FISICA
         rot = utils.TipoPessoaRot.JURIDICA if v == utils.TipoPessoaCod.JURIDICA else rot
         rot = (
@@ -127,33 +124,32 @@ class LeadOut(BaseModel):
         return rot
 
     @field_serializer("lead")
-    def formatar_lead(self, v):
-        v = str.upper(v)
+    def formatar_lead(self, v: utils.LeadCod):
         rot = utils.LeadRot.SIM if v == utils.AtivoCod.SIM else utils.LeadRot.NAO
         return rot
 
 
 class LeadUpdate(BaseModel):
-    ativo: utils.enums.codigos.lead_cod_enum.AtivoCod | None = Field(
+    ativo: utils.enums.AtivoCod | None = Field(
         default=None,
         max_length=1,
         description="Indica se o lead esta ativo (S para Sim, N para Não).",
-        examples=[utils.enums.codigos.lead_cod_enum.AtivoCod.SIM],
+        examples=[utils.enums.AtivoCod.SIM],
     )
-    principal: utils.enums.codigos.lead_cod_enum.PrincipalCod | None = Field(
+    principal: utils.enums.PrincipalCod | None = Field(
         default=None,
         max_length=1,
         description="Indica se o lead é o principal (S para Sim, N para Não).",
-        examples=[utils.enums.codigos.lead_cod_enum.PrincipalCod.SIM],
+        examples=[utils.enums.PrincipalCod.SIM],
     )
-    lead: utils.enums.codigos.lead_cod_enum.LeadCod | None = Field(
+    lead: utils.enums.LeadCod | None = Field(
         default=None,
         description="ID do tipo de contato.",
-        examples=[utils.enums.codigos.lead_cod_enum.LeadCod.SIM],
+        examples=[utils.enums.LeadCod.SIM],
     )
     tipo_pessoa: str | None = Field(
         default=None,
-        examples=[utils.enums.codigos.TipoPessoaCod.FISICA],
+        examples=[utils.enums.TipoPessoaCod.FISICA],
         description="Tipo de pessoa (F para Física, J para Jurídica, E para Estrangeiro).",
     )
     nome: str | None = Field(
@@ -246,7 +242,7 @@ class LeadUpdate(BaseModel):
     )
 
     @field_serializer("cep")
-    def formatar_cep(self, v):
+    def formatar_cep(self, v: str):
         primeira_parte = v[:5]
         segunda_parte = v[5:]
         cep_pattern = r"^\d{5}-\d{3}$"
@@ -255,43 +251,43 @@ class LeadUpdate(BaseModel):
         return f"{primeira_parte}-{segunda_parte}"
 
     @field_serializer("ativo")
-    def formatar_ativo(self, v):
+    def formatar_ativo(self, v: str):
         return str.upper(v)
 
     @field_serializer("principal")
-    def formatar_principal(self, v):
+    def formatar_principal(self, v: str):
         return str.upper(v)
 
     @field_serializer("tipo_pessoa")
-    def formatar_tipo_pessoa(self, v):
+    def formatar_tipo_pessoa(self, v: str):
         return str.upper(v)
 
     @field_serializer("lead")
-    def formatar_lead(self, v):
+    def formatar_lead(self, v: str):
         return str.upper(v)
 
 
 class LeadIn(BaseModel):
-    ativo: utils.enums.codigos.lead_cod_enum.AtivoCod | None = Field(
-        default=utils.enums.codigos.lead_cod_enum.AtivoCod.SIM,
+    ativo: utils.enums.AtivoCod | None = Field(
+        default=utils.enums.AtivoCod.SIM,
         max_length=1,
         description="Indica se o lead esta ativo (S para Sim, N para Não).",
-        examples=[utils.enums.codigos.lead_cod_enum.AtivoCod.SIM],
+        examples=[utils.enums.AtivoCod.SIM],
     )
-    principal: utils.enums.codigos.lead_cod_enum.PrincipalCod | None = Field(
-        default=utils.enums.codigos.lead_cod_enum.PrincipalCod.SIM,
+    principal: utils.enums.PrincipalCod | None = Field(
+        default=utils.enums.PrincipalCod.SIM,
         max_length=1,
         description="Indica se o lead é o principal (S para Sim, N para Não).",
-        examples=[utils.enums.codigos.lead_cod_enum.PrincipalCod.SIM],
+        examples=[utils.enums.PrincipalCod.SIM],
     )
-    lead: utils.enums.codigos.lead_cod_enum.LeadCod | None = Field(
-        default=utils.enums.codigos.lead_cod_enum.LeadCod.SIM,
+    lead: utils.enums.LeadCod | None = Field(
+        default=utils.enums.LeadCod.SIM,
         description="ID do tipo de contato.",
-        examples=[utils.enums.codigos.lead_cod_enum.LeadCod.SIM],
+        examples=[utils.enums.LeadCod.SIM],
     )
     tipo_pessoa: str | None = Field(
-        default=utils.enums.codigos.TipoPessoaCod.FISICA,
-        examples=[utils.enums.codigos.TipoPessoaCod.FISICA],
+        default=utils.enums.TipoPessoaCod.FISICA,
+        examples=[utils.enums.TipoPessoaCod.FISICA],
         description="Tipo de pessoa (F para Física, J para Jurídica, E para Estrangeiro).",
     )
     # Campo obrigatório para a API do IXC: nome
@@ -380,7 +376,7 @@ class LeadIn(BaseModel):
     )
 
     @field_serializer("cep")
-    def formatar_cep(self, v):
+    def formatar_cep(self, v: str):
         primeira_parte = v[:5]
         segunda_parte = v[5:]
         cep_pattern = r"^\d{5}-\d{3}$"
@@ -389,19 +385,19 @@ class LeadIn(BaseModel):
         return f"{primeira_parte}-{segunda_parte}"
 
     @field_serializer("ativo")
-    def formatar_ativo(self, v):
+    def formatar_ativo(self, v: str):
         return str.upper(v)
 
     @field_serializer("principal")
-    def formatar_principal(self, v):
+    def formatar_principal(self, v: str):
         return str.upper(v)
 
     @field_serializer("tipo_pessoa")
-    def formatar_tipo_pessoa(self, v):
+    def formatar_tipo_pessoa(self, v: str):
         return str.upper(v)
 
     @field_serializer("lead")
-    def formatar_lead(self, v):
+    def formatar_lead(self, v: str):
         return str.upper(v)
 
 

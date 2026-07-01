@@ -2,7 +2,7 @@ from typing import Any
 from . import service_service
 from pydantic import PositiveInt
 from fastapi import HTTPException, status
-from .. import utils, schemas, clients, services
+from .. import schemas, clients, services
 
 
 class SuporteService(service_service.Service):
@@ -13,7 +13,7 @@ class SuporteService(service_service.Service):
         cnpj_cpf: str | None = None,
         page: PositiveInt | None = 1,
         per_page: PositiveInt | None = 10,
-    ) -> schemas.SuporteContratoListOut:
+    ) -> schemas.ContratoListOut:
         try:
             # --- Cliente ---
             id_cliente = await cls.get_id_cliente_ixc(
@@ -48,7 +48,7 @@ class SuporteService(service_service.Service):
             total = res.get("total", 0)
             contratos = regs
 
-            contratos_parciais: list[schemas.SuporteContrato] = []
+            contratos_parciais: list[schemas.Contrato] = []
 
             # --- Iteração entre contratos ---
             for contrato in contratos:
@@ -83,14 +83,12 @@ class SuporteService(service_service.Service):
 
                 # --- Contrato parcial ---
                 contratos_parciais.append(
-                    schemas.SuporteContrato(
+                    schemas.Contrato(
                         id=id_contrato,
                         id_login=login.get("id"),
                         id_cliente=contrato.get("id_cliente"),
                         nome_cliente=cliente.get("razao"),
-                        status=utils.rotular_status_contrato(
-                            status_contrato_codigo=contrato.get("status")
-                        ),
+                        status=contrato.get("status"),
                         contrato=contrato.get("contrato"),
                         valor=fatura_referencia["valor"],
                         data_vencimento=fatura_referencia["data_vencimento"],
@@ -98,7 +96,7 @@ class SuporteService(service_service.Service):
                     )
                 )
 
-            return schemas.SuporteContratoListOut(
+            return schemas.ContratoListOut(
                 data=contratos_parciais,
                 meta=schemas.Meta(total=total, page=page, per_page=per_page),
             )
@@ -248,9 +246,7 @@ class SuporteService(service_service.Service):
                     {
                         "id": a.get("id"),
                         "id_assunto": a.get("id_assunto"),
-                        "status": utils.rotular_status_atendimento(
-                            status_atendimento_codigo=a.get("su_status"),
-                        ),
+                        "status": a.get("su_status"),
                         "mensagem": a.get("menssagem") or a.get("mensagem") or "",
                         "titulo": a.get("titulo"),
                         "data_criacao": a.get("data_criacao"),

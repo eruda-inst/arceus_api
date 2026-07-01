@@ -9,17 +9,14 @@ from .comercial import (
     ComercialContrato,
     ComercialContratoListOut,
     LeadIn,
-    StatusAcessoOut,
     LeadCreate,
     ClienteExisteOut,
     LeadOut,
     LeadUpdate,
 )
 from .suporte import (
-    SuporteContratoListOut,
     AtendimentoCreate,
     AtendimentoIn,
-    SuporteContrato,
     StatusConexao,
     StatusONUOut,
     StatusONU,
@@ -41,23 +38,24 @@ from .cliente_schema import ClienteUpdate
 from .login_schema import LoginUpdate
 from .index_schema import IndexOut
 from .upgrade import PlanoSugeridoOut, PlanoSugeridoListOut
+from .contrato_schema import StatusAcessoOut, ContratoListOut, Contrato
 
 __all__ = [
     "Meta",
+    "Contrato",
+    "ContratoListOut",
     "MensagemOut",
+    "StatusAcessoOut",
     "ComercialContrato",
     "ComercialContratoListOut",
     "LeadIn",
-    "StatusAcessoOut",
     "NewWifiOut",
     "LeadCreate",
-    "SuporteContratoListOut",
     "NewStatusConexaoOut",
     "Atendimento",
     "AtendimentoCreate",
     "AtendimentoIn",
     "AtendimentoOut",
-    "SuporteContrato",
     "onu_suporte_schema",
     "StatusConexao",
     "StatusONUOut",

@@ -16,7 +16,7 @@ async def get_contratos(
     ] = None,
     page: Annotated[int | None, Query(ge=1, description="Número da página.")] = 1,
     per_page: Annotated[int | None, Query(ge=1, description="Itens por página.")] = 10,
-) -> schemas.SuporteContratoListOut:
+) -> schemas.ContratoListOut:
     """
     Obtém contratos ativos de todos os clientes, atravé de protocolo de atendimento.
     """
