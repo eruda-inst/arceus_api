@@ -29,7 +29,7 @@ async def get_contato_cliente(
 # Por razões de limitações na plataforma opa, o verbo deve ser put, ao invés de patch
 @triagem_router.put(
     path="/contato_cliente",
-    summary="Atualiza um ou mais campos associado a um cliente específico.",
+    summary="Atualiza contato de um cliente.",
 )
 async def put_contato_cliente(
     telefone_celular: Annotated[
@@ -45,7 +45,7 @@ async def put_contato_cliente(
     ] = None,
 ) -> schemas.MensagemOut:
     """
-    Atualiza um ou mais campos associado a um cliente específico, baseado no protocolo de atendimento ou no CPF/CNPJ.
+    Atualiza contato de um cliente, baseado no protocolo de atendimento ou no CPF/CNPJ.
     """
     return await services.TriagemService.put_contato_cliente(
         protocolo=protocolo, cnpj_cpf=cnpj_cpf, telefone_celular=telefone_celular
