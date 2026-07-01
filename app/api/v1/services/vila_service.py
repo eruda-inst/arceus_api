@@ -245,3 +245,41 @@ class VilaService(service_service.Service):
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=f"Erro interno ao processar solicitação: {e}",
             )
+
+    @classmethod
+    async def put_ip(
+        cls,
+        numero_residencia: PositiveInt,
+        ip: str | None = "",
+        pool_radius: str | None = "",
+    ):
+        try:
+            # --- Login ---
+            login_antigo = await cls.get_login(numero_residencia=numero_residencia)
+
+            # Exceção já tratada na get_login
+
+            # --- Login atualizado ---
+            novo_ip = ip if ip else login_antigo["ip"]
+            novo_radius = pool_radius if pool_radius else login_antigo["pool_radius"]
+            login_atualizado: Any = {
+                **login_antigo,
+                "ip": novo_ip,
+                "pool_radius": novo_radius,
+            }
+            del login_atualizado["id"]
+
+            # --- Atualizar login ---
+            endpoint = "radusuarios"
+            id = login_antigo["id"]
+            payload = login_atualizado
+            res = await clients.IXCCliente.put(
+                endpoint=endpoint, id=id, payload=payload
+            )
+
+            return schemas.MensagemOut(mensagem=res["message"])
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Erro interno ao processar solicitação: {e}",
+            )
