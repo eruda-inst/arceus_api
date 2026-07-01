@@ -63,7 +63,7 @@ class TriagemService(service_service.Service):
 
             cliente_atualizado: Any = {
                 **cliente_antigo,
-                "telefone_celular": telefone_celular,
+                "telefone_celular": utils.Formatter.cell(cell=telefone_celular),
             }
 
             if "cep" in cliente_atualizado:
