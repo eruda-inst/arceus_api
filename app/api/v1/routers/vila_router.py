@@ -1,6 +1,6 @@
 from typing import Annotated
 from .. import services, schemas
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, Body
 
 vila_router = APIRouter(prefix="/vila", tags=["Vila"])
 
@@ -79,3 +79,17 @@ async def post_desconectar_cliente(
     return await services.VilaService.post_desconectar_cliente(
         numero_residencia=numero_residencia
     )
+
+
+@vila_router.post(
+    path="/atendimentos", summary="Obtém atendimentos abertos de um cliente."
+)
+async def post_atendimentos(
+    atendimento: Annotated[
+        schemas.AtendimentoIn, Body(description="Dados do atendimento.")
+    ],
+) -> schemas.AtendimentoCreate:
+    """
+    Abre ticket de atendimento, através de dados do atendimento.
+    """
+    return await services.VilaService.post_atendimentos(atendimento=atendimento)

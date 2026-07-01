@@ -229,3 +229,19 @@ class VilaService(service_service.Service):
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=f"Erro interno ao processar solicitação: {e}",
             )
+
+    @classmethod
+    async def post_atendimentos(
+        cls, atendimento: schemas.AtendimentoIn
+    ) -> schemas.AtendimentoCreate:
+        try:
+            endpoint = "su_ticket"
+            payload = atendimento.model_dump()
+            res = await clients.IXCCliente.post(endpoint=endpoint, payload=payload)
+            id_atendimento = res.get("id", None)
+            return schemas.AtendimentoCreate(id=int(id_atendimento))
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Erro interno ao processar solicitação: {e}",
+            )

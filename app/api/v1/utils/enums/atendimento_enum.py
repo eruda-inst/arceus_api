@@ -15,3 +15,22 @@ class SuStatusRot(StrEnum):
     EM_PROGRESSO = "Em progresso"
     SOLUCIONADO = "Solucionado"
     CANCELADO = "Cancelado"
+
+
+class OrigemEnderecoCod(StrEnum):
+    CLIENTE = "C"
+    LOGIN = "L"
+    CONTRATO = "CC"
+    MANUAL = "M"
+
+
+class TipoCod(StrEnum):
+    CLIENTE = "C"
+    ESTRUTURA_PROPRIA = "E"
+
+
+class PrioridadeCod(StrEnum):
+    BAIXA = "B"
+    NORMAL = "M"
+    ALTA = "A"
+    CRITICA = "C"
