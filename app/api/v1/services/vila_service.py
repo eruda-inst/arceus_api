@@ -205,3 +205,27 @@ class VilaService(service_service.Service):
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=f"Erro interno ao processar solicitação: {e}",
             )
+
+    @classmethod
+    async def post_desconectar_cliente(
+        cls, numero_residencia: PositiveInt
+    ) -> schemas.MensagemOut:
+        try:
+            # --- Login ---
+            login = await cls.get_login(numero_residencia=numero_residencia)
+
+            # Exceção já tratada na get_login
+
+            # --- Desconectar cliente ---
+            endpoint = "desconectar_clientes"
+            payload = {"id": str(login["id"])}
+            res = await clients.IXCCliente.post(endpoint=endpoint, payload=payload)
+
+            return schemas.MensagemOut(
+                mensagem=res.get("msg", "Nenhuma mensagem retornada.")[0]["message"]
+            )
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Erro interno ao processar solicitação: {e}",
+            )

@@ -67,3 +67,15 @@ async def post_limpar_mac(numero_residencia: NumeroResidencia) -> schemas.Mensag
     return await services.VilaService.post_limpar_mac(
         numero_residencia=numero_residencia
     )
+
+
+@vila_router.post(path="/desconectar_cliente", summary="Desconecta um cliente.")
+async def post_desconectar_cliente(
+    numero_residencia: NumeroResidencia,
+) -> schemas.MensagemOut:
+    """
+    Desconecta um cliente, através do número da residência.
+    """
+    return await services.VilaService.post_desconectar_cliente(
+        numero_residencia=numero_residencia
+    )
