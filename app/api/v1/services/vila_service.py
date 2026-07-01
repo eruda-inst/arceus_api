@@ -1,3 +1,4 @@
+from typing import Any
 from . import service_service
 from .. import clients, schemas
 from pydantic import PositiveInt
@@ -6,7 +7,7 @@ from fastapi import HTTPException, status
 
 class VilaService(service_service.Service):
     @classmethod
-    async def get_login(cls, numero_residencia: PositiveInt):
+    async def get_login(cls, numero_residencia: PositiveInt) -> dict[str, Any]:
         try:
             # --- Login ---
             endpoint = "radusuarios"
@@ -28,7 +29,7 @@ class VilaService(service_service.Service):
             login = regs[0]
 
             return {
-                "id": login["id"],
+                "id": int(login["id"]),
                 "login": login["login"],
                 "online": login["online"],
                 "ssid_router_wifi": login["ssid_router_wifi"],
@@ -55,8 +56,6 @@ class VilaService(service_service.Service):
             # Exceção já tratada na get_login
 
             return schemas.NewStatusConexaoOut(status_conexao=login["online"])
-        except HTTPException:
-            raise
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -114,8 +113,6 @@ class VilaService(service_service.Service):
                 ssid_wifi_5g=login["ssid_router_wifi_5ghz"],
                 senha_wifi_5g=login["senha_rede_sem_fio_5ghz"],
             )
-        except HTTPException:
-            raise
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -179,6 +176,30 @@ class VilaService(service_service.Service):
             )
         except HTTPException:
             raise
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Erro interno ao processar solicitação: {e}",
+            )
+
+    @classmethod
+    async def post_limpar_mac(
+        cls, numero_residencia: PositiveInt
+    ) -> schemas.MensagemOut:
+        try:
+            # --- Login ---
+            login = await cls.get_login(numero_residencia=numero_residencia)
+
+            # Exceção já tratada na get_login
+
+            # --- Limpar MAC ---
+            endpoint = "radusuarios_25452"
+            payload = {"get_id": str(login["id"])}
+            res = await clients.IXCCliente.post(endpoint=endpoint, payload=payload)
+
+            return schemas.MensagemOut(
+                mensagem=res.get("message", "Nenhuma mensagem retornada.")
+            )
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

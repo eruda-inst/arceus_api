@@ -57,3 +57,13 @@ async def get_atendimentos(
     return await services.VilaService.get_atendimentos(
         numero_residencia=numero_residencia, page=pagina, per_page=itens_por_pagina
     )
+
+
+@vila_router.post(path="/limpar_mac", summary="Limpa MAC Address de um cliente.")
+async def post_limpar_mac(numero_residencia: NumeroResidencia) -> schemas.MensagemOut:
+    """
+    Limpa MAC Address de um cliente, através do número da residência.
+    """
+    return await services.VilaService.post_limpar_mac(
+        numero_residencia=numero_residencia
+    )
