@@ -55,17 +55,15 @@ class SuporteService(service_service.Service):
                 # --- Pŕoxima fatura aberta ----
                 id_contrato = contrato.get("id")
 
-                proxima_fatura_aberta = (
-                    await services.FinanceiroService.get_proxima_fatura_aberta(
+                # --- Fatura referência ---
+                fatura_referencia: dict[str, Any] | None = (
+                    await services.FinanceiroService.get_fatura_referencia(
                         id_contrato=id_contrato
                     )
                 )
 
-                if not proxima_fatura_aberta:
-                    raise HTTPException(
-                        status_code=status.HTTP_404_NOT_FOUND,
-                        detail="Nenhuma fatura aberta encontrada.",
-                    )
+                if not fatura_referencia:
+                    fatura_referencia = {"valor": 0.00, "data_vencimento": ""}
 
                 # --- Login ---
                 endpoint = "radusuarios"
@@ -94,8 +92,8 @@ class SuporteService(service_service.Service):
                             status_contrato_codigo=contrato.get("status")
                         ),
                         contrato=contrato.get("contrato"),
-                        valor=proxima_fatura_aberta["valor"],
-                        data_vencimento=proxima_fatura_aberta["data_vencimento"],
+                        valor=fatura_referencia["valor"],
+                        data_vencimento=fatura_referencia["data_vencimento"],
                         mac_onu=login.get("onu_mac"),
                     )
                 )

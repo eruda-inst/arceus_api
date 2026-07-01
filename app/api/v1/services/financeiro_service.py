@@ -83,26 +83,22 @@ class FinanceiroService(service_service.Service):
             )
 
     @classmethod
-    async def get_valor_contrato(cls, id_contrato: PositiveInt) -> dict[str, float]:
+    async def get_fatura_referencia(
+        cls, id_contrato: PositiveInt
+    ) -> dict[str, Any] | None:
         try:
-            # --- Ultima Fatura Paga ---
             ultima_fatura_paga = await cls.get_ultima_fatura_paga(
                 id_contrato=id_contrato
             )
 
-            valor = 0.00
-
             if ultima_fatura_paga:
-                valor = ultima_fatura_paga["valor"]
-            else:
-                # --- Proxima Fatura Aberta ---
-                proxima_fatura_aberta = await cls.get_proxima_fatura_aberta(
-                    id_contrato=id_contrato
-                )
-                if proxima_fatura_aberta:
-                    valor = proxima_fatura_aberta["valor"]
+                return ultima_fatura_paga
 
-            return {"valor": valor}
+            proxima_fatura_aberta = await cls.get_proxima_fatura_aberta(
+                id_contrato=id_contrato
+            )
+
+            return proxima_fatura_aberta
         except HTTPException:
             raise
         except Exception as e:
