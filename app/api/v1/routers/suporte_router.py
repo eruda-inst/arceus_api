@@ -5,8 +5,8 @@ from fastapi import APIRouter, Query, status, Path, Body
 suporte_router = APIRouter(prefix="/suporte", tags=["Suporte"])
 
 IdLogin = Annotated[int, Query(ge=1, description="ID de login do cliente.")]
-Pagina = Annotated[int | None, Query(ge=1, description="Número da página.")]
-ItensPorPagina = Annotated[int | None, Query(ge=1, description="Itens por página.")]
+Pagina = Annotated[int, Query(ge=1, description="Número da página.")]
+ItensPorPagina = Annotated[int, Query(ge=1, description="Itens por página.")]
 
 
 @suporte_router.get(path="/contratos", summary="Obtém contratos de um cliente.")
@@ -18,8 +18,8 @@ async def get_contratos(
     cnpj_cpf: Annotated[
         str | None, Query(description="CPF ou CNPJ do cliente.")
     ] = None,
-    pagina: Pagina = 1,
-    itens_por_pagina: ItensPorPagina = 10,
+    pagina: Pagina | None = 1,
+    itens_por_pagina: ItensPorPagina | None = 10,
 ) -> schemas.ContratoListOut:
     """
     Obtém contratos de um cliente, através de protocolo de atendimento ou CPF/CNPJ.
@@ -73,8 +73,8 @@ async def post_desconectar_cliente(id_login: IdLogin) -> schemas.MensagemOut:
 )
 async def get_atendimentos(
     id_login: IdLogin,
-    pagina: Pagina = 1,
-    itens_por_pagina: ItensPorPagina = 10,
+    pagina: Pagina | None = 1,
+    itens_por_pagina: ItensPorPagina | None = 10,
 ) -> schemas.AtendimentoOut:
     """
     Obtém atendimentos abertos de um cliente, através do ID de login.
