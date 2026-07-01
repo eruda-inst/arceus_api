@@ -79,6 +79,8 @@ class VilaService(service_service.Service):
                 id_login=login["id"],
                 id_cliente=contrato["id_cliente"],
             )
+        except HTTPException:
+            raise
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
