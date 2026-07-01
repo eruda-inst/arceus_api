@@ -7,7 +7,7 @@ from fastapi import HTTPException, status
 
 class VilaService(service_service.Service):
     @classmethod
-    async def get_login(cls, numero_residencia: PositiveInt) -> dict[str, Any]:
+    async def _get_login(cls, numero_residencia: PositiveInt) -> dict[str, Any]:
         try:
             # --- Login ---
             endpoint = "radusuarios"
@@ -51,7 +51,7 @@ class VilaService(service_service.Service):
     ) -> schemas.StatusConexaoOut:
         try:
             # --- Login ---
-            login = await cls.get_login(numero_residencia=numero_residencia)
+            login = await cls._get_login(numero_residencia=numero_residencia)
 
             # Exceção já tratada na get_login
 
@@ -68,7 +68,7 @@ class VilaService(service_service.Service):
     ) -> schemas.StatusOnuOut:
         try:
             # --- Login ---
-            login = await cls.get_login(numero_residencia=numero_residencia)
+            login = await cls._get_login(numero_residencia=numero_residencia)
 
             # Exceção já tratada na get_login
 
@@ -103,7 +103,7 @@ class VilaService(service_service.Service):
     async def get_dados_wifi(cls, numero_residencia: PositiveInt) -> schemas.WifiOut:
         try:
             # --- Login ---
-            login = await cls.get_login(numero_residencia=numero_residencia)
+            login = await cls._get_login(numero_residencia=numero_residencia)
 
             # Exceção já tratada na get_login
 
@@ -128,7 +128,7 @@ class VilaService(service_service.Service):
     ) -> schemas.AtendimentoOut:
         try:
             # --- Login ---
-            login = await cls.get_login(numero_residencia=numero_residencia)
+            login = await cls._get_login(numero_residencia=numero_residencia)
 
             # Exceção já tratada na get_login
 
@@ -195,7 +195,7 @@ class VilaService(service_service.Service):
     ) -> schemas.MensagemOut:
         try:
             # --- Login ---
-            login = await cls.get_login(numero_residencia=numero_residencia)
+            login = await cls._get_login(numero_residencia=numero_residencia)
 
             # Exceção já tratada na get_login
 
@@ -219,7 +219,7 @@ class VilaService(service_service.Service):
     ) -> schemas.MensagemOut:
         try:
             # --- Login ---
-            login = await cls.get_login(numero_residencia=numero_residencia)
+            login = await cls._get_login(numero_residencia=numero_residencia)
 
             # Exceção já tratada na get_login
 
@@ -242,64 +242,13 @@ class VilaService(service_service.Service):
         cls, atendimento: schemas.AtendimentoIn
     ) -> schemas.AtendimentoCreate:
         try:
+            # --- Atendimento ---
             endpoint = "su_ticket"
             payload = atendimento.model_dump()
             res = await clients.IXCCliente.post(endpoint=endpoint, payload=payload)
-            id_atendimento = res.get("id", None)
-            return schemas.AtendimentoCreate(id=int(id_atendimento))
-        except Exception as e:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno ao processar solicitação: {e}",
-            )
+            data = res.get("data", None)
 
-    @classmethod
-    async def put_ip(
-        cls,
-        numero_residencia: PositiveInt,
-        ip: str | None = "",
-        pool_radius: str | None = "",
-    ):
-        try:
-            # --- Login ---
-            endpoint = "radusuarios"
-            grid_param = [
-                {
-                    "TB": "radusuarios.login",
-                    "OP": "L",
-                    "P": f"res{str(numero_residencia)}",
-                },
-                {"TB": "radusuarios.ativo", "OP": "=", "P": "S"},
-            ]
-            res = await clients.IXCCliente.get(endpoint=endpoint, grid_param=grid_param)
-            regs = res.get("registros", [])
-
-            if not regs:
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail="Nenhum login encontrado.",
-                )
-            login_antigo = regs[0]
-
-            # --- Login atualizado ---
-            novo_ip = ip if ip else login_antigo["ip"]
-            novo_radius = pool_radius if pool_radius else login_antigo["pool_radius"]
-            login_atualizado: Any = {
-                **login_antigo,
-                "ip": novo_ip,
-                "pool_radius": novo_radius,
-            }
-            del login_atualizado["id"]
-
-            # --- Atualizar login ---
-            endpoint = "radusuarios"
-            id = login_antigo["id"]
-            payload = login_atualizado
-            res = await clients.IXCCliente.put(
-                endpoint=endpoint, id=id, payload=payload
-            )
-
-            return schemas.MensagemOut(mensagem=res["message"])
+            return schemas.AtendimentoCreate(id=data["id"])
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
