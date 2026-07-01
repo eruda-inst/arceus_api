@@ -38,7 +38,7 @@ class TriagemService(service_service.Service):
     @classmethod
     async def put_contato_cliente(
         cls,
-        contato: schemas.ContatoUpdate,
+        telefone_celular: str,
         protocolo: str | None = None,
         cnpj_cpf: str | None = None,
     ) -> schemas.MensagemOut:
@@ -60,9 +60,11 @@ class TriagemService(service_service.Service):
                 )
 
             cliente_antigo = res["registros"][0]
-            novo_contato = contato.model_dump()
 
-            cliente_atualizado: Any = {**cliente_antigo, **novo_contato}
+            cliente_atualizado: Any = {
+                **cliente_antigo,
+                "telefone_celular": telefone_celular,
+            }
 
             if "cep" in cliente_atualizado:
                 cliente_atualizado["cep"] = utils.Formatter.cep(

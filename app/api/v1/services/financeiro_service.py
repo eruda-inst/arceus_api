@@ -234,7 +234,7 @@ class FinanceiroService(service_service.Service):
             )
 
     @staticmethod
-    async def get_chave_pix(id_fatura: PositiveInt) -> schemas.ChavePixBase:
+    async def get_chave_pix(id_fatura: PositiveInt) -> schemas.ChavePixOut:
         try:
             res = await clients.SeteAZCliente.get_chave_pix(id_fatura=id_fatura)
             if len(res) < 1 or not res.get("pixCode"):
@@ -243,7 +243,7 @@ class FinanceiroService(service_service.Service):
                     detail="Sem chave pix.",
                 )
             chave_pix = res.get("pixCode")
-            return schemas.ChavePixBase(chave_pix=chave_pix)
+            return schemas.ChavePixOut(chave_pix=chave_pix)
         except HTTPException:
             raise
         except Exception as e:

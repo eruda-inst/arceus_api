@@ -1,4 +1,4 @@
-from .. import misc_schema
+from . import misc_schema
 from pydantic import BaseModel, Field
 
 

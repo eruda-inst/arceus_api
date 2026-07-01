@@ -1,44 +1,34 @@
 from .misc_schema import Meta, MensagemOut
-from .new_login_schema import (
+from .login_schema import (
     StatusConexaoOut as NewStatusConexaoOut,
     WifiOut as NewWifiOut,
 )
-from .atendimento_schema import Atendimento, AtendimentoOut
-from .onu_schema import StatusOnuOut
-from .comercial import (
-    ComercialContrato,
-    ComercialContratoListOut,
-    LeadIn,
-    LeadCreate,
-    ClienteExisteOut,
-    LeadOut,
-    LeadUpdate,
-)
-from .suporte import (
+from .atendimento_schema import (
+    Atendimento,
+    AtendimentoOut,
     AtendimentoCreate,
     AtendimentoIn,
-    StatusConexao,
-    StatusONUOut,
-    StatusONU,
-    onu_suporte_schema,
-    StatusConexaoOut,
 )
-from .financeiro import (
-    FaturaAbertaListOut,
-    FaturaAberta,
-    LinhaDigitavelBase,
-    LinhaDigitavelOut,
-    ChavePixBase,
-    CredencialUpdate,
-    CredencialOut,
+from .onu_schema import StatusOnuOut
+from .cliente_schema import (
+    ClienteExisteOut,
     CredencialBase,
+    CredencialOut,
+    CredencialUpdate,
+    ContatoOut,
 )
-from .triagem import ContatoUpdate, ContatoOut
-from .cliente_schema import ClienteUpdate
-from .login_schema import LoginUpdate
+from .lead_schema import LeadIn, LeadCreate, LeadOut, LeadUpdate
 from .index_schema import IndexOut
-from .upgrade import PlanoSugeridoOut, PlanoSugeridoListOut
-from .contrato_schema import StatusAcessoOut, ContratoListOut, Contrato
+from .contrato_schema import (
+    StatusAcessoOut,
+    ContratoListOut,
+    Contrato,
+    ComercialContrato,
+    ComercialContratoListOut,
+)
+from .pix_schema import ChavePixOut
+from .fatura_schema import FaturaAberta, FaturaAbertaListOut, LinhaDigitavelBase
+from .plano_schema import PlanoSugeridoOut, PlanoSugeridoListOut
 
 __all__ = [
     "Meta",
@@ -56,24 +46,15 @@ __all__ = [
     "AtendimentoCreate",
     "AtendimentoIn",
     "AtendimentoOut",
-    "onu_suporte_schema",
-    "StatusConexao",
-    "StatusONUOut",
-    "StatusONU",
     "StatusOnuOut",
-    "StatusConexaoOut",
     "FaturaAbertaListOut",
     "FaturaAberta",
     "LinhaDigitavelBase",
-    "LinhaDigitavelOut",
-    "ChavePixBase",
+    "ChavePixOut",
     "CredencialUpdate",
     "CredencialOut",
     "CredencialBase",
-    "ContatoUpdate",
     "ContatoOut",
-    "ClienteUpdate",
-    "LoginUpdate",
     "IndexOut",
     "ClienteExisteOut",
     "LeadOut",

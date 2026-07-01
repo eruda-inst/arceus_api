@@ -1,5 +1,5 @@
 from typing import List
-from .. import misc_schema
+from . import misc_schema
 from pydantic import BaseModel, Field, PositiveInt, NonNegativeInt
 
 
@@ -10,10 +10,6 @@ class LinhaDigitavelBase(BaseModel):
         description="Linha digitável.",
         examples=["123..."],
     )
-
-
-class LinhaDigitavelOut(BaseModel):
-    data: LinhaDigitavelBase
 
 
 class FaturaAberta(BaseModel):

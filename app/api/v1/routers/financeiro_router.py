@@ -80,7 +80,7 @@ async def get_linha_digitavel(
 @financeiro_router.get(path="/chave_pix", summary="Obtém chave pix de uma fatura.")
 async def get_chave_pix(
     id_fatura: Annotated[int, Query(ge=1, description="ID da fatura.")],
-) -> schemas.ChavePixBase:
+) -> schemas.ChavePixOut:
     """
     Obtém chave pix de uma fatura, atravé do ID da fatura.
     """

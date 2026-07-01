@@ -32,9 +32,9 @@ async def get_contato_cliente(
     summary="Atualiza um ou mais campos associado a um cliente específico.",
 )
 async def put_contato_cliente(
-    contato: Annotated[
-        schemas.ContatoUpdate,
-        Body(description="Campos de cliente a serem atualizados."),
+    telefone_celular: Annotated[
+        str,
+        Body(embed=True, description="Campos de cliente a serem atualizados."),
     ],
     protocolo: Annotated[
         str | None,
@@ -48,5 +48,5 @@ async def put_contato_cliente(
     Atualiza um ou mais campos associado a um cliente específico, baseado no protocolo de atendimento ou no CPF/CNPJ.
     """
     return await services.TriagemService.put_contato_cliente(
-        protocolo=protocolo, cnpj_cpf=cnpj_cpf, contato=contato
+        protocolo=protocolo, cnpj_cpf=cnpj_cpf, telefone_celular=telefone_celular
     )
