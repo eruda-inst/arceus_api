@@ -138,70 +138,50 @@ class SuporteService(service_service.Service):
                 detail=f"Erro interno: {e}",
             )
 
-    # Isto precisa ser limpo?
     @staticmethod
     async def get_status_onu(
         id_login: PositiveInt | None = None, mac_onu: str | None = None
     ) -> schemas.StatusOnuOut:
-        if not id_login and not mac_onu:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="É necessário informar id_login ou mac_onu.",
-            )
         try:
-            if id_login is not None:
-                try:
-                    query_field = "id_login" if id_login else "mac"
-                    query_value = id_login if id_login else mac_onu
-                    grid_param = [
-                        {
-                            "TB": f"radpop_radio_cliente_fibra.{query_field}",
-                            "OP": "=",
-                            "P": str(query_value),
-                        }
-                    ]
-                    endpoint = "radpop_radio_cliente_fibra"
-                    res = await clients.IXCCliente.get(
-                        endpoint=endpoint, grid_param=grid_param
-                    )
-                    registros = res.get("registros", [])
-                    if registros and "sinal_rx" in registros[0]:
-                        codigo = registros[0].get("sinal_rx")
-                        if not codigo:
-                            return schemas.StatusOnuOut(
-                                status_onu=registros[0].get("sinal_rx")
-                            )
+            query_param = None
+            query_value = None
 
-                        return schemas.StatusOnuOut(
-                            status_onu=registros[0].get("sinal_rx")
-                        )
-                except HTTPException:
-                    if not mac_onu:
-                        raise
-            if mac_onu is not None:
-                grid_param = [
-                    {
-                        "TB": "radpop_radio_cliente_fibra.mac",
-                        "OP": "=",
-                        "P": str(mac_onu),
-                    }
-                ]
-                endpoint = "radpop_radio_cliente_fibra"
-                res = await clients.IXCCliente.get(
-                    endpoint=endpoint, grid_param=grid_param
+            if id_login:
+                query_param = "id_login"
+                query_value = id_login
+            elif mac_onu:
+                query_param = "mac"
+                query_value = mac_onu
+            else:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Informe o id_login ou o mac_onu.",
                 )
-                registros = res.get("registros", [])
-                if registros and "sinal_rx" in registros[0]:
-                    codigo = registros[0].get("sinal_rx")
-                    if not codigo:
-                        return schemas.StatusOnuOut(
-                            status_onu=registros[0].get("sinal_rx")
-                        )
 
-                    return schemas.StatusOnuOut(status_onu=registros[0].get("sinal_rx"))
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="ONU não encontrada."
-            )
+            # --- ONU ---
+            endpoint = "radpop_radio_cliente_fibra"
+            grid_param = [
+                {
+                    "TB": f"radpop_radio_cliente_fibra.{query_param}",
+                    "OP": "=",
+                    "P": str(query_value),
+                }
+            ]
+            res = await clients.IXCCliente.get(endpoint=endpoint, grid_param=grid_param)
+            regs = res.get("registros", [])
+            if not regs:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="ONU não encontrada.",
+                )
+            onu = regs[0]
+            sinal_rx = onu["sinal_rx"]
+            if not sinal_rx:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="ONU não encontrada.",
+                )
+            return schemas.StatusOnuOut(status_onu=sinal_rx)
         except HTTPException:
             raise
         except Exception as e:

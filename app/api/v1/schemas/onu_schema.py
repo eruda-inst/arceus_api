@@ -8,7 +8,7 @@ class StatusOnuOut(BaseModel):
     )
 
     @field_serializer("status_onu")
-    def serialize_status_onu(self, v: float):
+    def serialize_status_onu(self, v: float) -> utils.StatusOnuRot:
         if v >= -15:
             return utils.StatusOnuRot.SATURADO
         elif v >= -21:
