@@ -8,11 +8,11 @@ from .contrato_enum import (
     StatusInternetRot,
 )
 from .atendimento_enum import (
-    TipoCod,
     SuStatusCod,
     SuStatusRot,
     PrioridadeCod,
     OrigemEnderecoCod,
+    TipoAtendimentoCod,
 )
 from .lead_enum import (
     LeadCod,
@@ -35,11 +35,11 @@ __all__ = [
     "StatusContratoCod",
     "StatusInternetCod",
     "StatusInternetRot",
-    "TipoCod",
     "SuStatusCod",
     "SuStatusRot",
     "PrioridadeCod",
     "OrigemEnderecoCod",
+    "TipoAtendimentoCod",
     "LeadCod",
     "LeadRot",
     "AtivoCod",

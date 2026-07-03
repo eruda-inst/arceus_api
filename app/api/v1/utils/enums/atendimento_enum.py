@@ -24,7 +24,7 @@ class OrigemEnderecoCod(StrEnum):
     MANUAL = "M"
 
 
-class TipoCod(StrEnum):
+class TipoAtendimentoCod(StrEnum):
     CLIENTE = "C"
     ESTRUTURA_PROPRIA = "E"
 
