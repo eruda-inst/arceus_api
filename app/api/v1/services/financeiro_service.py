@@ -87,18 +87,18 @@ class FinanceiroService(service_service.Service):
         cls, id_contrato: PositiveInt
     ) -> dict[str, Any] | None:
         try:
-            ultima_fatura_paga = await cls.get_ultima_fatura_paga(
-                id_contrato=id_contrato
-            )
-
-            if ultima_fatura_paga:
-                return ultima_fatura_paga
-
             proxima_fatura_aberta = await cls.get_proxima_fatura_aberta(
                 id_contrato=id_contrato
             )
 
-            return proxima_fatura_aberta
+            if proxima_fatura_aberta:
+                return proxima_fatura_aberta
+
+            ultima_fatura_paga = await cls.get_ultima_fatura_paga(
+                id_contrato=id_contrato
+            )
+
+            return ultima_fatura_paga
         except HTTPException:
             raise
         except Exception as e:

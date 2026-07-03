@@ -10,7 +10,7 @@ comercial_router = APIRouter(prefix="/comercial", tags=["Comercial"])
 )
 async def get_status_acesso(
     id_contrato: Annotated[int, Query(ge=1, description="ID do contrato.")],
-) -> schemas.StatusAcessoOut:
+) -> schemas.StatusInternetOut:
     """
     Obtém status de acesso de um contrato, através do ID do contrato.
     """
@@ -32,7 +32,7 @@ async def get_contratos(
     ] = 10,
 ) -> schemas.ComercialContratoListOut:
     """
-    Obtém contratos de todos os clientes, através de protocolo de atendimento ou CPF/CNPJ.
+    Obtém contratos de um cliente, através de protocolo de atendimento ou CPF/CNPJ.
     """
     return await services.ComercialService.get_contratos(
         protocolo=protocolo,

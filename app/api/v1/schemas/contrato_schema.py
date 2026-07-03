@@ -3,7 +3,7 @@ from app.api.v1 import utils
 from pydantic import BaseModel, Field, PositiveInt, field_serializer
 
 
-class StatusAcessoOut(BaseModel):
+class StatusInternetOut(BaseModel):
     status_acesso: utils.StatusInternetCod = Field(
         description="Status de acesso.", examples=[utils.StatusInternetRot.ATIVO]
     )

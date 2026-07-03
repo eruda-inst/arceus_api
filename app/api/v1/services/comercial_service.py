@@ -7,28 +7,28 @@ from .. import utils, schemas, clients, services
 
 class ComercialService(service_service.Service):
     @staticmethod
-    async def get_status_acesso(id_contrato: PositiveInt) -> schemas.StatusAcessoOut:
+    async def get_status_acesso(id_contrato: PositiveInt) -> schemas.StatusInternetOut:
         try:
+            # --- Contrato ---
             endpoint = "cliente_contrato"
             grid_param = [
                 {"TB": "cliente_contrato.id", "OP": "=", "P": str(id_contrato)}
             ]
             res = await clients.IXCCliente.get(endpoint=endpoint, grid_param=grid_param)
-            status_acesso = res.get("registros", [])
-            if not status_acesso:
+            regs = res.get("registros", [])
+            if not regs:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
-                    detail="Sem status de acesso.",
+                    detail="Contrato não encontrado.",
                 )
-            return schemas.StatusAcessoOut(
-                status_acesso=status_acesso[0].get("status_internet")
-            )
+            contrato = regs[0]
+            return schemas.StatusInternetOut(status_acesso=contrato["status_internet"])
         except HTTPException:
             raise
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno ao processar solicitação: {str(e)}",
+                detail=f"Erro interno ao processar solicitação: {e}",
             )
 
     @classmethod
@@ -141,43 +141,20 @@ class ComercialService(service_service.Service):
     @staticmethod
     async def post_leads(lead: schemas.LeadIn) -> schemas.LeadCreate:
         try:
-            lead_data = lead.model_dump()
-            if lead_data.get("cnpj_cpf"):
-                cnpj_cpf = lead_data["cnpj_cpf"]
-                lead_data["cnpj_cpf"] = utils.Formatter.cnpj_cpf(cnpj_cpf=cnpj_cpf)
-            if lead_data.get("fone_whatsapp"):
-                cel = lead_data["fone_whatsapp"]
-                lead_data["fone_whatsapp"] = utils.Formatter.cell(cell=cel)
-            if lead_data.get("fone_celular"):
-                cel = lead_data["fone_celular"]
-                lead_data["fone_celular"] = utils.Formatter.cell(cell=cel)
-            if lead_data.get("cep"):
-                cep = lead_data["cep"]
-                lead_data["cep"] = utils.Formatter.cep(cep=cep)
-            if lead_data.get("data_nascimento"):
-                data_nascimento = lead_data["data_nascimento"]
-                lead_data["data_nascimento"] = utils.Formatter.data(
-                    data=data_nascimento
-                )
-
-            formatted_lead = schemas.LeadIn(**lead_data)
-
-            """
-            Este campo "data_cadastro" é obrigatório na API do IXC (temos que mandar alguma coisa), porém o que é mandado é descartado e a data é gerada automaticamente pela própria API deles.
-
-            Só mais uma esquisitice da API do IXC.
-            """
+            # --- Lead ---
             endpoint = "contato"
-            payload = formatted_lead.model_dump()
+            payload = lead.model_dump()
+            """
+            "data_cadastro" é obrigatório na API do IXC, porém o que é mandado é descartado, e a data é gerada automaticamente pela própria API deles.
+            """
             payload["data_cadastro"] = "N/A"
             res = await clients.IXCCliente.post(endpoint=endpoint, payload=payload)
-
             id_lead = res.get("id", None)
             if not id_lead:
-                error_message = res.get("message", "")
+                mensagem = res.get("message", "Nenhuma mensagem retornada.")
                 raise HTTPException(
                     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    detail=f"Não foi possível retornar o ID do lead criado: {error_message}",
+                    detail=f"Não foi possível criar o lead: {mensagem}",
                 )
             return schemas.LeadCreate(id=id_lead)
         except HTTPException:
@@ -185,12 +162,13 @@ class ComercialService(service_service.Service):
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno ao processar solicitação: {str(e)}",
+                detail=f"Erro interno ao processar solicitação: {e}",
             )
 
     @staticmethod
     async def cliente_existe(cpf_cnpj: str) -> schemas.ClienteExisteOut:
         try:
+            # --- Busca de cliente no Opa ---
             cpf_cnpj_limpo = utils.Formatter.only_digits(cpf_cnpj)
             cliente_existe = await clients.OpaCliente.cliente_existe(
                 cpf_cnpj_limpo=cpf_cnpj_limpo
@@ -199,74 +177,42 @@ class ComercialService(service_service.Service):
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno ao processar solicitação: {str(e)}",
+                detail=f"Erro interno ao processar solicitação: {e}",
             )
 
     @staticmethod
     async def put_lead(cnpj_cpf: str, lead: schemas.LeadUpdate) -> schemas.LeadOut:
         try:
-            # 1. Buscar lead existente pelo CNPJ/CPF
+            # --- Lead ---
             endpoint = "contato"
+            cnpj_cpf_formatado = utils.Formatter.cnpj_cpf(cnpj_cpf)
             grid_param = [
-                {
-                    "TB": "contato.cnpj_cpf",
-                    "OP": "=",
-                    "P": utils.Formatter.cnpj_cpf(cnpj_cpf),
-                }
+                {"TB": "contato.cnpj_cpf", "OP": "=", "P": cnpj_cpf_formatado}
             ]
-            response = await clients.IXCCliente.get(
-                endpoint=endpoint, grid_param=grid_param
-            )
-            registros = response.get("registros", [])
-            if not registros:
+            res = await clients.IXCCliente.get(endpoint=endpoint, grid_param=grid_param)
+            regs = res.get("registros", [])
+            if not regs:
                 raise HTTPException(
                     status.HTTP_404_NOT_FOUND, detail="Lead não encontrado."
                 )
+            lead_antigo = regs[0]
 
-            lead_antigo = registros[0]
-            lead_id = lead_antigo["id"]
+            # --- Lead atualizado ---
+            lead_in_data = lead.model_dump(exclude_none=True)
+            lead_atualizado: dict[str, Any] = {**lead_antigo, **lead_in_data}
+            del lead_atualizado["id"]
 
-            # 2. Mesclar dados antigos com os novos (excluindo None)
-            dados_atualizados: Any = {
-                **lead_antigo,
-                **lead.model_dump(exclude_none=True),
-            }
-            # Remove campos que não devem ser enviados (ex: o próprio id, data_cadastro etc.)
-            dados_atualizados.pop("id", None)
-
-            # 3. Aplicar formatações (igual ao post_leads)
-            if dados_atualizados.get("cnpj_cpf"):
-                dados_atualizados["cnpj_cpf"] = utils.Formatter.cnpj_cpf(
-                    cnpj_cpf=dados_atualizados["cnpj_cpf"]
-                )
-            if dados_atualizados.get("fone_whatsapp"):
-                dados_atualizados["fone_whatsapp"] = utils.Formatter.cell(
-                    cell=dados_atualizados["fone_whatsapp"]
-                )
-            if dados_atualizados.get("fone_celular"):
-                dados_atualizados["fone_celular"] = utils.Formatter.cell(
-                    cell=dados_atualizados["fone_celular"]
-                )
-            if dados_atualizados.get("cep"):
-                dados_atualizados["cep"] = utils.Formatter.cep(
-                    cep=dados_atualizados["cep"]
-                )
-            if dados_atualizados.get("data_nascimento"):
-                dados_atualizados["data_nascimento"] = utils.Formatter.data(
-                    data=dados_atualizados["data_nascimento"]
-                )
-
-            # 4. Chamar o método de atualização no cliente
-            id = lead_id
+            # --- Atualiza lead ---
             endpoint = "contato"
-            payload = dados_atualizados
+            id = lead_antigo["id"]
+            payload = lead_atualizado
             await clients.IXCCliente.put(endpoint=endpoint, id=id, payload=payload)
 
-            return schemas.LeadOut(**dados_atualizados)
+            return schemas.LeadOut(**lead_atualizado)
         except HTTPException:
             raise
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno ao processar solicitação: {str(e)}",
+                detail=f"Erro interno ao processar solicitação: {e}",
             )

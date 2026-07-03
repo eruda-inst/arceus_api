@@ -17,7 +17,7 @@ from .cliente_schema import (
 from .lead_schema import LeadIn, LeadCreate, LeadOut, LeadUpdate
 from .index_schema import IndexOut
 from .contrato_schema import (
-    StatusAcessoOut,
+    StatusInternetOut,
     ContratoListOut,
     Contrato,
     ComercialContrato,
@@ -33,7 +33,7 @@ __all__ = [
     "Contrato",
     "ContratoListOut",
     "MensagemOut",
-    "StatusAcessoOut",
+    "StatusInternetOut",
     "ComercialContrato",
     "ComercialContratoListOut",
     "VilaContratoOut",

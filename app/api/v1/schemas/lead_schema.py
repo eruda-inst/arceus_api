@@ -1,405 +1,410 @@
-import re
-from app.api.v1 import utils
+from .. import utils
 from pydantic import BaseModel, Field, PositiveInt, EmailStr, field_serializer
 
 
 class LeadOut(BaseModel):
-    ativo: utils.enums.AtivoCod = Field(
-        max_length=1,
-        description="Indica se o lead esta ativo (S para Sim, N para Não).",
-        examples=[utils.enums.AtivoCod.SIM],
+    ativo: utils.AtivoCod = Field(
+        description="Indica se o lead está ativo.",
+        min_length=1,  # S
+        max_length=3,  # Sim
+        examples=[utils.AtivoRot.SIM],
     )
-    principal: utils.enums.PrincipalCod = Field(
-        max_length=1,
-        description="Indica se o lead é o principal (S para Sim, N para Não).",
-        examples=[utils.enums.PrincipalCod.SIM],
+    principal: utils.PrincipalCod = Field(
+        description="Indica se o lead é principal.",
+        min_length=1,  # S
+        max_length=3,  # Sim
+        examples=[utils.PrincipalRot.SIM],
     )
-    lead: utils.enums.LeadCod = Field(
-        description="ID do tipo de contato.",
-        examples=[utils.enums.LeadCod.SIM],
+    lead: utils.LeadCod = Field(
+        description="Indica se é lead.",
+        min_length=1,  # S
+        max_length=3,  # Sim
+        examples=[utils.LeadRot.SIM],
     )
-    tipo_pessoa: str = Field(
-        max_length=1,
-        examples=[utils.enums.TipoPessoaCod.FISICA],
-        description="Tipo de pessoa (F para Física, J para Jurídica, E para Estrangeiro).",
+    tipo_pessoa: utils.TipoPessoaCod = Field(
+        description="Tipo de pessoa.", examples=[utils.TipoPessoaRot.FISICA]
     )
-    nome: str = Field(
-        max_length=200,
-        description="Nome do potencial cliente associado ao lead.",
-        examples=["João"],
-    )
+    nome: str = Field(description="Nome do cliente.", examples=["João"])
     data_nascimento: str = Field(
-        max_length=20,
         description="Data de nascimento do cliente.",
-        examples=["01/01/2000"],
+        min_length=10,  # dd/mm/aaaa
+        max_length=10,  # dd/mm/aaaa
+        examples=["dd/mm/aaaa"],
     )
     id_filial: PositiveInt = Field(
-        description="ID da filial associada ao lead.", examples=[1]
+        description="ID da filial.", examples=[utils.Default.ID_FILIAL]
     )
     fone_celular: str = Field(
-        max_length=20,
-        description="Número do celular do potencial cliente associado ao lead.",
+        description="Celular do cliente.",
+        min_length=11,  # 12934567890
+        max_length=15,  # (12) 93456-7890
         examples=["(12) 93456-7890"],
     )
     fone_whatsapp: str = Field(
-        max_length=20,
-        description="Número do celular do potencial cliente associado ao lead.",
+        description="Celular do cliente.",
+        min_length=11,  # 12934567890
+        max_length=15,  # (12) 93456-7890
         examples=["(12) 93456-7890"],
     )
     cep: str = Field(
-        min_length=9,
-        max_length=9,
-        description="CEP do potencial cliente associado ao lead.",
+        min_length=8,  # 12345678
+        max_length=9,  # 12345-678
+        description="CEP do cliente.",
         examples=["12345-678"],
     )
-    endereco: str = Field(
-        max_length=200,
-        description="Endereço do potencial cliente associado ao lead.",
-        examples=["Rua do Lead"],
-    )
+    endereco: str = Field(description="Rua do cliente.", examples=["Rua do cliente"])
     numero: str | PositiveInt = Field(
-        default="S/N",
-        description="Número da casa do potencial cliente associado ao lead.",
-        examples=["123"],
+        default="S/N", description="Número da casa do cliente.", examples=[42]
     )
     bairro: str = Field(
-        max_length=200,
-        description="Bairro do potencial cliente associado ao lead.",
-        examples=["Bairro do Lead"],
+        description="Bairro do cliente.", examples=["Bairro do cliente"]
     )
-    uf: PositiveInt = Field(description="UF do potencial cliente.")
+    uf: PositiveInt = Field(description="ID da UF.", examples=[utils.Default.ID_UF])
     cnpj_cpf: str = Field(
-        max_length=30,
-        description="CNPJ ou CPF do potencial cliente associado ao lead.",
+        description="CNPJ ou CPF do cliente.",
+        min_length=11,  # 12345678900
+        max_length=18,  # 12.345.678/0001-90
         examples=["123.456.789-00"],
     )
     cidade: PositiveInt = Field(
-        description="Nome da cidade associada ao lead.",
-        examples=["Jacobina"],
+        description="ID da cidade.", examples=[utils.Default.ID_CIDADE_JAC]
     )
-    id_vd_contrato: PositiveInt = Field(
-        description="Nome do plano de contrato associado ao lead.",
-        examples=["Nome do plano de contrato"],
-    )
+    id_vd_contrato: PositiveInt = Field(description="ID do Plano.", examples=[42])
     id_responsavel: PositiveInt = Field(
-        description="ID do responsável técnico associado ao lead.",
+        description="ID do responsável técnico.",
         examples=[utils.Default.ID_RESPONSAVEL_ARCEUS],
     )
     email: EmailStr = Field(
-        description="E-mail do potencial cliente associado ao lead.",
-        examples=["exemplo@examplo.com"],
+        description="E-mail do cliente.", examples=["email@email.com"]
     )
     id_candidato_tipo: PositiveInt = Field(
-        description="Canal de venda.",
-        examples=["Canal de venda"],
+        description="ID do canal de venda.", examples=[42]
     )
-    obs: str = Field(
-        description="Observação associada ao lead.",
-        examples=["Observação associada ao lead"],
-    )
+    obs: str = Field(description="Observação do lead.", examples=["Observação do lead"])
 
     @field_serializer("ativo")
-    def formatar_ativo(self, v: utils.AtivoCod):
-        rot = utils.AtivoRot.SIM if v == utils.AtivoCod.SIM else utils.AtivoRot.NAO
-        return rot
+    def serialize_ativo(self, v: utils.AtivoCod) -> utils.AtivoRot:
+        cod = utils.AtivoCod
+        rot = utils.AtivoRot
+
+        mapping = {cod.SIM: rot.SIM, cod.NAO: rot.NAO}
+
+        return mapping[v]
 
     @field_serializer("principal")
-    def formatar_principal(self, v: utils.PrincipalCod):
-        rot = (
-            utils.PrincipalRot.SIM
-            if v == utils.PrincipalCod.SIM
-            else utils.PrincipalRot.NAO
-        )
-        return rot
+    def serialize_principal(self, v: utils.PrincipalCod) -> utils.PrincipalRot:
+        cod = utils.PrincipalCod
+        rot = utils.PrincipalRot
 
-    @field_serializer("tipo_pessoa")
-    def formatar_tipo_pessoa(self, v: utils.TipoPessoaCod):
-        rot = utils.TipoPessoaRot.FISICA
-        rot = utils.TipoPessoaRot.JURIDICA if v == utils.TipoPessoaCod.JURIDICA else rot
-        rot = (
-            utils.TipoPessoaRot.ESTRANGEIRO
-            if v == utils.TipoPessoaCod.ESTRANGEIRO
-            else rot
-        )
-        return rot
+        mapping = {cod.SIM: rot.SIM, cod.NAO: rot.NAO}
+
+        return mapping[v]
 
     @field_serializer("lead")
-    def formatar_lead(self, v: utils.LeadCod):
-        rot = utils.LeadRot.SIM if v == utils.AtivoCod.SIM else utils.LeadRot.NAO
-        return rot
+    def serialize_lead(self, v: utils.LeadCod) -> utils.LeadRot:
+        cod = utils.LeadCod
+        rot = utils.LeadRot
+
+        mapping = {cod.SIM: rot.SIM, cod.NAO: rot.NAO}
+
+        return mapping[v]
+
+    @field_serializer("tipo_pessoa")
+    def serialize_tipo_pessoa(self, v: utils.TipoPessoaCod) -> utils.TipoPessoaRot:
+        cod = utils.TipoPessoaCod
+        rot = utils.TipoPessoaRot
+
+        mapping = {
+            cod.FISICA: rot.FISICA,
+            cod.JURIDICA: rot.JURIDICA,
+            cod.ESTRANGEIRO: rot.ESTRANGEIRO,
+        }
+
+        return mapping[v]
+
+    @field_serializer("data_nascimento")
+    def serialize_data_nascimento(self, v: str) -> str:
+        return utils.Formatter.data(data=v)
+
+    @field_serializer("fone_celular")
+    def serialize_fone_celular(self, v: str) -> str:
+        return utils.Formatter.cell(cell=v)
+
+    @field_serializer("fone_whatsapp")
+    def serialize_fone_whatsapp(self, v: str) -> str:
+        return utils.Formatter.cell(cell=v)
+
+    @field_serializer("cep")
+    def serialize_cep(self, v: str) -> str:
+        return utils.Formatter.cep(cep=v)
+
+    @field_serializer("cnpj_cpf")
+    def serialize_cnpj_cpf(self, v: str) -> str:
+        return utils.Formatter.cnpj_cpf(cnpj_cpf=v)
 
 
 class LeadUpdate(BaseModel):
-    ativo: utils.enums.AtivoCod | None = Field(
+    ativo: utils.AtivoCod | None = Field(
         default=None,
-        max_length=1,
-        description="Indica se o lead esta ativo (S para Sim, N para Não).",
-        examples=[utils.enums.AtivoCod.SIM],
+        min_length=1,  # S
+        max_length=1,  # S
+        description="Indica se o lead está ativo.",
+        examples=[utils.AtivoCod.SIM],
     )
-    principal: utils.enums.PrincipalCod | None = Field(
+    principal: utils.PrincipalCod | None = Field(
         default=None,
-        max_length=1,
-        description="Indica se o lead é o principal (S para Sim, N para Não).",
-        examples=[utils.enums.PrincipalCod.SIM],
+        min_length=1,  # S
+        max_length=1,  # S
+        description="Indica se o lead é principal.",
+        examples=[utils.PrincipalCod.SIM],
     )
-    lead: utils.enums.LeadCod | None = Field(
+    lead: utils.LeadCod | None = Field(
         default=None,
-        description="ID do tipo de contato.",
-        examples=[utils.enums.LeadCod.SIM],
+        min_length=1,  # S
+        max_length=1,  # S
+        description="Indica se é lead.",
+        examples=[utils.LeadCod.SIM],
     )
-    tipo_pessoa: str | None = Field(
+    tipo_pessoa: utils.TipoPessoaCod | None = Field(
         default=None,
-        examples=[utils.enums.TipoPessoaCod.FISICA],
-        description="Tipo de pessoa (F para Física, J para Jurídica, E para Estrangeiro).",
+        min_length=1,  # F
+        max_length=1,  # F
+        description="Tipo de pessoa.",
+        examples=[utils.TipoPessoaCod.FISICA],
     )
     nome: str | None = Field(
-        default=None,
-        max_length=200,
-        description="Nome do potencial cliente associado ao lead.",
-        examples=["João"],
+        default=None, description="Nome do cliente.", examples=["Nome do Cliente"]
     )
     data_nascimento: str | None = Field(
         default=None,
-        max_length=20,
-        description="Data de nascimento do cliente.",
-        examples=["01/01/2000"],
+        min_length=10,  # dd/mm/aaaa
+        max_length=10,  # dd/mm/aaaa
+        description="Data de nascimento.",
+        examples=["dd/mm/aaaa"],
     )
     id_filial: PositiveInt | None = Field(
-        default=None, description="ID da filial associada ao lead.", examples=[1]
+        default=None, description="ID da filial.", examples=[utils.Default.ID_FILIAL]
     )
     fone_celular: str | None = Field(
         default=None,
-        max_length=20,
-        description="Número do celular do potencial cliente associado ao lead.",
+        min_length=11,  # 12934567890
+        max_length=15,  # (12) 93456-7890
+        description="Celular do cliente.",
         examples=["(12) 93456-7890"],
     )
     fone_whatsapp: str | None = Field(
         default=None,
-        max_length=20,
-        description="Número do celular do potencial cliente associado ao lead.",
+        min_length=11,  # 12934567890
+        max_length=15,  # (12) 93456-7890
+        description="Celular do cliente.",
         examples=["(12) 93456-7890"],
     )
     cep: str | None = Field(
         default=None,
-        min_length=8,
-        max_length=9,
-        description="CEP do potencial cliente associado ao lead.",
+        min_length=8,  # 12345678
+        max_length=9,  # 12345-678
+        description="CEP do cliente.",
         examples=["12345-678"],
     )
     endereco: str | None = Field(
-        default=None,
-        max_length=200,
-        description="Endereço do potencial cliente associado ao lead.",
-        examples=["Rua do Lead"],
+        default=None, description="Rua do cliente.", examples=["Rua do cliente"]
     )
     numero: str | PositiveInt | None = Field(
-        default=None,
-        description="Número da casa do potencial cliente associado ao lead.",
-        examples=["123"],
+        default=None, description="Número da casa do cliente.", examples=[42]
     )
     bairro: str | None = Field(
-        default=None,
-        max_length=200,
-        description="Bairro do potencial cliente associado ao lead.",
-        examples=["Bairro do Lead"],
+        default=None, description="Bairro do cliente.", examples=["Bairro do cliente"]
     )
-    uf: PositiveInt | None = Field(default=None, description="UF do potencial cliente.")
+    uf: PositiveInt | None = Field(
+        default=None, description="ID da UF.", examples=[utils.Default.ID_UF]
+    )
     cnpj_cpf: str | None = Field(
         default=None,
-        max_length=30,
-        description="CNPJ ou CPF do potencial cliente associado ao lead.",
+        min_length=11,  # 12345678900
+        max_length=18,  # 12.345.678/0001-90
+        description="CNPJ ou CPF do cliente.",
         examples=["123.456.789-00"],
     )
     cidade: PositiveInt | None = Field(
         default=None,
-        description="ID da cidade associada ao lead.",
-        examples=[utils.Default.ID_CIDADE_JACOBINA],
+        description="ID da cidade.",
+        examples=[utils.Default.ID_CIDADE_JAC],
     )
     id_vd_contrato: PositiveInt | None = Field(
         default=None,
-        description="ID do plano de contrato associado ao lead.",
+        description="ID do plano.",
         examples=[utils.Default.ID_VD_CONTRATO],
     )
     id_responsavel: PositiveInt | None = Field(
         default=None,
-        description="ID do responsável técnico associado ao lead.",
+        description="ID do responsável técnico.",
         examples=[utils.Default.ID_RESPONSAVEL_ARCEUS],
     )
     email: EmailStr | None = Field(
-        default=None,
-        description="Email do potencial cliente associado ao lead.",
-        examples=["exemplo@examplo.com"],
+        default=None, description="E-mail do cliente.", examples=["email@email.com"]
     )
     id_candidato_tipo: PositiveInt | None = Field(
         default=None,
-        description="Canal de venda",
+        description="ID do canal de venda",
         examples=[utils.Default.ID_CANAL_VENDA],
     )
     obs: str | None = Field(
         default=None,
-        description="Observação associada ao lead.",
-        examples=["Observação associada ao lead."],
+        description="Observação do lead.",
+        examples=["Observação do lead."],
     )
 
+    @field_serializer("data_nascimento")
+    def serialize_data_nascimento(self, v: str) -> str:
+        return utils.Formatter.data(data=v)
+
+    @field_serializer("fone_celular")
+    def serialize_fone_celular(self, v: str) -> str:
+        return utils.Formatter.cell(cell=v)
+
+    @field_serializer("fone_whatsapp")
+    def serialize_fone_whatsapp(self, v: str) -> str:
+        return utils.Formatter.cell(cell=v)
+
     @field_serializer("cep")
-    def formatar_cep(self, v: str):
-        primeira_parte = v[:5]
-        segunda_parte = v[5:]
-        cep_pattern = r"^\d{5}-\d{3}$"
-        if re.match(pattern=cep_pattern, string=v):
-            return v
-        return f"{primeira_parte}-{segunda_parte}"
+    def serialize_cep(self, v: str) -> str:
+        return utils.Formatter.cep(cep=v)
 
-    @field_serializer("ativo")
-    def formatar_ativo(self, v: str):
-        return str.upper(v)
-
-    @field_serializer("principal")
-    def formatar_principal(self, v: str):
-        return str.upper(v)
-
-    @field_serializer("tipo_pessoa")
-    def formatar_tipo_pessoa(self, v: str):
-        return str.upper(v)
-
-    @field_serializer("lead")
-    def formatar_lead(self, v: str):
-        return str.upper(v)
+    @field_serializer("cnpj_cpf")
+    def serialize_cnpj_cpf(self, v: str) -> str:
+        return utils.Formatter.cnpj_cpf(cnpj_cpf=v)
 
 
 class LeadIn(BaseModel):
-    ativo: utils.enums.AtivoCod | None = Field(
-        default=utils.enums.AtivoCod.SIM,
-        max_length=1,
-        description="Indica se o lead esta ativo (S para Sim, N para Não).",
-        examples=[utils.enums.AtivoCod.SIM],
+    ativo: utils.AtivoCod | None = Field(
+        default=utils.AtivoCod.SIM,
+        min_length=1,  # S
+        max_length=1,  # S
+        description="Indica se o lead está ativo.",
+        examples=[utils.AtivoCod.SIM],
     )
-    principal: utils.enums.PrincipalCod | None = Field(
-        default=utils.enums.PrincipalCod.SIM,
-        max_length=1,
-        description="Indica se o lead é o principal (S para Sim, N para Não).",
-        examples=[utils.enums.PrincipalCod.SIM],
+    principal: utils.PrincipalCod | None = Field(
+        default=utils.PrincipalCod.SIM,
+        min_length=1,  # S
+        max_length=1,  # S
+        description="Indica se o lead é principal.",
+        examples=[utils.PrincipalCod.SIM],
     )
-    lead: utils.enums.LeadCod | None = Field(
-        default=utils.enums.LeadCod.SIM,
-        description="ID do tipo de contato.",
-        examples=[utils.enums.LeadCod.SIM],
+    lead: utils.LeadCod | None = Field(
+        default=utils.LeadCod.SIM,
+        min_length=1,  # S
+        max_length=1,  # S
+        description="Indica se é lead.",
+        examples=[utils.LeadCod.SIM],
     )
     tipo_pessoa: str | None = Field(
-        default=utils.enums.TipoPessoaCod.FISICA,
-        examples=[utils.enums.TipoPessoaCod.FISICA],
-        description="Tipo de pessoa (F para Física, J para Jurídica, E para Estrangeiro).",
+        default=utils.TipoPessoaCod.FISICA,
+        min_length=1,  # F
+        max_length=1,  # F
+        examples=[utils.TipoPessoaCod.FISICA],
+        description="Tipo de pessoa.",
     )
-    # Campo obrigatório para a API do IXC: nome
     nome: str = Field(
-        max_length=200,
-        description="Nome do potencial cliente associado ao lead.",
-        examples=["João"],
+        description="Nome do cliente.",
+        examples=["Nome do Cliente"],
     )
-    # Formato de data aceito pel API do IXC: dd/mm/aaaa
     data_nascimento: str = Field(
-        max_length=20,
-        description="Data de nascimento do cliente.",
-        examples=["01/01/2000"],
+        description="Data de nascimento.",
+        min_length=10,  # dd/mm/aaaa
+        max_length=10,  # dd/mm/aaaa
+        examples=["dd/mm/aaaa"],
     )
-    # Campo obrigatório para a API do IXC: id_filial
     id_filial: PositiveInt | None = Field(
-        default=1, description="ID da filial associada ao lead.", examples=[1]
+        default=utils.Default.ID_FILIAL,
+        description="ID da filial.",
+        examples=[utils.Default.ID_FILIAL],
     )
     fone_celular: str = Field(
-        max_length=20,
-        description="Número do celular do potencial cliente associado ao lead.",
+        description="Celular do cliente.",
+        min_length=11,  # 12934567890
+        max_length=15,  # (12) 93456-7890
         examples=["(12) 93456-7890"],
     )
-    # Campo obrigatório para a API do IXC: fone_whatsapp (ou qualquer outro telefone)
     fone_whatsapp: str = Field(
-        max_length=20,
-        description="Número do celular do potencial cliente associado ao lead.",
+        description="Celular do cliente.",
+        min_length=11,  # 12934567890
+        max_length=15,  # (12) 93456-7890
         examples=["(12) 93456-7890"],
     )
     cep: str | None = Field(
         default="44700-000",
-        min_length=8,
-        max_length=9,
-        description="CEP do potencial cliente associado ao lead.",
+        min_length=8,  # 12345678
+        max_length=9,  # 12345-678
+        description="CEP do cliente.",
         examples=["12345-678"],
     )
-    endereco: str = Field(
-        max_length=200,
-        description="Endereço do potencial cliente associado ao lead.",
-        examples=["Rua do Lead"],
-    )
+    endereco: str = Field(description="Rua do cliente.", examples=["Rua do cliente"])
     numero: str | PositiveInt | None = Field(
-        default="S/N",
-        description="Número da casa do potencial cliente associado ao lead.",
-        examples=["123"],
+        default="S/N", description="Número da casa do cliente.", examples=[42]
     )
     bairro: str = Field(
-        max_length=200,
-        description="Bairro do potencial cliente associado ao lead.",
-        examples=["Bairro do Lead"],
+        description="Bairro do cliente.", examples=["Bairro do cliente"]
     )
-    uf: PositiveInt | None = Field(default=10, description="UF do potencial cliente.")
+    uf: PositiveInt | None = Field(
+        default=utils.Default.ID_UF,
+        description="ID da UF.",
+        examples=[utils.Default.ID_UF],
+    )
     cnpj_cpf: str = Field(
-        max_length=30,
-        description="CNPJ ou CPF do potencial cliente associado ao lead.",
+        description="CNPJ ou CPF do cliente.",
+        min_length=11,  # 12345678900
+        max_length=18,  # 12.345.678/0001-90
         examples=["123.456.789-00"],
     )
     cidade: PositiveInt | None = Field(
-        utils.Default.ID_CIDADE_JACOBINA,
-        description="ID da cidade associada ao lead.",
-        examples=[utils.Default.ID_CIDADE_JACOBINA],
+        default=utils.Default.ID_CIDADE_JAC,
+        description="ID da cidade.",
+        examples=[utils.Default.ID_CIDADE_JAC],
     )
     id_vd_contrato: PositiveInt | None = Field(
-        utils.Default.ID_VD_CONTRATO,
-        description="ID do plano de contrato associado ao lead.",
+        default=utils.Default.ID_VD_CONTRATO,
+        description="ID do plano.",
         examples=[utils.Default.ID_VD_CONTRATO],
     )
     id_responsavel: PositiveInt | None = Field(
-        utils.Default.ID_RESPONSAVEL_ARCEUS,
-        description="ID do responsável técnico associado ao lead.",
+        default=utils.Default.ID_RESPONSAVEL_ARCEUS,
+        description="ID do responsável técnico.",
         examples=[utils.Default.ID_RESPONSAVEL_ARCEUS],
     )
     email: EmailStr = Field(
-        description="Email do potencial cliente associado ao lead.",
-        examples=["exemplo@examplo.com"],
+        description="E-mail do cliente.", examples=["email@email.com"]
     )
     id_candidato_tipo: PositiveInt | None = Field(
         default=utils.Default.ID_CANAL_VENDA,
-        description="Canal de venda",
+        description="Canal de venda.",
         examples=[utils.Default.ID_CANAL_VENDA],
     )
     obs: str | None = Field(
         default=None,
-        description="Observação associada ao lead.",
-        examples=["Observação associada ao lead."],
+        description="Observação do lead.",
+        examples=["Observação do lead."],
     )
 
+    @field_serializer("cnpj_cpf")
+    def serialize_cnpj_cpf(self, v: str) -> str:
+        return utils.Formatter.cnpj_cpf(cnpj_cpf=v)
+
+    @field_serializer("fone_whatsapp")
+    def serialize_fone_whatsapp(self, v: str) -> str:
+        return utils.Formatter.cell(cell=v)
+
+    @field_serializer("fone_celular")
+    def serialize_fone_celular(self, v: str) -> str:
+        return utils.Formatter.cell(cell=v)
+
     @field_serializer("cep")
-    def formatar_cep(self, v: str):
-        primeira_parte = v[:5]
-        segunda_parte = v[5:]
-        cep_pattern = r"^\d{5}-\d{3}$"
-        if re.match(pattern=cep_pattern, string=v):
-            return v
-        return f"{primeira_parte}-{segunda_parte}"
+    def serialize_cep(self, v: str) -> str:
+        return utils.Formatter.cep(cep=v)
 
-    @field_serializer("ativo")
-    def formatar_ativo(self, v: str):
-        return str.upper(v)
-
-    @field_serializer("principal")
-    def formatar_principal(self, v: str):
-        return str.upper(v)
-
-    @field_serializer("tipo_pessoa")
-    def formatar_tipo_pessoa(self, v: str):
-        return str.upper(v)
-
-    @field_serializer("lead")
-    def formatar_lead(self, v: str):
-        return str.upper(v)
+    @field_serializer("data_nascimento")
+    def serialize_data_nascimento(self, v: str) -> str:
+        return utils.Formatter.data(data=v)
 
 
 class LeadCreate(BaseModel):
-    id: PositiveInt = Field(description="ID do lead criado.", examples=[12345])
+    id: PositiveInt = Field(description="ID do lead criado.", examples=[42])
