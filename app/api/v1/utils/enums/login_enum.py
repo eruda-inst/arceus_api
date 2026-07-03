@@ -13,7 +13,7 @@ class StatusConexaoCod(StrEnum):
     DESCONECTADO = "N"
 
 
-class StatusONURot(StrEnum):
+class StatusOnuRot(StrEnum):
     SATURADO = "Saturado"
     EXCELENTE = "Excelente"
     BOM = "Bom"

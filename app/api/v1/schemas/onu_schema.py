@@ -4,20 +4,20 @@ from pydantic import BaseModel, field_serializer, Field
 
 class StatusOnuOut(BaseModel):
     status_onu: float = Field(
-        description="Status da ONU.", examples=[utils.StatusONURot.EXCELENTE]
+        description="Status da ONU.", examples=[utils.StatusOnuRot.EXCELENTE]
     )
 
     @field_serializer("status_onu")
     def serialize_status_onu(self, v: float):
         if v >= -15:
-            return utils.StatusONURot.SATURADO
+            return utils.StatusOnuRot.SATURADO
         elif v >= -21:
-            return utils.StatusONURot.EXCELENTE
+            return utils.StatusOnuRot.EXCELENTE
         elif v >= -26:
-            return utils.StatusONURot.BOM
+            return utils.StatusOnuRot.BOM
         elif v >= -29:
-            return utils.StatusONURot.REGULAR
+            return utils.StatusOnuRot.REGULAR
         elif v >= -31:
-            return utils.StatusONURot.RUIM
+            return utils.StatusOnuRot.RUIM
         else:
-            return utils.StatusONURot.PESSIMO
+            return utils.StatusOnuRot.PESSIMO

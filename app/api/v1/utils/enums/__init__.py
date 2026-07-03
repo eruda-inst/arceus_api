@@ -1,6 +1,6 @@
 from .default_enum import Default
 from .sortorder_enum import SortOrder
-from .login_enum import StatusConexaoCod, StatusConexaoRot, StatusONURot
+from .login_enum import StatusConexaoCod, StatusConexaoRot, StatusOnuRot
 from .contrato_enum import (
     StatusContratoRot,
     StatusContratoCod,
@@ -30,7 +30,7 @@ __all__ = [
     "SortOrder",
     "StatusConexaoCod",
     "StatusConexaoRot",
-    "StatusONURot",
+    "StatusOnuRot",
     "StatusContratoRot",
     "StatusContratoCod",
     "StatusInternetCod",
