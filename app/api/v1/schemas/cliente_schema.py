@@ -1,21 +1,22 @@
-from pydantic import BaseModel, Field
+from .. import utils
+from pydantic import BaseModel, Field, field_serializer
 
 
 class ContatoOut(BaseModel):
     telefone_celular: str = Field(
-        description="Número do celular do cliente.", examples=["(12) 93456-7890"]
+        description="Celular do cliente.",
+        min_length=11,  # 12934567890
+        max_length=15,  # (12) 93456-7890
+        examples=["(12) 93456-7890"],
     )
+
+    @field_serializer("telefone_celular")
+    def serialize_telefone_celular(self, v: str) -> str:
+        return utils.Formatter.cell(cell=v)
 
 
 class ClienteExisteOut(BaseModel):
     cliente_existe: bool = Field(description="Indica se o cliente existe no Opa.")
-
-
-class CredencialUpdate(BaseModel):
-    senha: str = Field(
-        description="Senha da central de acesso do assinante, a ser atualizada.",
-        examples=["12345678"],
-    )
 
 
 class CredencialOut(BaseModel):

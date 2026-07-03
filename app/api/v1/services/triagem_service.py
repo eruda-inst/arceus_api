@@ -7,32 +7,35 @@ from fastapi import HTTPException, status
 class TriagemService(service_service.Service):
     @classmethod
     async def get_contato_cliente(
-        cls, protocolo: str | None = None, cnpj_cpf: str | None = None
+        cls, protocolo: str | None, cnpj_cpf: str | None
     ) -> schemas.ContatoOut:
         try:
             id_cliente = await cls.get_id_cliente_ixc(
                 protocolo=protocolo, cnpj_cpf=cnpj_cpf
             )
 
+            # --- Cliente ---
+            endpoint = "cliente"
             grid_param = [{"TB": "cliente.id", "OP": "=", "P": str(id_cliente)}]
-
-            res = await clients.IXCCliente.get(
-                endpoint="cliente", grid_param=grid_param
-            )
-            if not res.get("registros"):
+            res = await clients.IXCCliente.get(endpoint=endpoint, grid_param=grid_param)
+            regs = res.get("registros", [])
+            if not regs:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
                     detail="Cliente não encontrado.",
                 )
+            cliente = regs[0]
 
-            contato = res["registros"][0]["telefone_celular"]
-            return schemas.ContatoOut(telefone_celular=contato)
+            # --- Contato ---
+            telefone_celular = cliente["telefone_celular"]
+
+            return schemas.ContatoOut(telefone_celular=telefone_celular)
         except HTTPException:
             raise
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno: {str(e)}",
+                detail=f"Erro interno: {e}",
             )
 
     @classmethod
@@ -41,50 +44,41 @@ class TriagemService(service_service.Service):
         telefone_celular: str,
         protocolo: str | None = None,
         cnpj_cpf: str | None = None,
-    ) -> schemas.MensagemOut:
+    ) -> schemas.ContatoOut:
         try:
             id_cliente = await cls.get_id_cliente_ixc(
                 protocolo=protocolo, cnpj_cpf=cnpj_cpf
             )
 
+            # --- Cliente ---
+            endpoint = "cliente"
             grid_param = [{"TB": "cliente.id", "OP": "=", "P": str(id_cliente)}]
-
-            res = await clients.IXCCliente.get(
-                endpoint="cliente", grid_param=grid_param
-            )
-
-            if not res.get("registros"):
+            res = await clients.IXCCliente.get(endpoint=endpoint, grid_param=grid_param)
+            regs = res.get("registros", [])
+            if not regs:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
                     detail="Cliente não encontrado.",
                 )
+            cliente_antigo = regs[0]
 
-            cliente_antigo = res["registros"][0]
-
-            cliente_atualizado: Any = {
+            # --- Cliente atualizado ---
+            cliente_atualizado: dict[str, Any] = {
                 **cliente_antigo,
                 "telefone_celular": utils.Formatter.cell(cell=telefone_celular),
             }
-
-            if "cep" in cliente_atualizado:
-                cliente_atualizado["cep"] = utils.Formatter.cep(
-                    cep=cliente_atualizado["cep"]
-                )
-
             del cliente_atualizado["id"]
 
-            res = await clients.IXCCliente.put(
-                endpoint="cliente", id=id_cliente, payload=cliente_atualizado
+            # --- Atualiza cliente ---
+            await clients.IXCCliente.put(
+                endpoint=endpoint, id=id_cliente, payload=cliente_atualizado
             )
 
-            mensagem = "Nenhuma mensagem retornada."
-            mensagem = res.get("message")
-
-            return schemas.MensagemOut(mensagem=mensagem)
+            return schemas.ContatoOut(telefone_celular=telefone_celular)
         except HTTPException:
             raise
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno: {str(e)}",
+                detail=f"Erro interno: {e}",
             )
