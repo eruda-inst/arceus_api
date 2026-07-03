@@ -71,7 +71,7 @@ class ComercialService(service_service.Service):
             if not regs:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
-                    detail="Nenhum contrato encontrado.",
+                    detail="Nenhum contrato ativo encontrado.",
                 )
             total = res.get("total", 0)
             contratos = regs
