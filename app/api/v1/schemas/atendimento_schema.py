@@ -4,13 +4,13 @@ from pydantic import BaseModel, Field, PositiveInt, field_serializer
 
 
 class AtendimentoCreate(BaseModel):
-    id: PositiveInt = Field(description="ID do atendimento.", examples=[42])
+    id: PositiveInt = Field(description="ID do atendimento.", examples=[1])
 
 
 class AtendimentoIn(BaseModel):
-    id_login: PositiveInt = Field(description="ID de login.", examples=[42])
-    id_assunto: PositiveInt = Field(description="ID do assunto.", examples=[42])
-    id_cliente: PositiveInt = Field(description="ID do cliente.", examples=[42])
+    id_login: PositiveInt = Field(description="ID de login.", examples=[1])
+    id_assunto: PositiveInt = Field(description="ID do assunto.", examples=[12])
+    id_cliente: PositiveInt = Field(description="ID do cliente.", examples=[123])
     menssagem: str = Field(
         description="Mensagem do atendimento.", examples=["Mensagem do atendimento"]
     )
@@ -42,7 +42,7 @@ class AtendimentoIn(BaseModel):
         description="Setor do atendimento.",
         examples=[utils.Default.ID_TICKET_SETOR],
     )
-    id_contrato: PositiveInt = Field(description="ID do contrato.", examples=[42])
+    id_contrato: PositiveInt = Field(description="ID do contrato.", examples=[1234])
     id_responsavel_tecnico: PositiveInt | None = Field(
         default=utils.Default.ID_RESPONSAVEL_ARCEUS,
         description="ID do responsável técnico.",
@@ -51,8 +51,8 @@ class AtendimentoIn(BaseModel):
 
 
 class Atendimento(BaseModel):
-    id: PositiveInt = Field(description="ID do atendimento.", examples=[42])
-    id_assunto: PositiveInt = Field(description="ID do assunto.", examples=[42])
+    id: PositiveInt = Field(description="ID do atendimento.", examples=[1])
+    id_assunto: PositiveInt = Field(description="ID do assunto.", examples=[12])
     status: utils.SuStatusCod = Field(
         description="Status do atendimento.", examples=[utils.SuStatusRot.NOVO]
     )
