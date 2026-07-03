@@ -27,7 +27,7 @@ class OpaCliente:
         except httpx.RequestError as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro na API do OPA: {str(e)}",
+                detail=f"Erro na API do OPA: {e}",
             )
 
     @classmethod

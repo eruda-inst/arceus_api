@@ -32,7 +32,7 @@ class SeteAZCliente:
         except httpx.HTTPStatusError as e:
             return {"error": f"API request failed with status {e.response.status_code}"}
         except httpx.RequestError as e:
-            return {"error": f"An error occurred while making the request: {str(e)}"}
+            return {"error": f"An error occurred while making the request: {e}"}
 
     @classmethod
     async def aclose(cls) -> None:

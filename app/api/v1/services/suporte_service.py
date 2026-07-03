@@ -111,7 +111,7 @@ class SuporteService(service_service.Service):
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno ao processar solicitação: {e}",
+                detail=f"Erro interno: {e}",
             )
 
     @staticmethod
@@ -135,7 +135,7 @@ class SuporteService(service_service.Service):
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno ao processar solicitação: {e}",
+                detail=f"Erro interno: {e}",
             )
 
     # Isto precisa ser limpo?
@@ -207,7 +207,7 @@ class SuporteService(service_service.Service):
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno ao processar solicitação: {e}",
+                detail=f"Erro interno: {e}",
             )
 
     @staticmethod
@@ -231,7 +231,7 @@ class SuporteService(service_service.Service):
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno ao processar solicitação: {e}",
+                detail=f"Erro interno: {e}",
             )
 
     @staticmethod
@@ -292,7 +292,7 @@ class SuporteService(service_service.Service):
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno ao processar solicitação: {e}",
+                detail=f"Erro interno: {e}",
             )
 
     @staticmethod
@@ -310,7 +310,7 @@ class SuporteService(service_service.Service):
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno ao processar solicitação: {e}",
+                detail=f"Erro interno: {e}",
             )
 
     @staticmethod
@@ -403,5 +403,5 @@ class SuporteService(service_service.Service):
         except Exception:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Erro interno ao processar solicitação.",
+                detail="Erro interno.",
             )

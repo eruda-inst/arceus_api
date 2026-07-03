@@ -110,5 +110,5 @@ class UpgradeService:
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno ao processar solicitação: {e}",
+                detail=f"Erro interno: {e}",
             )

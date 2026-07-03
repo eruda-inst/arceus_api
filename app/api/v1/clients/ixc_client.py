@@ -52,7 +52,7 @@ class IXCCliente:
                 detail=f"Erro retornado pelo IXC: {e.response.text}",
             ) from e
         except httpx.RequestError as e:
-            detail = f"Falha na comunicação com o serviço IXC: {str(e)}"
+            detail = f"Falha na comunicação com o serviço IXC: {e}"
 
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
