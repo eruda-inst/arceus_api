@@ -1,5 +1,5 @@
-from . import misc_schema
-from app.api.v1 import utils
+from . import Meta
+from .. import utils
 from pydantic import BaseModel, Field, PositiveInt, field_serializer
 
 
@@ -26,30 +26,22 @@ class StatusInternetOut(BaseModel):
 
 
 class Contrato(BaseModel):
-    id: PositiveInt = Field(description="ID único do contrato.", examples=[123])
-    id_login: PositiveInt = Field(
-        description="ID de login associado ao contrato.", examples=[456]
-    )
-    id_cliente: PositiveInt = Field(
-        description="ID do cliente associado ao contrato.", examples=[789]
-    )
+    id: PositiveInt = Field(description="ID do contrato.", examples=[1])
+    id_login: PositiveInt = Field(description="ID do login.", examples=[12])
+    id_cliente: PositiveInt = Field(description="ID do cliente.", examples=[123])
     nome_cliente: str = Field(
-        description="Nome do cliente.", examples=["Nome do Cliente"]
+        description="Nome do cliente.", examples=["Nome do cliente"]
     )
     status: utils.StatusContratoCod = Field(
-        description="Status atual do contrato.",
+        description="Status do contrato.",
         examples=[utils.StatusContratoRot.PRE_CONTRATO],
     )
-    contrato: str = Field(
-        max_length=100,
-        description="Número do contrato.",
-        examples=["NEWNET PADRAO - 250MB - 06/2025"],
-    )
-    valor: float = Field(description="Valor do contrato.", examples=[99.99])
+    contrato: str = Field(description="Nome do plano.", examples=["Nome do plano"])
+    valor: float = Field(description="Valor do plano.", examples=[12.34])
     data_vencimento: str = Field(
-        description="Data de vencimento do contrato.", examples=["2025-12-31"]
+        description="Data de vencimento.", examples=["YYYY-MM-AA"]
     )
-    mac_onu: str = Field(description="MAC Address da ONU.", examples=["AB1230001234"])
+    mac_onu: str = Field(description="MAC da ONU.", examples=["AB1..."])
 
     @field_serializer("status")
     def serialize_status(self, v: utils.StatusContratoCod) -> utils.StatusContratoRot:
@@ -69,29 +61,24 @@ class Contrato(BaseModel):
 
 class ContratoListOut(BaseModel):
     data: list[Contrato]
-    meta: misc_schema.Meta
+    meta: Meta
 
 
 class ComercialContrato(BaseModel):
-    id: PositiveInt = Field(description="ID único do contrato.", examples=[1234])
-    contrato: str = Field(
-        max_length=100,
-        description="Número do contrato.",
-        examples=["NEWNET PADRAO - 250MB - 06/2025"],
-    )
+    id: PositiveInt = Field(description="ID do contrato.", examples=[1])
+    contrato: str = Field(description="Nome do plano.", examples=["Nome do plano"])
     nome_cliente: str = Field(
-        description="Nome do cliente.", examples=["Nome do Cliente"]
+        description="Nome do cliente.", examples=["Nome do cliente"]
     )
-    valor: float = Field(description="Valor do contrato.", examples=[99.99])
+    valor: float = Field(description="Valor do plano.", examples=[12.34])
     status_acesso: utils.StatusInternetCod = Field(
-        description="Status do acesso do contrato.",
-        examples=[utils.StatusInternetRot.ATIVO],
+        description="Status do acesso.", examples=[utils.StatusInternetRot.ATIVO]
     )
     data_vencimento: str = Field(
-        description="Data de vencimento do contrato.", examples=["2025-12-31"]
+        description="Data de vencimento.", examples=["YYYY-MM-AA"]
     )
-    id_cliente: PositiveInt = Field(description="ID do cliente.", examples=[12345])
-    id_login: PositiveInt = Field(description="ID de login.", examples=[123456])
+    id_cliente: PositiveInt = Field(description="ID do cliente.", examples=[12])
+    id_login: PositiveInt = Field(description="ID do login.", examples=[123])
 
     @field_serializer("status_acesso")
     def serialize_status(self, v: utils.StatusInternetCod) -> utils.StatusInternetRot:
@@ -112,10 +99,10 @@ class ComercialContrato(BaseModel):
 
 class ComercialContratoListOut(BaseModel):
     data: list[ComercialContrato]
-    meta: misc_schema.Meta
+    meta: Meta
 
 
 class VilaContratoOut(BaseModel):
     id: PositiveInt = Field(description="ID do contrato.", examples=[1])
-    id_login: PositiveInt = Field(description="ID do login do contrato.", examples=[12])
+    id_login: PositiveInt = Field(description="ID do login.", examples=[12])
     id_cliente: PositiveInt = Field(description="ID do cliente.", examples=[123])
