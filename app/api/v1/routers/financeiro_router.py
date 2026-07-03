@@ -4,25 +4,26 @@ from fastapi import APIRouter, Query, Path, Body
 
 financeiro_router = APIRouter(prefix="/financeiro", tags=["Financeiro"])
 
+Protocolo = Annotated[
+    str,
+    Query(min_length=12, max_length=12, description="Protocolo de atendimento."),
+]
+Pagina = Annotated[int, Query(ge=1, description="Número da página.")]
+ItensPorPagina = Annotated[int, Query(ge=1, description="Itens por página.")]
+CnpjCpf = Annotated[str, Query(description="CPF ou CNPJ do cliente.")]
+
 
 @financeiro_router.get(
-    path="/faturas_abertas", summary="Obtém faturas associadas a um cliente."
+    path="/faturas_abertas", summary="Obtém faturas abertas de um cliente."
 )
 async def get_faturas_abertas(
-    protocolo: Annotated[
-        str | None,
-        Query(min_length=12, max_length=12, description="Protocolo de atendimento."),
-    ] = None,
-    cnpj_cpf: Annotated[
-        str | None, Query(description="CPF ou CNPJ do cliente.")
-    ] = None,
-    pagina: Annotated[int | None, Query(ge=1, description="Número da página.")] = 1,
-    itens_por_pagina: Annotated[
-        int | None, Query(ge=1, description="Itens por página.")
-    ] = 15,
+    protocolo: Protocolo | None = None,
+    cnpj_cpf: CnpjCpf | None = None,
+    pagina: Pagina | None = 1,
+    itens_por_pagina: ItensPorPagina | None = 15,
 ) -> schemas.FaturaAbertaListOut:
     """
-    Obtém faturas abertas de todos os contratos de um cliente, através de protocolo de atendimento ou CPF/CNPJ.
+    Obtém faturas abertas de um cliente, através de protocolo de atendimento ou CPF/CNPJ.
     """
     return await services.FinanceiroService.get_faturas_abertas(
         protocolo=protocolo,
@@ -34,20 +35,13 @@ async def get_faturas_abertas(
 
 @financeiro_router.get(path="/contratos", summary="Obtém contratos de um cliente.")
 async def get_contratos(
-    protocolo: Annotated[
-        str | None,
-        Query(min_length=12, max_length=12, description="Protocolo de atendimento."),
-    ] = None,
-    cnpj_cpf: Annotated[
-        str | None, Query(description="CPF ou CNPJ do cliente.")
-    ] = None,
-    pagina: Annotated[int | None, Query(ge=1, description="Número da página.")] = 1,
-    itens_por_pagina: Annotated[
-        int | None, Query(ge=1, description="Itens por página.")
-    ] = 10,
+    protocolo: Protocolo | None = None,
+    cnpj_cpf: CnpjCpf | None = None,
+    pagina: Pagina | None = 1,
+    itens_por_pagina: ItensPorPagina | None = 10,
 ) -> schemas.ComercialContratoListOut:
     """
-    Obtém contratos de todos os clientes, atravé de protocolo de atendimento ou CPF/CNPJ.
+    Obtém contratos de um cliente, através de protocolo de atendimento ou CPF/CNPJ.
     """
     return await services.ComercialService.get_contratos(
         protocolo=protocolo,
@@ -59,13 +53,13 @@ async def get_contratos(
 
 @financeiro_router.post(
     path="/desbloqueio_em_confianca",
-    summary="Realiza desbloqueio em confiança de um determinado contrato.",
+    summary="Realiza desbloqueio em confiança de um cliente.",
 )
 async def post_desbloqueio_em_confianca(
     id_contrato: Annotated[int, Query(ge=1, description="ID do contrato.")],
 ) -> schemas.MensagemOut:
     """
-    Realiza desbloqueio em confiança de um determinado contrato, atravé do ID do contrato.
+    Realiza desbloqueio em confiança de um cliente, através do ID do contrato.
     """
     return await services.FinanceiroService.post_desbloqueio_em_confianca(
         id_contrato=id_contrato,
@@ -77,9 +71,9 @@ async def post_desbloqueio_em_confianca(
 )
 async def get_linha_digitavel(
     id_fatura: Annotated[int, Path(ge=1, description="ID da fatura.")],
-) -> schemas.LinhaDigitavelBase:
+) -> schemas.LinhaDigitavelOut:
     """
-    Obtém linha digitável de uma fatura, atravé do ID da fatura.
+    Obtém linha digitável de uma fatura, através do ID dela.
     """
     return await services.FinanceiroService.get_linha_digitavel(id_fatura=id_fatura)
 
@@ -89,26 +83,20 @@ async def get_chave_pix(
     id_fatura: Annotated[int, Query(ge=1, description="ID da fatura.")],
 ) -> schemas.ChavePixOut:
     """
-    Obtém chave pix de uma fatura, atravé do ID da fatura.
+    Obtém chave pix de uma fatura, através do ID dela.
     """
     return await services.FinanceiroService.get_chave_pix(id_fatura=id_fatura)
 
 
 @financeiro_router.get(
     path="/credenciais",
-    summary="Obtém credenciais de acesso à central do assinante de um cliente.",
+    summary="Obtém credenciais da central do assinante de um cliente.",
 )
 async def get_credenciais(
-    protocolo: Annotated[
-        str | None,
-        Query(min_length=12, max_length=12, description="Protocolo de atendimento."),
-    ] = None,
-    cnpj_cpf: Annotated[
-        str | None, Query(description="CPF ou CNPJ do cliente.")
-    ] = None,
+    protocolo: Protocolo | None = None, cnpj_cpf: CnpjCpf | None = None
 ) -> schemas.CredencialOut:
     """
-    Obtém credenciais de acesso à central do assinante de um cliente, atravé de protocolo de atendimento.
+    Obtém credenciais da central do assinante de um cliente, através de protocolo de atendimento ou CPF/CNPJ.
     """
     return await services.FinanceiroService.get_credenciais(
         protocolo=protocolo, cnpj_cpf=cnpj_cpf
@@ -118,17 +106,15 @@ async def get_credenciais(
 # Por razões de limitações na plataforma opa, o verbo deve ser put, ao invés de patch
 @financeiro_router.put(
     path="/credenciais/{id_cliente}",
-    summary="Atualiza credenciais de acesso à central do assinante de um cliente.",
+    summary="Atualiza senha da central do assinante de um cliente.",
 )
 async def put_credenciais(
     id_cliente: Annotated[int, Path(ge=1, description="ID do cliente.")],
-    credenciais: Annotated[
-        schemas.CredencialUpdate, Body(description="Credenciais a serem atualizadas.")
-    ],
-) -> schemas.MensagemOut:
+    senha: Annotated[str, Body(embed=True, description="Nova senha.")],
+) -> schemas.CredencialOut:
     """
-    Atualiza credenciais de acesso à central do assinante de um cliente, atravé do ID do cliente.
+    Atualiza senha da central do assinante de um cliente, através do ID do cliente.
     """
     return await services.FinanceiroService.put_credenciais(
-        id_cliente=id_cliente, credenciais=credenciais
+        id_cliente=id_cliente, senha=senha
     )

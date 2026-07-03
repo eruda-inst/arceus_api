@@ -1,9 +1,8 @@
-from typing import List
-from . import misc_schema
+from . import Meta
 from pydantic import BaseModel, Field, PositiveInt, NonNegativeInt
 
 
-class LinhaDigitavelBase(BaseModel):
+class LinhaDigitavelOut(BaseModel):
     linha_digitavel: str = Field(
         min_length=47,
         max_length=47,
@@ -13,22 +12,20 @@ class LinhaDigitavelBase(BaseModel):
 
 
 class FaturaAberta(BaseModel):
-    id: PositiveInt = Field(description="ID da fatura.", examples=[123])
+    id: PositiveInt = Field(description="ID da fatura.", examples=[1])
     data_vencimento: str = Field(
-        max_length=10,
+        min_length=10,  # dd/mm/aaaa
+        max_length=10,  # dd/mm/aaaa
         description="Data de vencimento da fatura.",
-        examples=["2025-12-31"],
+        examples=["dd/mm/aaaa"],
     )
-    preco: float = Field(description="Preço da fatura.", examples=[99.99])
+    preco: float = Field(ge=0.00, description="Preço da fatura.", examples=[12.34])
     id_contrato: NonNegativeInt = Field(
-        description="ID de contrato associado à fatura", examples=[1234]
+        description="ID de contrato associado à fatura", examples=[12]
     )
-    contrato: str = Field(
-        description="Nome do contrato associado à fatura.",
-        examples=["NEWNET PADRAO - 250MB - 06/2025"],
-    )
+    contrato: str = Field(description="Nome do plano.", examples=["Nome do plano"])
 
 
 class FaturaAbertaListOut(BaseModel):
-    data: List[FaturaAberta]
-    meta: misc_schema.Meta
+    data: list[FaturaAberta]
+    meta: Meta

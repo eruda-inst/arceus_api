@@ -9,7 +9,6 @@ from .atendimento_schema import (
 from .onu_schema import StatusOnuOut
 from .cliente_schema import (
     ClienteExisteOut,
-    CredencialBase,
     CredencialOut,
     CredencialUpdate,
     ContatoOut,
@@ -25,7 +24,7 @@ from .contrato_schema import (
     VilaContratoOut,
 )
 from .pix_schema import ChavePixOut
-from .fatura_schema import FaturaAberta, FaturaAbertaListOut, LinhaDigitavelBase
+from .fatura_schema import FaturaAberta, FaturaAbertaListOut, LinhaDigitavelOut
 from .plano_schema import PlanoSugeridoOut, PlanoSugeridoListOut
 
 __all__ = [
@@ -48,11 +47,10 @@ __all__ = [
     "StatusOnuOut",
     "FaturaAbertaListOut",
     "FaturaAberta",
-    "LinhaDigitavelBase",
+    "LinhaDigitavelOut",
     "ChavePixOut",
     "CredencialUpdate",
     "CredencialOut",
-    "CredencialBase",
     "ContatoOut",
     "IndexOut",
     "ClienteExisteOut",

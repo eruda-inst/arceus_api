@@ -8,10 +8,11 @@ from fastapi import HTTPException, status
 
 class FinanceiroService(service_service.Service):
     @staticmethod
-    async def get_ultima_fatura_paga(
+    async def _get_ultima_fatura_paga(
         id_contrato: PositiveInt,
     ) -> dict[str, Any] | None:
         try:
+            # --- Faturas pagas ---
             endpoint = "fn_areceber"
             grid_param = [
                 {"TB": "fn_areceber.id_contrato", "OP": "=", "P": str(id_contrato)},
@@ -22,15 +23,16 @@ class FinanceiroService(service_service.Service):
                 grid_param=grid_param,
                 sort_order=utils.SortOrder.DESC,
             )
-
             regs = res.get("registros", [])
-
             if not regs:
                 return None
+            faturas_pagas = regs
 
-            ultimas_faturas_pagas = regs[:3]
+            # --- Ultima fatura paga ---
+            ultimas_faturas_pagas = faturas_pagas[:3]
             ultima_fatura_paga = ultimas_faturas_pagas[0]
 
+            # --- Valor mais frequente ---
             valores = [float(u["valor"]) for u in ultimas_faturas_pagas]
             valor_mais_frequente = statistics.mode(valores)
 
@@ -47,10 +49,11 @@ class FinanceiroService(service_service.Service):
             )
 
     @classmethod
-    async def get_proxima_fatura_aberta(
+    async def _get_proxima_fatura_aberta(
         cls, id_contrato: PositiveInt
     ) -> dict[str, Any] | None:
         try:
+            # --- Faturas abertas ---
             endpoint = "fn_areceber"
             grid_param = [
                 {"TB": "fn_areceber.id_contrato", "OP": "=", "P": str(id_contrato)},
@@ -58,15 +61,16 @@ class FinanceiroService(service_service.Service):
                 {"TB": "fn_areceber.status", "OP": "!=", "P": "C"},
             ]
             res = await clients.IXCCliente.get(endpoint=endpoint, grid_param=grid_param)
-
             regs = res.get("registros", [])
-
             if not regs:
                 return None
+            faturas_abertas = regs
 
-            proximas_faturas_abertas = regs[:3]
+            # --- Proxima fatura aberta ---
+            proximas_faturas_abertas = faturas_abertas[:3]
             proxima_fatura_aberta = proximas_faturas_abertas[0]
 
+            # --- Valor mais frequente ---
             valores = [float(p["valor"]) for p in proximas_faturas_abertas]
             valor_mais_frequente = statistics.mode(valores)
 
@@ -87,20 +91,18 @@ class FinanceiroService(service_service.Service):
         cls, id_contrato: PositiveInt
     ) -> dict[str, Any] | None:
         try:
-            proxima_fatura_aberta = await cls.get_proxima_fatura_aberta(
+            proxima_fatura_aberta = await cls._get_proxima_fatura_aberta(
                 id_contrato=id_contrato
             )
 
             if proxima_fatura_aberta:
                 return proxima_fatura_aberta
 
-            ultima_fatura_paga = await cls.get_ultima_fatura_paga(
+            ultima_fatura_paga = await cls._get_ultima_fatura_paga(
                 id_contrato=id_contrato
             )
 
             return ultima_fatura_paga
-        except HTTPException:
-            raise
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -120,63 +122,67 @@ class FinanceiroService(service_service.Service):
                 protocolo=protocolo, cnpj_cpf=cnpj_cpf
             )
 
+            # --- Faturas Abertas ---
+            endpoint = "fn_areceber"
             grid_param = [
                 {"TB": "fn_areceber.id_cliente", "OP": "=", "P": str(id_cliente)},
                 {"TB": "fn_areceber.status", "OP": "!=", "P": "R"},
                 {"TB": "fn_areceber.status", "OP": "!=", "P": "C"},
             ]
-
             res = await clients.IXCCliente.get(
-                endpoint="fn_areceber",
+                endpoint=endpoint,
                 grid_param=grid_param,
                 pagina=pagina,
                 itens_por_pagina=itens_por_pagina,
             )
-
-            if not res.get("registros"):
+            regs = res.get("registros", [])
+            if not regs:
                 raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND, detail="Cliente sem faturas."
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Faturas abertas não encontradas.",
                 )
+            faturas_abertas = regs
+            total = res.get("total", 0)
 
-            faturas_abertas = res["registros"]
+            faturas_abertas_parciais: list[schemas.FaturaAberta] = []
 
-            faturas_abertas_formatadas: Any = []
-
+            # --- Iteração entre faturas abertas ---
             for fatura_aberta in faturas_abertas:
+                # --- Contrato ---
                 id_contrato = fatura_aberta["id_contrato"]
+                endpoint = "cliente_contrato"
                 grid_param = [
                     {"TB": "cliente_contrato.id", "OP": "=", "P": str(id_contrato)}
                 ]
-                endpoint = "cliente_contrato"
-                contrato_res = await clients.IXCCliente.get(
+                res = await clients.IXCCliente.get(
                     endpoint=endpoint, grid_param=grid_param
                 )
-                contrato = (
-                    contrato_res["registros"][0]["contrato"]
-                    if contrato_res.get("registros")
-                    else "N/A"
-                )
-                faturas_abertas_formatadas.append(
-                    {
-                        "id": fatura_aberta["id"],
-                        "id_contrato": fatura_aberta["id_contrato"],
-                        "data_vencimento": fatura_aberta["data_vencimento"],
-                        "preco": fatura_aberta["valor"],
-                        "contrato": contrato,
-                    }
-                )
+                regs = res.get("registros", [])
+                if not regs:
+                    raise HTTPException(
+                        status_code=status.HTTP_404_NOT_FOUND,
+                        detail="Contrato não encontrado.",
+                    )
+                contrato = regs[0]
 
-            total = int(res.get("total", 0))
-
-            meta = schemas.Meta(
-                total_itens=total,
-                pagina_atual=pagina,
-                itens_por_pagina=itens_por_pagina,
-            )
+                # --- Faturas abertas parciais ---
+                faturas_abertas_parciais.append(
+                    schemas.FaturaAberta(
+                        id=fatura_aberta["id"],
+                        contrato=contrato["contrato"],
+                        data_vencimento=fatura_aberta["data_vencimento"],
+                        id_contrato=contrato["id"],
+                        preco=fatura_aberta["valor"],
+                    )
+                )
 
             return schemas.FaturaAbertaListOut(
-                data=[schemas.FaturaAberta(**f) for f in faturas_abertas_formatadas],
-                meta=meta,
+                data=faturas_abertas_parciais,
+                meta=schemas.Meta(
+                    total_itens=total,
+                    pagina_atual=pagina,
+                    itens_por_pagina=itens_por_pagina,
+                ),
             )
         except HTTPException:
             raise
@@ -191,14 +197,13 @@ class FinanceiroService(service_service.Service):
         id_contrato: PositiveInt,
     ) -> schemas.MensagemOut:
         try:
+            # --- Desbloqueio em confiança ---
             endpoint = "desbloqueio_confianca"
             payload = {"id": id_contrato}
             res = await clients.IXCCliente.post(endpoint=endpoint, payload=payload)
-            mensagem = "Nenhuma mensagem retornada."
-            mensagem = res.get("message")
+            mensagem = res.get("message", "Nenhuma mensagem retornada.")
+
             return schemas.MensagemOut(mensagem=mensagem)
-        except HTTPException:
-            raise
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -206,25 +211,29 @@ class FinanceiroService(service_service.Service):
             )
 
     @staticmethod
-    async def get_linha_digitavel(id_fatura: PositiveInt) -> schemas.LinhaDigitavelBase:
+    async def get_linha_digitavel(id_fatura: PositiveInt) -> schemas.LinhaDigitavelOut:
         try:
-            grid_param = [{"TB": "fn_areceber.id", "OP": "=", "P": str(id_fatura)}]
+            # -- Fatura ---
             endpoint = "fn_areceber"
+            grid_param = [{"TB": "fn_areceber.id", "OP": "=", "P": str(id_fatura)}]
             res = await clients.IXCCliente.get(endpoint=endpoint, grid_param=grid_param)
-            reg = res.get("registros")
-            if not reg:
+            regs = res.get("registros")
+            if not regs:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
-                    detail="Sem linha digitável.",
+                    detail="Fatura não encontrada.",
                 )
-            linha_digitavel = reg[0].get("linha_digitavel")
+            fatura = regs[0]
+
+            # -- Linha digitável ---
+            linha_digitavel = fatura.get("linha_digitavel")
             if not linha_digitavel:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
-                    detail="Sem linha digitável.",
+                    detail="Linha digitável não encontrada",
                 )
-            return schemas.LinhaDigitavelBase(linha_digitavel=linha_digitavel)
 
+            return schemas.LinhaDigitavelOut(linha_digitavel=linha_digitavel)
         except HTTPException:
             raise
         except Exception as e:
@@ -261,18 +270,21 @@ class FinanceiroService(service_service.Service):
                 protocolo=protocolo, cnpj_cpf=cnpj_cpf
             )
 
-            grid_param = [{"TB": "cliente.id", "OP": "=", "P": str(id_cliente)}]
+            # --- Cliente ---
             endpoint = "cliente"
+            grid_param = [{"TB": "cliente.id", "OP": "=", "P": str(id_cliente)}]
             res = await clients.IXCCliente.get(endpoint=endpoint, grid_param=grid_param)
-            if not res.get("registros"):
+            regs = res.get("registros", [])
+            if not regs:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
-                    detail="Sem credenciais.",
+                    detail="Cliente não encontrado.",
                 )
-            cliente = res["registros"][0]
-            senha = cliente["senha"]
-            hotsite_email = cliente["hotsite_email"]
-            return schemas.CredencialOut(usuario=hotsite_email, senha=senha)
+            cliente = regs[0]
+
+            return schemas.CredencialOut(
+                usuario=cliente["hotsite_email"], senha=cliente["senha"]
+            )
         except HTTPException:
             raise
         except Exception as e:
@@ -283,30 +295,34 @@ class FinanceiroService(service_service.Service):
 
     @staticmethod
     async def put_credenciais(
-        id_cliente: PositiveInt, credenciais: schemas.CredencialUpdate
-    ) -> schemas.MensagemOut:
+        id_cliente: PositiveInt, senha: str
+    ) -> schemas.CredencialOut:
         try:
-            grid_param = [{"TB": "cliente.id", "OP": "=", "P": str(id_cliente)}]
+            # --- Cliente ---
             endpoint = "cliente"
+            grid_param = [{"TB": "cliente.id", "OP": "=", "P": str(id_cliente)}]
             res = await clients.IXCCliente.get(endpoint=endpoint, grid_param=grid_param)
-            if not res.get("registros"):
+            regs = res.get("registros", [])
+            if not regs:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
                     detail="Cliente não encontrado.",
                 )
-            cliente_antigo = res["registros"][0]
-            novas_credenciais = credenciais.model_dump()
-            cliente_atualizado: Any = {**cliente_antigo, **novas_credenciais}
+            cliente_antigo = regs[0]
+
+            # --- Cliente atualizado ---
+            cliente_atualizado: dict[str, Any] = {**cliente_antigo, "senha": senha}
             del cliente_atualizado["id"]
 
-            endpoint = "cliente"
+            # --- Atualiza cliente ---
+            id = cliente_antigo["id"]
             res = await clients.IXCCliente.put(
-                endpoint=endpoint,
-                id=id_cliente,
-                payload=cliente_atualizado,
+                endpoint=endpoint, id=id, payload=cliente_atualizado
             )
-            mensagem = res.get("message", "Nenhuma mensagem retornada.")
-            return schemas.MensagemOut(mensagem=mensagem)
+
+            return schemas.CredencialOut(
+                usuario=cliente_atualizado["hotsite_email"], senha=senha
+            )
         except HTTPException:
             raise
         except Exception as e:

@@ -18,12 +18,12 @@ class CredencialUpdate(BaseModel):
     )
 
 
-class CredencialBase(CredencialUpdate):
+class CredencialOut(BaseModel):
+    senha: str = Field(
+        description="Senha da central de acesso do assinante, a ser atualizada.",
+        examples=["12345678"],
+    )
     usuario: str = Field(
         description="Usuário da central de acesso do assinante, a ser atualizado.",
         examples=["usuario"],
     )
-
-
-class CredencialOut(CredencialBase):
-    pass
