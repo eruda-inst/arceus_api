@@ -16,15 +16,13 @@ class ContatoOut(BaseModel):
 
 
 class ClienteExisteOut(BaseModel):
-    cliente_existe: bool = Field(description="Indica se o cliente existe no Opa.")
+    cliente_existe: bool = Field(description="Indica se o cliente existe.")
 
 
 class CredencialOut(BaseModel):
     senha: str = Field(
-        description="Senha da central de acesso do assinante, a ser atualizada.",
-        examples=["12345678"],
+        description="Senha da central do assinante.", examples=["12345678"]
     )
     usuario: str = Field(
-        description="Usuário da central de acesso do assinante, a ser atualizado.",
-        examples=["usuario"],
+        description="Usuário da central do assinante.", examples=["usuario"]
     )
