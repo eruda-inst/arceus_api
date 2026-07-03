@@ -230,7 +230,7 @@ class FinanceiroService(service_service.Service):
             if not linha_digitavel:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
-                    detail="Linha digitável não encontrada",
+                    detail="Linha digitável não encontrada.",
                 )
 
             return schemas.LinhaDigitavelOut(linha_digitavel=linha_digitavel)
