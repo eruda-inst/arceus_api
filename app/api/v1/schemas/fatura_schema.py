@@ -19,10 +19,8 @@ class FaturaAberta(BaseModel):
         description="Data de vencimento da fatura.",
         examples=["dd/mm/aaaa"],
     )
-    preco: float = Field(ge=0.00, description="Preço da fatura.", examples=[12.34])
-    id_contrato: NonNegativeInt = Field(
-        description="ID de contrato associado à fatura", examples=[12]
-    )
+    preco: float = Field(ge=0, description="Preço da fatura.", examples=[12.34])
+    id_contrato: NonNegativeInt = Field(description="ID do contrato", examples=[12])
     contrato: str = Field(description="Nome do plano.", examples=["Nome do plano"])
 
 
