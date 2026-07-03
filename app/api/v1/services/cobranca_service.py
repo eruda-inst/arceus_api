@@ -1,10 +1,9 @@
-from typing import List, Any
 from . import service_service
 from datetime import datetime
 from zoneinfo import ZoneInfo
 from .. import schemas, clients
+from pydantic import PositiveInt
 from fastapi import HTTPException, status
-from pydantic import ValidationError, PositiveInt
 
 
 class CobrancaService(service_service.Service):
@@ -21,84 +20,83 @@ class CobrancaService(service_service.Service):
                 protocolo=protocolo, cnpj_cpf=cnpj_cpf
             )
 
+            # --- Faturas abertas ---
+            endpoint = "fn_areceber"
             grid_param = [
                 {"TB": "fn_areceber.id_cliente", "OP": "=", "P": str(id_cliente)},
-                {"TB": "fn_areceber.status", "OP": "=", "P": "A"},
+                {"TB": "fn_areceber.status", "OP": "!=", "P": "R"},
+                {"TB": "fn_areceber.status", "OP": "!=", "P": "C"},
             ]
-
             res = await clients.IXCCliente.get(
-                endpoint="fn_areceber",
+                endpoint=endpoint,
                 grid_param=grid_param,
                 pagina=pagina,
                 itens_por_pagina=itens_por_pagina,
             )
-
-            if not res.get("registros"):
+            regs = res.get("registros", [])
+            if not regs:
                 raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND, detail="Cliente sem faturas."
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Faturas não encontradas.",
                 )
+            faturas_abertas = regs
 
-            faturas_abertas_e_parciais = res["registros"]
+            faturas_vencidas_parciais: list[schemas.FaturaAberta] = []
 
-            faturas_abertas_formatadas: List[Any] = []
+            # --- Data de hoje ---
+            timezone = ZoneInfo("America/Bahia")
+            datetime_hoje = datetime.now(tz=timezone)
+            data_hoje = datetime_hoje.date()
+            data_hoje_iso = data_hoje.isoformat()  # YYYY-MM-DD
 
-            for fatura_aberta_e_parcial in faturas_abertas_e_parciais:
-                data_hoje = (
-                    datetime.now(ZoneInfo("America/Sao_Paulo")).date().isoformat()
-                )
+            # --- Iteração entre faturas abertas ---
+            for fatura_aberta in faturas_abertas:
+                data_vencimento_iso = fatura_aberta["data_vencimento"]  # YYYY-MM-DD
 
-                data_vencimento = fatura_aberta_e_parcial["data_vencimento"]
-
-                if fatura_aberta_e_parcial["status"] != "A":
+                # Pula faturas não vencidas
+                if data_hoje_iso <= data_vencimento_iso:
                     continue
 
-                if data_vencimento >= data_hoje:
-                    continue
-
-                id_contrato = fatura_aberta_e_parcial["id_contrato"]
+                # --- Contrato ---
                 endpoint = "cliente_contrato"
+                id_contrato = fatura_aberta["id_contrato"]
                 grid_param = [
                     {"TB": "cliente_contrato.id", "OP": "=", "P": str(id_contrato)}
                 ]
-                contrato_res = await clients.IXCCliente.get(
+                res = await clients.IXCCliente.get(
                     endpoint=endpoint, grid_param=grid_param
                 )
-                contrato = (
-                    contrato_res["registros"][0]["contrato"]
-                    if contrato_res.get("registros")
-                    else "N/A"
-                )
-                faturas_abertas_formatadas.append(
-                    {
-                        "id": fatura_aberta_e_parcial["id"],
-                        "id_contrato": fatura_aberta_e_parcial["id_contrato"],
-                        "data_vencimento": data_vencimento,
-                        "preco": fatura_aberta_e_parcial["valor"],
-                        "contrato": contrato,
-                    }
-                )
+                regs = res.get("registros", [])
+                if not regs:
+                    raise HTTPException(
+                        status_code=status.HTTP_404_NOT_FOUND,
+                        detail="Contrato não encontrado.",
+                    )
+                contrato = regs[0]
 
-            total = int(res.get("total", 0))
-
-            meta = schemas.Meta(
-                total_itens=total,
-                pagina_atual=pagina,
-                itens_por_pagina=itens_por_pagina,
-            )
+                # --- Faturas vencidas parciais ---
+                faturas_vencidas_parciais.append(
+                    schemas.FaturaAberta(
+                        id=fatura_aberta["id"],
+                        id_contrato=fatura_aberta["id_contrato"],
+                        contrato=contrato["contrato"],
+                        data_vencimento=fatura_aberta["data_vencimento"],
+                        preco=fatura_aberta["valor"],
+                    )
+                )
 
             return schemas.FaturaAbertaListOut(
-                data=[schemas.FaturaAberta(**f) for f in faturas_abertas_formatadas],
-                meta=meta,
+                data=faturas_vencidas_parciais,
+                meta=schemas.Meta(
+                    total_itens=len(faturas_vencidas_parciais),
+                    pagina_atual=pagina,
+                    itens_por_pagina=itens_por_pagina,
+                ),
             )
         except HTTPException:
             raise
-        except ValidationError as e:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Validação da resposta falhou: {e}",
-            )
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno ao processar solicitação: {str(e)}",
+                detail=f"Erro interno: {e}",
             )
