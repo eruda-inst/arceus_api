@@ -1,33 +1,31 @@
+from . import Meta
 from .. import utils
-from . import misc_schema
 from pydantic import BaseModel, Field, PositiveInt, field_serializer
 
 
 class AtendimentoCreate(BaseModel):
-    id: PositiveInt = Field(description="ID do atendimento aberto.", examples=[1])
+    id: PositiveInt = Field(description="ID do atendimento.", examples=[42])
 
 
 class AtendimentoIn(BaseModel):
-    id_login: PositiveInt = Field(description="ID de login do cliente.", examples=[1])
-    id_assunto: PositiveInt = Field(
-        description="ID do assunto do atendimento.", examples=[1]
-    )
-    id_cliente: PositiveInt = Field(description="ID do cliente.", examples=[1])
+    id_login: PositiveInt = Field(description="ID de login.", examples=[42])
+    id_assunto: PositiveInt = Field(description="ID do assunto.", examples=[42])
+    id_cliente: PositiveInt = Field(description="ID do cliente.", examples=[42])
     menssagem: str = Field(
-        description="Mensagem descritiva.", examples=["Estou com problemas."]
+        description="Mensagem do atendimento.", examples=["Mensagem do atendimento"]
     )
     origem_endereco: utils.OrigemEnderecoCod | None = Field(
         default=utils.OrigemEnderecoCod.LOGIN,
-        description="Origem de endereço.",
+        description="Origem do endereço.",
         examples=[utils.OrigemEnderecoCod.LOGIN],
     )
-    tipo: utils.TipoCod | None = Field(
-        default=utils.TipoCod.CLIENTE,
+    tipo: utils.TipoAtendimentoCod | None = Field(
+        default=utils.TipoAtendimentoCod.CLIENTE,
         description="Tipo do atendimento.",
-        examples=[utils.TipoCod.CLIENTE],
+        examples=[utils.TipoAtendimentoCod.CLIENTE],
     )
     titulo: str = Field(
-        description="Título do atendimento.", examples=["Problema de conexão."]
+        description="Título do atendimento..", examples=["Título do atendimento"]
     )
     prioridade: utils.PrioridadeCod | None = Field(
         default=utils.PrioridadeCod.NORMAL,
@@ -44,9 +42,7 @@ class AtendimentoIn(BaseModel):
         description="Setor do atendimento.",
         examples=[utils.Default.ID_TICKET_SETOR],
     )
-    id_contrato: PositiveInt = Field(
-        description="ID de contrato do cliente.", examples=[1]
-    )
+    id_contrato: PositiveInt = Field(description="ID do contrato.", examples=[42])
     id_responsavel_tecnico: PositiveInt | None = Field(
         default=utils.Default.ID_RESPONSAVEL_ARCEUS,
         description="ID do responsável técnico.",
@@ -55,23 +51,19 @@ class AtendimentoIn(BaseModel):
 
 
 class Atendimento(BaseModel):
-    id: PositiveInt = Field(description="ID do atendimento.", examples=[1])
-    id_assunto: PositiveInt = Field(
-        description="ID do assunto do atendimento.", examples=[1]
-    )
+    id: PositiveInt = Field(description="ID do atendimento.", examples=[42])
+    id_assunto: PositiveInt = Field(description="ID do assunto.", examples=[42])
     status: utils.SuStatusCod = Field(
         description="Status do atendimento.", examples=[utils.SuStatusRot.NOVO]
     )
     mensagem: str = Field(
-        description="Mensagem descritiva.",
-        examples=["Estou com problemas de conexão na minha residência."],
+        description="Mensagem do atendimento.", examples=["Mensagem do atendimento"]
     )
     titulo: str = Field(
-        description="Título do atendimento.", examples=["Problema de conexão"]
+        description="Título do atendimento.", examples=["Título do atendimento"]
     )
     data_criacao: str = Field(
-        description="Data de criação do atendimento.",
-        examples=["YYYY-MM-DDTHH:mm:ss.sssZ"],
+        description="Data de criação do atendimento.", examples=["YYYY-MM-DD"]
     )
 
     @field_serializer("status")
@@ -92,4 +84,4 @@ class Atendimento(BaseModel):
 
 class AtendimentoOut(BaseModel):
     data: list[Atendimento]
-    meta: misc_schema.Meta
+    meta: Meta
