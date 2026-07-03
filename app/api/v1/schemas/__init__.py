@@ -7,12 +7,7 @@ from .atendimento_schema import (
     AtendimentoIn,
 )
 from .onu_schema import StatusOnuOut
-from .cliente_schema import (
-    ClienteExisteOut,
-    CredencialOut,
-    CredencialUpdate,
-    ContatoOut,
-)
+from .cliente_schema import ClienteExisteOut, CredencialOut, ContatoOut
 from .lead_schema import LeadIn, LeadCreate, LeadOut, LeadUpdate
 from .index_schema import IndexOut
 from .contrato_schema import (
@@ -49,7 +44,6 @@ __all__ = [
     "FaturaAberta",
     "LinhaDigitavelOut",
     "ChavePixOut",
-    "CredencialUpdate",
     "CredencialOut",
     "ContatoOut",
     "IndexOut",
