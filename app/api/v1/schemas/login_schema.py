@@ -22,11 +22,11 @@ class StatusConexaoOut(BaseModel):
 
 
 class WifiOut(BaseModel):
-    ssid_wifi_2g: str = Field(description="Nome da rede WiFi 2G", examples=["Rede 2G"])
+    ssid_wifi_2g: str = Field(description="Nome da rede WiFi 2G.", examples=["Rede 2G"])
     senha_wifi_2g: str = Field(
-        description="Senha da rede WiFi 2G", examples=["12345678"]
+        description="Senha da rede WiFi 2G.", examples=["12345678"]
     )
-    ssid_wifi_5g: str = Field(description="Nome da rede WiFi 5G", examples=["Rede 5G"])
+    ssid_wifi_5g: str = Field(description="Nome da rede WiFi 5G.", examples=["Rede 5G"])
     senha_wifi_5g: str = Field(
-        description="Senha da rede WiFi 5G", examples=["12345678"]
+        description="Senha da rede WiFi 5G.", examples=["12345678"]
     )
