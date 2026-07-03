@@ -17,5 +17,5 @@ class Meta(BaseModel):
 
 class MensagemOut(BaseModel):
     mensagem: str = Field(
-        description="Mensagem de sucesso.", examples=["Operação realizada com sucesso."]
+        description="Mensagem de retorno.", examples=["Mensagem de retorno"]
     )
