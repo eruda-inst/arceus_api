@@ -25,7 +25,7 @@ class StatusInternetOut(BaseModel):
         return mapping[v]
 
 
-class Contrato(BaseModel):
+class ContratoOut(BaseModel):
     id: PositiveInt = Field(description="ID do contrato.", examples=[1])
     id_login: PositiveInt = Field(description="ID do login.", examples=[12])
     id_cliente: PositiveInt = Field(description="ID do cliente.", examples=[123])
@@ -64,11 +64,11 @@ class Contrato(BaseModel):
 
 
 class ContratoListOut(BaseModel):
-    data: list[Contrato]
+    data: list[ContratoOut]
     meta: Meta
 
 
-class ComercialContrato(BaseModel):
+class ComercialContratoOut(BaseModel):
     id: PositiveInt = Field(description="ID do contrato.", examples=[1])
     contrato: str = Field(description="Nome do plano.", examples=["Nome do plano"])
     nome_cliente: str = Field(
@@ -106,7 +106,7 @@ class ComercialContrato(BaseModel):
 
 
 class ComercialContratoListOut(BaseModel):
-    data: list[ComercialContrato]
+    data: list[ComercialContratoOut]
     meta: Meta
 
 
