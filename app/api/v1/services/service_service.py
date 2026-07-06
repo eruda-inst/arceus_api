@@ -1,7 +1,7 @@
 from typing import Any
 from .. import clients, utils
+from pydantic import PositiveInt
 from fastapi import HTTPException, status
-from pydantic import ValidationError, PositiveInt
 
 
 class Service:
@@ -89,14 +89,8 @@ class Service:
                 id_cliente_ixc_res = await cls._buscar_por_cnpj_cpf(cnpj_cpf_formatado)
 
             return cls._extrair_id_cliente_ixc(id_cliente_ixc_res)
-
         except HTTPException:
             raise
-        except ValidationError as e:
-            raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
-                detail=f"Validação da resposta falhou: {e}",
-            )
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
