@@ -24,7 +24,7 @@ class SuporteService(service_service.Service):
             if not regs:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
-                    detail="Cliente não encontrado.",
+                    detail="Cliente inexistente.",
                 )
             cliente = regs[0]
 
@@ -61,7 +61,7 @@ class SuporteService(service_service.Service):
                 if not fatura_referencia:
                     raise HTTPException(
                         status_code=status.HTTP_404_NOT_FOUND,
-                        detail="Fatura referência não encontrada.",
+                        detail="Fatura referência inexistente.",
                     )
 
                 # --- Login ---
@@ -76,7 +76,7 @@ class SuporteService(service_service.Service):
                 if not regs:
                     raise HTTPException(
                         status_code=status.HTTP_404_NOT_FOUND,
-                        detail="Login não encontrado.",
+                        detail="Login inexistente.",
                     )
                 login = regs[0]
 
@@ -108,7 +108,7 @@ class SuporteService(service_service.Service):
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno: {e}",
+                detail=f"Erro interno desconhecido: {e}",
             )
 
     @staticmethod
@@ -121,8 +121,7 @@ class SuporteService(service_service.Service):
             regs = res.get("registros", [])
             if not regs:
                 raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail="Login não encontrado.",
+                    status_code=status.HTTP_404_NOT_FOUND, detail="Login inexistente."
                 )
             login = regs[0]
 
@@ -132,7 +131,7 @@ class SuporteService(service_service.Service):
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno: {e}",
+                detail=f"Erro interno desconhecido: {e}",
             )
 
     @staticmethod
@@ -152,7 +151,7 @@ class SuporteService(service_service.Service):
             else:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Informe o id_login ou o mac_onu.",
+                    detail="Informe id_login ou mac_onu.",
                 )
 
             # --- ONU ---
@@ -166,16 +165,11 @@ class SuporteService(service_service.Service):
             ]
             res = await clients.IXCCliente.get(endpoint=endpoint, grid_param=grid_param)
             regs = res.get("registros", [])
-            if not regs:
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail="ONU não encontrada.",
-                )
             onu = regs[0]
             sinal_rx = onu["sinal_rx"]
-            if not sinal_rx:
+            if not regs or not sinal_rx:
                 raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND, detail="ONU não encontrada."
+                    status_code=status.HTTP_404_NOT_FOUND, detail="ONU inexistente."
                 )
 
             return schemas.StatusOnuOut(status_onu=sinal_rx)
@@ -184,7 +178,7 @@ class SuporteService(service_service.Service):
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno: {e}",
+                detail=f"Erro interno desconhecido: {e}",
             )
 
     @staticmethod
@@ -194,21 +188,20 @@ class SuporteService(service_service.Service):
             payload = {"id": id_login}
             endpoint = "desconectar_clientes"
             res = await clients.IXCCliente.post(endpoint=endpoint, payload=payload)
-            msgs = res.get("msg", [])
-            if not msgs:
+            type = res["msgs"][0]["type"]
+            if type == "error":
                 raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail="Mensagem não encontrada.",
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail="Desconexão malsucedida.",
                 )
-            msg = msgs[0]
 
-            return schemas.MensagemOut(mensagem=msg["message"])
+            return schemas.MensagemOut(mensagem="Desconexão bem-sucedida.")
         except HTTPException:
             raise
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno: {e}",
+                detail=f"Erro interno desconhecido: {e}",
             )
 
     @staticmethod
@@ -262,7 +255,7 @@ class SuporteService(service_service.Service):
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno: {e}",
+                detail=f"Erro interno desconhecido: {e}",
             )
 
     @staticmethod
@@ -274,12 +267,13 @@ class SuporteService(service_service.Service):
             endpoint = "su_ticket"
             payload = atendimento.model_dump()
             res = await clients.IXCCliente.post(endpoint=endpoint, payload=payload)
-
-            id = res.get("id", None)
-
-            if not id:
-                msg = res.get("message", "Não foi possível abrir o atendimento.")
-                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=msg)
+            type = res.get("type")
+            if type == "error":
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail="Cadastro malsucedido.",
+                )
+            id = res.get("id")
 
             return schemas.AtendimentoCreate(id=id)
         except HTTPException:
@@ -287,7 +281,7 @@ class SuporteService(service_service.Service):
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno: {e}",
+                detail=f"Erro interno desconhecido: {e}",
             )
 
     @staticmethod
@@ -303,7 +297,7 @@ class SuporteService(service_service.Service):
             if not regs:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
-                    detail="Login não encontrado.",
+                    detail="Login inexistente.",
                 )
             login_antigo = regs[0]
 
@@ -324,15 +318,20 @@ class SuporteService(service_service.Service):
             res = await clients.IXCCliente.put(
                 endpoint=endpoint, id=id, payload=payload
             )
-            msg = res.get("message", "Nenhuma mensagem retornada.")
+            type = res.get("type")
+            if type == "error":
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail="Atualização malsucedida.",
+                )
 
-            return schemas.MensagemOut(mensagem=msg)
+            return schemas.MensagemOut(mensagem="Atualização bem-sucedida.")
         except HTTPException:
             raise
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno: {e}",
+                detail=f"Erro interno desconhecido: {e}",
             )
 
     @staticmethod
@@ -342,16 +341,20 @@ class SuporteService(service_service.Service):
             endpoint = "radusuarios_25452"
             payload = {"get_id": id_login}
             res = await clients.IXCCliente.post(endpoint=endpoint, payload=payload)
+            type = res["type"]
+            if type == "error":
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail="Limpeza malsucedida.",
+                )
 
-            mensagem = res.get("message", "Nenhuma mensagem retornada.")
-
-            return schemas.MensagemOut(mensagem=mensagem)
+            return schemas.MensagemOut(mensagem="Limpeza bem-sucedida.")
         except HTTPException:
             raise
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno: {e}",
+                detail=f"Erro interno desconhecido: {e}",
             )
 
     @staticmethod
@@ -365,7 +368,7 @@ class SuporteService(service_service.Service):
             if not regs:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
-                    detail="Login não encontrado.",
+                    detail="Login inexistente.",
                 )
             login = regs[0]
 
@@ -380,5 +383,5 @@ class SuporteService(service_service.Service):
         except Exception:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Erro interno.",
+                detail="Erro interno desconhecido.",
             )
