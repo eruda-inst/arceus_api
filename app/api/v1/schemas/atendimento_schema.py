@@ -63,7 +63,11 @@ class Atendimento(BaseModel):
         description="Título do atendimento.", examples=["Título do atendimento"]
     )
     data_criacao: str = Field(
-        description="Data de criação do atendimento.", examples=["YYYY-MM-DD"]
+        description="Data de criação do atendimento.",
+        # Não pode haver isto, pois o IXC é quebrado
+        # min_length=10,  # YYYY-MM-AA
+        # max_length=10,  # YYYY-MM-AA
+        examples=["YYYY-MM-DD"],
     )
 
     @field_serializer("status")

@@ -40,8 +40,9 @@ class Contrato(BaseModel):
     valor: float = Field(description="Valor do plano.", examples=[12.34])
     data_vencimento: str = Field(
         description="Data de vencimento.",
-        min_length=10,  # YYYY-MM-AA
-        max_length=10,  # YYYY-MM-AA
+        # Não pode haver isto, pois o IXC é quebrado
+        # min_length=10,  # YYYY-MM-AA
+        # max_length=10,  # YYYY-MM-AA
         examples=["YYYY-MM-AA"],
     )
     mac_onu: str = Field(description="MAC da ONU.", examples=["AB1..."])
@@ -79,8 +80,9 @@ class ComercialContrato(BaseModel):
     )
     data_vencimento: str = Field(
         description="Data de vencimento.",
-        min_length=10,  # YYYY-MM-AA
-        max_length=10,  # YYYY-MM-AA
+        # Não pode haver isto, pois o IXC é quebrado
+        # min_length=10,  # YYYY-MM-AA
+        # max_length=10,  # YYYY-MM-AA
         examples=["YYYY-MM-AA"],
     )
     id_cliente: PositiveInt = Field(description="ID do cliente.", examples=[12])

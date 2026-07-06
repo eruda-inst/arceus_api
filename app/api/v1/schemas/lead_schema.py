@@ -27,8 +27,9 @@ class LeadOut(BaseModel):
     nome: str = Field(description="Nome do cliente.", examples=["João"])
     data_nascimento: str = Field(
         description="Data de nascimento do cliente.",
-        min_length=10,  # dd/mm/aaaa
-        max_length=10,  # dd/mm/aaaa
+        # Não pode haver isto, pois o IXC é quebrado
+        # min_length=10,  # YYYY-MM-AA
+        # max_length=10,  # YYYY-MM-AA
         examples=["dd/mm/aaaa"],
     )
     id_filial: PositiveInt = Field(
@@ -310,8 +311,9 @@ class LeadIn(BaseModel):
     )
     data_nascimento: str = Field(
         description="Data de nascimento.",
-        min_length=10,  # dd/mm/aaaa
-        max_length=10,  # dd/mm/aaaa
+        # Não pode haver isto, pois o IXC é quebrado
+        # min_length=10,  # YYYY-MM-AA
+        # max_length=10,  # YYYY-MM-AA
         examples=["dd/mm/aaaa"],
     )
     id_filial: PositiveInt | None = Field(

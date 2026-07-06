@@ -14,9 +14,10 @@ class LinhaDigitavelOut(BaseModel):
 class FaturaAberta(BaseModel):
     id: PositiveInt = Field(description="ID da fatura.", examples=[1])
     data_vencimento: str = Field(
-        min_length=10,  # dd/mm/aaaa
-        max_length=10,  # dd/mm/aaaa
         description="Data de vencimento da fatura.",
+        # Não pode haver isto, pois o IXC é quebrado
+        # min_length=10,  # YYYY-MM-AA
+        # max_length=10,  # YYYY-MM-AA
         examples=["dd/mm/aaaa"],
     )
     preco: float = Field(ge=0, description="Preço da fatura.", examples=[12.34])
