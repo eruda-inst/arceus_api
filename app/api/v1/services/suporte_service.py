@@ -284,14 +284,8 @@ class SuporteService(service_service.Service):
             endpoint = "su_ticket"
             payload = atendimento.model_dump()
             res = await clients.IXCCliente.post(endpoint=endpoint, payload=payload)
-            data = res.get("data", None)
-            if not data:
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail="Não foi possível abrir o atendimento.",
-                )
 
-            return schemas.AtendimentoCreate(id=data["id"])
+            return schemas.AtendimentoCreate(id=res.get("id", None))
         except HTTPException:
             raise
         except Exception as e:
