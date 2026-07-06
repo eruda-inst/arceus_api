@@ -21,8 +21,7 @@ class TriagemService(service_service.Service):
             regs = res.get("registros", [])
             if not regs:
                 raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail="Cliente não encontrado.",
+                    status_code=status.HTTP_404_NOT_FOUND, detail="Cliente inexistente."
                 )
             cliente = regs[0]
 
@@ -35,7 +34,7 @@ class TriagemService(service_service.Service):
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno: {e}",
+                detail=f"Erro interno desconhecido: {e}",
             )
 
     @classmethod
@@ -57,8 +56,7 @@ class TriagemService(service_service.Service):
             regs = res.get("registros", [])
             if not regs:
                 raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail="Cliente não encontrado.",
+                    status_code=status.HTTP_404_NOT_FOUND, detail="Cliente inexistente."
                 )
             cliente_antigo = regs[0]
 
@@ -70,9 +68,15 @@ class TriagemService(service_service.Service):
             del cliente_atualizado["id"]
 
             # --- Atualiza cliente ---
-            await clients.IXCCliente.put(
+            res = await clients.IXCCliente.put(
                 endpoint=endpoint, id=id_cliente, payload=cliente_atualizado
             )
+            type = res["type"]
+            if type == "error":
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail="Atualização malsucedida.",
+                )
 
             return schemas.ContatoOut(telefone_celular=telefone_celular)
         except HTTPException:
@@ -80,5 +84,5 @@ class TriagemService(service_service.Service):
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno: {e}",
+                detail=f"Erro interno desconhecido: {e}",
             )
