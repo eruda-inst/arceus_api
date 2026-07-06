@@ -19,7 +19,7 @@ class ComercialService(service_service.Service):
             if not regs:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
-                    detail="Contrato não encontrado.",
+                    detail="Contrato inexistente.",
                 )
             contrato = regs[0]
             return schemas.StatusInternetOut(status_acesso=contrato["status_internet"])
@@ -28,7 +28,7 @@ class ComercialService(service_service.Service):
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno: {e}",
+                detail=f"Erro interno desconhecido: {e}",
             )
 
     @classmethod
@@ -48,8 +48,7 @@ class ComercialService(service_service.Service):
             regs = res.get("registros", [])
             if not regs:
                 raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail="Nenum cliente encontrado.",
+                    status_code=status.HTTP_404_NOT_FOUND, detail="Cliente inexistente."
                 )
             cliente = regs[0]
 
@@ -89,7 +88,7 @@ class ComercialService(service_service.Service):
                 if not regs:
                     raise HTTPException(
                         status_code=status.HTTP_404_NOT_FOUND,
-                        detail="Nenhum login encontrado.",
+                        detail="Login inexistente.",
                     )
                 login = regs[0]
 
@@ -99,21 +98,25 @@ class ComercialService(service_service.Service):
                         id_contrato=id_contrato
                     )
                 )
-
-                if fatura_referencia:
-                    # --- Contrato parcial ---
-                    contratos_parciais.append(
-                        schemas.ComercialContrato(
-                            id=id_contrato,
-                            contrato=contrato.get("contrato"),
-                            nome_cliente=cliente.get("razao"),
-                            valor=fatura_referencia["valor"],
-                            status_acesso=contrato.get("status_internet"),
-                            data_vencimento=fatura_referencia["data_vencimento"],
-                            id_cliente=id_cliente,
-                            id_login=login.get("id"),
-                        )
+                if not fatura_referencia:
+                    raise HTTPException(
+                        status_code=status.HTTP_404_NOT_FOUND,
+                        detail="Fatura referência inexistente.",
                     )
+
+                # --- Contrato parcial ---
+                contratos_parciais.append(
+                    schemas.ComercialContrato(
+                        id=id_contrato,
+                        contrato=contrato.get("contrato"),
+                        nome_cliente=cliente.get("razao"),
+                        valor=fatura_referencia["valor"],
+                        status_acesso=contrato.get("status_internet"),
+                        data_vencimento=fatura_referencia["data_vencimento"],
+                        id_cliente=id_cliente,
+                        id_login=login.get("id"),
+                    )
+                )
 
             return schemas.ComercialContratoListOut(
                 data=contratos_parciais,
@@ -128,7 +131,7 @@ class ComercialService(service_service.Service):
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno: {e}",
+                detail=f"Erro interno desconhecido: {e}",
             )
 
     @staticmethod
@@ -138,24 +141,24 @@ class ComercialService(service_service.Service):
             endpoint = "contato"
             payload = lead.model_dump()
             """
-            "data_cadastro" é obrigatório na API do IXC, porém o que é mandado é descartado, e a data é gerada automaticamente pela própria API deles.
+            "data_cadastro" é obrigatório na API do IXC, porém o que é mandado é descartado, e a data é gerada automaticamente.
             """
             payload["data_cadastro"] = "N/A"
             res = await clients.IXCCliente.post(endpoint=endpoint, payload=payload)
             id = res.get("id", None)
             if not id:
-                mensagem = res.get("message", "Nenhuma mensagem retornada.")
                 raise HTTPException(
                     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    detail=f"Não foi possível criar o lead: {mensagem}",
+                    detail="Cadastro malsucedido.",
                 )
+
             return schemas.LeadCreate(id=id)
         except HTTPException:
             raise
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno: {e}",
+                detail=f"Erro interno desconhecido: {e}",
             )
 
     @staticmethod
@@ -171,7 +174,7 @@ class ComercialService(service_service.Service):
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno: {e}",
+                detail=f"Erro interno desconhecido: {e}",
             )
 
     @staticmethod
@@ -187,7 +190,7 @@ class ComercialService(service_service.Service):
             regs = res.get("registros", [])
             if not regs:
                 raise HTTPException(
-                    status.HTTP_404_NOT_FOUND, detail="Lead não encontrado."
+                    status.HTTP_404_NOT_FOUND, detail="Lead inexistente."
                 )
             lead_antigo = regs[0]
 
@@ -200,7 +203,15 @@ class ComercialService(service_service.Service):
             endpoint = "contato"
             id = lead_antigo["id"]
             payload = lead_atualizado
-            await clients.IXCCliente.put(endpoint=endpoint, id=id, payload=payload)
+            res = await clients.IXCCliente.put(
+                endpoint=endpoint, id=id, payload=payload
+            )
+            type = res.get("type")
+            if type == "error":
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail="Atualização malsucedida.",
+                )
 
             return schemas.LeadOut(**lead_atualizado)
         except HTTPException:
@@ -208,5 +219,5 @@ class ComercialService(service_service.Service):
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno: {e}",
+                detail=f"Erro interno desconhecido: {e}",
             )
