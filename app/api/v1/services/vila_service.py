@@ -23,8 +23,7 @@ class VilaService(service_service.Service):
             regs = res.get("registros", [])
             if not regs:
                 raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail="Nenhum login encontrado.",
+                    status_code=status.HTTP_404_NOT_FOUND, detail="Login inexistente."
                 )
             login = regs[0]
 
@@ -43,7 +42,7 @@ class VilaService(service_service.Service):
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno: {e}",
+                detail=f"Erro interno desconhecido: {e}",
             )
 
     @classmethod
@@ -70,7 +69,7 @@ class VilaService(service_service.Service):
             if not regs:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
-                    detail="Contrato não encontrado.",
+                    detail="Contrato inexistente.",
                 )
             contrato = regs[0]
 
@@ -84,7 +83,7 @@ class VilaService(service_service.Service):
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno: {e}",
+                detail=f"Erro interno desconhecido: {e}",
             )
 
     @classmethod
@@ -101,7 +100,7 @@ class VilaService(service_service.Service):
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno: {e}",
+                detail=f"Erro interno desconhecido: {e}",
             )
 
     @classmethod
@@ -127,8 +126,7 @@ class VilaService(service_service.Service):
             regs = res.get("registros", [])
             if not regs:
                 raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail="Nenhuma ONU encontrada.",
+                    status_code=status.HTTP_404_NOT_FOUND, detail="ONU inexistente."
                 )
             onu = regs[0]
 
@@ -138,7 +136,7 @@ class VilaService(service_service.Service):
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno: {e}",
+                detail=f"Erro interno desconhecido: {e}",
             )
 
     @classmethod
@@ -158,7 +156,7 @@ class VilaService(service_service.Service):
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno: {e}",
+                detail=f"Erro interno desconhecido: {e}",
             )
 
     @classmethod
@@ -192,11 +190,6 @@ class VilaService(service_service.Service):
                 itens_por_pagina=itens_por_pagina,
             )
             regs = res.get("registros", [])
-            if not regs:
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail="Sem atendimentos abertos.",
-                )
             total = res["total"]
             atendimentos = regs
 
@@ -228,7 +221,7 @@ class VilaService(service_service.Service):
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno: {e}",
+                detail=f"Erro interno desconhecido: {e}",
             )
 
     @classmethod
@@ -245,14 +238,18 @@ class VilaService(service_service.Service):
             endpoint = "radusuarios_25452"
             payload = {"get_id": str(login["id"])}
             res = await clients.IXCCliente.post(endpoint=endpoint, payload=payload)
+            type = res.get("type")
+            if type == "error":
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail="Limpeza malsucedida.",
+                )
 
-            return schemas.MensagemOut(
-                mensagem=res.get("message", "Nenhuma mensagem retornada.")
-            )
+            return schemas.MensagemOut(mensagem="Limpeza bem-sucedida.")
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno: {e}",
+                detail=f"Erro interno desconhecido: {e}",
             )
 
     @classmethod
@@ -269,14 +266,19 @@ class VilaService(service_service.Service):
             endpoint = "desconectar_clientes"
             payload = {"id": str(login["id"])}
             res = await clients.IXCCliente.post(endpoint=endpoint, payload=payload)
+            msgs = res.get("msg", [])
+            type = msgs[0].get("type")
+            if type == "error":
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail="Desconexão malsucedida.",
+                )
 
-            return schemas.MensagemOut(
-                mensagem=res.get("msg", "Nenhuma mensagem retornada.")[0]["message"]
-            )
+            return schemas.MensagemOut(mensagem="Desconexão bem-sucedida.")
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno: {e}",
+                detail=f"Erro interno desconhecido: {e}",
             )
 
     @classmethod
@@ -288,11 +290,17 @@ class VilaService(service_service.Service):
             endpoint = "su_ticket"
             payload = atendimento.model_dump()
             res = await clients.IXCCliente.post(endpoint=endpoint, payload=payload)
-            data = res.get("data", None)
+            type = res.get("type")
+            if type == "error":
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail="Cadastro malsucedido.",
+                )
+            id = res.get("id")
 
-            return schemas.AtendimentoCreate(id=data["id"])
+            return schemas.AtendimentoCreate(id=id)
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno: {e}",
+                detail=f"Erro interno desconhecido: {e}",
             )
