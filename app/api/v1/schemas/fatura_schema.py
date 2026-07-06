@@ -11,7 +11,7 @@ class LinhaDigitavelOut(BaseModel):
     )
 
 
-class FaturaAberta(BaseModel):
+class FaturaOut(BaseModel):
     id: PositiveInt = Field(description="ID da fatura.", examples=[1])
     data_vencimento: str = Field(
         description="Data de vencimento da fatura.",
@@ -21,10 +21,10 @@ class FaturaAberta(BaseModel):
         examples=["dd/mm/aaaa"],
     )
     preco: float = Field(ge=0, description="Preço da fatura.", examples=[12.34])
-    id_contrato: NonNegativeInt = Field(description="ID do contrato", examples=[12])
+    id_contrato: NonNegativeInt = Field(description="ID do contrato.", examples=[12])
     contrato: str = Field(description="Nome do plano.", examples=["Nome do plano"])
 
 
-class FaturaAbertaListOut(BaseModel):
-    data: list[FaturaAberta]
+class FaturaListOut(BaseModel):
+    data: list[FaturaOut]
     meta: Meta

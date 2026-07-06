@@ -21,7 +21,7 @@ async def get_faturas_abertas(
     cnpj_cpf: CnpjCpf | None = None,
     pagina: Pagina | None = 1,
     itens_por_pagina: ItensPorPagina = 15,
-) -> schemas.FaturaAbertaListOut:
+) -> schemas.FaturaListOut:
     """
     Obtém faturas abertas de um cliente, através de protocolo de atendimento ou CPF/CNPJ.
     """
@@ -41,7 +41,7 @@ async def get_faturas_vencidas(
     cnpj_cpf: CnpjCpf | None = None,
     pagina: Pagina | None = 1,
     itens_por_pagina: ItensPorPagina = 15,
-) -> schemas.FaturaAbertaListOut:
+) -> schemas.FaturaListOut:
     """
     Obtém faturas vencidas de um cliente, através de protocolo de atendimento ou CPF/CNPJ.
     """

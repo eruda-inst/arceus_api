@@ -116,7 +116,7 @@ class FinanceiroService(service_service.Service):
         cnpj_cpf: str | None,
         pagina: PositiveInt | None,
         itens_por_pagina: PositiveInt | None,
-    ) -> schemas.FaturaAbertaListOut:
+    ) -> schemas.FaturaListOut:
         try:
             id_cliente = await cls.get_id_cliente_ixc(
                 protocolo=protocolo, cnpj_cpf=cnpj_cpf
@@ -139,7 +139,7 @@ class FinanceiroService(service_service.Service):
             faturas_abertas = regs
             total = res.get("total", 0)
 
-            faturas_abertas_parciais: list[schemas.FaturaAberta] = []
+            faturas_abertas_parciais: list[schemas.FaturaOut] = []
 
             # --- Iteração entre faturas abertas ---
             for fatura_aberta in faturas_abertas:
@@ -162,7 +162,7 @@ class FinanceiroService(service_service.Service):
 
                 # --- Faturas abertas parciais ---
                 faturas_abertas_parciais.append(
-                    schemas.FaturaAberta(
+                    schemas.FaturaOut(
                         id=fatura_aberta["id"],
                         contrato=contrato["contrato"],
                         data_vencimento=fatura_aberta["data_vencimento"],
@@ -171,7 +171,7 @@ class FinanceiroService(service_service.Service):
                     )
                 )
 
-            return schemas.FaturaAbertaListOut(
+            return schemas.FaturaListOut(
                 data=faturas_abertas_parciais,
                 meta=schemas.Meta(
                     total_itens=total,

@@ -46,7 +46,7 @@ class SuporteService(service_service.Service):
             total = res.get("total", 0)
             contratos = regs
 
-            contratos_parciais: list[schemas.Contrato] = []
+            contratos_parciais: list[schemas.ContratoOut] = []
 
             # --- Iteração entre contratos ---
             for contrato in contratos:
@@ -82,7 +82,7 @@ class SuporteService(service_service.Service):
 
                 # --- Contrato parcial ---
                 contratos_parciais.append(
-                    schemas.Contrato(
+                    schemas.ContratoOut(
                         id=id_contrato,
                         id_login=login["id"],
                         id_cliente=contrato["id_cliente"],

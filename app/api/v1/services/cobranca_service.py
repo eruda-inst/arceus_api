@@ -14,7 +14,7 @@ class CobrancaService(service_service.Service):
         cnpj_cpf: str | None,
         pagina: PositiveInt | None,
         itens_por_pagina: PositiveInt | None,
-    ) -> schemas.FaturaAbertaListOut:
+    ) -> schemas.FaturaListOut:
         try:
             id_cliente = await cls.get_id_cliente_ixc(
                 protocolo=protocolo, cnpj_cpf=cnpj_cpf
@@ -36,7 +36,7 @@ class CobrancaService(service_service.Service):
             regs = res.get("registros", [])
             faturas_abertas = regs
 
-            faturas_vencidas_parciais: list[schemas.FaturaAberta] = []
+            faturas_vencidas_parciais: list[schemas.FaturaOut] = []
 
             # --- Data de hoje ---
             timezone = ZoneInfo("America/Bahia")
@@ -72,7 +72,7 @@ class CobrancaService(service_service.Service):
 
                 # --- Faturas vencidas parciais ---
                 faturas_vencidas_parciais.append(
-                    schemas.FaturaAberta(
+                    schemas.FaturaOut(
                         id=fatura_aberta["id"],
                         id_contrato=fatura_aberta["id_contrato"],
                         contrato=contrato["contrato"],
@@ -81,7 +81,7 @@ class CobrancaService(service_service.Service):
                     )
                 )
 
-            return schemas.FaturaAbertaListOut(
+            return schemas.FaturaListOut(
                 data=faturas_vencidas_parciais,
                 meta=schemas.Meta(
                     total_itens=len(faturas_vencidas_parciais),

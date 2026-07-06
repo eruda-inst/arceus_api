@@ -13,22 +13,22 @@ from .index_schema import IndexOut
 from .contrato_schema import (
     StatusInternetOut,
     ContratoListOut,
-    Contrato,
-    ComercialContrato,
+    ContratoOut,
+    ComercialContratoOut,
     ComercialContratoListOut,
     VilaContratoOut,
 )
 from .pix_schema import ChavePixOut
-from .fatura_schema import FaturaAberta, FaturaAbertaListOut, LinhaDigitavelOut
+from .fatura_schema import FaturaOut, FaturaListOut, LinhaDigitavelOut
 from .plano_schema import PlanoSugeridoOut, PlanoSugeridoListOut
 
 __all__ = [
     "Meta",
-    "Contrato",
+    "ContratoOut",
     "ContratoListOut",
     "MensagemOut",
     "StatusInternetOut",
-    "ComercialContrato",
+    "ComercialContratoOut",
     "ComercialContratoListOut",
     "VilaContratoOut",
     "LeadIn",
@@ -40,8 +40,8 @@ __all__ = [
     "AtendimentoIn",
     "AtendimentoOut",
     "StatusOnuOut",
-    "FaturaAbertaListOut",
-    "FaturaAberta",
+    "FaturaListOut",
+    "FaturaOut",
     "LinhaDigitavelOut",
     "ChavePixOut",
     "CredencialOut",
