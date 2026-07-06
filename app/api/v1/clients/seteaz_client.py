@@ -24,15 +24,8 @@ class SeteAZCliente:
             endpoint=f"v2/integrations/omnichannel/invoices/{id_fatura}/payment-data"
         )
         headers = cls._get_headers()
-
-        try:
-            res = await cls.async_client.request(method="GET", url=url, headers=headers)
-            res.raise_for_status()
-            return res.json()
-        except httpx.HTTPStatusError as e:
-            return {"error": f"API request failed with status {e.response.status_code}"}
-        except httpx.RequestError as e:
-            return {"error": f"An error occurred while making the request: {e}"}
+        res = await cls.async_client.request(method="GET", url=url, headers=headers)
+        return res.json()
 
     @classmethod
     async def aclose(cls) -> None:
