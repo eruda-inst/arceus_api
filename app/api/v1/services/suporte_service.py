@@ -285,7 +285,13 @@ class SuporteService(service_service.Service):
             payload = atendimento.model_dump()
             res = await clients.IXCCliente.post(endpoint=endpoint, payload=payload)
 
-            return schemas.AtendimentoCreate(id=res.get("id", None))
+            id = res.get("id", None)
+
+            if not id:
+                msg = res.get("message", "Não foi possível abrir o atendimento.")
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=msg)
+
+            return schemas.AtendimentoCreate(id=id)
         except HTTPException:
             raise
         except Exception as e:
