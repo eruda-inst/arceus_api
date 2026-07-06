@@ -58,9 +58,11 @@ class SuporteService(service_service.Service):
                         id_contrato=id_contrato
                     )
                 )
-
                 if not fatura_referencia:
-                    fatura_referencia = {"valor": 0.00, "data_vencimento": ""}
+                    raise HTTPException(
+                        status_code=status.HTTP_404_NOT_FOUND,
+                        detail="Fatura referência não encontrada.",
+                    )
 
                 # --- Login ---
                 endpoint = "radusuarios"
@@ -173,9 +175,9 @@ class SuporteService(service_service.Service):
             sinal_rx = onu["sinal_rx"]
             if not sinal_rx:
                 raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail="ONU não encontrada.",
+                    status_code=status.HTTP_404_NOT_FOUND, detail="ONU não encontrada."
                 )
+
             return schemas.StatusOnuOut(status_onu=sinal_rx)
         except HTTPException:
             raise
@@ -230,11 +232,6 @@ class SuporteService(service_service.Service):
                 itens_por_pagina=itens_por_pagina,
             )
             regs = res.get("registros", [])
-            if not regs:
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail="Sem atendimentos abertos.",
-                )
             total = res.get("total", 0)
             atendimentos = regs
 
@@ -262,8 +259,6 @@ class SuporteService(service_service.Service):
                     itens_por_pagina=itens_por_pagina,
                 ),
             )
-        except HTTPException:
-            raise
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
