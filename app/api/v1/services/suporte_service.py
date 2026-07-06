@@ -43,11 +43,6 @@ class SuporteService(service_service.Service):
                 itens_por_pagina=itens_por_pagina,
             )
             regs = res.get("registros", [])
-            if not regs:
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail="Nenhum contrato ativo encontrado.",
-                )
             total = res.get("total", 0)
             contratos = regs
 
