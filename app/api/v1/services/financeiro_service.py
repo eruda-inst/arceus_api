@@ -221,7 +221,7 @@ class FinanceiroService(service_service.Service):
             fatura = regs[0]
 
             # -- Linha digitável ---
-            linha_digitavel = fatura.get("linha_digitavel")
+            linha_digitavel = fatura.get("linha_digitavel", None)
             if not linha_digitavel:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
@@ -243,8 +243,7 @@ class FinanceiroService(service_service.Service):
             res = await clients.SeteAZCliente.get_chave_pix(id_fatura=id_fatura)
             if len(res) < 1 or not res.get("pixCode"):
                 raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail="Sem chave pix.",
+                    status_code=status.HTTP_404_NOT_FOUND, detail="Sem chave pix."
                 )
             chave_pix = res.get("pixCode")
             return schemas.ChavePixOut(chave_pix=chave_pix)
