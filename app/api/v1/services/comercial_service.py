@@ -100,22 +100,20 @@ class ComercialService(service_service.Service):
                     )
                 )
 
-                if not fatura_referencia:
-                    fatura_referencia = {"valor": 0.00, "data_vencimento": ""}
-
-                # --- Contrato parcial ---
-                contratos_parciais.append(
-                    schemas.ComercialContrato(
-                        id=id_contrato,
-                        contrato=contrato.get("contrato"),
-                        nome_cliente=cliente.get("razao"),
-                        valor=fatura_referencia["valor"],
-                        status_acesso=contrato.get("status_internet"),
-                        data_vencimento=fatura_referencia["data_vencimento"],
-                        id_cliente=id_cliente,
-                        id_login=login.get("id"),
+                if fatura_referencia:
+                    # --- Contrato parcial ---
+                    contratos_parciais.append(
+                        schemas.ComercialContrato(
+                            id=id_contrato,
+                            contrato=contrato.get("contrato"),
+                            nome_cliente=cliente.get("razao"),
+                            valor=fatura_referencia["valor"],
+                            status_acesso=contrato.get("status_internet"),
+                            data_vencimento=fatura_referencia["data_vencimento"],
+                            id_cliente=id_cliente,
+                            id_login=login.get("id"),
+                        )
                     )
-                )
 
             return schemas.ComercialContratoListOut(
                 data=contratos_parciais,
@@ -144,14 +142,14 @@ class ComercialService(service_service.Service):
             """
             payload["data_cadastro"] = "N/A"
             res = await clients.IXCCliente.post(endpoint=endpoint, payload=payload)
-            id_lead = res.get("id", None)
-            if not id_lead:
+            id = res.get("id", None)
+            if not id:
                 mensagem = res.get("message", "Nenhuma mensagem retornada.")
                 raise HTTPException(
                     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                     detail=f"Não foi possível criar o lead: {mensagem}",
                 )
-            return schemas.LeadCreate(id=id_lead)
+            return schemas.LeadCreate(id=id)
         except HTTPException:
             raise
         except Exception as e:
@@ -168,6 +166,7 @@ class ComercialService(service_service.Service):
             cliente_existe = await clients.OpaCliente.cliente_existe(
                 cpf_cnpj_limpo=cpf_cnpj_limpo
             )
+
             return schemas.ClienteExisteOut(cliente_existe=cliente_existe)
         except Exception as e:
             raise HTTPException(
