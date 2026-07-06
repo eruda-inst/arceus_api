@@ -49,7 +49,7 @@ class CobrancaService(service_service.Service):
                 data_vencimento_iso = fatura_aberta["data_vencimento"]  # YYYY-MM-DD
 
                 # Pula faturas não vencidas
-                # Datas em formato ISO podem ser comparadas diretamente, como comparações de strings convencionais
+                # Datas em formato ISO podem ser comparadas diretamente, como comparações convencionais entre strings
                 if data_hoje_iso <= data_vencimento_iso:
                     continue
 
