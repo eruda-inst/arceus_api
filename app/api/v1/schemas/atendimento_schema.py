@@ -3,10 +3,6 @@ from .. import utils
 from pydantic import BaseModel, Field, PositiveInt, field_serializer
 
 
-class AtendimentoCreate(BaseModel):
-    id: PositiveInt = Field(description="ID do atendimento.", examples=[1])
-
-
 class AtendimentoIn(BaseModel):
     id_login: PositiveInt = Field(description="ID de login.", examples=[1])
     id_assunto: PositiveInt = Field(description="ID do assunto.", examples=[12])
@@ -50,7 +46,7 @@ class AtendimentoIn(BaseModel):
     )
 
 
-class Atendimento(BaseModel):
+class AtendimentoOut(BaseModel):
     id: PositiveInt = Field(description="ID do atendimento.", examples=[1])
     id_assunto: PositiveInt = Field(description="ID do assunto.", examples=[12])
     status: utils.SuStatusCod = Field(
@@ -86,6 +82,6 @@ class Atendimento(BaseModel):
         return mapping[v]
 
 
-class AtendimentoOut(BaseModel):
-    data: list[Atendimento]
+class AtendimentoListOut(BaseModel):
+    data: list[AtendimentoOut]
     meta: Meta

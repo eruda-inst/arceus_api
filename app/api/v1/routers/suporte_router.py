@@ -75,7 +75,7 @@ async def get_atendimentos(
     id_login: IdLogin,
     pagina: Pagina | None = 1,
     itens_por_pagina: ItensPorPagina | None = 10,
-) -> schemas.AtendimentoOut:
+) -> schemas.AtendimentoListOut:
     """
     Obtém atendimentos abertos de um cliente, através do ID de login.
     """
@@ -93,7 +93,7 @@ async def post_atendimentos(
     atendimento: Annotated[
         schemas.AtendimentoIn, Body(description="Dados do atendimento.")
     ],
-) -> schemas.AtendimentoCreate:
+) -> schemas.AtendimentoOut:
     """
     Abre um atendimento para um cliente, atravé de dados do atendimento.
     """
@@ -108,7 +108,7 @@ async def put_ip(
     pool_radius: Annotated[
         str | None, Body(description="Radius do login a ser atualizado.")
     ] = "",
-) -> schemas.MensagemOut:
+) -> schemas.IpOut:
     """
     Atualiza IP e Radius de um login, através do ID de login.
     """

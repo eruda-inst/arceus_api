@@ -47,7 +47,7 @@ async def get_contratos(
 )
 async def post_leads(
     lead: Annotated[schemas.LeadIn, Body(description="Lead a ser cadastrado.")],
-) -> schemas.LeadCreate:
+) -> schemas.LeadOut:
     """
     Cadastra novo lead e retorna o ID dele.
     """
