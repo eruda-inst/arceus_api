@@ -34,11 +34,6 @@ class CobrancaService(service_service.Service):
                 itens_por_pagina=itens_por_pagina,
             )
             regs = res.get("registros", [])
-            if not regs:
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail="Faturas não encontradas.",
-                )
             faturas_abertas = regs
 
             faturas_vencidas_parciais: list[schemas.FaturaAberta] = []
@@ -54,6 +49,7 @@ class CobrancaService(service_service.Service):
                 data_vencimento_iso = fatura_aberta["data_vencimento"]  # YYYY-MM-DD
 
                 # Pula faturas não vencidas
+                # Datas em formato ISO podem ser comparadas diretamente, como comparações de strings convencionais
                 if data_hoje_iso <= data_vencimento_iso:
                     continue
 
