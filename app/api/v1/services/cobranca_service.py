@@ -66,7 +66,7 @@ class CobrancaService(service_service.Service):
                 if not regs:
                     raise HTTPException(
                         status_code=status.HTTP_404_NOT_FOUND,
-                        detail="Contrato não encontrado.",
+                        detail="Contrato inexistente.",
                     )
                 contrato = regs[0]
 
@@ -94,5 +94,5 @@ class CobrancaService(service_service.Service):
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno: {e}",
+                detail=f"Erro interno desconhecido: {e}",
             )
