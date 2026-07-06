@@ -196,15 +196,14 @@ class FinanceiroService(service_service.Service):
             endpoint = "desbloqueio_confianca"
             payload = {"id": id_contrato}
             res = await clients.IXCCliente.post(endpoint=endpoint, payload=payload)
-            type = res.get("type")
+            type = res["type"]
             if type == "error":
-                msg = res.get("message", "Desbloqueio malsucedido.")
                 raise HTTPException(
-                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=msg
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail="Desbloqueio malsucedido.",
                 )
-            msg = res.get("message", "Desbloqueio bem-sucedido.")
 
-            return schemas.MensagemOut(mensagem=msg)
+            return schemas.MensagemOut(mensagem="Desbloqueio bem-sucedido.")
         except HTTPException:
             raise
         except Exception as e:
@@ -247,9 +246,7 @@ class FinanceiroService(service_service.Service):
     @staticmethod
     async def get_chave_pix(id_fatura: PositiveInt) -> schemas.ChavePixOut:
         try:
-            """
-            --- Fatura ---
-            """
+            # --- Fatura ---
             res = await clients.SeteAZCliente.get_chave_pix(id_fatura=id_fatura)
             fatura = res.get("id")
             if not fatura:
@@ -257,9 +254,7 @@ class FinanceiroService(service_service.Service):
                     status_code=status.HTTP_404_NOT_FOUND, detail="Fatura inexistente."
                 )
 
-            """
-            --- Chave pix ---
-            """
+            # --- Chave pix ---
             chave_pix = res.get("pixCode")
             if not chave_pix:
                 raise HTTPException(
@@ -332,7 +327,7 @@ class FinanceiroService(service_service.Service):
             res = await clients.IXCCliente.put(
                 endpoint=endpoint, id=id, payload=cliente_atualizado
             )
-            type = res.get("type")
+            type = res["type"]
             if type == "error":
                 raise HTTPException(
                     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

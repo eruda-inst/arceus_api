@@ -188,7 +188,8 @@ class SuporteService(service_service.Service):
             payload = {"id": id_login}
             endpoint = "desconectar_clientes"
             res = await clients.IXCCliente.post(endpoint=endpoint, payload=payload)
-            type = res["msgs"][0]["type"]
+            print(res)
+            type = res["msg"][0]["type"]
             if type == "error":
                 raise HTTPException(
                     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -267,13 +268,12 @@ class SuporteService(service_service.Service):
             endpoint = "su_ticket"
             payload = atendimento.model_dump()
             res = await clients.IXCCliente.post(endpoint=endpoint, payload=payload)
-            type = res.get("type")
-            if type == "error":
+            id = res.get("id")
+            if not id:
                 raise HTTPException(
                     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                     detail="Cadastro malsucedido.",
                 )
-            id = res.get("id")
 
             # --- Atendimento criado ---
             grid_param = [{"TB": "su_ticket.id", "OP": "=", "P": str(id)}]
@@ -331,7 +331,7 @@ class SuporteService(service_service.Service):
             res = await clients.IXCCliente.put(
                 endpoint=endpoint, id=id, payload=payload
             )
-            type = res.get("type")
+            type = res["type"]
             if type == "error":
                 raise HTTPException(
                     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

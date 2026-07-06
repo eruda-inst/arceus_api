@@ -216,8 +216,6 @@ class VilaService(service_service.Service):
                     itens_por_pagina=itens_por_pagina,
                 ),
             )
-        except HTTPException:
-            raise
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -238,7 +236,7 @@ class VilaService(service_service.Service):
             endpoint = "radusuarios_25452"
             payload = {"get_id": str(login["id"])}
             res = await clients.IXCCliente.post(endpoint=endpoint, payload=payload)
-            type = res.get("type")
+            type = res["type"]
             if type == "error":
                 raise HTTPException(
                     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -246,6 +244,8 @@ class VilaService(service_service.Service):
                 )
 
             return schemas.MensagemOut(mensagem="Limpeza bem-sucedida.")
+        except HTTPException:
+            raise
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -266,8 +266,7 @@ class VilaService(service_service.Service):
             endpoint = "desconectar_clientes"
             payload = {"id": str(login["id"])}
             res = await clients.IXCCliente.post(endpoint=endpoint, payload=payload)
-            msgs = res.get("msg", [])
-            type = msgs[0].get("type")
+            type = res["msg"][0]["type"]
             if type == "error":
                 raise HTTPException(
                     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -275,6 +274,8 @@ class VilaService(service_service.Service):
                 )
 
             return schemas.MensagemOut(mensagem="Desconexão bem-sucedida.")
+        except HTTPException:
+            raise
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -290,13 +291,12 @@ class VilaService(service_service.Service):
             endpoint = "su_ticket"
             payload = atendimento.model_dump()
             res = await clients.IXCCliente.post(endpoint=endpoint, payload=payload)
-            type = res.get("type")
-            if type == "error":
+            id = res.get("id")
+            if not id:
                 raise HTTPException(
                     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                     detail="Cadastro malsucedido.",
                 )
-            id = res.get("id")
 
             # --- Atendimento criado ---
             grid_param = [{"TB": "su_ticket.id", "OP": "=", "P": str(id)}]
@@ -312,6 +312,8 @@ class VilaService(service_service.Service):
                 mensagem=atendimento_criado["menssagem"],
                 titulo=atendimento_criado["titulo"],
             )
+        except HTTPException:
+            raise
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

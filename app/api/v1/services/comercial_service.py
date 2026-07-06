@@ -145,7 +145,7 @@ class ComercialService(service_service.Service):
             """
             payload["data_cadastro"] = "N/A"
             res = await clients.IXCCliente.post(endpoint=endpoint, payload=payload)
-            id = res.get("id", None)
+            id = res.get("id")
             if not id:
                 raise HTTPException(
                     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -156,7 +156,7 @@ class ComercialService(service_service.Service):
             grid_param = [{"TB": "contato.id", "OP": "=", "P": str(id)}]
             res = await clients.IXCCliente.get(endpoint=endpoint, grid_param=grid_param)
             regs = res.get("registros", [])
-            lead_criado: dict[str, Any] = regs[0]
+            lead_criado = regs[0]
 
             return schemas.LeadOut(
                 id=lead_criado["id"],
@@ -236,7 +236,7 @@ class ComercialService(service_service.Service):
             res = await clients.IXCCliente.put(
                 endpoint=endpoint, id=id, payload=payload
             )
-            type = res.get("type")
+            type = res["type"]
             if type == "error":
                 raise HTTPException(
                     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
