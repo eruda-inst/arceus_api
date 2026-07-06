@@ -1,5 +1,12 @@
 from .. import utils
-from pydantic import BaseModel, field_serializer, Field
+from pydantic import BaseModel, field_serializer, Field, PositiveInt
+
+
+class IpOut(BaseModel):
+    ip: str = Field(description="IP do login.", examples=["123.456.7.890"])
+    pool_radius: PositiveInt = Field(
+        ge=1, description="Pool Radius do login.", examples=[1]
+    )
 
 
 class StatusConexaoOut(BaseModel):

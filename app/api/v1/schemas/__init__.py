@@ -1,11 +1,6 @@
 from .misc_schema import Meta, MensagemOut
-from .login_schema import StatusConexaoOut, WifiOut
-from .atendimento_schema import (
-    Atendimento,
-    AtendimentoOut,
-    AtendimentoCreate,
-    AtendimentoIn,
-)
+from .login_schema import StatusConexaoOut, WifiOut, IpOut
+from .atendimento_schema import AtendimentoOut, AtendimentoListOut, AtendimentoIn
 from .onu_schema import StatusOnuOut
 from .cliente_schema import ClienteExisteOut, CredencialOut, ContatoOut
 from .lead_schema import LeadIn, LeadCreate, LeadOut, LeadUpdate
@@ -24,6 +19,7 @@ from .plano_schema import PlanoSugeridoOut, PlanoSugeridoListOut
 
 __all__ = [
     "Meta",
+    "IpOut",
     "ContratoOut",
     "ContratoListOut",
     "MensagemOut",
@@ -35,8 +31,8 @@ __all__ = [
     "WifiOut",
     "LeadCreate",
     "StatusConexaoOut",
-    "Atendimento",
-    "AtendimentoCreate",
+    "AtendimentoOut",
+    "AtendimentoListOut",
     "AtendimentoIn",
     "AtendimentoOut",
     "StatusOnuOut",

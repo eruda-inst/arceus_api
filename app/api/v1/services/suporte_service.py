@@ -209,7 +209,7 @@ class SuporteService(service_service.Service):
         id_login: PositiveInt,
         pagina: PositiveInt | None,
         itens_por_pagina: PositiveInt | None,
-    ) -> schemas.AtendimentoOut:
+    ) -> schemas.AtendimentoListOut:
         try:
             # --- Atendimentos ---
             endpoint = "su_ticket"
@@ -228,13 +228,13 @@ class SuporteService(service_service.Service):
             total = res.get("total", 0)
             atendimentos = regs
 
-            atendimentos_parciais: list[schemas.Atendimento] = []
+            atendimentos_parciais: list[schemas.AtendimentoOut] = []
 
             # --- Iteração entre atendimentos ---
             for atendimento in atendimentos:
                 # --- Atendimentos parciais ---
                 atendimentos_parciais.append(
-                    schemas.Atendimento(
+                    schemas.AtendimentoOut(
                         id=atendimento["id"],
                         id_assunto=atendimento["id_assunto"],
                         status=atendimento["su_status"],
@@ -244,7 +244,7 @@ class SuporteService(service_service.Service):
                     )
                 )
 
-            return schemas.AtendimentoOut(
+            return schemas.AtendimentoListOut(
                 data=atendimentos_parciais,
                 meta=schemas.Meta(
                     total_itens=total,
@@ -261,7 +261,7 @@ class SuporteService(service_service.Service):
     @staticmethod
     async def post_atendimentos(
         atendimento: schemas.AtendimentoIn,
-    ) -> schemas.AtendimentoCreate:
+    ) -> schemas.AtendimentoOut:
         try:
             # --- Atendimento ---
             endpoint = "su_ticket"
@@ -275,7 +275,20 @@ class SuporteService(service_service.Service):
                 )
             id = res.get("id")
 
-            return schemas.AtendimentoCreate(id=id)
+            # --- Atendimento criado ---
+            grid_param = [{"TB": "su_ticket.id", "OP": "=", "P": str(id)}]
+            res = await clients.IXCCliente.get(endpoint=endpoint, grid_param=grid_param)
+            regs = res.get("registros", [])
+            atendimento_criado: dict[str, Any] = regs[0]
+
+            return schemas.AtendimentoOut(
+                id=atendimento_criado["id"],
+                data_criacao=atendimento_criado["data_criacao"],
+                id_assunto=atendimento_criado["id_assunto"],
+                status=atendimento_criado["su_status"],
+                mensagem=atendimento_criado["menssagem"],
+                titulo=atendimento_criado["titulo"],
+            )
         except HTTPException:
             raise
         except Exception as e:
@@ -287,7 +300,7 @@ class SuporteService(service_service.Service):
     @staticmethod
     async def put_ip(
         id_login: PositiveInt, ip: str | None, pool_radius: str | None
-    ) -> schemas.MensagemOut:
+    ) -> schemas.IpOut:
         try:
             # --- Login ---
             endpoint = "radusuarios"
@@ -325,7 +338,7 @@ class SuporteService(service_service.Service):
                     detail="Atualização malsucedida.",
                 )
 
-            return schemas.MensagemOut(mensagem="Atualização bem-sucedida.")
+            return schemas.IpOut(ip=novo_ip, pool_radius=int(novo_radius))
         except HTTPException:
             raise
         except Exception as e:

@@ -165,7 +165,7 @@ class VilaService(service_service.Service):
         numero_residencia: PositiveInt,
         pagina: PositiveInt | None,
         itens_por_pagina: PositiveInt | None,
-    ) -> schemas.AtendimentoOut:
+    ) -> schemas.AtendimentoListOut:
         try:
             # --- Login ---
             login = await cls._get_login(numero_residencia=numero_residencia)
@@ -193,12 +193,12 @@ class VilaService(service_service.Service):
             total = res["total"]
             atendimentos = regs
 
-            atendimentos_parciais: list[schemas.Atendimento] = []
+            atendimentos_parciais: list[schemas.AtendimentoOut] = []
 
             # --- Iteração entre atendimentos ---
             for atendimento in atendimentos:
                 atendimentos_parciais.append(
-                    schemas.Atendimento(
+                    schemas.AtendimentoOut(
                         id=atendimento["id"],
                         id_assunto=atendimento["id_assunto"],
                         status=atendimento["su_status"],
@@ -208,7 +208,7 @@ class VilaService(service_service.Service):
                     ),
                 )
 
-            return schemas.AtendimentoOut(
+            return schemas.AtendimentoListOut(
                 data=atendimentos_parciais,
                 meta=schemas.Meta(
                     total_itens=total,
@@ -284,7 +284,7 @@ class VilaService(service_service.Service):
     @classmethod
     async def post_atendimentos(
         cls, atendimento: schemas.AtendimentoIn
-    ) -> schemas.AtendimentoCreate:
+    ) -> schemas.AtendimentoOut:
         try:
             # --- Atendimento ---
             endpoint = "su_ticket"
@@ -298,7 +298,20 @@ class VilaService(service_service.Service):
                 )
             id = res.get("id")
 
-            return schemas.AtendimentoCreate(id=id)
+            # --- Atendimento criado ---
+            grid_param = [{"TB": "su_ticket.id", "OP": "=", "P": str(id)}]
+            res = await clients.IXCCliente.get(endpoint=endpoint, grid_param=grid_param)
+            regs = res.get("registros", [])
+            atendimento_criado: dict[str, Any] = regs[0]
+
+            return schemas.AtendimentoOut(
+                id=atendimento_criado["id"],
+                data_criacao=atendimento_criado["data_criacao"],
+                id_assunto=atendimento_criado["id_assunto"],
+                status=atendimento_criado["su_status"],
+                mensagem=atendimento_criado["menssagem"],
+                titulo=atendimento_criado["titulo"],
+            )
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

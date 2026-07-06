@@ -58,7 +58,7 @@ async def get_atendimentos(
     itens_por_pagina: Annotated[
         int | None, Query(ge=1, description="Itens por página.")
     ] = 10,
-) -> schemas.AtendimentoOut:
+) -> schemas.AtendimentoListOut:
     """
     Obtém atendimentos abertos de um cliente, através do número da residência.
     """
@@ -98,7 +98,7 @@ async def post_atendimentos(
     atendimento: Annotated[
         schemas.AtendimentoIn, Body(description="Dados do atendimento.")
     ],
-) -> schemas.AtendimentoCreate:
+) -> schemas.AtendimentoOut:
     """
     Abre ticket de atendimento, através de dados do atendimento.
     """

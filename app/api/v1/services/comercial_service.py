@@ -70,7 +70,7 @@ class ComercialService(service_service.Service):
             total = res.get("total", 0)
             contratos = regs
 
-            contratos_parciais: list[schemas.ComercialContrato] = []
+            contratos_parciais: list[schemas.ComercialContratoOut] = []
 
             # --- Iteração entre contratos ---
             for contrato in contratos:
@@ -106,7 +106,7 @@ class ComercialService(service_service.Service):
 
                 # --- Contrato parcial ---
                 contratos_parciais.append(
-                    schemas.ComercialContrato(
+                    schemas.ComercialContratoOut(
                         id=id_contrato,
                         contrato=contrato.get("contrato"),
                         nome_cliente=cliente.get("razao"),
@@ -135,7 +135,7 @@ class ComercialService(service_service.Service):
             )
 
     @staticmethod
-    async def post_leads(lead: schemas.LeadIn) -> schemas.LeadCreate:
+    async def post_leads(lead: schemas.LeadIn) -> schemas.LeadOut:
         try:
             # --- Lead ---
             endpoint = "contato"
@@ -152,7 +152,37 @@ class ComercialService(service_service.Service):
                     detail="Cadastro malsucedido.",
                 )
 
-            return schemas.LeadCreate(id=id)
+            # --- Lead criado ---
+            grid_param = [{"TB": "contato.id", "OP": "=", "P": str(id)}]
+            res = await clients.IXCCliente.get(endpoint=endpoint, grid_param=grid_param)
+            regs = res.get("registros", [])
+            lead_criado: dict[str, Any] = regs[0]
+
+            return schemas.LeadOut(
+                id=lead_criado["id"],
+                ativo=lead_criado["ativo"],
+                bairro=lead_criado["bairro"],
+                cep=lead_criado["cep"],
+                cidade=lead_criado["cidade"],
+                cnpj_cpf=lead_criado["cnpj_cpf"],
+                data_nascimento=lead_criado["data_nascimento"],
+                email=lead_criado["email"],
+                endereco=lead_criado["endereco"],
+                fone_celular=lead_criado["fone_celular"],
+                fone_whatsapp=lead_criado["fone_whatsapp"],
+                id_candidato_tipo=lead_criado["id_candidato_tipo"],
+                id_filial=lead_criado["id_filial"],
+                id_responsavel=lead_criado["id_responsavel"],
+                id_vd_contrato=lead_criado["id_vd_contrato"],
+                lead=lead_criado["lead"],
+                nome=lead_criado["nome"],
+                numero=lead_criado["numero"],
+                obs=lead_criado["obs"],
+                principal=lead_criado["principal"],
+                tipo_pessoa=lead_criado["tipo_pessoa"],
+                uf=lead_criado["uf"],
+            )
+
         except HTTPException:
             raise
         except Exception as e:
@@ -213,7 +243,7 @@ class ComercialService(service_service.Service):
                     detail="Atualização malsucedida.",
                 )
 
-            return schemas.LeadOut(**lead_atualizado)
+            return schemas.LeadOut(**lead_atualizado, id=id)
         except HTTPException:
             raise
         except Exception as e:

@@ -3,6 +3,7 @@ from pydantic import BaseModel, Field, PositiveInt, EmailStr, field_serializer
 
 
 class LeadOut(BaseModel):
+    id: PositiveInt = Field(description="ID do lead.", examples=[1])
     ativo: utils.AtivoCod = Field(
         description="Indica se o lead está ativo.",
         min_length=1,  # S
