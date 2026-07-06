@@ -45,7 +45,7 @@ class FinanceiroService(service_service.Service):
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno: {e}",
+                detail=f"Erro interno desconhecido: {e}",
             )
 
     @classmethod
@@ -83,7 +83,7 @@ class FinanceiroService(service_service.Service):
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno: {e}",
+                detail=f"Erro interno desconhecido: {e}",
             )
 
     @classmethod
@@ -106,7 +106,7 @@ class FinanceiroService(service_service.Service):
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno: {e}",
+                detail=f"Erro interno desconhecido: {e}",
             )
 
     @classmethod
@@ -156,7 +156,7 @@ class FinanceiroService(service_service.Service):
                 if not regs:
                     raise HTTPException(
                         status_code=status.HTTP_404_NOT_FOUND,
-                        detail="Contrato não encontrado.",
+                        detail="Contrato inexistente.",
                     )
                 contrato = regs[0]
 
@@ -184,7 +184,7 @@ class FinanceiroService(service_service.Service):
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno: {e}",
+                detail=f"Erro interno desconhecido: {e}",
             )
 
     @staticmethod
@@ -192,17 +192,25 @@ class FinanceiroService(service_service.Service):
         id_contrato: PositiveInt,
     ) -> schemas.MensagemOut:
         try:
-            # --- Desbloqueio em confiança ---
+            # --- Desbloqueio de confiança ---
             endpoint = "desbloqueio_confianca"
             payload = {"id": id_contrato}
             res = await clients.IXCCliente.post(endpoint=endpoint, payload=payload)
-            mensagem = res.get("message", "Nenhuma mensagem retornada.")
+            type = res.get("type")
+            if type == "error":
+                msg = res.get("message", "Desbloqueio malsucedido.")
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=msg
+                )
+            msg = res.get("message", "Desbloqueio bem-sucedido.")
 
-            return schemas.MensagemOut(mensagem=mensagem)
+            return schemas.MensagemOut(mensagem=msg)
+        except HTTPException:
+            raise
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno: {e}",
+                detail=f"Erro interno desconhecido: {e}",
             )
 
     @staticmethod
@@ -215,8 +223,7 @@ class FinanceiroService(service_service.Service):
             regs = res.get("registros")
             if not regs:
                 raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail="Fatura não encontrada.",
+                    status_code=status.HTTP_404_NOT_FOUND, detail="Fatura inexistente."
                 )
             fatura = regs[0]
 
@@ -225,7 +232,7 @@ class FinanceiroService(service_service.Service):
             if not linha_digitavel:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
-                    detail="Linha digitável não encontrada.",
+                    detail="Linha digitável inexistente.",
                 )
 
             return schemas.LinhaDigitavelOut(linha_digitavel=linha_digitavel)
@@ -234,25 +241,39 @@ class FinanceiroService(service_service.Service):
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno: {e}",
+                detail=f"Erro interno desconhecido: {e}",
             )
 
     @staticmethod
     async def get_chave_pix(id_fatura: PositiveInt) -> schemas.ChavePixOut:
         try:
+            """
+            --- Fatura ---
+            """
             res = await clients.SeteAZCliente.get_chave_pix(id_fatura=id_fatura)
-            if len(res) < 1 or not res.get("pixCode"):
+            fatura = res.get("id")
+            if not fatura:
                 raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND, detail="Sem chave pix."
+                    status_code=status.HTTP_404_NOT_FOUND, detail="Fatura inexistente."
                 )
+
+            """
+            --- Chave pix ---
+            """
             chave_pix = res.get("pixCode")
+            if not chave_pix:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Chave pix inexistente.",
+                )
+
             return schemas.ChavePixOut(chave_pix=chave_pix)
         except HTTPException:
             raise
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno: {e}",
+                detail=f"Erro interno desconhecido: {e}",
             )
 
     @classmethod
@@ -271,8 +292,7 @@ class FinanceiroService(service_service.Service):
             regs = res.get("registros", [])
             if not regs:
                 raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail="Cliente não encontrado.",
+                    status_code=status.HTTP_404_NOT_FOUND, detail="Cliente inexistente."
                 )
             cliente = regs[0]
 
@@ -284,7 +304,7 @@ class FinanceiroService(service_service.Service):
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno: {e}",
+                detail=f"Erro interno desconhecido: {e}",
             )
 
     @staticmethod
@@ -299,8 +319,7 @@ class FinanceiroService(service_service.Service):
             regs = res.get("registros", [])
             if not regs:
                 raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail="Cliente não encontrado.",
+                    status_code=status.HTTP_404_NOT_FOUND, detail="Cliente inexistente."
                 )
             cliente_antigo = regs[0]
 
@@ -313,6 +332,12 @@ class FinanceiroService(service_service.Service):
             res = await clients.IXCCliente.put(
                 endpoint=endpoint, id=id, payload=cliente_atualizado
             )
+            type = res.get("type")
+            if type == "error":
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail="Cadastro malsucedido.",
+                )
 
             return schemas.CredencialOut(
                 usuario=cliente_atualizado["hotsite_email"], senha=senha
@@ -322,5 +347,5 @@ class FinanceiroService(service_service.Service):
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno: {e}",
+                detail=f"Erro interno desconhecido: {e}",
             )
