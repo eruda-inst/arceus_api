@@ -108,7 +108,7 @@ class ComercialService:
                     schemas.ComercialContratoOut(
                         id=id_contrato,
                         contrato=contrato["contrato"],
-                        nome_cliente=cliente["nome"],
+                        nome_cliente=cliente["razao"],
                         valor=fatura_referencia["valor"],
                         status_acesso=contrato["status_internet"],
                         data_vencimento=fatura_referencia["data_vencimento"],
