@@ -42,18 +42,6 @@ async def get_contratos(
     )
 
 
-@comercial_router.post(
-    path="/leads", status_code=status.HTTP_201_CREATED, summary="Cadastra novo lead."
-)
-async def post_leads(
-    lead: Annotated[schemas.LeadIn, Body(description="Lead a ser cadastrado.")],
-) -> schemas.LeadOut:
-    """
-    Cadastra novo lead e retorna o ID dele.
-    """
-    return await services.ComercialService.post_leads(lead=lead)
-
-
 @comercial_router.get(
     path="/cliente_existe", summary="Checa se um cliente existe no Opa."
 )
@@ -64,6 +52,18 @@ async def cliente_existe(
     Checa se um cliente existe no Opa, através do CPF/CNPJ.
     """
     return await services.ComercialService.cliente_existe(cpf_cnpj=cpf_cnpj)
+
+
+@comercial_router.post(
+    path="/leads", status_code=status.HTTP_201_CREATED, summary="Cadastra novo lead."
+)
+async def post_leads(
+    lead: Annotated[schemas.LeadIn, Body(description="Lead a ser cadastrado.")],
+) -> schemas.LeadOut:
+    """
+    Cadastra novo lead e retorna o ID dele.
+    """
+    return await services.ComercialService.post_leads(lead=lead)
 
 
 # Por razões de limitações na plataforma opa, o verbo deve ser put, ao invés de patch

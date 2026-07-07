@@ -58,14 +58,12 @@ async def get_status_onu(
     )
 
 
-@suporte_router.post(
-    path="/desconectar_cliente", summary="Envia sinal de desconexão para um cliente."
-)
-async def post_desconectar_cliente(id_login: IdLogin) -> schemas.MensagemOut:
+@suporte_router.get(path="/dados_wifi", summary="Obtém dados do WiFi de um cliente.")
+async def get_dados_wifi(id_login: IdLogin) -> schemas.WifiOut:
     """
-    Envia sinal de desconexão para um cliente, através do ID de login.
+    Obtém dados do WiFi de um cliente, através do ID de login.
     """
-    return await services.SuporteService.post_desconectar_cliente(id_login=id_login)
+    return await services.SuporteService.get_dados_wifi(id_login=id_login)
 
 
 @suporte_router.get(
@@ -100,6 +98,24 @@ async def post_atendimentos(
     return await services.SuporteService.post_atendimentos(atendimento=atendimento)
 
 
+@suporte_router.post(
+    path="/desconectar_cliente", summary="Envia sinal de desconexão para um cliente."
+)
+async def post_desconectar_cliente(id_login: IdLogin) -> schemas.MensagemOut:
+    """
+    Envia sinal de desconexão para um cliente, através do ID de login.
+    """
+    return await services.SuporteService.post_desconectar_cliente(id_login=id_login)
+
+
+@suporte_router.post(path="/limpar_mac", summary="Limpa MAC Address.")
+async def post_limpar_mac(id_login: IdLogin) -> schemas.MensagemOut:
+    """
+    Limpa MAC Address, através do ID de login.
+    """
+    return await services.SuporteService.post_limpar_mac(id_login=id_login)
+
+
 # Por razões de limitações na plataforma opa, o verbo deve ser put, ao invés de patch
 @suporte_router.put(path="/ip/{id_login}", summary="Atualiza IP e Radius de um login.")
 async def put_ip(
@@ -115,19 +131,3 @@ async def put_ip(
     return await services.SuporteService.put_ip(
         id_login=id_login, ip=ip, pool_radius=pool_radius
     )
-
-
-@suporte_router.post(path="/limpar_mac", summary="Limpa MAC Address.")
-async def post_limpar_mac(id_login: IdLogin) -> schemas.MensagemOut:
-    """
-    Limpa MAC Address, através do ID de login.
-    """
-    return await services.SuporteService.post_limpar_mac(id_login=id_login)
-
-
-@suporte_router.get(path="/dados_wifi", summary="Obtém dados do WiFi de um cliente.")
-async def get_dados_wifi(id_login: IdLogin) -> schemas.WifiOut:
-    """
-    Obtém dados do WiFi de um cliente, através do ID de login.
-    """
-    return await services.SuporteService.get_dados_wifi(id_login=id_login)

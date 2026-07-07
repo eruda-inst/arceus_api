@@ -51,21 +51,6 @@ async def get_contratos(
     )
 
 
-@financeiro_router.post(
-    path="/desbloqueio_em_confianca",
-    summary="Realiza desbloqueio em confiança de um cliente.",
-)
-async def post_desbloqueio_em_confianca(
-    id_contrato: Annotated[int, Query(ge=1, description="ID do contrato.")],
-) -> schemas.MensagemOut:
-    """
-    Realiza desbloqueio em confiança de um cliente, através do ID do contrato.
-    """
-    return await services.FinanceiroService.post_desbloqueio_em_confianca(
-        id_contrato=id_contrato,
-    )
-
-
 @financeiro_router.get(
     path="/linha_digitavel/{id_fatura}", summary="Obtém linha digitável de uma fatura."
 )
@@ -100,6 +85,21 @@ async def get_credenciais(
     """
     return await services.FinanceiroService.get_credenciais(
         protocolo=protocolo, cnpj_cpf=cnpj_cpf
+    )
+
+
+@financeiro_router.post(
+    path="/desbloqueio_em_confianca",
+    summary="Realiza desbloqueio em confiança de um cliente.",
+)
+async def post_desbloqueio_em_confianca(
+    id_contrato: Annotated[int, Query(ge=1, description="ID do contrato.")],
+) -> schemas.MensagemOut:
+    """
+    Realiza desbloqueio em confiança de um cliente, através do ID do contrato.
+    """
+    return await services.FinanceiroService.post_desbloqueio_em_confianca(
+        id_contrato=id_contrato,
     )
 
 
