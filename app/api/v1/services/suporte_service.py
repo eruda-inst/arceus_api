@@ -75,13 +75,18 @@ class SuporteService:
                     )
                 login = regs[0]
 
+                # --- Nome do cliente ---
+                nome = cliente.get("nome")
+                razao = cliente.get("razao")
+                nome_cliente = nome if nome else razao
+
                 # --- Contrato parcial ---
                 contratos_parciais.append(
                     schemas.ContratoOut(
                         id=id_contrato,
                         id_login=login["id"],
                         id_cliente=contrato["id_cliente"],
-                        nome_cliente=cliente["razao"],
+                        nome_cliente=nome_cliente,
                         status=contrato["status"],
                         status_acesso=contrato["status_internet"],
                         contrato=contrato["contrato"],

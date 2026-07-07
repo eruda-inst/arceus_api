@@ -103,12 +103,17 @@ class ComercialService:
                         detail="Fatura referência inexistente.",
                     )
 
+                # --- Nome do cliente ---
+                nome = cliente.get("nome")
+                razao = cliente.get("razao")
+                nome_cliente = nome if nome else razao
+
                 # --- Contrato parcial ---
                 contratos_parciais.append(
                     schemas.ComercialContratoOut(
                         id=id_contrato,
                         contrato=contrato["contrato"],
-                        nome_cliente=cliente["razao"],
+                        nome_cliente=nome_cliente,
                         valor=fatura_referencia["valor"],
                         status_acesso=contrato["status_internet"],
                         data_vencimento=fatura_referencia["data_vencimento"],
