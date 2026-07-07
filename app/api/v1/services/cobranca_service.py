@@ -1,4 +1,4 @@
-from . import service_service
+from . import Service
 from datetime import datetime
 from zoneinfo import ZoneInfo
 from .. import schemas, clients
@@ -6,17 +6,16 @@ from pydantic import PositiveInt
 from fastapi import HTTPException, status
 
 
-class CobrancaService(service_service.Service):
-    @classmethod
+class CobrancaService:
+    @staticmethod
     async def get_faturas_vencidas(
-        cls,
         protocolo: str | None,
         cnpj_cpf: str | None,
         pagina: PositiveInt | None,
         itens_por_pagina: PositiveInt | None,
     ) -> schemas.FaturaListOut:
         try:
-            id_cliente = await cls.get_id_cliente_ixc(
+            id_cliente = await Service.get_id_cliente_ixc(
                 protocolo=protocolo, cnpj_cpf=cnpj_cpf
             )
 

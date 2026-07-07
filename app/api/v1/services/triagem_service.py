@@ -1,16 +1,16 @@
+from . import Service
 from typing import Any
-from . import service_service
 from .. import schemas, clients, utils
 from fastapi import HTTPException, status
 
 
-class TriagemService(service_service.Service):
-    @classmethod
+class TriagemService:
+    @staticmethod
     async def get_contato_cliente(
-        cls, protocolo: str | None, cnpj_cpf: str | None
+        protocolo: str | None, cnpj_cpf: str | None
     ) -> schemas.ContatoOut:
         try:
-            id_cliente = await cls.get_id_cliente_ixc(
+            id_cliente = await Service.get_id_cliente_ixc(
                 protocolo=protocolo, cnpj_cpf=cnpj_cpf
             )
 
@@ -37,15 +37,14 @@ class TriagemService(service_service.Service):
                 detail=f"Erro interno desconhecido: {e}",
             )
 
-    @classmethod
+    @staticmethod
     async def put_contato_cliente(
-        cls,
         telefone_celular: str,
         protocolo: str | None = None,
         cnpj_cpf: str | None = None,
     ) -> schemas.ContatoOut:
         try:
-            id_cliente = await cls.get_id_cliente_ixc(
+            id_cliente = await Service.get_id_cliente_ixc(
                 protocolo=protocolo, cnpj_cpf=cnpj_cpf
             )
 

@@ -1,7 +1,6 @@
 import httpx
-from .. import cores
 from typing import Any
-from pydantic import PositiveInt
+from .. import cores, utils
 from fastapi import HTTPException, status
 
 
@@ -17,7 +16,7 @@ class OpaCliente:
         try:
             async with httpx.AsyncClient(timeout=30.0) as async_client:
                 res = await async_client.request(
-                    method="GET",
+                    method=utils.HttpMethod.GET,
                     url=url,
                     headers=cls.headers,
                     json=payload,
@@ -31,21 +30,12 @@ class OpaCliente:
             )
 
     @classmethod
-    async def get_id_cliente_opa(cls, protocolo: str) -> Any:
-        payload = {"filter": {"protocolo": protocolo}}
-        data = await cls._make_request(endpoint="atendimento", payload=payload)
+    async def get(
+        cls,
+        endpoint: str,
+        filter: dict[str, Any],
+        options: dict[str, Any] | None = None,
+    ) -> Any:
+        payload: dict[str, Any] = {"filter": filter, "options": options}
+        data = await cls._make_request(endpoint=endpoint, payload=payload)
         return data
-
-    @classmethod
-    async def get_id_cliente_ixc(cls, id_cliente_opa: PositiveInt) -> Any:
-        payload = {"filter": {"_id": id_cliente_opa}}
-        data = await cls._make_request(endpoint="cliente", payload=payload)
-        return data
-
-    @classmethod
-    async def cliente_existe(cls, cpf_cnpj_limpo: str) -> bool:
-        payload: Any = {"filter": {"cpf_cnpj": cpf_cnpj_limpo}, "options": {"limit": 1}}
-        data = await cls()._make_request(endpoint="cliente", payload=payload)
-        if data.get("data"):
-            return True
-        return False

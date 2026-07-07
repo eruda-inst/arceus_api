@@ -29,7 +29,7 @@ class IXCCliente:
         cls,
         endpoint: str,
         payload: Any,
-        method: str = "POST",
+        method: utils.HttpMethod = utils.HttpMethod.POST,
         include_ixcsoft: bool = True,
     ) -> Any:
         url = f"{cls.base_url}/{endpoint}"
@@ -38,10 +38,7 @@ class IXCCliente:
         try:
             async with httpx.AsyncClient(timeout=30.0) as async_client:
                 res = await async_client.request(
-                    method=method,
-                    url=url,
-                    headers=headers,
-                    json=payload,
+                    method=method, url=url, headers=headers, json=payload
                 )
                 res.raise_for_status()
                 return res.json()
@@ -52,31 +49,15 @@ class IXCCliente:
                 detail=f"Erro retornado pelo IXC: {e.response.text}",
             ) from e
         except httpx.RequestError as e:
-            detail = f"Falha na comunicação com o serviço IXC: {e}"
-
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail=detail,
+                detail=f"Falha na comunicação com o serviço IXC: {e}",
             ) from e
         except ValueError as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=f"Resposta inválida do servidor IXC: {e}",
             ) from e
-
-    @classmethod
-    async def get_id_cliente_ixc(cls, cnpj_cpf: str) -> Any:
-        grid_param = [{"TB": "cliente.cnpj_cpf", "OP": "=", "P": str(cnpj_cpf)}]
-        payload = {"grid_param": json.dumps(obj=grid_param)}
-        data = await cls._make_request(endpoint="cliente", payload=payload)
-        return data
-
-    @classmethod
-    async def get_cliente_ixc(cls, id: PositiveInt) -> Any:
-        grid_param = [{"TB": "cliente.id", "OP": "=", "P": str(id)}]
-        payload = {"grid_param": json.dumps(obj=grid_param)}
-        data = await cls._make_request(endpoint="cliente", payload=payload)
-        return data
 
     @classmethod
     async def post(cls, endpoint: str, payload: dict[str, Any]) -> Any:
@@ -91,7 +72,7 @@ class IXCCliente:
             endpoint=f"{endpoint}/{id}",
             payload=payload,
             include_ixcsoft=False,
-            method="PUT",
+            method=utils.HttpMethod.PUT,
         )
         return data
 

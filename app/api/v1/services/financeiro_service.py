@@ -1,12 +1,12 @@
 import statistics
+from . import Service
 from typing import Any
-from . import service_service
 from pydantic import PositiveInt
 from .. import clients, schemas, utils
 from fastapi import HTTPException, status
 
 
-class FinanceiroService(service_service.Service):
+class FinanceiroService:
     @staticmethod
     async def _get_ultima_fatura_paga(
         id_contrato: PositiveInt,
@@ -109,16 +109,15 @@ class FinanceiroService(service_service.Service):
                 detail=f"Erro interno desconhecido: {e}",
             )
 
-    @classmethod
+    @staticmethod
     async def get_faturas_abertas(
-        cls,
         protocolo: str | None,
         cnpj_cpf: str | None,
         pagina: PositiveInt | None,
         itens_por_pagina: PositiveInt | None,
     ) -> schemas.FaturaListOut:
         try:
-            id_cliente = await cls.get_id_cliente_ixc(
+            id_cliente = await Service.get_id_cliente_ixc(
                 protocolo=protocolo, cnpj_cpf=cnpj_cpf
             )
 
@@ -271,12 +270,12 @@ class FinanceiroService(service_service.Service):
                 detail=f"Erro interno desconhecido: {e}",
             )
 
-    @classmethod
+    @staticmethod
     async def get_credenciais(
-        cls, protocolo: str | None = None, cnpj_cpf: str | None = None
+        protocolo: str | None = None, cnpj_cpf: str | None = None
     ) -> schemas.CredencialOut:
         try:
-            id_cliente = await cls.get_id_cliente_ixc(
+            id_cliente = await Service.get_id_cliente_ixc(
                 protocolo=protocolo, cnpj_cpf=cnpj_cpf
             )
 

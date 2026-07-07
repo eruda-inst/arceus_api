@@ -1,13 +1,12 @@
 from typing import Any
-from . import service_service
 from .. import clients, schemas
 from pydantic import PositiveInt
 from fastapi import HTTPException, status
 
 
-class VilaService(service_service.Service):
-    @classmethod
-    async def _get_login(cls, numero_residencia: PositiveInt) -> dict[str, Any]:
+class VilaService:
+    @staticmethod
+    async def _get_login(numero_residencia: PositiveInt) -> dict[str, Any]:
         try:
             # --- Login ---
             endpoint = "radusuarios"
@@ -282,9 +281,9 @@ class VilaService(service_service.Service):
                 detail=f"Erro interno desconhecido: {e}",
             )
 
-    @classmethod
+    @staticmethod
     async def post_atendimentos(
-        cls, atendimento: schemas.AtendimentoIn
+        atendimento: schemas.AtendimentoIn,
     ) -> schemas.AtendimentoOut:
         try:
             # --- Atendimento ---

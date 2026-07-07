@@ -1,5 +1,6 @@
 from .default_enum import Default
 from .sortorder_enum import SortOrder
+from .http_method_enum import HttpMethod
 from .login_enum import StatusConexaoCod, StatusConexaoRot, StatusOnuRot
 from .contrato_enum import (
     StatusContratoRot,
@@ -28,6 +29,7 @@ from .lead_enum import (
 __all__ = [
     "Default",
     "SortOrder",
+    "HttpMethod",
     "StatusConexaoCod",
     "StatusConexaoRot",
     "StatusOnuRot",

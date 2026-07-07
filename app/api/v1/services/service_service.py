@@ -8,8 +8,10 @@ class Service:
     @staticmethod
     async def _buscar_por_protocolo(protocolo: str) -> Any:
         # Busca ID do cliente no OPA
-        id_cliente_opa_res = await clients.OpaCliente.get_id_cliente_opa(
-            protocolo=protocolo
+        endpoint = "atendimento"
+        filter = {"protocolo": protocolo}
+        id_cliente_opa_res = await clients.OpaCliente.get(
+            endpoint=endpoint, filter=filter
         )
 
         if not id_cliente_opa_res.get("data"):
@@ -21,8 +23,10 @@ class Service:
         id_cliente_opa = id_cliente_opa_res["data"][0]["id_cliente"]
 
         # Busca ID do cliente no IXC via OPA
-        id_cliente_ixc_res = await clients.OpaCliente.get_id_cliente_ixc(
-            id_cliente_opa=id_cliente_opa
+        endpoint = "cliente"
+        filter = {"_id": id_cliente_opa}
+        id_cliente_ixc_res = await clients.OpaCliente.get(
+            endpoint=endpoint, filter=filter
         )
 
         if not id_cliente_ixc_res.get("data"):
@@ -35,8 +39,10 @@ class Service:
 
     @staticmethod
     async def _buscar_por_cnpj_cpf(cnpj_cpf: str) -> Any:
-        id_cliente_ixc_res = await clients.IXCCliente.get_id_cliente_ixc(
-            cnpj_cpf=cnpj_cpf
+        endpoint = "cliente"
+        grid_param = [{"TB": "cliente.cnpj_cpf", "OP": "=", "P": str(cnpj_cpf)}]
+        id_cliente_ixc_res = await clients.IXCCliente.get(
+            endpoint=endpoint, grid_param=grid_param
         )
 
         if not id_cliente_ixc_res.get("registros"):

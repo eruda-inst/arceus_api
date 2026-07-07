@@ -1,11 +1,11 @@
+from . import Service
 from typing import Any
-from . import service_service
 from pydantic import PositiveInt
 from fastapi import HTTPException, status
 from .. import utils, schemas, clients, services
 
 
-class ComercialService(service_service.Service):
+class ComercialService:
     @staticmethod
     async def get_status_acesso(id_contrato: PositiveInt) -> schemas.StatusInternetOut:
         try:
@@ -31,9 +31,8 @@ class ComercialService(service_service.Service):
                 detail=f"Erro interno desconhecido: {e}",
             )
 
-    @classmethod
+    @staticmethod
     async def get_contratos(
-        cls,
         protocolo: str | None,
         cnpj_cpf: str | None,
         pagina: PositiveInt | None,
@@ -41,10 +40,12 @@ class ComercialService(service_service.Service):
     ) -> schemas.ComercialContratoListOut:
         try:
             # --- Cliente ---
-            id_cliente = await cls.get_id_cliente_ixc(
+            id_cliente = await Service.get_id_cliente_ixc(
                 protocolo=protocolo, cnpj_cpf=cnpj_cpf
             )
-            res = await clients.IXCCliente.get_cliente_ixc(id=id_cliente)
+            endpoint = "cliente"
+            grid_param = [{"TB": "cliente.id", "OP": "=", "P": str(id_cliente)}]
+            res = await clients.IXCCliente.get(endpoint=endpoint, grid_param=grid_param)
             regs = res.get("registros", [])
             if not regs:
                 raise HTTPException(
@@ -196,9 +197,16 @@ class ComercialService(service_service.Service):
         try:
             # --- Busca de cliente no Opa ---
             cpf_cnpj_limpo = utils.Formatter.only_digits(cpf_cnpj)
-            cliente_existe = await clients.OpaCliente.cliente_existe(
-                cpf_cnpj_limpo=cpf_cnpj_limpo
+            endpoint = "cliente"
+            filter = {"cpf_cnpj": cpf_cnpj_limpo}
+            options = {"limit": 1}
+            res = await clients.OpaCliente.get(
+                endpoint=endpoint, filter=filter, options=options
             )
+            cliente_existe = True
+            data = res.get("data")
+            if not data:
+                cliente_existe = False
 
             return schemas.ClienteExisteOut(cliente_existe=cliente_existe)
         except Exception as e:

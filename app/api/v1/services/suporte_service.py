@@ -1,14 +1,13 @@
+from . import Service
 from typing import Any
-from . import service_service
 from pydantic import PositiveInt
 from fastapi import HTTPException, status
 from .. import schemas, clients, services
 
 
-class SuporteService(service_service.Service):
-    @classmethod
+class SuporteService:
+    @staticmethod
     async def get_contratos(
-        cls,
         protocolo: str | None,
         cnpj_cpf: str | None,
         pagina: PositiveInt | None,
@@ -16,15 +15,16 @@ class SuporteService(service_service.Service):
     ) -> schemas.ContratoListOut:
         try:
             # --- Cliente ---
-            id_cliente = await cls.get_id_cliente_ixc(
+            id_cliente = await Service.get_id_cliente_ixc(
                 protocolo=protocolo, cnpj_cpf=cnpj_cpf
             )
-            res = await clients.IXCCliente.get_cliente_ixc(id=id_cliente)
+            endpoint = "cliente"
+            grid_param = [{"TB": "cliente.id", "OP": "=", "P": str(id_cliente)}]
+            res = await clients.IXCCliente.get(endpoint=endpoint, grid_param=grid_param)
             regs = res.get("registros", [])
             if not regs:
                 raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail="Cliente inexistente.",
+                    status_code=status.HTTP_404_NOT_FOUND, detail="Cliente inexistente."
                 )
             cliente = regs[0]
 
