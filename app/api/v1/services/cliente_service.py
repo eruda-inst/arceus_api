@@ -21,7 +21,7 @@ class ClienteService:
                 if not regs:
                     raise HTTPException(
                         status_code=status.HTTP_404_NOT_FOUND,
-                        detail="Cliente inexistente no IXC",
+                        detail="Cliente inexistente no IXC.",
                     )
                 cliente_ixc = regs[0]
                 return cliente_ixc
