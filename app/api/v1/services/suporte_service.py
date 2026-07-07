@@ -81,7 +81,7 @@ class SuporteService:
                         id=id_contrato,
                         id_login=login["id"],
                         id_cliente=contrato["id_cliente"],
-                        nome_cliente=cliente["razao"],
+                        nome_cliente=cliente["nome"],
                         status=contrato["status"],
                         contrato=contrato["contrato"],
                         valor=fatura_referencia["valor"],
