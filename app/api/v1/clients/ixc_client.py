@@ -8,8 +8,8 @@ from fastapi import HTTPException, status
 
 
 class IXCCliente:
-    token = cores.settings.IXC_TOKEN
-    host = cores.settings.IXC_HOST
+    host = cores.settings.ixc_host
+    token = cores.settings.ixc_token.get_secret_value()
     base_url = f"https://{host}/webservice/v1"
 
     @classmethod

@@ -5,8 +5,8 @@ from pydantic import PositiveInt
 
 
 class SeteAZCliente:
-    base_url = cores.settings.BASE_URL_7AZ
-    api_key = cores.settings.API_KEY_7AZ
+    base_url = cores.settings.base_url_7az
+    api_key = cores.settings.api_key_7az.get_secret_value()
     timeout = httpx.Timeout(connect=5.0, read=30.0, write=10.0, pool=1.0)
     async_client = httpx.AsyncClient(timeout=timeout)
 

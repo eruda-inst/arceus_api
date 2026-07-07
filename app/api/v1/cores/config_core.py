@@ -5,23 +5,20 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
-    OPA_TOKEN: str = ""
-    IXC_TOKEN: str = ""
-    OPA_HOST: str = ""
-    IXC_HOST: str = ""
-    API_KEY_7AZ: str = ""
-    BASE_URL_7AZ: str = ""
+    api_key_7az: SecretStr = SecretStr("")
+    base_url_7az: str = ""
+    db_url: str = ""
+    ixc_host: str = ""
+    ixc_token: SecretStr = SecretStr("")
+    migrate_db_url: str = ""
+    opa_host: str = ""
+    opa_token: SecretStr = SecretStr("")
+    postgres_db: str = ""
+    postgres_password: SecretStr = SecretStr("")
+    postgres_user: str = ""
+    secret_key: SecretStr = SecretStr("")
 
-    DB_URL: str = ""
-    MIGRATE_DB_URL: str = ""
-
-    SECRET_KEY: SecretStr = SecretStr("")
-
-    POSTGRES_USER: str = ""
-    POSTGRES_PASSWORD: str = ""
-    POSTGRES_DB: str = ""
-
-    @field_validator("DB_URL")
+    @field_validator("db_url")
     def change_db_schema(cls, v: str) -> str:
         if v.startswith("postgresql://"):
             return v.replace("postgresql://", "postgresql+asyncpg://", 1)

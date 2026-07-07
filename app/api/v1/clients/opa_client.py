@@ -5,8 +5,8 @@ from fastapi import HTTPException, status
 
 
 class OpaCliente:
-    token = cores.settings.OPA_TOKEN
-    host = cores.settings.OPA_HOST
+    token = cores.settings.opa_token.get_secret_value()
+    host = cores.settings.opa_host
     base_url = f"https://{host}/api/v1"
     headers = {"Authorization": f"Bearer {token}"}
 
