@@ -37,6 +37,9 @@ class ContratoOut(BaseModel):
         description="Status do contrato.",
         examples=[utils.StatusContratoRot.PRE_CONTRATO],
     )
+    status_acesso: utils.StatusInternetCod = Field(
+        description="Status de acesso.", examples=[utils.StatusInternetRot.ATIVO]
+    )
     contrato: str = Field(description="Nome do plano.", examples=["Nome do plano"])
     valor: float = Field(description="Valor do plano.", examples=[12.34])
     data_vencimento: str = Field(
@@ -59,6 +62,24 @@ class ContratoOut(BaseModel):
             cod.INATIVO: rot.INATIVO,
             cod.NEGATIVADO: rot.NEGATIVADO,
             cod.DESISTIU: rot.DESISTIU,
+        }
+
+        return mapping[v]
+
+    @field_serializer("status_acesso")
+    def serialize_status_acesso(
+        self, v: utils.StatusInternetCod
+    ) -> utils.StatusInternetRot:
+        cod = utils.StatusInternetCod
+        rot = utils.StatusInternetRot
+
+        mapping = {
+            cod.ATIVO: rot.ATIVO,
+            cod.DESATIVADO: rot.DESATIVADO,
+            cod.BLOQUEIO_MANUAL: rot.BLOQUEIO_MANUAL,
+            cod.BLOQUEIO_AUTOMATICO: rot.BLOQUEIO_AUTOMATICO,
+            cod.FINANCEIRO_EM_ATRASO: rot.FINANCEIRO_EM_ATRASO,
+            cod.AGUARDANDO_ASSINATURA: rot.AGUARDANDO_ASSINATURA,
         }
 
         return mapping[v]
