@@ -6,13 +6,13 @@ services:
     container_name: db-bot
     restart: always
     environment:
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${postgres_user}
+      - POSTGRES_PASSWORD=${postgres_password}
+      - POSTGRES_DB=${postgres_db}
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      test: ["CMD-SHELL", "pg_isready -U ${postgres_usre} -d ${postgres_db}"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -22,14 +22,14 @@ services:
     image: zolppy/aggregator-api:latest
     container_name: api-bot
     environment:
-      - BASE_URL_7AZ=${BASE_URL_7AZ}
-      - API_KEY_7AZ=${API_KEY_7AZ}
-      - DB_URL=${DB_URL}
-      - IXC_HOST=${IXC_HOST}
-      - OPA_TOKEN=${OPA_TOKEN}
-      - OPA_HOST=${OPA_HOST}
-      - MIGRATE_DB_URL=${MIGRATE_DB_URL}
-      - IXC_TOKEN=${IXC_TOKEN}
+      - BASE_URL_7AZ=${base_url_7az}
+      - API_KEY_7AZ=${api_key_7az}
+      - DB_URL=${db_url}
+      - IXC_HOST=${ixc_host}
+      - OPA_TOKEN=${opa_token}
+      - OPA_HOST=${opa_host}
+      - MIGRATE_DB_URL=${migrate_db_url}
+      - IXC_TOKEN=${ixc_token}
       - RUN_MIGRATIONS=1
     ports:
       - 8000:8000
