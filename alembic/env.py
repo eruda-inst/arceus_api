@@ -19,7 +19,7 @@ if config.config_file_name is not None:
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
 
-database_url = settings.MIGRATE_DB_URL
+database_url = settings.migrate_db_url
 config.set_main_option("sqlalchemy.url", database_url)
 
 target_metadata = Base.metadata
