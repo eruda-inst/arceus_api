@@ -55,7 +55,8 @@ async def get_contratos(
     path="/linha_digitavel/{id_fatura}", summary="Obtém linha digitável de uma fatura."
 )
 async def get_linha_digitavel(
-    id_fatura: Annotated[int, Path(ge=1, description="ID da fatura.")],
+    # IDs NonNegativeInt, pois o IXC é quebrado
+    id_fatura: Annotated[int, Path(ge=0, description="ID da fatura.")],
 ) -> schemas.LinhaDigitavelOut:
     """
     Obtém linha digitável de uma fatura, através do ID dela.
@@ -65,7 +66,8 @@ async def get_linha_digitavel(
 
 @financeiro_router.get(path="/chave_pix", summary="Obtém chave pix de uma fatura.")
 async def get_chave_pix(
-    id_fatura: Annotated[int, Query(ge=1, description="ID da fatura.")],
+    # IDs NonNegativeInt, pois o IXC é quebrado
+    id_fatura: Annotated[int, Query(ge=0, description="ID da fatura.")],
 ) -> schemas.ChavePixOut:
     """
     Obtém chave pix de uma fatura, através do ID dela.
@@ -93,7 +95,8 @@ async def get_credenciais(
     summary="Realiza desbloqueio em confiança de um cliente.",
 )
 async def post_desbloqueio_em_confianca(
-    id_contrato: Annotated[int, Query(ge=1, description="ID do contrato.")],
+    # IDs NonNegativeInt, pois o IXC é quebrado
+    id_contrato: Annotated[int, Query(ge=0, description="ID do contrato.")],
 ) -> schemas.MensagemOut:
     """
     Realiza desbloqueio em confiança de um cliente, através do ID do contrato.
@@ -109,7 +112,8 @@ async def post_desbloqueio_em_confianca(
     summary="Atualiza senha da central do assinante de um cliente.",
 )
 async def put_credenciais(
-    id_cliente: Annotated[int, Path(ge=1, description="ID do cliente.")],
+    # IDs NonNegativeInt, pois o IXC é quebrado
+    id_cliente: Annotated[int, Path(ge=0, description="ID do cliente.")],
     senha: Annotated[str, Body(embed=True, description="Nova senha.")],
 ) -> schemas.CredencialOut:
     """

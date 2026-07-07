@@ -1,5 +1,5 @@
 from . import Meta
-from pydantic import BaseModel, Field, PositiveInt, NonNegativeInt
+from pydantic import BaseModel, Field, NonNegativeInt
 
 
 class LinhaDigitavelOut(BaseModel):
@@ -12,7 +12,7 @@ class LinhaDigitavelOut(BaseModel):
 
 
 class FaturaOut(BaseModel):
-    id: PositiveInt = Field(description="ID da fatura.", examples=[1])
+    id: NonNegativeInt = Field(description="ID da fatura.", examples=[1])
     data_vencimento: str = Field(
         description="Data de vencimento da fatura.",
         # Não pode haver isto, pois o IXC é quebrado

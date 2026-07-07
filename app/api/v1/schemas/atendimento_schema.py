@@ -1,12 +1,13 @@
 from . import Meta
 from .. import utils
-from pydantic import BaseModel, Field, PositiveInt, field_serializer
+from pydantic import BaseModel, Field, field_serializer, NonNegativeInt
 
 
 class AtendimentoIn(BaseModel):
-    id_login: PositiveInt = Field(description="ID de login.", examples=[1])
-    id_assunto: PositiveInt = Field(description="ID do assunto.", examples=[12])
-    id_cliente: PositiveInt = Field(description="ID do cliente.", examples=[123])
+    # IDs NonNegativeInt, pois o IXC é quebrado
+    id_login: NonNegativeInt = Field(description="ID de login.", examples=[1])
+    id_assunto: NonNegativeInt = Field(description="ID do assunto.", examples=[12])
+    id_cliente: NonNegativeInt = Field(description="ID do cliente.", examples=[123])
     menssagem: str = Field(
         description="Mensagem do atendimento.", examples=["Mensagem do atendimento"]
     )
@@ -33,13 +34,13 @@ class AtendimentoIn(BaseModel):
         description="Status do atendimento.",
         examples=[utils.SuStatusCod.NOVO],
     )
-    id_ticket_setor: PositiveInt | None = Field(
+    id_ticket_setor: NonNegativeInt | None = Field(
         default=utils.Default.ID_TICKET_SETOR,
         description="Setor do atendimento.",
         examples=[utils.Default.ID_TICKET_SETOR],
     )
-    id_contrato: PositiveInt = Field(description="ID do contrato.", examples=[1234])
-    id_responsavel_tecnico: PositiveInt | None = Field(
+    id_contrato: NonNegativeInt = Field(description="ID do contrato.", examples=[1234])
+    id_responsavel_tecnico: NonNegativeInt | None = Field(
         default=utils.Default.ID_RESPONSAVEL_ARCEUS,
         description="ID do responsável técnico.",
         examples=[utils.Default.ID_RESPONSAVEL_ARCEUS],
@@ -47,8 +48,9 @@ class AtendimentoIn(BaseModel):
 
 
 class AtendimentoOut(BaseModel):
-    id: PositiveInt = Field(description="ID do atendimento.", examples=[1])
-    id_assunto: PositiveInt = Field(description="ID do assunto.", examples=[12])
+    # IDs NonNegativeInt, pois o IXC é quebrado
+    id: NonNegativeInt = Field(description="ID do atendimento.", examples=[1])
+    id_assunto: NonNegativeInt = Field(description="ID do assunto.", examples=[12])
     status: utils.SuStatusCod = Field(
         description="Status do atendimento.", examples=[utils.SuStatusRot.NOVO]
     )

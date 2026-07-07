@@ -4,7 +4,8 @@ from fastapi import APIRouter, Query, status, Path, Body
 
 suporte_router = APIRouter(prefix="/suporte", tags=["Suporte"])
 
-IdLogin = Annotated[int, Query(ge=1, description="ID de login do cliente.")]
+# IDs NonNegativeInt, pois o IXC é quebrado
+IdLogin = Annotated[int, Query(ge=0, description="ID de login do cliente.")]
 Pagina = Annotated[int, Query(ge=1, description="Número da página.")]
 ItensPorPagina = Annotated[int, Query(ge=1, description="Itens por página.")]
 
@@ -119,7 +120,8 @@ async def post_limpar_mac(id_login: IdLogin) -> schemas.MensagemOut:
 # Por razões de limitações na plataforma opa, o verbo deve ser put, ao invés de patch
 @suporte_router.put(path="/ip/{id_login}", summary="Atualiza IP e Radius de um login.")
 async def put_ip(
-    id_login: Annotated[int, Path(ge=1, description="ID de login.")],
+    # IDs NonNegativeInt, pois o IXC é quebrado
+    id_login: Annotated[int, Path(ge=0, description="ID de login.")],
     ip: Annotated[str | None, Body(description="IP do login a ser atualizado.")] = "",
     pool_radius: Annotated[
         str | None, Body(description="Radius do login a ser atualizado.")

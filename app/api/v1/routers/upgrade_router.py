@@ -10,7 +10,8 @@ upgrade_router = APIRouter(prefix="/upgrade", tags=["Upgrade"])
     summary="Sugere planos oficiais de acordo com planos desatualizados.",
 )
 async def get_planos_sugeridos(
-    id_cliente: Annotated[int, Query(get=1, description="ID do cliente no IXC.")],
+    # IDs NonNegativeInt, pois o IXC é quebrado
+    id_cliente: Annotated[int, Query(get=0, description="ID do cliente no IXC.")],
     pagina: Annotated[int | None, Query(ge=1, description="Número da página.")] = 1,
     itens_por_pagina: Annotated[
         int | None, Query(ge=1, description="Itens por página.")

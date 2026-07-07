@@ -1,12 +1,13 @@
 from .. import clients, schemas
-from pydantic import PositiveInt
 from fastapi import HTTPException, status
+from pydantic import PositiveInt, NonNegativeInt
 
 
 class UpgradeService:
     @staticmethod
     async def get_planos_sugeridos(
-        id_cliente: PositiveInt,
+        # IDs NonNegativeInt, pois o IXC é quebrado
+        id_cliente: NonNegativeInt,
         pagina: PositiveInt | None,
         itens_por_pagina: PositiveInt | None,
     ) -> schemas.PlanoSugeridoListOut:

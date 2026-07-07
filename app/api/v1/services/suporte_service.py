@@ -1,8 +1,8 @@
-from . import ClienteService
 from typing import Any
-from pydantic import PositiveInt
-from fastapi import HTTPException, status
+from . import ClienteService
 from .. import schemas, clients, services
+from fastapi import HTTPException, status
+from pydantic import PositiveInt, NonNegativeInt
 
 
 class SuporteService:
@@ -107,7 +107,10 @@ class SuporteService:
             )
 
     @staticmethod
-    async def get_status_conexao(id_login: PositiveInt) -> schemas.StatusConexaoOut:
+    async def get_status_conexao(
+        # IDs NonNegativeInt, pois o IXC é quebrado
+        id_login: NonNegativeInt,
+    ) -> schemas.StatusConexaoOut:
         try:
             # --- Login ---
             endpoint = "radusuarios"
@@ -131,7 +134,9 @@ class SuporteService:
 
     @staticmethod
     async def get_status_onu(
-        id_login: PositiveInt | None = None, mac_onu: str | None = None
+        # IDs NonNegativeInt, pois o IXC é quebrado
+        id_login: NonNegativeInt | None = None,
+        mac_onu: str | None = None,
     ) -> schemas.StatusOnuOut:
         try:
             query_param = None
@@ -177,7 +182,10 @@ class SuporteService:
             )
 
     @staticmethod
-    async def post_desconectar_cliente(id_login: PositiveInt) -> schemas.MensagemOut:
+    async def post_desconectar_cliente(
+        # IDs NonNegativeInt, pois o IXC é quebrado
+        id_login: NonNegativeInt,
+    ) -> schemas.MensagemOut:
         try:
             # --- Desconectar cliente ---
             payload = {"id": id_login}
@@ -201,7 +209,8 @@ class SuporteService:
 
     @staticmethod
     async def get_atendimentos(
-        id_login: PositiveInt,
+        # IDs NonNegativeInt, pois o IXC é quebrado
+        id_login: NonNegativeInt,
         pagina: PositiveInt | None,
         itens_por_pagina: PositiveInt | None,
     ) -> schemas.AtendimentoListOut:
@@ -293,7 +302,10 @@ class SuporteService:
 
     @staticmethod
     async def put_ip(
-        id_login: PositiveInt, ip: str | None, pool_radius: str | None
+        # IDs NonNegativeInt, pois o IXC é quebrado
+        id_login: NonNegativeInt,
+        ip: str | None,
+        pool_radius: str | None,
     ) -> schemas.IpOut:
         try:
             # --- Login ---
@@ -342,7 +354,10 @@ class SuporteService:
             )
 
     @staticmethod
-    async def post_limpar_mac(id_login: PositiveInt) -> schemas.MensagemOut:
+    async def post_limpar_mac(
+        # IDs NonNegativeInt, pois o IXC é quebrado
+        id_login: NonNegativeInt,
+    ) -> schemas.MensagemOut:
         try:
             # --- Limpar MAC ---
             endpoint = "radusuarios_25452"
@@ -365,7 +380,10 @@ class SuporteService:
             )
 
     @staticmethod
-    async def get_dados_wifi(id_login: PositiveInt) -> schemas.WifiOut:
+    async def get_dados_wifi(
+        # IDs NonNegativeInt, pois o IXC é quebrado
+        id_login: NonNegativeInt,
+    ) -> schemas.WifiOut:
         try:
             # --- Login ---
             endpoint = "radusuarios"

@@ -1,13 +1,16 @@
-from . import ClienteService
 from typing import Any
-from pydantic import PositiveInt
+from . import ClienteService
 from fastapi import HTTPException, status
+from pydantic import PositiveInt, NonNegativeInt
 from .. import utils, schemas, clients, services
 
 
 class ComercialService:
     @staticmethod
-    async def get_status_acesso(id_contrato: PositiveInt) -> schemas.StatusInternetOut:
+    async def get_status_acesso(
+        # IDs NonNegativeInt, pois o IXC é quebrado
+        id_contrato: NonNegativeInt,
+    ) -> schemas.StatusInternetOut:
         try:
             # --- Contrato ---
             endpoint = "cliente_contrato"

@@ -1,9 +1,16 @@
 from .. import utils
-from pydantic import BaseModel, Field, PositiveInt, EmailStr, field_serializer
+from pydantic import (
+    Field,
+    EmailStr,
+    BaseModel,
+    PositiveInt,
+    NonNegativeInt,
+    field_serializer,
+)
 
 
 class LeadOut(BaseModel):
-    id: PositiveInt = Field(description="ID do lead.", examples=[1])
+    id: NonNegativeInt = Field(description="ID do lead.", examples=[1])
     ativo: utils.AtivoCod = Field(
         description="Indica se o lead está ativo.",
         min_length=1,  # S
@@ -33,7 +40,7 @@ class LeadOut(BaseModel):
         # max_length=10,  # YYYY-MM-AA
         examples=["dd/mm/aaaa"],
     )
-    id_filial: PositiveInt = Field(
+    id_filial: NonNegativeInt = Field(
         description="ID da filial.", examples=[utils.Default.ID_FILIAL]
     )
     fone_celular: str = Field(
@@ -71,15 +78,15 @@ class LeadOut(BaseModel):
     cidade: PositiveInt = Field(
         description="ID da cidade.", examples=[utils.Default.ID_CIDADE_JAC]
     )
-    id_vd_contrato: PositiveInt = Field(description="ID do Plano.", examples=[42])
-    id_responsavel: PositiveInt = Field(
+    id_vd_contrato: NonNegativeInt = Field(description="ID do Plano.", examples=[42])
+    id_responsavel: NonNegativeInt = Field(
         description="ID do responsável técnico.",
         examples=[utils.Default.ID_RESPONSAVEL_ARCEUS],
     )
     email: EmailStr = Field(
         description="E-mail do cliente.", examples=["email@email.com"]
     )
-    id_candidato_tipo: PositiveInt = Field(
+    id_candidato_tipo: NonNegativeInt = Field(
         description="ID do canal de venda.", examples=[42]
     )
     obs: str = Field(description="Observação do lead.", examples=["Observação do lead"])
@@ -184,7 +191,7 @@ class LeadUpdate(BaseModel):
         description="Data de nascimento.",
         examples=["dd/mm/aaaa"],
     )
-    id_filial: PositiveInt | None = Field(
+    id_filial: NonNegativeInt | None = Field(
         default=None, description="ID da filial.", examples=[utils.Default.ID_FILIAL]
     )
     fone_celular: str | None = Field(
@@ -232,12 +239,12 @@ class LeadUpdate(BaseModel):
         description="ID da cidade.",
         examples=[utils.Default.ID_CIDADE_JAC],
     )
-    id_vd_contrato: PositiveInt | None = Field(
+    id_vd_contrato: NonNegativeInt | None = Field(
         default=None,
         description="ID do plano.",
         examples=[utils.Default.ID_VD_CONTRATO],
     )
-    id_responsavel: PositiveInt | None = Field(
+    id_responsavel: NonNegativeInt | None = Field(
         default=None,
         description="ID do responsável técnico.",
         examples=[utils.Default.ID_RESPONSAVEL_ARCEUS],
@@ -245,7 +252,7 @@ class LeadUpdate(BaseModel):
     email: EmailStr | None = Field(
         default=None, description="E-mail do cliente.", examples=["email@email.com"]
     )
-    id_candidato_tipo: PositiveInt | None = Field(
+    id_candidato_tipo: NonNegativeInt | None = Field(
         default=None,
         description="ID do canal de venda",
         examples=[utils.Default.ID_CANAL_VENDA],
@@ -317,7 +324,7 @@ class LeadIn(BaseModel):
         # max_length=10,  # YYYY-MM-AA
         examples=["dd/mm/aaaa"],
     )
-    id_filial: PositiveInt | None = Field(
+    id_filial: NonNegativeInt | None = Field(
         default=utils.Default.ID_FILIAL,
         description="ID da filial.",
         examples=[utils.Default.ID_FILIAL],
@@ -364,12 +371,12 @@ class LeadIn(BaseModel):
         description="ID da cidade.",
         examples=[utils.Default.ID_CIDADE_JAC],
     )
-    id_vd_contrato: PositiveInt | None = Field(
+    id_vd_contrato: NonNegativeInt | None = Field(
         default=utils.Default.ID_VD_CONTRATO,
         description="ID do plano.",
         examples=[utils.Default.ID_VD_CONTRATO],
     )
-    id_responsavel: PositiveInt | None = Field(
+    id_responsavel: NonNegativeInt | None = Field(
         default=utils.Default.ID_RESPONSAVEL_ARCEUS,
         description="ID do responsável técnico.",
         examples=[utils.Default.ID_RESPONSAVEL_ARCEUS],
@@ -377,7 +384,7 @@ class LeadIn(BaseModel):
     email: EmailStr = Field(
         description="E-mail do cliente.", examples=["email@email.com"]
     )
-    id_candidato_tipo: PositiveInt | None = Field(
+    id_candidato_tipo: NonNegativeInt | None = Field(
         default=utils.Default.ID_CANAL_VENDA,
         description="Canal de venda.",
         examples=[utils.Default.ID_CANAL_VENDA],
@@ -410,4 +417,4 @@ class LeadIn(BaseModel):
 
 
 class LeadCreate(BaseModel):
-    id: PositiveInt = Field(description="ID do lead criado.", examples=[42])
+    id: NonNegativeInt = Field(description="ID do lead criado.", examples=[42])

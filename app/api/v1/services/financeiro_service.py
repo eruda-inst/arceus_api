@@ -1,15 +1,16 @@
 import statistics
-from . import ClienteService
 from typing import Any
-from pydantic import PositiveInt
+from . import ClienteService
 from .. import clients, schemas, utils
 from fastapi import HTTPException, status
+from pydantic import PositiveInt, NonNegativeInt
 
 
 class FinanceiroService:
     @staticmethod
     async def _get_ultima_fatura_paga(
-        id_contrato: PositiveInt,
+        # IDs NonNegativeInt, pois o IXC é quebrado
+        id_contrato: NonNegativeInt,
     ) -> dict[str, Any] | None:
         try:
             # --- Faturas pagas ---
@@ -50,7 +51,9 @@ class FinanceiroService:
 
     @classmethod
     async def _get_proxima_fatura_aberta(
-        cls, id_contrato: PositiveInt
+        cls,
+        # IDs NonNegativeInt, pois o IXC é quebrado
+        id_contrato: NonNegativeInt,
     ) -> dict[str, Any] | None:
         try:
             # --- Faturas abertas ---
@@ -88,7 +91,9 @@ class FinanceiroService:
 
     @classmethod
     async def get_fatura_referencia(
-        cls, id_contrato: PositiveInt
+        cls,
+        # IDs NonNegativeInt, pois o IXC é quebrado
+        id_contrato: NonNegativeInt,
     ) -> dict[str, Any] | None:
         try:
             proxima_fatura_aberta = await cls._get_proxima_fatura_aberta(
@@ -188,7 +193,8 @@ class FinanceiroService:
 
     @staticmethod
     async def post_desbloqueio_em_confianca(
-        id_contrato: PositiveInt,
+        # IDs NonNegativeInt, pois o IXC é quebrado
+        id_contrato: NonNegativeInt,
     ) -> schemas.MensagemOut:
         try:
             # --- Desbloqueio de confiança ---
@@ -212,7 +218,10 @@ class FinanceiroService:
             )
 
     @staticmethod
-    async def get_linha_digitavel(id_fatura: PositiveInt) -> schemas.LinhaDigitavelOut:
+    async def get_linha_digitavel(
+        # IDs NonNegativeInt, pois o IXC é quebrado
+        id_fatura: NonNegativeInt,
+    ) -> schemas.LinhaDigitavelOut:
         try:
             # -- Fatura ---
             endpoint = "fn_areceber"
@@ -243,7 +252,10 @@ class FinanceiroService:
             )
 
     @staticmethod
-    async def get_chave_pix(id_fatura: PositiveInt) -> schemas.ChavePixOut:
+    async def get_chave_pix(
+        # IDs NonNegativeInt, pois o IXC é quebrado
+        id_fatura: NonNegativeInt,
+    ) -> schemas.ChavePixOut:
         try:
             # --- Fatura ---
             res = await clients.SeteAZCliente.get_chave_pix(id_fatura=id_fatura)
@@ -293,7 +305,9 @@ class FinanceiroService:
 
     @staticmethod
     async def put_credenciais(
-        id_cliente: PositiveInt, senha: str
+        # IDs NonNegativeInt, pois o IXC é quebrado
+        id_cliente: NonNegativeInt,
+        senha: str,
     ) -> schemas.CredencialOut:
         try:
             # --- Cliente ---

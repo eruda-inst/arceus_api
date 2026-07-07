@@ -9,7 +9,8 @@ comercial_router = APIRouter(prefix="/comercial", tags=["Comercial"])
     path="/status_acesso", summary="Obtém status de acesso de um contrato."
 )
 async def get_status_acesso(
-    id_contrato: Annotated[int, Query(ge=1, description="ID do contrato.")],
+    # IDs NonNegativeInt, pois o IXC é quebrado
+    id_contrato: Annotated[int, Query(ge=0, description="ID do contrato.")],
 ) -> schemas.StatusInternetOut:
     """
     Obtém status de acesso de um contrato, através do ID do contrato.

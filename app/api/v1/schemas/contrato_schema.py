@@ -1,6 +1,6 @@
 from . import Meta
 from .. import utils
-from pydantic import BaseModel, Field, PositiveInt, field_serializer
+from pydantic import BaseModel, Field, field_serializer, NonNegativeInt
 
 
 class StatusInternetOut(BaseModel):
@@ -26,9 +26,10 @@ class StatusInternetOut(BaseModel):
 
 
 class ContratoOut(BaseModel):
-    id: PositiveInt = Field(description="ID do contrato.", examples=[1])
-    id_login: PositiveInt = Field(description="ID do login.", examples=[12])
-    id_cliente: PositiveInt = Field(description="ID do cliente.", examples=[123])
+    # IDs NonNegativeInt, pois o IXC é quebrado
+    id: NonNegativeInt = Field(description="ID do contrato.", examples=[1])
+    id_login: NonNegativeInt = Field(description="ID do login.", examples=[12])
+    id_cliente: NonNegativeInt = Field(description="ID do cliente.", examples=[123])
     nome_cliente: str = Field(
         description="Nome do cliente.", examples=["Nome do cliente"]
     )
@@ -69,7 +70,8 @@ class ContratoListOut(BaseModel):
 
 
 class ComercialContratoOut(BaseModel):
-    id: PositiveInt = Field(description="ID do contrato.", examples=[1])
+    # IDs NonNegativeInt, pois o IXC é quebrado
+    id: NonNegativeInt = Field(description="ID do contrato.", examples=[1])
     contrato: str = Field(description="Nome do plano.", examples=["Nome do plano"])
     nome_cliente: str = Field(
         description="Nome do cliente.", examples=["Nome do cliente"]
@@ -85,8 +87,8 @@ class ComercialContratoOut(BaseModel):
         # max_length=10,  # YYYY-MM-AA
         examples=["YYYY-MM-AA"],
     )
-    id_cliente: PositiveInt = Field(description="ID do cliente.", examples=[12])
-    id_login: PositiveInt = Field(description="ID do login.", examples=[123])
+    id_cliente: NonNegativeInt = Field(description="ID do cliente.", examples=[12])
+    id_login: NonNegativeInt = Field(description="ID do login.", examples=[123])
 
     @field_serializer("status_acesso")
     def serialize_status(self, v: utils.StatusInternetCod) -> utils.StatusInternetRot:
@@ -111,6 +113,7 @@ class ComercialContratoListOut(BaseModel):
 
 
 class VilaContratoOut(BaseModel):
-    id: PositiveInt = Field(description="ID do contrato.", examples=[1])
-    id_login: PositiveInt = Field(description="ID do login.", examples=[12])
-    id_cliente: PositiveInt = Field(description="ID do cliente.", examples=[123])
+    # IDs NonNegativeInt, pois o IXC é quebrado
+    id: NonNegativeInt = Field(description="ID do contrato.", examples=[1])
+    id_login: NonNegativeInt = Field(description="ID do login.", examples=[12])
+    id_cliente: NonNegativeInt = Field(description="ID do cliente.", examples=[123])
