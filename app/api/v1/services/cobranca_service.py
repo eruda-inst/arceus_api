@@ -1,4 +1,4 @@
-from . import Service
+from . import ClienteService
 from datetime import datetime
 from zoneinfo import ZoneInfo
 from .. import schemas, clients
@@ -15,14 +15,15 @@ class CobrancaService:
         itens_por_pagina: PositiveInt | None,
     ) -> schemas.FaturaListOut:
         try:
-            id_cliente = await Service.get_id_cliente_ixc(
+            # --- Cliente ---
+            cliente = await ClienteService.get_cliente_ixc(
                 protocolo=protocolo, cnpj_cpf=cnpj_cpf
             )
 
             # --- Faturas abertas ---
             endpoint = "fn_areceber"
             grid_param = [
-                {"TB": "fn_areceber.id_cliente", "OP": "=", "P": str(id_cliente)},
+                {"TB": "fn_areceber.id_cliente", "OP": "=", "P": str(cliente["id"])},
                 {"TB": "fn_areceber.status", "OP": "!=", "P": "R"},
                 {"TB": "fn_areceber.status", "OP": "!=", "P": "C"},
             ]

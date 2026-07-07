@@ -1,5 +1,5 @@
 import statistics
-from . import Service
+from . import ClienteService
 from typing import Any
 from pydantic import PositiveInt
 from .. import clients, schemas, utils
@@ -117,14 +117,14 @@ class FinanceiroService:
         itens_por_pagina: PositiveInt | None,
     ) -> schemas.FaturaListOut:
         try:
-            id_cliente = await Service.get_id_cliente_ixc(
+            cliente = await ClienteService.get_cliente_ixc(
                 protocolo=protocolo, cnpj_cpf=cnpj_cpf
             )
 
             # --- Faturas Abertas ---
             endpoint = "fn_areceber"
             grid_param = [
-                {"TB": "fn_areceber.id_cliente", "OP": "=", "P": str(id_cliente)},
+                {"TB": "fn_areceber.id_cliente", "OP": "=", "P": str(cliente["id"])},
                 {"TB": "fn_areceber.status", "OP": "!=", "P": "R"},
                 {"TB": "fn_areceber.status", "OP": "!=", "P": "C"},
             ]
@@ -275,20 +275,10 @@ class FinanceiroService:
         protocolo: str | None = None, cnpj_cpf: str | None = None
     ) -> schemas.CredencialOut:
         try:
-            id_cliente = await Service.get_id_cliente_ixc(
+            # --- Cliente ---
+            cliente = await ClienteService.get_cliente_ixc(
                 protocolo=protocolo, cnpj_cpf=cnpj_cpf
             )
-
-            # --- Cliente ---
-            endpoint = "cliente"
-            grid_param = [{"TB": "cliente.id", "OP": "=", "P": str(id_cliente)}]
-            res = await clients.IXCCliente.get(endpoint=endpoint, grid_param=grid_param)
-            regs = res.get("registros", [])
-            if not regs:
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND, detail="Cliente inexistente."
-                )
-            cliente = regs[0]
 
             return schemas.CredencialOut(
                 usuario=cliente["hotsite_email"], senha=cliente["senha"]

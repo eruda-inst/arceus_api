@@ -1,5 +1,5 @@
-from .service_service import Service
 from .vila_service import VilaService
+from .cliente_service import ClienteService
 from .upgrade_service import UpgradeService
 from .triagem_service import TriagemService
 from .suporte_service import SuporteService
@@ -8,8 +8,8 @@ from .comercial_service import ComercialService
 from .financeiro_service import FinanceiroService
 
 __all__ = [
-    "Service",
     "VilaService",
+    "ClienteService",
     "UpgradeService",
     "TriagemService",
     "SuporteService",
