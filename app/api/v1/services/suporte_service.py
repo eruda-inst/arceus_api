@@ -188,7 +188,6 @@ class SuporteService:
             payload = {"id": id_login}
             endpoint = "desconectar_clientes"
             res = await clients.IXCCliente.post(endpoint=endpoint, payload=payload)
-            print(res)
             type = res["msg"][0]["type"]
             if type == "error":
                 raise HTTPException(
