@@ -1,3 +1,4 @@
+from typing import Any
 from .. import clients, utils
 from fastapi import HTTPException, status
 
@@ -6,13 +7,13 @@ class ClienteService:
     @staticmethod
     async def get_cliente_ixc(
         protocolo: str | None = None, cnpj_cpf: str | None = None
-    ):
+    ) -> dict[str, Any]:
         try:
             if cnpj_cpf:
-                cnpj_cpf_formatado = utils.Formatter.cnpj_cpf(cnpj_cpf=cnpj_cpf)
                 endpoint = "cliente"
+                cnpj_cpf_formatado = utils.Formatter.cnpj_cpf(cnpj_cpf=cnpj_cpf)
                 grid_param = [
-                    {"TB": "cliente.cnpj_cpf", "OP": "=", "P": str(cnpj_cpf_formatado)}
+                    {"TB": "cliente.cnpj_cpf", "OP": "=", "P": cnpj_cpf_formatado}
                 ]
                 res = await clients.IXCCliente.get(
                     endpoint=endpoint, grid_param=grid_param

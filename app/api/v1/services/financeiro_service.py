@@ -33,15 +33,15 @@ class FinanceiroService:
             ultimas_faturas_pagas = faturas_pagas[:3]
             ultima_fatura_paga = ultimas_faturas_pagas[0]
 
-            # --- Valor mais frequente ---
+            # --- Valor ---
             valores = [float(u["valor"]) for u in ultimas_faturas_pagas]
-            valor_mais_frequente = statistics.mode(valores)
+            valor = statistics.mode(valores)
 
             return {
                 "id": int(ultima_fatura_paga["id"]),
                 "status": ultima_fatura_paga["status"],
                 "data_vencimento": ultima_fatura_paga["data_vencimento"],
-                "valor": valor_mais_frequente,
+                "valor": valor,
             }
         except Exception as e:
             raise HTTPException(
@@ -49,9 +49,8 @@ class FinanceiroService:
                 detail=f"Erro interno desconhecido: {e}",
             )
 
-    @classmethod
+    @staticmethod
     async def _get_proxima_fatura_aberta(
-        cls,
         # IDs NonNegativeInt, pois o IXC é quebrado
         id_contrato: NonNegativeInt,
     ) -> dict[str, Any] | None:
@@ -73,15 +72,15 @@ class FinanceiroService:
             proximas_faturas_abertas = faturas_abertas[:3]
             proxima_fatura_aberta = proximas_faturas_abertas[0]
 
-            # --- Valor mais frequente ---
+            # --- Valor ---
             valores = [float(p["valor"]) for p in proximas_faturas_abertas]
-            valor_mais_frequente = statistics.mode(valores)
+            valor = statistics.mode(valores)
 
             return {
                 "id": int(proxima_fatura_aberta["id"]),
                 "status": proxima_fatura_aberta["status"],
                 "data_vencimento": proxima_fatura_aberta["data_vencimento"],
-                "valor": valor_mais_frequente,
+                "valor": valor,
             }
         except Exception as e:
             raise HTTPException(
