@@ -127,25 +127,6 @@ class FinanceiroService:
                 protocolo=protocolo, cnpj_cpf=cnpj_cpf
             )
 
-            # --- Faturas Abertas ---
-            endpoint = "fn_areceber"
-            grid_param = [
-                {"TB": "fn_areceber.id_cliente", "OP": "=", "P": str(cliente["id"])},
-                {"TB": "fn_areceber.status", "OP": "!=", "P": "R"},
-                {"TB": "fn_areceber.status", "OP": "!=", "P": "C"},
-            ]
-            res = await clients.IXCCliente.get(
-                endpoint=endpoint,
-                grid_param=grid_param,
-                pagina=pagina,
-                itens_por_pagina=itens_por_pagina,
-            )
-            regs = res.get("registros", [])
-            faturas_abertas = regs
-            total = res.get("total", 0)
-
-            faturas_abertas_parciais: list[schemas.FaturaOut] = []
-
             # --- Contratos ---
             endpoint = "cliente_contrato"
             grid_param = [
@@ -162,9 +143,30 @@ class FinanceiroService:
             regs = res.get("registros", [])
             contratos = regs
 
+            faturas_abertas_parciais: list[schemas.FaturaOut] = []
+
             # --- Iteração entre contratos ---
             # Abordagem mais segura (fatura_aberta["id_contrato"] pode ser 0)
             for contrato in contratos:
+                id_contrato = contrato["id"]
+
+                # --- Faturas Abertas ---
+                endpoint = "fn_areceber"
+                grid_param = [
+                    {"TB": "fn_areceber.id_contrato", "OP": "=", "P": str(id_contrato)},
+                    {"TB": "fn_areceber.status", "OP": "!=", "P": "R"},
+                    {"TB": "fn_areceber.status", "OP": "!=", "P": "C"},
+                ]
+                res = await clients.IXCCliente.get(
+                    endpoint=endpoint,
+                    grid_param=grid_param,
+                    pagina=pagina,
+                    itens_por_pagina=itens_por_pagina,
+                )
+                regs = res.get("registros", [])
+                faturas_abertas = regs
+
+                # --- Iteração entre faturas abertas ---
                 for fatura_aberta in faturas_abertas:
                     # --- Faturas abertas parciais ---
                     faturas_abertas_parciais.append(
@@ -172,7 +174,7 @@ class FinanceiroService:
                             id=fatura_aberta["id"],
                             contrato=contrato["contrato"],
                             data_vencimento=fatura_aberta["data_vencimento"],
-                            id_contrato=contrato["id"],
+                            id_contrato=id_contrato,
                             preco=fatura_aberta["valor"],
                         )
                     )
@@ -180,7 +182,7 @@ class FinanceiroService:
             return schemas.FaturaListOut(
                 data=faturas_abertas_parciais,
                 meta=schemas.Meta(
-                    total_itens=total,
+                    total_itens=len(faturas_abertas_parciais),
                     pagina_atual=pagina,
                     itens_por_pagina=itens_por_pagina,
                 ),
