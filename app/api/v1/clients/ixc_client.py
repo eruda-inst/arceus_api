@@ -12,7 +12,7 @@ class IxcCliente:
     _token = cores.settings.ixc_token.get_secret_value()
     _token_encoded = base64.b64encode(_token.encode("utf-8")).decode("utf-8")
     _client = httpx.AsyncClient(timeout=30.0)
-    _url = "http://{}/webservice/v1/{}"  # host, endpoint
+    _url = "https://{}/webservice/v1/{}"  # host, endpoint
 
     @classmethod
     def _create_auth_header(cls) -> str:
