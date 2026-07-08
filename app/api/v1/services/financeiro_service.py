@@ -33,14 +33,19 @@ class FinanceiroService:
             ultimas_faturas_pagas = faturas_pagas[:3]
             ultima_fatura_paga = ultimas_faturas_pagas[0]
 
-            # --- Valor ---
+            # --- Valor da fatura ---
             valores = [float(u["valor"]) for u in ultimas_faturas_pagas]
             valor = statistics.mode(valores)
+
+            # --- Dia de vencimento da fatura ---
+            datas_vencimento = [u["data_vencimento"] for u in ultimas_faturas_pagas]
+            dias_vencimento = [d.split("-")[2] for d in datas_vencimento]
+            dia_vencimento = statistics.mode(dias_vencimento)
 
             return {
                 "id": int(ultima_fatura_paga["id"]),
                 "status": ultima_fatura_paga["status"],
-                "data_vencimento": ultima_fatura_paga["data_vencimento"],
+                "dia_vencimento_fatura": dia_vencimento,
                 "valor": valor,
             }
         except Exception:
@@ -72,14 +77,19 @@ class FinanceiroService:
             proximas_faturas_abertas = faturas_abertas[:3]
             proxima_fatura_aberta = proximas_faturas_abertas[0]
 
-            # --- Valor ---
+            # --- Valor da fatura ---
             valores = [float(p["valor"]) for p in proximas_faturas_abertas]
             valor = statistics.mode(valores)
+
+            # --- Dia de vencimento da fatura ---
+            datas_vencimento = [p["data_vencimento"] for p in proximas_faturas_abertas]
+            dias_vencimento = [d.split("-")[2] for d in datas_vencimento]
+            dia_vencimento = statistics.mode(dias_vencimento)
 
             return {
                 "id": int(proxima_fatura_aberta["id"]),
                 "status": proxima_fatura_aberta["status"],
-                "data_vencimento": proxima_fatura_aberta["data_vencimento"],
+                "dia_vencimento_fatura": dia_vencimento,
                 "valor": valor,
             }
         except Exception:

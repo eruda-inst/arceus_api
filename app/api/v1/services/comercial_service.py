@@ -104,11 +104,13 @@ class ComercialService:
                 contratos_parciais.append(
                     schemas.ComercialContratoOut(
                         id=id_contrato,
-                        contrato=contrato["contrato"],
+                        nome_plano=contrato["contrato"],
                         nome_cliente=nome_cliente,
-                        valor=fatura_referencia["valor"],
+                        valor_fatura=fatura_referencia["valor"],
                         status_acesso=contrato["status_internet"],
-                        data_vencimento=fatura_referencia["data_vencimento"],
+                        dia_vencimento_fatura=fatura_referencia[
+                            "dia_vencimento_fatura"
+                        ],
                         id_cliente=cliente["id"],
                         id_login=login["id"],
                     )

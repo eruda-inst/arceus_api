@@ -83,9 +83,11 @@ class SuporteService:
                         nome_cliente=nome_cliente,
                         status=contrato["status"],
                         status_acesso=contrato["status_internet"],
-                        contrato=contrato["contrato"],
-                        valor=fatura_referencia["valor"],
-                        data_vencimento=fatura_referencia["data_vencimento"],
+                        nome_plano=contrato["contrato"],
+                        valor_fatura=fatura_referencia["valor"],
+                        dia_vencimento_fatura=fatura_referencia[
+                            "dia_vencimento_fatura"
+                        ],
                         mac_onu=login["onu_mac"],
                     )
                 )

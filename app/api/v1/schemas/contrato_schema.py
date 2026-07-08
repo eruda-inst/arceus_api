@@ -40,14 +40,10 @@ class ContratoOut(BaseModel):
     status_acesso: utils.StatusInternetCod = Field(
         description="Status de acesso.", examples=[utils.StatusInternetRot.ATIVO]
     )
-    contrato: str = Field(description="Nome do plano.", examples=["Nome do plano"])
-    valor: float = Field(description="Valor do plano.", examples=[12.34])
-    data_vencimento: str = Field(
-        description="Data de vencimento.",
-        # Não pode haver isto, pois o IXC é quebrado
-        # min_length=10,  # YYYY-MM-AA
-        # max_length=10,  # YYYY-MM-AA
-        examples=["YYYY-MM-AA"],
+    nome_plano: str = Field(description="Nome do plano.", examples=["Nome do plano"])
+    valor_fatura: float = Field(description="Valor da fatura.", examples=[12.34])
+    dia_vencimento_fatura: str = Field(
+        description="Dia de vencimento da fatura.", examples=["01"]
     )
     mac_onu: str = Field(description="MAC da ONU.", examples=["AB1..."])
 
@@ -93,20 +89,16 @@ class ContratoListOut(BaseModel):
 class ComercialContratoOut(BaseModel):
     # IDs NonNegativeInt, pois o IXC é quebrado
     id: NonNegativeInt = Field(description="ID do contrato.", examples=[1])
-    contrato: str = Field(description="Nome do plano.", examples=["Nome do plano"])
+    nome_plano: str = Field(description="Nome do plano.", examples=["Nome do plano"])
     nome_cliente: str = Field(
         description="Nome do cliente.", examples=["Nome do cliente"]
     )
-    valor: float = Field(description="Valor do plano.", examples=[12.34])
+    valor_fatura: float = Field(description="Valor do plano.", examples=[12.34])
     status_acesso: utils.StatusInternetCod = Field(
         description="Status do acesso.", examples=[utils.StatusInternetRot.ATIVO]
     )
-    data_vencimento: str = Field(
-        description="Data de vencimento.",
-        # Não pode haver isto, pois o IXC é quebrado
-        # min_length=10,  # YYYY-MM-AA
-        # max_length=10,  # YYYY-MM-AA
-        examples=["YYYY-MM-AA"],
+    dia_vencimento_fatura: str = Field(
+        description="Dia de vencimento da fatura.", examples=["01"]
     )
     id_cliente: NonNegativeInt = Field(description="ID do cliente.", examples=[12])
     id_login: NonNegativeInt = Field(description="ID do login.", examples=[123])
