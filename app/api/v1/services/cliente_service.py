@@ -16,7 +16,7 @@ class ClienteService:
                 grid_param = [
                     {"TB": "cliente.cnpj_cpf", "OP": "=", "P": cnpj_cpf_formatado}
                 ]
-                res = await clients.IXCCliente.get(
+                res = await clients.IxcCliente.get(
                     endpoint=endpoint, grid_param=grid_param
                 )
                 regs = res.get("registros", [])
@@ -57,7 +57,7 @@ class ClienteService:
                 grid_param = [
                     {"TB": "cliente.id", "OP": "=", "P": str(cliente_opa["id"])}
                 ]
-                res = await clients.IXCCliente.get(
+                res = await clients.IxcCliente.get(
                     endpoint=endpoint, grid_param=grid_param
                 )
                 regs = res.get("registros", [])

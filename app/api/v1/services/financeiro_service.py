@@ -19,7 +19,7 @@ class FinanceiroService:
                 {"TB": "fn_areceber.id_contrato", "OP": "=", "P": str(id_contrato)},
                 {"TB": "fn_areceber.status", "OP": "=", "P": "R"},
             ]
-            res = await clients.IXCCliente.get(
+            res = await clients.IxcCliente.get(
                 endpoint=endpoint,
                 grid_param=grid_param,
                 sort_order=utils.SortOrder.DESC,
@@ -62,7 +62,7 @@ class FinanceiroService:
                 {"TB": "fn_areceber.status", "OP": "!=", "P": "R"},
                 {"TB": "fn_areceber.status", "OP": "!=", "P": "C"},
             ]
-            res = await clients.IXCCliente.get(endpoint=endpoint, grid_param=grid_param)
+            res = await clients.IxcCliente.get(endpoint=endpoint, grid_param=grid_param)
             regs = res.get("registros", [])
             if not regs:
                 return None
@@ -138,7 +138,7 @@ class FinanceiroService:
                 {"TB": "cliente_contrato.status", "OP": "!=", "P": "N"},
                 {"TB": "cliente_contrato.status", "OP": "!=", "P": "D"},
             ]
-            res = await clients.IXCCliente.get(endpoint=endpoint, grid_param=grid_param)
+            res = await clients.IxcCliente.get(endpoint=endpoint, grid_param=grid_param)
             regs = res.get("registros", [])
             contratos = regs
 
@@ -156,7 +156,7 @@ class FinanceiroService:
                     {"TB": "fn_areceber.status", "OP": "!=", "P": "R"},
                     {"TB": "fn_areceber.status", "OP": "!=", "P": "C"},
                 ]
-                res = await clients.IXCCliente.get(
+                res = await clients.IxcCliente.get(
                     endpoint=endpoint,
                     grid_param=grid_param,
                     pagina=pagina,
@@ -203,7 +203,7 @@ class FinanceiroService:
             # --- Desbloqueio de confiança ---
             endpoint = "desbloqueio_confianca"
             payload = {"id": id_contrato}
-            res = await clients.IXCCliente.post(endpoint=endpoint, payload=payload)
+            res = await clients.IxcCliente.post(endpoint=endpoint, payload=payload)
             type = res["type"]
             if type == "error":
                 raise HTTPException(
@@ -229,7 +229,7 @@ class FinanceiroService:
             # -- Fatura ---
             endpoint = "fn_areceber"
             grid_param = [{"TB": "fn_areceber.id", "OP": "=", "P": str(id_fatura)}]
-            res = await clients.IXCCliente.get(endpoint=endpoint, grid_param=grid_param)
+            res = await clients.IxcCliente.get(endpoint=endpoint, grid_param=grid_param)
             regs = res.get("registros")
             if not regs:
                 raise HTTPException(
@@ -316,7 +316,7 @@ class FinanceiroService:
             # --- Cliente ---
             endpoint = "cliente"
             grid_param = [{"TB": "cliente.id", "OP": "=", "P": str(id_cliente)}]
-            res = await clients.IXCCliente.get(endpoint=endpoint, grid_param=grid_param)
+            res = await clients.IxcCliente.get(endpoint=endpoint, grid_param=grid_param)
             regs = res.get("registros", [])
             if not regs:
                 raise HTTPException(
@@ -330,7 +330,7 @@ class FinanceiroService:
 
             # --- Atualiza cliente ---
             id = cliente_antigo["id"]
-            res = await clients.IXCCliente.put(
+            res = await clients.IxcCliente.put(
                 endpoint=endpoint, id=id, payload=cliente_atualizado
             )
             type = res["type"]

@@ -27,7 +27,7 @@ class CobrancaService:
                 {"TB": "fn_areceber.status", "OP": "!=", "P": "R"},
                 {"TB": "fn_areceber.status", "OP": "!=", "P": "C"},
             ]
-            res = await clients.IXCCliente.get(
+            res = await clients.IxcCliente.get(
                 endpoint=endpoint,
                 grid_param=grid_param,
                 pagina=pagina,
@@ -59,7 +59,7 @@ class CobrancaService:
                 grid_param = [
                     {"TB": "cliente_contrato.id", "OP": "=", "P": str(id_contrato)}
                 ]
-                res = await clients.IXCCliente.get(
+                res = await clients.IxcCliente.get(
                     endpoint=endpoint, grid_param=grid_param
                 )
                 regs = res.get("registros", [])

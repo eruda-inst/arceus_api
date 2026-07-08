@@ -19,7 +19,7 @@ class UpgradeService:
                 {"TB": "cliente_contrato.status", "OP": "!=", "P": "D"},
             ]
             endpoint = "cliente_contrato"
-            contratos_res = await clients.IXCCliente.get(
+            contratos_res = await clients.IxcCliente.get(
                 endpoint=endpoint,
                 grid_param=grid_param,
                 pagina=pagina,
@@ -36,7 +36,7 @@ class UpgradeService:
             ids_str = (str(id) for id in ids_planos_basicos)
             ids_str_tratados = str(",").join(ids_str)
             grid_param = [{"TB": "vd_contratos.id", "OP": "IN", "P": ids_str_tratados}]
-            planos_oficiais_res = await clients.IXCCliente.get(
+            planos_oficiais_res = await clients.IxcCliente.get(
                 endpoint="vd_contratos",
                 grid_param=grid_param,
                 pagina=pagina,
@@ -61,7 +61,7 @@ class UpgradeService:
                 grid_param = [
                     {"TB": "vd_contratos.id", "OP": "=", "P": str(id_vd_contrato)}
                 ]
-                plano_vigente_res = await clients.IXCCliente.get(
+                plano_vigente_res = await clients.IxcCliente.get(
                     endpoint="vd_contratos",
                     grid_param=grid_param,
                     pagina=pagina,

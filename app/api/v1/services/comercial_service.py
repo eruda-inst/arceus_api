@@ -17,7 +17,7 @@ class ComercialService:
             grid_param = [
                 {"TB": "cliente_contrato.id", "OP": "=", "P": str(id_contrato)}
             ]
-            res = await clients.IXCCliente.get(endpoint=endpoint, grid_param=grid_param)
+            res = await clients.IxcCliente.get(endpoint=endpoint, grid_param=grid_param)
             regs = res.get("registros", [])
             if not regs:
                 raise HTTPException(
@@ -59,7 +59,7 @@ class ComercialService:
                 {"TB": "cliente_contrato.status", "OP": "!=", "P": "N"},
                 {"TB": "cliente_contrato.status", "OP": "!=", "P": "D"},
             ]
-            res = await clients.IXCCliente.get(
+            res = await clients.IxcCliente.get(
                 endpoint=endpoint,
                 grid_param=grid_param,
                 pagina=pagina,
@@ -80,7 +80,7 @@ class ComercialService:
                 grid_param = [
                     {"TB": "radusuarios.id_contrato", "OP": "=", "P": str(id_contrato)}
                 ]
-                res = await clients.IXCCliente.get(
+                res = await clients.IxcCliente.get(
                     endpoint=endpoint, grid_param=grid_param
                 )
                 regs = res.get("registros", [])
@@ -148,7 +148,7 @@ class ComercialService:
             "data_cadastro" é obrigatório na API do IXC, porém o que é mandado é descartado, e a data é gerada automaticamente.
             """
             payload["data_cadastro"] = "N/A"
-            res = await clients.IXCCliente.post(endpoint=endpoint, payload=payload)
+            res = await clients.IxcCliente.post(endpoint=endpoint, payload=payload)
             id = res.get("id")
             if not id:
                 raise HTTPException(
@@ -158,7 +158,7 @@ class ComercialService:
 
             # --- Lead criado ---
             grid_param = [{"TB": "contato.id", "OP": "=", "P": str(id)}]
-            res = await clients.IXCCliente.get(endpoint=endpoint, grid_param=grid_param)
+            res = await clients.IxcCliente.get(endpoint=endpoint, grid_param=grid_param)
             regs = res.get("registros", [])
             lead_criado = regs[0]
 
@@ -227,7 +227,7 @@ class ComercialService:
             grid_param = [
                 {"TB": "contato.cnpj_cpf", "OP": "=", "P": cnpj_cpf_formatado}
             ]
-            res = await clients.IXCCliente.get(endpoint=endpoint, grid_param=grid_param)
+            res = await clients.IxcCliente.get(endpoint=endpoint, grid_param=grid_param)
             regs = res.get("registros", [])
             if not regs:
                 raise HTTPException(
@@ -244,7 +244,7 @@ class ComercialService:
             endpoint = "contato"
             id = lead_antigo["id"]
             payload = lead_atualizado
-            res = await clients.IXCCliente.put(
+            res = await clients.IxcCliente.put(
                 endpoint=endpoint, id=id, payload=payload
             )
             type = res["type"]

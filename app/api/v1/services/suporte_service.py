@@ -31,7 +31,7 @@ class SuporteService:
                 {"TB": "cliente_contrato.status", "OP": "!=", "P": "N"},
                 {"TB": "cliente_contrato.status", "OP": "!=", "P": "D"},
             ]
-            res = await clients.IXCCliente.get(
+            res = await clients.IxcCliente.get(
                 endpoint=endpoint,
                 grid_param=grid_param,
                 pagina=pagina,
@@ -64,7 +64,7 @@ class SuporteService:
                 grid_param = [
                     {"TB": "radusuarios.id_contrato", "OP": "=", "P": str(id_contrato)}
                 ]
-                res = await clients.IXCCliente.get(
+                res = await clients.IxcCliente.get(
                     endpoint=endpoint, grid_param=grid_param
                 )
                 regs = res.get("registros", [])
@@ -121,7 +121,7 @@ class SuporteService:
             # --- Login ---
             endpoint = "radusuarios"
             grid_param = [{"TB": "radusuarios.id", "OP": "=", "P": str(id_login)}]
-            res = await clients.IXCCliente.get(endpoint=endpoint, grid_param=grid_param)
+            res = await clients.IxcCliente.get(endpoint=endpoint, grid_param=grid_param)
             regs = res.get("registros", [])
             if not regs:
                 raise HTTPException(
@@ -169,7 +169,7 @@ class SuporteService:
                     "P": str(query_value),
                 }
             ]
-            res = await clients.IXCCliente.get(endpoint=endpoint, grid_param=grid_param)
+            res = await clients.IxcCliente.get(endpoint=endpoint, grid_param=grid_param)
             regs = res.get("registros", [])
             onu = regs[0]
             sinal_rx = onu["sinal_rx"]
@@ -196,7 +196,7 @@ class SuporteService:
             # --- Desconectar cliente ---
             payload = {"id": id_login}
             endpoint = "desconectar_clientes"
-            res = await clients.IXCCliente.post(endpoint=endpoint, payload=payload)
+            res = await clients.IxcCliente.post(endpoint=endpoint, payload=payload)
             type = res["msg"][0]["type"]
             if type == "error":
                 raise HTTPException(
@@ -228,7 +228,7 @@ class SuporteService:
                 {"TB": "su_ticket.su_status", "OP": "!=", "P": "S"},
                 {"TB": "su_ticket.su_status", "OP": "!=", "P": "C"},
             ]
-            res = await clients.IXCCliente.get(
+            res = await clients.IxcCliente.get(
                 endpoint=endpoint,
                 grid_param=grid_param,
                 pagina=pagina,
@@ -276,7 +276,7 @@ class SuporteService:
             # --- Atendimento ---
             endpoint = "su_ticket"
             payload = atendimento.model_dump()
-            res = await clients.IXCCliente.post(endpoint=endpoint, payload=payload)
+            res = await clients.IxcCliente.post(endpoint=endpoint, payload=payload)
             id = res.get("id")
             if not id:
                 raise HTTPException(
@@ -286,7 +286,7 @@ class SuporteService:
 
             # --- Atendimento criado ---
             grid_param = [{"TB": "su_ticket.id", "OP": "=", "P": str(id)}]
-            res = await clients.IXCCliente.get(endpoint=endpoint, grid_param=grid_param)
+            res = await clients.IxcCliente.get(endpoint=endpoint, grid_param=grid_param)
             regs = res.get("registros", [])
             atendimento_criado: dict[str, Any] = regs[0]
 
@@ -317,7 +317,7 @@ class SuporteService:
             # --- Login ---
             endpoint = "radusuarios"
             grid_param = [{"TB": "radusuarios.id", "OP": "=", "P": str(id_login)}]
-            res = await clients.IXCCliente.get(endpoint=endpoint, grid_param=grid_param)
+            res = await clients.IxcCliente.get(endpoint=endpoint, grid_param=grid_param)
             regs = res.get("registros", [])
             if not regs:
                 raise HTTPException(
@@ -340,7 +340,7 @@ class SuporteService:
             endpoint = "radusuarios"
             id = id_login
             payload = login_atualizado
-            res = await clients.IXCCliente.put(
+            res = await clients.IxcCliente.put(
                 endpoint=endpoint, id=id, payload=payload
             )
             type = res["type"]
@@ -368,7 +368,7 @@ class SuporteService:
             # --- Limpar MAC ---
             endpoint = "radusuarios_25452"
             payload = {"get_id": id_login}
-            res = await clients.IXCCliente.post(endpoint=endpoint, payload=payload)
+            res = await clients.IxcCliente.post(endpoint=endpoint, payload=payload)
             type = res["type"]
             if type == "error":
                 raise HTTPException(
@@ -394,7 +394,7 @@ class SuporteService:
             # --- Login ---
             endpoint = "radusuarios"
             grid_param = [{"TB": "radusuarios.id", "OP": "=", "P": str(id_login)}]
-            res = await clients.IXCCliente.get(endpoint=endpoint, grid_param=grid_param)
+            res = await clients.IxcCliente.get(endpoint=endpoint, grid_param=grid_param)
             regs = res.get("registros", [])
             if not regs:
                 raise HTTPException(

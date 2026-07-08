@@ -18,7 +18,7 @@ class VilaService:
                 },
                 {"TB": "radusuarios.ativo", "OP": "=", "P": "S"},
             ]
-            res = await clients.IXCCliente.get(endpoint=endpoint, grid_param=grid_param)
+            res = await clients.IxcCliente.get(endpoint=endpoint, grid_param=grid_param)
             regs = res.get("registros", [])
             if not regs:
                 raise HTTPException(
@@ -63,7 +63,7 @@ class VilaService:
                     "P": str(login["id_cliente"]),
                 }
             ]
-            res = await clients.IXCCliente.get(endpoint=endpoint, grid_param=grid_param)
+            res = await clients.IxcCliente.get(endpoint=endpoint, grid_param=grid_param)
             regs = res.get("registros", [])
             if not regs:
                 raise HTTPException(
@@ -121,7 +121,7 @@ class VilaService:
                     "P": f"res{str(login['id'])}",
                 },
             ]
-            res = await clients.IXCCliente.get(endpoint=endpoint, grid_param=grid_param)
+            res = await clients.IxcCliente.get(endpoint=endpoint, grid_param=grid_param)
             regs = res.get("registros", [])
             if not regs:
                 raise HTTPException(
@@ -182,7 +182,7 @@ class VilaService:
                 {"TB": "su_ticket.su_status", "OP": "!=", "P": "S"},
                 {"TB": "su_ticket.su_status", "OP": "!=", "P": "C"},
             ]
-            res = await clients.IXCCliente.get(
+            res = await clients.IxcCliente.get(
                 endpoint=endpoint,
                 grid_param=grid_param,
                 pagina=pagina,
@@ -234,7 +234,7 @@ class VilaService:
             # --- Limpar MAC ---
             endpoint = "radusuarios_25452"
             payload = {"get_id": str(login["id"])}
-            res = await clients.IXCCliente.post(endpoint=endpoint, payload=payload)
+            res = await clients.IxcCliente.post(endpoint=endpoint, payload=payload)
             type = res["type"]
             if type == "error":
                 raise HTTPException(
@@ -264,7 +264,7 @@ class VilaService:
             # --- Desconectar cliente ---
             endpoint = "desconectar_clientes"
             payload = {"id": str(login["id"])}
-            res = await clients.IXCCliente.post(endpoint=endpoint, payload=payload)
+            res = await clients.IxcCliente.post(endpoint=endpoint, payload=payload)
             type = res["msg"][0]["type"]
             if type == "error":
                 raise HTTPException(
@@ -289,7 +289,7 @@ class VilaService:
             # --- Atendimento ---
             endpoint = "su_ticket"
             payload = atendimento.model_dump()
-            res = await clients.IXCCliente.post(endpoint=endpoint, payload=payload)
+            res = await clients.IxcCliente.post(endpoint=endpoint, payload=payload)
             id = res.get("id")
             if not id:
                 raise HTTPException(
@@ -299,7 +299,7 @@ class VilaService:
 
             # --- Atendimento criado ---
             grid_param = [{"TB": "su_ticket.id", "OP": "=", "P": str(id)}]
-            res = await clients.IXCCliente.get(endpoint=endpoint, grid_param=grid_param)
+            res = await clients.IxcCliente.get(endpoint=endpoint, grid_param=grid_param)
             regs = res.get("registros", [])
             atendimento_criado: dict[str, Any] = regs[0]
 

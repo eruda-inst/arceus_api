@@ -48,7 +48,7 @@ class TriagemService:
 
             # --- Atualiza cliente ---
             endpoint = "cliente"
-            res = await clients.IXCCliente.put(
+            res = await clients.IxcCliente.put(
                 endpoint=endpoint, id=cliente_antigo["id"], payload=cliente_atualizado
             )
             type = res["type"]
