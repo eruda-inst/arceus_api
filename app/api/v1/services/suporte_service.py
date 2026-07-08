@@ -78,7 +78,7 @@ class SuporteService:
                 # --- Nome do cliente ---
                 nome = cliente.get("nome")
                 razao = cliente.get("razao")
-                nome_cliente = nome if nome else razao
+                nome_cliente = str(nome if nome else razao)
 
                 # --- Contrato parcial ---
                 contratos_parciais.append(

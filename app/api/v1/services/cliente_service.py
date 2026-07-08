@@ -48,7 +48,21 @@ class ClienteService:
                         status_code=status.HTTP_404_NOT_FOUND,
                         detail="Cliente inexistente no IXC.",
                     )
-                cliente_ixc = data[0]
+                cliente_opa = data[0]
+
+                endpoint = "cliente"
+                id_cliente_ixc = cliente_opa["id"]
+                grid_param = [{"TB": "cliente.id", "OP": "=", "P": str(id_cliente_ixc)}]
+                res = await clients.IXCCliente.get(
+                    endpoint=endpoint, grid_param=grid_param
+                )
+                regs = res.get("registros", [])
+                if not regs:
+                    raise HTTPException(
+                        status_code=status.HTTP_404_NOT_FOUND,
+                        detail="Cliente inexistente no IXC.",
+                    )
+                cliente_ixc = regs[0]
                 return cliente_ixc
             else:
                 raise HTTPException(
