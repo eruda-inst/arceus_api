@@ -1,26 +1,17 @@
-from typing import Annotated
-from .. import services, schemas
-from fastapi import APIRouter, Query
+from fastapi import APIRouter
+from .. import services, schemas, utils
 
 cobranca_router = APIRouter(prefix="/cobranca", tags=["Cobrança"])
-
-Protocolo = Annotated[
-    str,
-    Query(min_length=12, max_length=12, description="Protocolo de atendimento."),
-]
-CnpjCpf = Annotated[str, Query(description="CPF ou CNPJ do cliente.")]
-Pagina = Annotated[int, Query(ge=1, description="Número da página.")]
-ItensPorPagina = Annotated[int, Query(ge=1, description="Itens por página.")]
 
 
 @cobranca_router.get(
     path="/faturas_abertas", summary="Obtém faturas abertas de um cliente."
 )
 async def get_faturas_abertas(
-    protocolo: Protocolo | None = None,
-    cnpj_cpf: CnpjCpf | None = None,
-    pagina: Pagina | None = 1,
-    itens_por_pagina: ItensPorPagina = 15,
+    protocolo: utils.Protocolo | None = None,
+    cnpj_cpf: utils.CnpjCpf | None = None,
+    pagina: utils.Pagina | None = 1,
+    itens_por_pagina: utils.ItensPorPagina = 15,
 ) -> schemas.FaturaListOut:
     """
     Obtém faturas abertas de um cliente, através de protocolo de atendimento ou CPF/CNPJ.
@@ -37,10 +28,10 @@ async def get_faturas_abertas(
     path="/faturas_vencidas", summary="Obtém faturas vencidas de um cliente."
 )
 async def get_faturas_vencidas(
-    protocolo: Protocolo | None = None,
-    cnpj_cpf: CnpjCpf | None = None,
-    pagina: Pagina | None = 1,
-    itens_por_pagina: ItensPorPagina = 15,
+    protocolo: utils.Protocolo | None = None,
+    cnpj_cpf: utils.CnpjCpf | None = None,
+    pagina: utils.Pagina | None = 1,
+    itens_por_pagina: utils.ItensPorPagina = 15,
 ) -> schemas.FaturaListOut:
     """
     Obtém faturas vencidas de um cliente, através de protocolo de atendimento ou CPF/CNPJ.

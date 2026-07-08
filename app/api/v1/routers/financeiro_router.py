@@ -1,26 +1,18 @@
 from typing import Annotated
-from .. import services, schemas
+from .. import services, schemas, utils
 from fastapi import APIRouter, Query, Path, Body
 
 financeiro_router = APIRouter(prefix="/financeiro", tags=["Financeiro"])
-
-Protocolo = Annotated[
-    str,
-    Query(min_length=12, max_length=12, description="Protocolo de atendimento."),
-]
-Pagina = Annotated[int, Query(ge=1, description="Número da página.")]
-ItensPorPagina = Annotated[int, Query(ge=1, description="Itens por página.")]
-CnpjCpf = Annotated[str, Query(description="CPF ou CNPJ do cliente.")]
 
 
 @financeiro_router.get(
     path="/faturas_abertas", summary="Obtém faturas abertas de um cliente."
 )
 async def get_faturas_abertas(
-    protocolo: Protocolo | None = None,
-    cnpj_cpf: CnpjCpf | None = None,
-    pagina: Pagina | None = 1,
-    itens_por_pagina: ItensPorPagina | None = 15,
+    protocolo: utils.Protocolo | None = None,
+    cnpj_cpf: utils.CnpjCpf | None = None,
+    pagina: utils.Pagina | None = 1,
+    itens_por_pagina: utils.ItensPorPagina | None = 15,
 ) -> schemas.FaturaListOut:
     """
     Obtém faturas abertas de um cliente, através de protocolo de atendimento ou CPF/CNPJ.
@@ -35,10 +27,10 @@ async def get_faturas_abertas(
 
 @financeiro_router.get(path="/contratos", summary="Obtém contratos de um cliente.")
 async def get_contratos(
-    protocolo: Protocolo | None = None,
-    cnpj_cpf: CnpjCpf | None = None,
-    pagina: Pagina | None = 1,
-    itens_por_pagina: ItensPorPagina | None = 10,
+    protocolo: utils.Protocolo | None = None,
+    cnpj_cpf: utils.CnpjCpf | None = None,
+    pagina: utils.Pagina | None = 1,
+    itens_por_pagina: utils.ItensPorPagina | None = 10,
 ) -> schemas.ComercialContratoListOut:
     """
     Obtém contratos de um cliente, através de protocolo de atendimento ou CPF/CNPJ.
@@ -80,7 +72,7 @@ async def get_chave_pix(
     summary="Obtém credenciais da central do assinante de um cliente.",
 )
 async def get_credenciais(
-    protocolo: Protocolo | None = None, cnpj_cpf: CnpjCpf | None = None
+    protocolo: utils.Protocolo | None = None, cnpj_cpf: utils.CnpjCpf | None = None
 ) -> schemas.CredencialOut:
     """
     Obtém credenciais da central do assinante de um cliente, através de protocolo de atendimento ou CPF/CNPJ.

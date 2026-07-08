@@ -1,5 +1,5 @@
 from typing import Annotated
-from .. import services, schemas
+from .. import services, schemas, utils
 from fastapi import APIRouter, Query, status, Body
 
 comercial_router = APIRouter(prefix="/comercial", tags=["Comercial"])
@@ -20,17 +20,10 @@ async def get_status_acesso(
 
 @comercial_router.get(path="/contratos", summary="Obtém contratos de um cliente.")
 async def get_contratos(
-    protocolo: Annotated[
-        str | None,
-        Query(min_length=12, max_length=12, description="Protocolo de atendimento."),
-    ] = None,
-    cnpj_cpf: Annotated[
-        str | None, Query(description="CPF ou CNPJ do cliente.")
-    ] = None,
-    pagina: Annotated[int | None, Query(ge=1, description="Número da página.")] = 1,
-    itens_por_pagina: Annotated[
-        int | None, Query(ge=1, description="Itens por página.")
-    ] = 10,
+    protocolo: utils.Protocolo | None = None,
+    cnpj_cpf: utils.CnpjCpf | None = None,
+    pagina: utils.Pagina | None = 1,
+    itens_por_pagina: utils.ItensPorPagina | None = 10,
 ) -> schemas.ComercialContratoListOut:
     """
     Obtém contratos de um cliente, através de protocolo de atendimento ou CPF/CNPJ.
@@ -46,9 +39,7 @@ async def get_contratos(
 @comercial_router.get(
     path="/cliente_existe", summary="Checa se um cliente existe no Opa."
 )
-async def cliente_existe(
-    cpf_cnpj: Annotated[str, Query(description="CPF ou CNPJ.")],
-) -> schemas.ClienteExisteOut:
+async def cliente_existe(cpf_cnpj: utils.CnpjCpf) -> schemas.ClienteExisteOut:
     """
     Checa se um cliente existe no Opa, através do CPF/CNPJ.
     """
@@ -70,7 +61,7 @@ async def post_leads(
 # Por razões de limitações na plataforma opa, o verbo deve ser put, ao invés de patch
 @comercial_router.put(path="/leads", summary="Atualiza lead parcialmente.")
 async def put_lead(
-    cnpj_cpf: Annotated[str, Query(description="CPF ou CNPJ associado ao lead.")],
+    cnpj_cpf: utils.CnpjCpf,
     lead: Annotated[schemas.LeadUpdate, Body(description="Dados do lead.")],
 ) -> schemas.LeadOut:
     """

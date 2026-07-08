@@ -1,26 +1,19 @@
 from typing import Annotated
-from .. import schemas, services
+from .. import schemas, services, utils
 from fastapi import APIRouter, Query, status, Path, Body
 
 suporte_router = APIRouter(prefix="/suporte", tags=["Suporte"])
 
 # IDs NonNegativeInt, pois o IXC é quebrado
 IdLogin = Annotated[int, Query(ge=0, description="ID de login do cliente.")]
-Pagina = Annotated[int, Query(ge=1, description="Número da página.")]
-ItensPorPagina = Annotated[int, Query(ge=1, description="Itens por página.")]
 
 
 @suporte_router.get(path="/contratos", summary="Obtém contratos de um cliente.")
 async def get_contratos(
-    protocolo: Annotated[
-        str | None,
-        Query(min_length=12, max_length=12, description="Protocolo de atendimento."),
-    ] = None,
-    cnpj_cpf: Annotated[
-        str | None, Query(description="CPF ou CNPJ do cliente.")
-    ] = None,
-    pagina: Pagina | None = 1,
-    itens_por_pagina: ItensPorPagina | None = 10,
+    protocolo: utils.Protocolo | None = None,
+    cnpj_cpf: utils.CnpjCpf | None = None,
+    pagina: utils.Pagina | None = 1,
+    itens_por_pagina: utils.ItensPorPagina | None = 10,
 ) -> schemas.ContratoListOut:
     """
     Obtém contratos de um cliente, através de protocolo de atendimento ou CPF/CNPJ.
@@ -72,8 +65,8 @@ async def get_dados_wifi(id_login: IdLogin) -> schemas.WifiOut:
 )
 async def get_atendimentos(
     id_login: IdLogin,
-    pagina: Pagina | None = 1,
-    itens_por_pagina: ItensPorPagina | None = 10,
+    pagina: utils.Pagina | None = 1,
+    itens_por_pagina: utils.ItensPorPagina | None = 10,
 ) -> schemas.AtendimentoListOut:
     """
     Obtém atendimentos abertos de um cliente, através do ID de login.

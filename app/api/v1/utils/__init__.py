@@ -1,5 +1,6 @@
 from .helpers import Formatter
 from .ixc_types import Param, SortOrder
+from .api_types import CnpjCpf, Pagina, Protocolo, ItensPorPagina
 from .enums import (
     LeadCod,
     Default,
@@ -29,6 +30,10 @@ __all__ = [
     "Formatter",
     "Param",
     "SortOrder",
+    "CnpjCpf",
+    "Pagina",
+    "Protocolo",
+    "ItensPorPagina",
     "LeadCod",
     "Default",
     "LeadRot",
