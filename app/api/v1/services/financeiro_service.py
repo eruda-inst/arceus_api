@@ -122,6 +122,7 @@ class FinanceiroService:
         itens_por_pagina: PositiveInt | None,
     ) -> schemas.FaturaListOut:
         try:
+            # --- Cliente ---
             cliente = await ClienteService.get_cliente_ixc(
                 protocolo=protocolo, cnpj_cpf=cnpj_cpf
             )
@@ -145,35 +146,36 @@ class FinanceiroService:
 
             faturas_abertas_parciais: list[schemas.FaturaOut] = []
 
-            # --- Iteração entre faturas abertas ---
-            for fatura_aberta in faturas_abertas:
-                # --- Contrato ---
-                id_contrato = fatura_aberta["id_contrato"]
-                endpoint = "cliente_contrato"
-                grid_param = [
-                    {"TB": "cliente_contrato.id", "OP": "=", "P": str(id_contrato)}
-                ]
-                res = await clients.IXCCliente.get(
-                    endpoint=endpoint, grid_param=grid_param
-                )
-                regs = res.get("registros", [])
-                if not regs:
-                    raise HTTPException(
-                        status_code=status.HTTP_404_NOT_FOUND,
-                        detail="Contrato inexistente.",
-                    )
-                contrato = regs[0]
+            # --- Contratos ---
+            endpoint = "cliente_contrato"
+            grid_param = [
+                {
+                    "TB": "cliente_contrato.id_cliente",
+                    "OP": "=",
+                    "P": str(cliente["id"]),
+                },
+                {"TB": "cliente_contrato.status", "OP": "!=", "P": "I"},
+                {"TB": "cliente_contrato.status", "OP": "!=", "P": "N"},
+                {"TB": "cliente_contrato.status", "OP": "!=", "P": "D"},
+            ]
+            res = await clients.IXCCliente.get(endpoint=endpoint, grid_param=grid_param)
+            regs = res.get("registros", [])
+            contratos = regs
 
-                # --- Faturas abertas parciais ---
-                faturas_abertas_parciais.append(
-                    schemas.FaturaOut(
-                        id=fatura_aberta["id"],
-                        contrato=contrato["contrato"],
-                        data_vencimento=fatura_aberta["data_vencimento"],
-                        id_contrato=contrato["id"],
-                        preco=fatura_aberta["valor"],
+            # --- Iteração entre contratos ---
+            # Abordagem mais segura (fatura_aberta["id_contrato"] pode ser 0)
+            for contrato in contratos:
+                for fatura_aberta in faturas_abertas:
+                    # --- Faturas abertas parciais ---
+                    faturas_abertas_parciais.append(
+                        schemas.FaturaOut(
+                            id=fatura_aberta["id"],
+                            contrato=contrato["contrato"],
+                            data_vencimento=fatura_aberta["data_vencimento"],
+                            id_contrato=contrato["id"],
+                            preco=fatura_aberta["valor"],
+                        )
                     )
-                )
 
             return schemas.FaturaListOut(
                 data=faturas_abertas_parciais,
