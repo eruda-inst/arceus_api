@@ -1,8 +1,8 @@
 from . import ClienteService
 from datetime import datetime
 from zoneinfo import ZoneInfo
-from .. import schemas, clients
 from pydantic import PositiveInt
+from .. import schemas, clients, utils
 from fastapi import HTTPException, status
 
 
@@ -23,9 +23,9 @@ class CobrancaService:
             # --- Faturas abertas ---
             endpoint = "fn_areceber"
             grid_param = [
-                {"TB": "fn_areceber.id_cliente", "OP": "=", "P": str(cliente["id"])},
-                {"TB": "fn_areceber.status", "OP": "!=", "P": "R"},
-                {"TB": "fn_areceber.status", "OP": "!=", "P": "C"},
+                utils.Param(TB="fn_areceber.id_cliente", P=cliente["id"]),
+                utils.Param(TB="fn_areceber.status", OP="!=", P="R"),
+                utils.Param(TB="fn_areceber.status", OP="!=", P="C"),
             ]
             res = await clients.IxcCliente.get(
                 endpoint=endpoint,
@@ -56,9 +56,7 @@ class CobrancaService:
                 # --- Contrato ---
                 endpoint = "cliente_contrato"
                 id_contrato = fatura_aberta["id_contrato"]
-                grid_param = [
-                    {"TB": "cliente_contrato.id", "OP": "=", "P": str(id_contrato)}
-                ]
+                grid_param = [utils.Param(TB="cliente_contrato.id", P=id_contrato)]
                 res = await clients.IxcCliente.get(
                     endpoint=endpoint, grid_param=grid_param
                 )
@@ -91,8 +89,8 @@ class CobrancaService:
             )
         except HTTPException:
             raise
-        except Exception as e:
+        except Exception:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno desconhecido: {e}",
+                detail="Erro interno desconhecido",
             )

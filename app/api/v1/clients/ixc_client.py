@@ -79,13 +79,14 @@ class IxcCliente:
     async def get(
         cls,
         endpoint: str,
-        grid_param: list[dict[str, str]],
+        grid_param: list[utils.Param],
         pagina: PositiveInt | None = 1,
         itens_por_pagina: PositiveInt | None = 10,
         sort_order: utils.SortOrder | None = utils.SortOrder.ASC,
     ) -> dict[str, Any]:
+        grid_param_dict = [gp.model_dump() for gp in grid_param]
         payload = {
-            "grid_param": json.dumps(obj=grid_param),
+            "grid_param": json.dumps(grid_param_dict),
             "page": str(pagina),
             "rp": str(itens_por_pagina),
             "sortorder": str(sort_order),

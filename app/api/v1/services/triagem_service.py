@@ -21,10 +21,10 @@ class TriagemService:
             return schemas.ContatoOut(telefone_celular=telefone_celular)
         except HTTPException:
             raise
-        except Exception as e:
+        except Exception:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno desconhecido: {e}",
+                detail="Erro interno desconhecido",
             )
 
     @staticmethod
@@ -61,8 +61,8 @@ class TriagemService:
             return schemas.ContatoOut(telefone_celular=telefone_celular)
         except HTTPException:
             raise
-        except Exception as e:
+        except Exception:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno desconhecido: {e}",
+                detail="Erro interno desconhecido",
             )

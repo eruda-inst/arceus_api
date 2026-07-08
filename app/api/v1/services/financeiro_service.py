@@ -16,8 +16,8 @@ class FinanceiroService:
             # --- Faturas pagas ---
             endpoint = "fn_areceber"
             grid_param = [
-                {"TB": "fn_areceber.id_contrato", "OP": "=", "P": str(id_contrato)},
-                {"TB": "fn_areceber.status", "OP": "=", "P": "R"},
+                utils.Param(TB="fn_areceber.id_contrato", P=id_contrato),
+                utils.Param(TB="fn_areceber.status", P="R"),
             ]
             res = await clients.IxcCliente.get(
                 endpoint=endpoint,
@@ -43,10 +43,10 @@ class FinanceiroService:
                 "data_vencimento": ultima_fatura_paga["data_vencimento"],
                 "valor": valor,
             }
-        except Exception as e:
+        except Exception:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno desconhecido: {e}",
+                detail="Erro interno desconhecido",
             )
 
     @staticmethod
@@ -58,9 +58,9 @@ class FinanceiroService:
             # --- Faturas abertas ---
             endpoint = "fn_areceber"
             grid_param = [
-                {"TB": "fn_areceber.id_contrato", "OP": "=", "P": str(id_contrato)},
-                {"TB": "fn_areceber.status", "OP": "!=", "P": "R"},
-                {"TB": "fn_areceber.status", "OP": "!=", "P": "C"},
+                utils.Param(TB="fn_areceber.id_contrato", P=id_contrato),
+                utils.Param(TB="fn_areceber.status", OP="!=", P="R"),
+                utils.Param(TB="fn_areceber.status", OP="!=", P="C"),
             ]
             res = await clients.IxcCliente.get(endpoint=endpoint, grid_param=grid_param)
             regs = res.get("registros", [])
@@ -82,10 +82,10 @@ class FinanceiroService:
                 "data_vencimento": proxima_fatura_aberta["data_vencimento"],
                 "valor": valor,
             }
-        except Exception as e:
+        except Exception:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno desconhecido: {e}",
+                detail="Erro interno desconhecido",
             )
 
     @classmethod
@@ -107,10 +107,10 @@ class FinanceiroService:
             )
 
             return ultima_fatura_paga
-        except Exception as e:
+        except Exception:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno desconhecido: {e}",
+                detail="Erro interno desconhecido",
             )
 
     @staticmethod
@@ -129,14 +129,10 @@ class FinanceiroService:
             # --- Contratos ---
             endpoint = "cliente_contrato"
             grid_param = [
-                {
-                    "TB": "cliente_contrato.id_cliente",
-                    "OP": "=",
-                    "P": str(cliente["id"]),
-                },
-                {"TB": "cliente_contrato.status", "OP": "!=", "P": "I"},
-                {"TB": "cliente_contrato.status", "OP": "!=", "P": "N"},
-                {"TB": "cliente_contrato.status", "OP": "!=", "P": "D"},
+                utils.Param(TB="cliente_contrato.id_cliente", P=cliente["id"]),
+                utils.Param(TB="cliente_contrato.status", OP="!=", P="I"),
+                utils.Param(TB="cliente_contrato.status", OP="!=", P="N"),
+                utils.Param(TB="cliente_contrato.status", OP="!=", P="D"),
             ]
             res = await clients.IxcCliente.get(endpoint=endpoint, grid_param=grid_param)
             regs = res.get("registros", [])
@@ -152,9 +148,9 @@ class FinanceiroService:
                 # --- Faturas Abertas ---
                 endpoint = "fn_areceber"
                 grid_param = [
-                    {"TB": "fn_areceber.id_contrato", "OP": "=", "P": str(id_contrato)},
-                    {"TB": "fn_areceber.status", "OP": "!=", "P": "R"},
-                    {"TB": "fn_areceber.status", "OP": "!=", "P": "C"},
+                    utils.Param(TB="fn_areceber.id_contrato", P=id_contrato),
+                    utils.Param(TB="fn_areceber.status", OP="!=", P="R"),
+                    utils.Param(TB="fn_areceber.status", OP="!=", P="C"),
                 ]
                 res = await clients.IxcCliente.get(
                     endpoint=endpoint,
@@ -188,10 +184,10 @@ class FinanceiroService:
             )
         except HTTPException:
             raise
-        except Exception as e:
+        except Exception:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno desconhecido: {e}",
+                detail="Erro interno desconhecido",
             )
 
     @staticmethod
@@ -214,10 +210,10 @@ class FinanceiroService:
             return schemas.MensagemOut(mensagem="Desbloqueio bem-sucedido.")
         except HTTPException:
             raise
-        except Exception as e:
+        except Exception:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno desconhecido: {e}",
+                detail="Erro interno desconhecido",
             )
 
     @staticmethod
@@ -228,7 +224,7 @@ class FinanceiroService:
         try:
             # -- Fatura ---
             endpoint = "fn_areceber"
-            grid_param = [{"TB": "fn_areceber.id", "OP": "=", "P": str(id_fatura)}]
+            grid_param = [utils.Param(TB="fn_areceber.id", P=id_fatura)]
             res = await clients.IxcCliente.get(endpoint=endpoint, grid_param=grid_param)
             regs = res.get("registros")
             if not regs:
@@ -248,10 +244,10 @@ class FinanceiroService:
             return schemas.LinhaDigitavelOut(linha_digitavel=linha_digitavel)
         except HTTPException:
             raise
-        except Exception as e:
+        except Exception:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno desconhecido: {e}",
+                detail="Erro interno desconhecido",
             )
 
     @staticmethod
@@ -279,10 +275,10 @@ class FinanceiroService:
             return schemas.ChavePixOut(chave_pix=chave_pix)
         except HTTPException:
             raise
-        except Exception as e:
+        except Exception:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno desconhecido: {e}",
+                detail="Erro interno desconhecido",
             )
 
     @staticmethod
@@ -300,10 +296,10 @@ class FinanceiroService:
             )
         except HTTPException:
             raise
-        except Exception as e:
+        except Exception:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno desconhecido: {e}",
+                detail="Erro interno desconhecido",
             )
 
     @staticmethod
@@ -315,7 +311,7 @@ class FinanceiroService:
         try:
             # --- Cliente ---
             endpoint = "cliente"
-            grid_param = [{"TB": "cliente.id", "OP": "=", "P": str(id_cliente)}]
+            grid_param = [utils.Param(TB="cliente.id", P=id_cliente)]
             res = await clients.IxcCliente.get(endpoint=endpoint, grid_param=grid_param)
             regs = res.get("registros", [])
             if not regs:
@@ -345,8 +341,8 @@ class FinanceiroService:
             )
         except HTTPException:
             raise
-        except Exception as e:
+        except Exception:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno desconhecido: {e}",
+                detail="Erro interno desconhecido",
             )

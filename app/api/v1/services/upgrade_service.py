@@ -1,4 +1,4 @@
-from .. import clients, schemas
+from .. import clients, schemas, utils
 from fastapi import HTTPException, status
 from pydantic import PositiveInt, NonNegativeInt
 
@@ -13,10 +13,10 @@ class UpgradeService:
     ) -> schemas.PlanoSugeridoListOut:
         try:
             grid_param = [
-                {"TB": "cliente_contrato.id_cliente", "OP": "=", "P": str(id_cliente)},
-                {"TB": "cliente_contrato.status", "OP": "!=", "P": "I"},
-                {"TB": "cliente_contrato.status", "OP": "!=", "P": "N"},
-                {"TB": "cliente_contrato.status", "OP": "!=", "P": "D"},
+                utils.Param(TB="cliente_contrato.id_cliente", P=id_cliente),
+                utils.Param(TB="cliente_contrato.status", OP="!=", P="I"),
+                utils.Param(TB="cliente_contrato.status", OP="!=", P="N"),
+                utils.Param(TB="cliente_contrato.status", OP="!=", P="D"),
             ]
             endpoint = "cliente_contrato"
             contratos_res = await clients.IxcCliente.get(
@@ -35,7 +35,9 @@ class UpgradeService:
 
             ids_str = (str(id) for id in ids_planos_basicos)
             ids_str_tratados = str(",").join(ids_str)
-            grid_param = [{"TB": "vd_contratos.id", "OP": "IN", "P": ids_str_tratados}]
+            grid_param = [
+                utils.Param(TB="vd_contratos.id", OP="IN", P=ids_str_tratados)
+            ]
             planos_oficiais_res = await clients.IxcCliente.get(
                 endpoint="vd_contratos",
                 grid_param=grid_param,
@@ -58,9 +60,7 @@ class UpgradeService:
                 if id_vd_contrato in ids_planos_oficiais:
                     continue
 
-                grid_param = [
-                    {"TB": "vd_contratos.id", "OP": "=", "P": str(id_vd_contrato)}
-                ]
+                grid_param = [utils.Param(TB="vd_contratos.id", P=id_vd_contrato)]
                 plano_vigente_res = await clients.IxcCliente.get(
                     endpoint="vd_contratos",
                     grid_param=grid_param,
@@ -108,8 +108,8 @@ class UpgradeService:
             )
 
             return schemas.PlanoSugeridoListOut(data=planos_sugeridos, meta=meta)
-        except Exception as e:
+        except Exception:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno desconhecido: {e}",
+                detail="Erro interno desconhecido",
             )

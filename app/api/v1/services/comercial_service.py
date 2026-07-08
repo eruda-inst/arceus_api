@@ -14,9 +14,7 @@ class ComercialService:
         try:
             # --- Contrato ---
             endpoint = "cliente_contrato"
-            grid_param = [
-                {"TB": "cliente_contrato.id", "OP": "=", "P": str(id_contrato)}
-            ]
+            grid_param = [utils.Param(TB="cliente_contrato.id", P=id_contrato)]
             res = await clients.IxcCliente.get(endpoint=endpoint, grid_param=grid_param)
             regs = res.get("registros", [])
             if not regs:
@@ -28,10 +26,10 @@ class ComercialService:
             return schemas.StatusInternetOut(status_acesso=contrato["status_internet"])
         except HTTPException:
             raise
-        except Exception as e:
+        except Exception:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno desconhecido: {e}",
+                detail="Erro interno desconhecido",
             )
 
     @staticmethod
@@ -50,14 +48,10 @@ class ComercialService:
             # --- Contratos ---
             endpoint = "cliente_contrato"
             grid_param = [
-                {
-                    "TB": "cliente_contrato.id_cliente",
-                    "OP": "=",
-                    "P": str(cliente["id"]),
-                },
-                {"TB": "cliente_contrato.status", "OP": "!=", "P": "I"},
-                {"TB": "cliente_contrato.status", "OP": "!=", "P": "N"},
-                {"TB": "cliente_contrato.status", "OP": "!=", "P": "D"},
+                utils.Param(TB="cliente_contrato.id_cliente", P=cliente["id"]),
+                utils.Param(TB="cliente_contrato.status", OP="!=", P="I"),
+                utils.Param(TB="cliente_contrato.status", OP="!=", P="N"),
+                utils.Param(TB="cliente_contrato.status", OP="!=", P="D"),
             ]
             res = await clients.IxcCliente.get(
                 endpoint=endpoint,
@@ -77,9 +71,7 @@ class ComercialService:
 
                 # --- Login ---
                 endpoint = "radusuarios"
-                grid_param = [
-                    {"TB": "radusuarios.id_contrato", "OP": "=", "P": str(id_contrato)}
-                ]
+                grid_param = [utils.Param(TB="radusuarios.id_contrato", P=id_contrato)]
                 res = await clients.IxcCliente.get(
                     endpoint=endpoint, grid_param=grid_param
                 )
@@ -106,7 +98,7 @@ class ComercialService:
                 # --- Nome do cliente ---
                 nome = cliente.get("nome")
                 razao = cliente.get("razao")
-                nome_cliente = nome if nome else razao
+                nome_cliente = str(nome if nome else razao)
 
                 # --- Contrato parcial ---
                 contratos_parciais.append(
@@ -132,10 +124,10 @@ class ComercialService:
             )
         except HTTPException:
             raise
-        except Exception as e:
+        except Exception:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno desconhecido: {e}",
+                detail="Erro interno desconhecido",
             )
 
     @staticmethod
@@ -157,7 +149,7 @@ class ComercialService:
                 )
 
             # --- Lead criado ---
-            grid_param = [{"TB": "contato.id", "OP": "=", "P": str(id)}]
+            grid_param = [utils.Param(TB="contato.id", P=id)]
             res = await clients.IxcCliente.get(endpoint=endpoint, grid_param=grid_param)
             regs = res.get("registros", [])
             lead_criado = regs[0]
@@ -189,10 +181,10 @@ class ComercialService:
 
         except HTTPException:
             raise
-        except Exception as e:
+        except Exception:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno desconhecido: {e}",
+                detail="Erro interno desconhecido",
             )
 
     @staticmethod
@@ -212,10 +204,10 @@ class ComercialService:
                 cliente_existe = False
 
             return schemas.ClienteExisteOut(cliente_existe=cliente_existe)
-        except Exception as e:
+        except Exception:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno desconhecido: {e}",
+                detail="Erro interno desconhecido",
             )
 
     @staticmethod
@@ -224,9 +216,7 @@ class ComercialService:
             # --- Lead ---
             endpoint = "contato"
             cnpj_cpf_formatado = utils.Formatter.cnpj_cpf(cnpj_cpf)
-            grid_param = [
-                {"TB": "contato.cnpj_cpf", "OP": "=", "P": cnpj_cpf_formatado}
-            ]
+            grid_param = [utils.Param(TB="contato.cnpj_cpf", P=cnpj_cpf_formatado)]
             res = await clients.IxcCliente.get(endpoint=endpoint, grid_param=grid_param)
             regs = res.get("registros", [])
             if not regs:
@@ -257,8 +247,8 @@ class ComercialService:
             return schemas.LeadOut(**lead_atualizado, id=id)
         except HTTPException:
             raise
-        except Exception as e:
+        except Exception:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno desconhecido: {e}",
+                detail="Erro interno desconhecido",
             )

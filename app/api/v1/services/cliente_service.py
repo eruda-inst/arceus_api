@@ -13,9 +13,7 @@ class ClienteService:
                 # --- Cliente IXC por cnpj_cpf ---
                 endpoint = "cliente"
                 cnpj_cpf_formatado = utils.Formatter.cnpj_cpf(cnpj_cpf=cnpj_cpf)
-                grid_param = [
-                    {"TB": "cliente.cnpj_cpf", "OP": "=", "P": cnpj_cpf_formatado}
-                ]
+                grid_param = [utils.Param(TB="cliente.cnpj_cpf", P=cnpj_cpf_formatado)]
                 res = await clients.IxcCliente.get(
                     endpoint=endpoint, grid_param=grid_param
                 )
@@ -54,9 +52,7 @@ class ClienteService:
 
                 # --- Cliente IXC por ID ---
                 endpoint = "cliente"
-                grid_param = [
-                    {"TB": "cliente.id", "OP": "=", "P": str(cliente_opa["id"])}
-                ]
+                grid_param = [utils.Param(TB="cliente.id", P=cliente_opa["id"])]
                 res = await clients.IxcCliente.get(
                     endpoint=endpoint, grid_param=grid_param
                 )
@@ -75,8 +71,8 @@ class ClienteService:
                 )
         except HTTPException:
             raise
-        except Exception as e:
+        except Exception:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno desconhecido: {e}",
+                detail="Erro interno desconhecido",
             )

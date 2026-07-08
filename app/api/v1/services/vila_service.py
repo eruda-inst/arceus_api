@@ -1,6 +1,6 @@
 from typing import Any
-from .. import clients, schemas
 from pydantic import PositiveInt
+from .. import clients, schemas, utils
 from fastapi import HTTPException, status
 
 
@@ -11,12 +11,10 @@ class VilaService:
             # --- Login ---
             endpoint = "radusuarios"
             grid_param = [
-                {
-                    "TB": "radusuarios.login",
-                    "OP": "L",
-                    "P": f"res{str(numero_residencia)}",
-                },
-                {"TB": "radusuarios.ativo", "OP": "=", "P": "S"},
+                utils.Param(
+                    TB="radusuarios.login", OP="L", P=f"res{str(numero_residencia)}"
+                ),
+                utils.Param(TB="radusuarios.ativo", P="S"),
             ]
             res = await clients.IxcCliente.get(endpoint=endpoint, grid_param=grid_param)
             regs = res.get("registros", [])
@@ -38,10 +36,10 @@ class VilaService:
             }
         except HTTPException:
             raise
-        except Exception as e:
+        except Exception:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno desconhecido: {e}",
+                detail="Erro interno desconhecido",
             )
 
     @classmethod
@@ -52,16 +50,10 @@ class VilaService:
             # --- Login ---
             login = await cls._get_login(numero_residencia=numero_residencia)
 
-            # Exceção já tratada na get_login
-
             # --- Contrato ---
             endpoint = "cliente_contrato"
             grid_param = [
-                {
-                    "TB": "cliente_contrato.id_cliente",
-                    "OP": "=",
-                    "P": str(login["id_cliente"]),
-                }
+                utils.Param(TB="cliente_contrato.id_cliente", P=login["id_cliente"])
             ]
             res = await clients.IxcCliente.get(endpoint=endpoint, grid_param=grid_param)
             regs = res.get("registros", [])
@@ -79,10 +71,10 @@ class VilaService:
             )
         except HTTPException:
             raise
-        except Exception as e:
+        except Exception:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno desconhecido: {e}",
+                detail="Erro interno desconhecido",
             )
 
     @classmethod
@@ -93,13 +85,11 @@ class VilaService:
             # --- Login ---
             login = await cls._get_login(numero_residencia=numero_residencia)
 
-            # Exceção já tratada na get_login
-
             return schemas.StatusConexaoOut(status_conexao=login["online"])
-        except Exception as e:
+        except Exception:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno desconhecido: {e}",
+                detail="Erro interno desconhecido",
             )
 
     @classmethod
@@ -110,16 +100,12 @@ class VilaService:
             # --- Login ---
             login = await cls._get_login(numero_residencia=numero_residencia)
 
-            # Exceção já tratada na get_login
-
             # --- ONU ---
             endpoint = "radpop_radio_cliente_fibra"
             grid_param = [
-                {
-                    "TB": "radpop_radio_cliente_fibra.id_login",
-                    "OP": "=",
-                    "P": f"res{str(login['id'])}",
-                },
+                utils.Param(
+                    TB="radpop_radio_cliente_fibra.id_login", P=f"res{login['id']}"
+                )
             ]
             res = await clients.IxcCliente.get(endpoint=endpoint, grid_param=grid_param)
             regs = res.get("registros", [])
@@ -132,10 +118,10 @@ class VilaService:
             return schemas.StatusOnuOut(status_onu=onu["sinal_rx"])
         except HTTPException:
             raise
-        except Exception as e:
+        except Exception:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno desconhecido: {e}",
+                detail="Erro interno desconhecido",
             )
 
     @classmethod
@@ -144,18 +130,16 @@ class VilaService:
             # --- Login ---
             login = await cls._get_login(numero_residencia=numero_residencia)
 
-            # Exceção já tratada na get_login
-
             return schemas.WifiOut(
                 ssid_wifi_2g=login["ssid_router_wifi"],
                 senha_wifi_2g=login["senha_rede_sem_fio"],
                 ssid_wifi_5g=login["ssid_router_wifi_5ghz"],
                 senha_wifi_5g=login["senha_rede_sem_fio_5ghz"],
             )
-        except Exception as e:
+        except Exception:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno desconhecido: {e}",
+                detail="Erro interno desconhecido",
             )
 
     @classmethod
@@ -169,18 +153,12 @@ class VilaService:
             # --- Login ---
             login = await cls._get_login(numero_residencia=numero_residencia)
 
-            # Exceção já tratada na get_login
-
             # --- Atendimentos ---
             endpoint = "su_ticket"
             grid_param = [
-                {
-                    "TB": "su_ticket.id_login",
-                    "OP": "L",
-                    "P": f"res{str(login['id'])}",
-                },
-                {"TB": "su_ticket.su_status", "OP": "!=", "P": "S"},
-                {"TB": "su_ticket.su_status", "OP": "!=", "P": "C"},
+                utils.Param(TB="su_ticket.id_login", OP="L", P=f"res{login['id']}"),
+                utils.Param(TB="su_ticket.su_status", OP="!=", P="S"),
+                utils.Param(TB="su_ticket.su_status", OP="!=", P="C"),
             ]
             res = await clients.IxcCliente.get(
                 endpoint=endpoint,
@@ -215,10 +193,10 @@ class VilaService:
                     itens_por_pagina=itens_por_pagina,
                 ),
             )
-        except Exception as e:
+        except Exception:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno desconhecido: {e}",
+                detail="Erro interno desconhecido",
             )
 
     @classmethod
@@ -245,10 +223,10 @@ class VilaService:
             return schemas.MensagemOut(mensagem="Limpeza bem-sucedida.")
         except HTTPException:
             raise
-        except Exception as e:
+        except Exception:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno desconhecido: {e}",
+                detail="Erro interno desconhecido",
             )
 
     @classmethod
@@ -275,10 +253,10 @@ class VilaService:
             return schemas.MensagemOut(mensagem="Desconexão bem-sucedida.")
         except HTTPException:
             raise
-        except Exception as e:
+        except Exception:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno desconhecido: {e}",
+                detail="Erro interno desconhecido",
             )
 
     @staticmethod
@@ -298,7 +276,7 @@ class VilaService:
                 )
 
             # --- Atendimento criado ---
-            grid_param = [{"TB": "su_ticket.id", "OP": "=", "P": str(id)}]
+            grid_param = [utils.Param(TB="su_ticket.id", P=id)]
             res = await clients.IxcCliente.get(endpoint=endpoint, grid_param=grid_param)
             regs = res.get("registros", [])
             atendimento_criado: dict[str, Any] = regs[0]
@@ -313,8 +291,8 @@ class VilaService:
             )
         except HTTPException:
             raise
-        except Exception as e:
+        except Exception:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno desconhecido: {e}",
+                detail="Erro interno desconhecido",
             )

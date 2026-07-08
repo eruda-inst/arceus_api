@@ -1,7 +1,7 @@
 from typing import Any
 from . import ClienteService
-from .. import schemas, clients, services
 from fastapi import HTTPException, status
+from .. import schemas, clients, services, utils
 from pydantic import PositiveInt, NonNegativeInt
 
 
@@ -22,14 +22,10 @@ class SuporteService:
             # --- Contratos ---
             endpoint = "cliente_contrato"
             grid_param = [
-                {
-                    "TB": "cliente_contrato.id_cliente",
-                    "OP": "=",
-                    "P": str(cliente["id"]),
-                },
-                {"TB": "cliente_contrato.status", "OP": "!=", "P": "I"},
-                {"TB": "cliente_contrato.status", "OP": "!=", "P": "N"},
-                {"TB": "cliente_contrato.status", "OP": "!=", "P": "D"},
+                utils.Param(TB="cliente_contrato.id_cliente", P=cliente["id"]),
+                utils.Param(TB="cliente_contrato.status", OP="!=", P="I"),
+                utils.Param(TB="cliente_contrato.status", OP="!=", P="N"),
+                utils.Param(TB="cliente_contrato.status", OP="!=", P="D"),
             ]
             res = await clients.IxcCliente.get(
                 endpoint=endpoint,
@@ -61,9 +57,7 @@ class SuporteService:
 
                 # --- Login ---
                 endpoint = "radusuarios"
-                grid_param = [
-                    {"TB": "radusuarios.id_contrato", "OP": "=", "P": str(id_contrato)}
-                ]
+                grid_param = [utils.Param(TB="radusuarios.id_contrato", P=id_contrato)]
                 res = await clients.IxcCliente.get(
                     endpoint=endpoint, grid_param=grid_param
                 )
@@ -106,10 +100,10 @@ class SuporteService:
             )
         except HTTPException:
             raise
-        except Exception as e:
+        except Exception:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno desconhecido: {e}",
+                detail="Erro interno desconhecido",
             )
 
     @staticmethod
@@ -120,7 +114,7 @@ class SuporteService:
         try:
             # --- Login ---
             endpoint = "radusuarios"
-            grid_param = [{"TB": "radusuarios.id", "OP": "=", "P": str(id_login)}]
+            grid_param = [utils.Param(TB="radusuarios.id", P=id_login)]
             res = await clients.IxcCliente.get(endpoint=endpoint, grid_param=grid_param)
             regs = res.get("registros", [])
             if not regs:
@@ -132,10 +126,10 @@ class SuporteService:
             return schemas.StatusConexaoOut(status_conexao=login["online"])
         except HTTPException:
             raise
-        except Exception as e:
+        except Exception:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno desconhecido: {e}",
+                detail="Erro interno desconhecido",
             )
 
     @staticmethod
@@ -163,11 +157,9 @@ class SuporteService:
             # --- ONU ---
             endpoint = "radpop_radio_cliente_fibra"
             grid_param = [
-                {
-                    "TB": f"radpop_radio_cliente_fibra.{query_param}",
-                    "OP": "=",
-                    "P": str(query_value),
-                }
+                utils.Param(
+                    TB=f"radpop_radio_cliente_fibra.{query_param}", P=query_value
+                )
             ]
             res = await clients.IxcCliente.get(endpoint=endpoint, grid_param=grid_param)
             regs = res.get("registros", [])
@@ -181,10 +173,10 @@ class SuporteService:
             return schemas.StatusOnuOut(status_onu=sinal_rx)
         except HTTPException:
             raise
-        except Exception as e:
+        except Exception:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno desconhecido: {e}",
+                detail="Erro interno desconhecido",
             )
 
     @staticmethod
@@ -207,10 +199,10 @@ class SuporteService:
             return schemas.MensagemOut(mensagem="Desconexão bem-sucedida.")
         except HTTPException:
             raise
-        except Exception as e:
+        except Exception:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno desconhecido: {e}",
+                detail="Erro interno desconhecido",
             )
 
     @staticmethod
@@ -224,9 +216,9 @@ class SuporteService:
             # --- Atendimentos ---
             endpoint = "su_ticket"
             grid_param = [
-                {"TB": "su_ticket.id_login", "OP": "=", "P": str(id_login)},
-                {"TB": "su_ticket.su_status", "OP": "!=", "P": "S"},
-                {"TB": "su_ticket.su_status", "OP": "!=", "P": "C"},
+                utils.Param(TB="su_ticket.id_login", P=id_login),
+                utils.Param(TB="su_ticket.su_status", OP="!=", P="S"),
+                utils.Param(TB="su_ticket.su_status", OP="!=", P="C"),
             ]
             res = await clients.IxcCliente.get(
                 endpoint=endpoint,
@@ -262,10 +254,10 @@ class SuporteService:
                     itens_por_pagina=itens_por_pagina,
                 ),
             )
-        except Exception as e:
+        except Exception:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno desconhecido: {e}",
+                detail="Erro interno desconhecido",
             )
 
     @staticmethod
@@ -285,7 +277,7 @@ class SuporteService:
                 )
 
             # --- Atendimento criado ---
-            grid_param = [{"TB": "su_ticket.id", "OP": "=", "P": str(id)}]
+            grid_param = [utils.Param(TB="su_ticket.id", P=id)]
             res = await clients.IxcCliente.get(endpoint=endpoint, grid_param=grid_param)
             regs = res.get("registros", [])
             atendimento_criado: dict[str, Any] = regs[0]
@@ -300,10 +292,10 @@ class SuporteService:
             )
         except HTTPException:
             raise
-        except Exception as e:
+        except Exception:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno desconhecido: {e}",
+                detail="Erro interno desconhecido",
             )
 
     @staticmethod
@@ -316,7 +308,7 @@ class SuporteService:
         try:
             # --- Login ---
             endpoint = "radusuarios"
-            grid_param = [{"TB": "radusuarios.id", "OP": "=", "P": str(id_login)}]
+            grid_param = [utils.Param(TB="radusuarios.id", P=id_login)]
             res = await clients.IxcCliente.get(endpoint=endpoint, grid_param=grid_param)
             regs = res.get("registros", [])
             if not regs:
@@ -353,10 +345,10 @@ class SuporteService:
             return schemas.IpOut(ip=novo_ip, pool_radius=int(novo_radius))
         except HTTPException:
             raise
-        except Exception as e:
+        except Exception:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno desconhecido: {e}",
+                detail="Erro interno desconhecido",
             )
 
     @staticmethod
@@ -379,10 +371,10 @@ class SuporteService:
             return schemas.MensagemOut(mensagem="Limpeza bem-sucedida.")
         except HTTPException:
             raise
-        except Exception as e:
+        except Exception:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno desconhecido: {e}",
+                detail="Erro interno desconhecido",
             )
 
     @staticmethod
@@ -393,7 +385,7 @@ class SuporteService:
         try:
             # --- Login ---
             endpoint = "radusuarios"
-            grid_param = [{"TB": "radusuarios.id", "OP": "=", "P": str(id_login)}]
+            grid_param = [utils.Param(TB="radusuarios.id", P=id_login)]
             res = await clients.IxcCliente.get(endpoint=endpoint, grid_param=grid_param)
             regs = res.get("registros", [])
             if not regs:
