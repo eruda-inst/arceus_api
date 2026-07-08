@@ -10,6 +10,7 @@ class ClienteService:
     ) -> dict[str, Any]:
         try:
             if cnpj_cpf:
+                # --- Cliente IXC por cnpj_cpf ---
                 endpoint = "cliente"
                 cnpj_cpf_formatado = utils.Formatter.cnpj_cpf(cnpj_cpf=cnpj_cpf)
                 grid_param = [
@@ -27,6 +28,7 @@ class ClienteService:
                 cliente_ixc = regs[0]
                 return cliente_ixc
             elif protocolo:
+                # --- Cliente Opa por protocolo ---
                 endpoint = "atendimento"
                 filter = {"protocolo": protocolo}
                 res = await clients.OpaCliente.get(endpoint=endpoint, filter=filter)
@@ -37,10 +39,10 @@ class ClienteService:
                         detail="Cliente inexistente no Opa.",
                     )
                 cliente_opa = data[0]
-                id = cliente_opa["id_cliente"]
 
+                # --- Cliente Opa por ID ---
                 endpoint = "cliente"
-                filter = {"_id": id}
+                filter = {"_id": cliente_opa["id_cliente"]}
                 res = await clients.OpaCliente.get(endpoint=endpoint, filter=filter)
                 data = res.get("data", [])
                 if not data:
@@ -50,9 +52,11 @@ class ClienteService:
                     )
                 cliente_opa = data[0]
 
+                # --- Cliente IXC por ID ---
                 endpoint = "cliente"
-                id_cliente_ixc = cliente_opa["id"]
-                grid_param = [{"TB": "cliente.id", "OP": "=", "P": str(id_cliente_ixc)}]
+                grid_param = [
+                    {"TB": "cliente.id", "OP": "=", "P": str(cliente_opa["id"])}
+                ]
                 res = await clients.IXCCliente.get(
                     endpoint=endpoint, grid_param=grid_param
                 )
