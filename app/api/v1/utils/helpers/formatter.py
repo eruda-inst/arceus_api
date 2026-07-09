@@ -113,7 +113,7 @@ class Formatter:
         # Remove quebras de linha
         l3 = l2.replace("\n", "")
         # Substítui dois ou mais espaços do meio por um
-        l4 = re.sub(pattern=r"\s{2,}", repl=r" ", string=l3)
+        l4 = re.sub(pattern=r"\s{2,}", repl=" ", string=l3)
         # Adiciona ponto no fim
         l5 = l4 + "." if not l4.endswith(".") else l4
         # Capitaliza
