@@ -213,10 +213,9 @@ class FinanceiroService:
             type = res["type"]
             if type == "error":
                 msg = res.get("message", "Desbloqueio malsucedido.")
-                msg_sanitizada = msg.replace("\\", "")
                 raise HTTPException(
                     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    detail=msg_sanitizada,
+                    detail=utils.Formatter.sanitize(string=msg),
                 )
 
             return schemas.MensagemOut(mensagem="Desbloqueio bem-sucedido.")

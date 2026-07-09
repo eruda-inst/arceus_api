@@ -103,3 +103,20 @@ class Formatter:
 
         # Se não estiver, converte
         return re.sub(FORMATO_ISO, r"\3/\2/\1", data)
+
+    @staticmethod
+    def sanitize(string: str) -> str:
+        # Remove espaços em branco do início e fim
+        l1 = string.strip()
+        # Remove barras invertidas
+        l2 = l1.replace("\\", "")
+        # Remove quebras de linha
+        l3 = l2.replace("\n", "")
+        # Remove espaços em branco do meio
+        l4 = re.sub(pattern=r"\s{2,}", repl=r" ", string=l3)
+        # Adiciona ponto no fim, caso não exista
+        if not l4.endswith("."):
+            l4 += "."
+        # Capitaliza a primeira letra
+        l5 = l4.capitalize()
+        return l5

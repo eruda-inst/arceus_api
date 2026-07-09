@@ -195,12 +195,9 @@ class SuporteService:
             if type == "error":
                 msgs = res.get("msg", [])
                 msg = msgs[0].get("message", "Desconexão malsucedida.")
-                msg_sanitizada = msg.strip().replace("\\n", "")
-                if not msg_sanitizada.endswith("."):
-                    msg_sanitizada += "."
                 raise HTTPException(
                     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    detail=msg_sanitizada,
+                    detail=utils.Formatter.sanitize(string=msg),
                 )
 
             return schemas.MensagemOut(mensagem="Desconexão bem-sucedida.")
@@ -382,10 +379,9 @@ class SuporteService:
             type = res["type"]
             if type == "error":
                 msg = res.get("message", "Limpeza malsucedida.")
-                if not msg.endswith("."):
-                    msg += "."
                 raise HTTPException(
-                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=msg
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail=utils.Formatter.sanitize(string=msg),
                 )
 
             return schemas.MensagemOut(mensagem="Limpeza bem-sucedida.")
