@@ -92,10 +92,14 @@ class Formatter:
         return cep_formatado
 
     @staticmethod
+    # De YYYY-MM-DD para DD/MM/AAAA
     def data(data: str) -> str:
-        if re.fullmatch(r"\d{2}/\d{2}/\d{4}", data):
+        FORMATO_BR = r"(\d{2})\/(\d{2})\/(\d{4})"
+        FORMATO_ISO = r"(\d{4})-(\d{2})-(\d{2})"
+
+        # Se já está no formato desejado, não faz nada
+        if re.match(FORMATO_BR, data):
             return data
-        ano = data[:4]
-        mes = data[5:7]
-        dia = data[8:]
-        return f"{dia}/{mes}/{ano}"
+
+        # Se não estiver, converte
+        return re.sub(FORMATO_ISO, r"\3/\2/\1", data)

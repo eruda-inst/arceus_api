@@ -236,6 +236,10 @@ class SuporteService:
 
             # --- Iteração entre atendimentos ---
             for atendimento in atendimentos:
+                # --- Data criação ---
+                datetime_criacao = atendimento["data_criacao"]
+                data_criacao = datetime_criacao.split(" ")[0]
+
                 # --- Atendimentos parciais ---
                 atendimentos_parciais.append(
                     schemas.AtendimentoOut(
@@ -244,7 +248,7 @@ class SuporteService:
                         status=atendimento["su_status"],
                         mensagem=atendimento["menssagem"],
                         titulo=atendimento["titulo"],
-                        data_criacao=atendimento["data_criacao"],
+                        data_criacao=data_criacao,
                     )
                 )
 
@@ -270,6 +274,9 @@ class SuporteService:
             # --- Atendimento ---
             endpoint = "su_ticket"
             payload = atendimento.model_dump()
+            menssagem = payload["mensagem"]
+            del payload["mensagem"]
+            payload["menssagem"] = menssagem
             res = await clients.IxcCliente.post(endpoint=endpoint, payload=payload)
             id = res.get("id")
             if not id:
@@ -284,9 +291,13 @@ class SuporteService:
             regs = res.get("registros", [])
             atendimento_criado: dict[str, Any] = regs[0]
 
+            # --- Data criação ---
+            datetime_criacao = atendimento_criado["data_criacao"]
+            data_criacao = datetime_criacao.split(" ")[0]
+
             return schemas.AtendimentoOut(
                 id=atendimento_criado["id"],
-                data_criacao=atendimento_criado["data_criacao"],
+                data_criacao=data_criacao,
                 id_assunto=atendimento_criado["id_assunto"],
                 status=atendimento_criado["su_status"],
                 mensagem=atendimento_criado["menssagem"],

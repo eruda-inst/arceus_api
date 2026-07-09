@@ -36,9 +36,9 @@ class LeadOut(BaseModel):
     data_nascimento: str = Field(
         description="Data de nascimento do cliente.",
         # Não pode haver isto, pois o IXC é quebrado
-        # min_length=10,  # YYYY-MM-AA
-        # max_length=10,  # YYYY-MM-AA
-        examples=["dd/mm/aaaa"],
+        # min_length=10,  # DD/MM/AAAA
+        # max_length=10,  # DD/MM/AAAA
+        examples=["DD/MM/AAAA"],
     )
     id_filial: NonNegativeInt = Field(
         description="ID da filial.", examples=[utils.Default.ID_FILIAL]
@@ -186,10 +186,10 @@ class LeadUpdate(BaseModel):
     )
     data_nascimento: str | None = Field(
         default=None,
-        min_length=10,  # dd/mm/aaaa
-        max_length=10,  # dd/mm/aaaa
+        min_length=10,  # DD/MM/AAAA
+        max_length=10,  # DD/MM/AAAA
         description="Data de nascimento.",
-        examples=["dd/mm/aaaa"],
+        examples=["DD/MM/AAAA"],
     )
     id_filial: NonNegativeInt | None = Field(
         default=None, description="ID da filial.", examples=[utils.Default.ID_FILIAL]
@@ -320,9 +320,9 @@ class LeadIn(BaseModel):
     data_nascimento: str = Field(
         description="Data de nascimento.",
         # Não pode haver isto, pois o IXC é quebrado
-        # min_length=10,  # YYYY-MM-AA
-        # max_length=10,  # YYYY-MM-AA
-        examples=["dd/mm/aaaa"],
+        # min_length=10,  # DD/MM/AAAA
+        # max_length=10,  # DD/MM/AAAA
+        examples=["DD/MM/AAAA"],
     )
     id_filial: NonNegativeInt | None = Field(
         default=utils.Default.ID_FILIAL,
