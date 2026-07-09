@@ -33,12 +33,12 @@ class IxcCliente:
         method: utils.HttpMethod = utils.HttpMethod.POST,
         include_ixcsoft: bool = True,
     ) -> dict[str, Any]:
-        url = cls._url.format(cls._host, endpoint)
-        headers = cls._get_headers(include_ixcsoft=include_ixcsoft)
-
         try:
             res = await cls._client.request(
-                method=method, url=url, headers=headers, json=payload
+                method=method,
+                url=cls._url.format(cls._host, endpoint),
+                headers=cls._get_headers(include_ixcsoft=include_ixcsoft),
+                json=payload,
             )
             res.raise_for_status()
             return res.json()
