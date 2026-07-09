@@ -193,9 +193,14 @@ class SuporteService:
             res = await clients.IxcCliente.post(endpoint=endpoint, payload=payload)
             type = res["msg"][0]["type"]
             if type == "error":
+                msgs = res.get("msg", [])
+                msg = msgs[0].get("message", "Desconexão malsucedida.")
+                msg_sanitizada = msg.strip().replace("\\n", "")
+                if not msg_sanitizada.endswith("."):
+                    msg_sanitizada += "."
                 raise HTTPException(
                     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    detail="Desconexão malsucedida.",
+                    detail=msg_sanitizada,
                 )
 
             return schemas.MensagemOut(mensagem="Desconexão bem-sucedida.")
@@ -376,9 +381,11 @@ class SuporteService:
             res = await clients.IxcCliente.post(endpoint=endpoint, payload=payload)
             type = res["type"]
             if type == "error":
+                msg = res.get("message", "Limpeza malsucedida.")
+                if not msg.endswith("."):
+                    msg += "."
                 raise HTTPException(
-                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    detail="Limpeza malsucedida.",
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=msg
                 )
 
             return schemas.MensagemOut(mensagem="Limpeza bem-sucedida.")

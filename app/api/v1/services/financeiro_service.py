@@ -212,9 +212,11 @@ class FinanceiroService:
             res = await clients.IxcCliente.post(endpoint=endpoint, payload=payload)
             type = res["type"]
             if type == "error":
+                msg = res.get("message", "Desbloqueio malsucedido.")
+                msg_sanitizada = msg.replace("\\", "")
                 raise HTTPException(
                     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    detail="Desbloqueio malsucedido.",
+                    detail=msg_sanitizada,
                 )
 
             return schemas.MensagemOut(mensagem="Desbloqueio bem-sucedido.")

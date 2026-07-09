@@ -207,17 +207,17 @@ class VilaService:
             # --- Login ---
             login = await cls._get_login(numero_residencia=numero_residencia)
 
-            # Exceção já tratada na get_login
-
             # --- Limpar MAC ---
             endpoint = "radusuarios_25452"
             payload = {"get_id": str(login["id"])}
             res = await clients.IxcCliente.post(endpoint=endpoint, payload=payload)
             type = res["type"]
             if type == "error":
+                msg = res.get("message", "Limpeza malsucedida.")
+                if not msg.endswith("."):
+                    msg += "."
                 raise HTTPException(
-                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    detail="Limpeza malsucedida.",
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=msg
                 )
 
             return schemas.MensagemOut(mensagem="Limpeza bem-sucedida.")
@@ -237,17 +237,20 @@ class VilaService:
             # --- Login ---
             login = await cls._get_login(numero_residencia=numero_residencia)
 
-            # Exceção já tratada na get_login
-
             # --- Desconectar cliente ---
             endpoint = "desconectar_clientes"
             payload = {"id": str(login["id"])}
             res = await clients.IxcCliente.post(endpoint=endpoint, payload=payload)
             type = res["msg"][0]["type"]
             if type == "error":
+                msgs = res.get("msg", [])
+                msg = msgs[0].get("message", "Desconexão malsucedida.")
+                msg_sanitizada = msg.strip().replace("\\n", "")
+                if not msg_sanitizada.endswith("."):
+                    msg_sanitizada += "."
                 raise HTTPException(
                     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    detail="Desconexão malsucedida.",
+                    detail=msg_sanitizada,
                 )
 
             return schemas.MensagemOut(mensagem="Desconexão bem-sucedida.")
