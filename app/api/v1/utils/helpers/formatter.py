@@ -106,17 +106,16 @@ class Formatter:
 
     @staticmethod
     def sanitize(string: str) -> str:
-        # Remove espaços em branco do início e fim
+        # Remove espaços do início e fim
         l1 = string.strip()
         # Remove barras invertidas
         l2 = l1.replace("\\", "")
         # Remove quebras de linha
         l3 = l2.replace("\n", "")
-        # Remove espaços em branco do meio
+        # Substítui dois ou mais espaços do meio por um
         l4 = re.sub(pattern=r"\s{2,}", repl=r" ", string=l3)
-        # Adiciona ponto no fim, caso não exista
-        if not l4.endswith("."):
-            l4 += "."
-        # Capitaliza a primeira letra
-        l5 = l4.capitalize()
-        return l5
+        # Adiciona ponto no fim
+        l5 = l4 + "." if not l4.endswith(".") else l4
+        # Capitaliza
+        l6 = l5.capitalize()
+        return l6
