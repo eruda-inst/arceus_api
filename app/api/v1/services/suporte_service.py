@@ -1,7 +1,7 @@
 from typing import Any
 from . import ClienteService
+from .. import schemas, clients, utils
 from fastapi import HTTPException, status
-from .. import schemas, clients, services, utils
 from pydantic import PositiveInt, NonNegativeInt
 
 
@@ -14,88 +14,18 @@ class SuporteService:
         itens_por_pagina: PositiveInt | None,
     ) -> schemas.ContratoListOut:
         try:
-            # --- Cliente ---
-            cliente = await ClienteService.get_cliente_ixc(
-                protocolo=protocolo, cnpj_cpf=cnpj_cpf
-            )
-
-            # --- Contratos ---
-            endpoint = "cliente_contrato"
-            grid_param = [
-                utils.Param(TB="cliente_contrato.id_cliente", P=cliente["id"]),
-                utils.Param(TB="cliente_contrato.status", OP="!=", P="I"),
-                utils.Param(TB="cliente_contrato.status", OP="!=", P="N"),
-                utils.Param(TB="cliente_contrato.status", OP="!=", P="D"),
-            ]
-            res = await clients.IxcCliente.get(
-                endpoint=endpoint,
-                grid_param=grid_param,
+            # --- Contratos ativos ---
+            contratos_ativos = await ClienteService.get_contratos_ativos(
+                protocolo=protocolo,
+                cnpj_cpf=cnpj_cpf,
                 pagina=pagina,
                 itens_por_pagina=itens_por_pagina,
             )
-            regs = res.get("registros", [])
-            total = res.get("total", 0)
-            contratos = regs
-
-            contratos_parciais: list[schemas.ContratoOut] = []
-
-            # --- Iteração entre contratos ---
-            for contrato in contratos:
-                id_contrato = contrato.get("id")
-
-                # --- Fatura referência ---
-                fatura_referencia: dict[str, Any] | None = (
-                    await services.FinanceiroService.get_fatura_referencia(
-                        id_contrato=id_contrato
-                    )
-                )
-                if not fatura_referencia:
-                    raise HTTPException(
-                        status_code=status.HTTP_404_NOT_FOUND,
-                        detail="Fatura referência inexistente.",
-                    )
-
-                # --- Login ---
-                endpoint = "radusuarios"
-                grid_param = [utils.Param(TB="radusuarios.id_contrato", P=id_contrato)]
-                res = await clients.IxcCliente.get(
-                    endpoint=endpoint, grid_param=grid_param
-                )
-                regs = res.get("registros", [])
-                if not regs:
-                    raise HTTPException(
-                        status_code=status.HTTP_404_NOT_FOUND,
-                        detail="Login inexistente.",
-                    )
-                login = regs[0]
-
-                # --- Nome do cliente ---
-                nome = cliente.get("nome")
-                razao = cliente.get("razao")
-                nome_cliente = str(nome if nome else razao)
-
-                # --- Contrato parcial ---
-                contratos_parciais.append(
-                    schemas.ContratoOut(
-                        id=id_contrato,
-                        id_login=login["id"],
-                        id_cliente=contrato["id_cliente"],
-                        nome_cliente=nome_cliente,
-                        status=contrato["status"],
-                        status_acesso=contrato["status_internet"],
-                        nome_plano=contrato["contrato"],
-                        valor_fatura=fatura_referencia["valor"],
-                        dia_vencimento_fatura=fatura_referencia[
-                            "dia_vencimento_fatura"
-                        ],
-                        mac_onu=login["onu_mac"],
-                    )
-                )
 
             return schemas.ContratoListOut(
-                data=contratos_parciais,
+                data=[schemas.ContratoOut(**c_a) for c_a in contratos_ativos],
                 meta=schemas.Meta(
-                    total_itens=total,
+                    total_itens=len(contratos_ativos),
                     pagina_atual=pagina,
                     itens_por_pagina=itens_por_pagina,
                 ),

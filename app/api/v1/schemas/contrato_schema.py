@@ -1,6 +1,6 @@
 from . import Meta
 from .. import utils
-from pydantic import BaseModel, Field, field_serializer, NonNegativeInt
+from pydantic import BaseModel, Field, field_serializer, NonNegativeInt, PositiveInt
 
 
 class StatusInternetOut(BaseModel):
@@ -42,8 +42,8 @@ class ContratoOut(BaseModel):
     )
     nome_plano: str = Field(description="Nome do plano.", examples=["Nome do plano"])
     valor_fatura: float = Field(description="Valor da fatura.", examples=[12.34])
-    dia_vencimento_fatura: str = Field(
-        description="Dia de vencimento da fatura.", examples=["01"]
+    dia_vencimento_fatura: PositiveInt = Field(
+        description="Dia de vencimento da fatura.", ge=1, le=31, examples=[1]
     )
     mac_onu: str = Field(description="MAC da ONU.", examples=["AB1..."])
 
@@ -89,19 +89,19 @@ class ContratoListOut(BaseModel):
 class ComercialContratoOut(BaseModel):
     # IDs NonNegativeInt, pois o IXC é quebrado
     id: NonNegativeInt = Field(description="ID do contrato.", examples=[1])
-    nome_plano: str = Field(description="Nome do plano.", examples=["Nome do plano"])
+    id_login: NonNegativeInt = Field(description="ID do login.", examples=[12])
+    id_cliente: NonNegativeInt = Field(description="ID do cliente.", examples=[123])
     nome_cliente: str = Field(
         description="Nome do cliente.", examples=["Nome do cliente"]
     )
-    valor_fatura: float = Field(description="Valor do plano.", examples=[12.34])
     status_acesso: utils.StatusInternetCod = Field(
         description="Status do acesso.", examples=[utils.StatusInternetRot.ATIVO]
     )
-    dia_vencimento_fatura: str = Field(
-        description="Dia de vencimento da fatura.", examples=["01"]
+    nome_plano: str = Field(description="Nome do plano.", examples=["Nome do plano"])
+    valor_fatura: float = Field(description="Valor do plano.", examples=[12.34])
+    dia_vencimento_fatura: PositiveInt = Field(
+        description="Dia de vencimento da fatura.", ge=1, le=31, examples=[1]
     )
-    id_cliente: NonNegativeInt = Field(description="ID do cliente.", examples=[12])
-    id_login: NonNegativeInt = Field(description="ID do login.", examples=[123])
 
     @field_serializer("status_acesso")
     def serialize_status(self, v: utils.StatusInternetCod) -> utils.StatusInternetRot:
