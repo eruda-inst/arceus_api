@@ -113,18 +113,6 @@ class ClienteService:
             for contrato in contratos:
                 id_contrato = contrato.get("id")
 
-                # --- Fatura referência ---
-                fatura_referencia: dict[str, Any] | None = (
-                    await services.FinanceiroService.get_fatura_referencia(
-                        id_contrato=id_contrato
-                    )
-                )
-                if not fatura_referencia:
-                    raise HTTPException(
-                        status_code=status.HTTP_404_NOT_FOUND,
-                        detail="Fatura referência inexistente.",
-                    )
-
                 # --- Login ---
                 endpoint = "radusuarios"
                 grid_param = [utils.Param(TB="radusuarios.id_contrato", P=id_contrato)]
@@ -144,6 +132,22 @@ class ClienteService:
                 razao = cliente.get("razao")
                 nome_cliente = str(nome if nome else razao)
 
+                # --- Fatura referência ---
+                fatura_referencia: dict[str, Any] | None = (
+                    await services.FinanceiroService.get_fatura_referencia(
+                        id_contrato=id_contrato
+                    )
+                )
+
+                # --- Dados fatura ---
+                fatura_parcial = {"valor_fatura": None, "dia_vencimento_fatura": None}
+
+                if fatura_referencia:
+                    fatura_parcial["valor_fatura"] = fatura_referencia["valor"]
+                    fatura_parcial["dia_vencimento_fatura"] = fatura_referencia[
+                        "dia_vencimento_fatura"
+                    ]
+
                 # --- Contrato parcial ---
                 contratos_parciais.append(
                     {
@@ -154,11 +158,11 @@ class ClienteService:
                         "status": contrato["status"],
                         "status_acesso": contrato["status_internet"],
                         "nome_plano": contrato["contrato"],
-                        "valor_fatura": fatura_referencia["valor"],
-                        "dia_vencimento_fatura": fatura_referencia[
+                        "valor_fatura": fatura_parcial["valor_fatura"],
+                        "dia_vencimento_fatura": fatura_parcial[
                             "dia_vencimento_fatura"
                         ],
-                        "mac_onu": login["onu_mac"],
+                        "mac_onu": login["onu_mac"] if login["onu_mac"] else None,
                     }
                 )
 

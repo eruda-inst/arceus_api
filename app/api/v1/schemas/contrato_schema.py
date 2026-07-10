@@ -41,11 +41,19 @@ class ContratoOut(BaseModel):
         description="Status de acesso.", examples=[utils.StatusInternetRot.ATIVO]
     )
     nome_plano: str = Field(description="Nome do plano.", examples=["Nome do plano"])
-    valor_fatura: float = Field(description="Valor da fatura.", examples=[12.34])
-    dia_vencimento_fatura: PositiveInt = Field(
-        description="Dia de vencimento da fatura.", ge=1, le=31, examples=[1]
+    valor_fatura: float | None = Field(
+        default=None, description="Valor da fatura.", examples=[12.34]
     )
-    mac_onu: str = Field(description="MAC da ONU.", examples=["AB1..."])
+    dia_vencimento_fatura: PositiveInt | None = Field(
+        default=None,
+        description="Dia de vencimento da fatura.",
+        ge=1,
+        le=31,
+        examples=[1],
+    )
+    mac_onu: str | None = Field(
+        default=None, description="MAC da ONU.", examples=["AB1..."]
+    )
 
     @field_serializer("status")
     def serialize_status(self, v: utils.StatusContratoCod) -> utils.StatusContratoRot:
@@ -98,9 +106,15 @@ class ComercialContratoOut(BaseModel):
         description="Status do acesso.", examples=[utils.StatusInternetRot.ATIVO]
     )
     nome_plano: str = Field(description="Nome do plano.", examples=["Nome do plano"])
-    valor_fatura: float = Field(description="Valor do plano.", examples=[12.34])
-    dia_vencimento_fatura: PositiveInt = Field(
-        description="Dia de vencimento da fatura.", ge=1, le=31, examples=[1]
+    valor_fatura: float | None = Field(
+        default=None, description="Valor do plano.", examples=[12.34]
+    )
+    dia_vencimento_fatura: PositiveInt | None = Field(
+        default=None,
+        description="Dia de vencimento da fatura.",
+        ge=1,
+        le=31,
+        examples=[1],
     )
 
     @field_serializer("status_acesso")
