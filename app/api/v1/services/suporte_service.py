@@ -72,12 +72,12 @@ class SuporteService:
             query_param = None
             query_value = None
 
-            if id_login:
-                query_param = "id_login"
-                query_value = id_login
-            elif mac_onu:
+            if mac_onu:
                 query_param = "mac"
                 query_value = mac_onu
+            elif id_login:
+                query_param = "id_login"
+                query_value = id_login
             else:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
@@ -93,20 +93,19 @@ class SuporteService:
             ]
             res = await clients.IxcCliente.get(endpoint=endpoint, grid_param=grid_param)
             regs = res.get("registros", [])
-            onu = regs[0]
-            sinal_rx = onu["sinal_rx"]
-            if not regs or not sinal_rx:
+            if not regs:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND, detail="ONU inexistente."
                 )
+            onu = regs[0]
 
-            return schemas.StatusOnuOut(status_onu=sinal_rx)
+            return schemas.StatusOnuOut(status_onu=onu["sinal_rx"])
         except HTTPException:
             raise
-        except Exception:
+        except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Erro interno desconhecido",
+                detail=f"Erro interno desconhecido: {e}",
             )
 
     @staticmethod
