@@ -14,24 +14,9 @@ class UpgradeService:
     ) -> schemas.PlanoSugeridoListOut:
         try:
             # --- Obtém contratos ativos ---
-            # contratos = await services.ClienteService.get_contratos_ativos(
-            #     id_cliente=id_cliente
-            # )
-            endpoint = "cliente_contrato"
-            grid_param = [
-                utils.Param(TB="cliente_contrato.id_cliente", P=id_cliente),
-                utils.Param(TB="cliente_contrato.status", OP="!=", P="I"),
-                utils.Param(TB="cliente_contrato.status", OP="!=", P="N"),
-                utils.Param(TB="cliente_contrato.status", OP="!=", P="D"),
-            ]
-            res = await clients.IxcCliente.get(
-                endpoint=endpoint,
-                grid_param=grid_param,
-                pagina=pagina,
-                itens_por_pagina=itens_por_pagina,
+            contratos = await services.ClienteService.get_contratos_ativos(
+                id_cliente=id_cliente, pagina=pagina, itens_por_pagina=itens_por_pagina
             )
-            regs = res.get("registros", [])
-            contratos = regs
 
             # IDs de planos
             ids_planos_padrao = (277, 278, 279, 280, 281)
@@ -83,7 +68,7 @@ class UpgradeService:
 
             # Iteração entre contratos
             for contrato in contratos:
-                id_vd_contrato = contrato["id_vd_contrato"]
+                id_vd_contrato = contrato["id_plano"]
 
                 # Caso I: Se o plano atual estiver na lista de planos para ignorar
                 if id_vd_contrato in ids_planos_para_ignorar:
