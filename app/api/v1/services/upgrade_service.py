@@ -1,4 +1,5 @@
-from .. import clients, schemas, utils
+from typing import Any
+from .. import clients, schemas, utils, services
 from fastapi import HTTPException, status
 from pydantic import PositiveInt, NonNegativeInt
 
@@ -12,6 +13,7 @@ class UpgradeService:
         itens_por_pagina: PositiveInt | None,
     ) -> schemas.PlanoSugeridoListOut:
         try:
+            # --- Contratos ativos ---
             grid_param = [
                 utils.Param(TB="cliente_contrato.id_cliente", P=id_cliente),
                 utils.Param(TB="cliente_contrato.status", OP="!=", P="I"),
@@ -19,97 +21,169 @@ class UpgradeService:
                 utils.Param(TB="cliente_contrato.status", OP="!=", P="D"),
             ]
             endpoint = "cliente_contrato"
-            contratos_res = await clients.IxcCliente.get(
+            res = await clients.IxcCliente.get(
                 endpoint=endpoint,
                 grid_param=grid_param,
                 pagina=pagina,
                 itens_por_pagina=itens_por_pagina,
             )
+            regs = res.get("registros", [])
+            contratos = regs
 
-            contratos = contratos_res.get("registros", [])
+            # IDs de planos
+            ids_planos_padrao = (277, 278, 279, 280, 281)
+            ids_planos_para_ignorar = (
+                267,
+                272,
+                266,
+                249,
+                247,
+                224,
+                217,
+                215,
+                211,
+                203,
+                172,
+                166,
+                162,
+                127,
+                126,
+                244,
+            )
 
-            ids_planos_basicos = [277, 278, 279, 280, 281]
-            ids_planos_gamers = [267, 272]
-            ids_planos_oficiais = ids_planos_basicos.copy()
-            ids_planos_oficiais.extend(ids_planos_gamers)
-
-            ids_str = (str(id) for id in ids_planos_basicos)
+            # --- Planos padrão ---
+            ids_str = (str(id) for id in ids_planos_padrao)
             ids_str_tratados = str(",").join(ids_str)
+            endpoint = "vd_contratos"
             grid_param = [
                 utils.Param(TB="vd_contratos.id", OP="IN", P=ids_str_tratados)
             ]
-            planos_oficiais_res = await clients.IxcCliente.get(
-                endpoint="vd_contratos",
+            res = await clients.IxcCliente.get(
+                endpoint=endpoint,
                 grid_param=grid_param,
                 pagina=pagina,
                 itens_por_pagina=itens_por_pagina,
             )
-            planos_oficiais = planos_oficiais_res.get("registros", [])
+            regs = res.get("registros", [])
+            planos_padrao = regs
 
-            planos_oficiais = sorted(
-                planos_oficiais, key=lambda p: float(p["valor_contrato"])
+            # Ordenação de planos, para facilitar a lógica
+            planos_padrao = sorted(
+                planos_padrao, key=lambda p: float(p["valor_contrato"])
             )
-            for plano_oficial in planos_oficiais:
-                plano_oficial["valor_contrato"] = float(plano_oficial["valor_contrato"])
+
+            # Conversão de valores para float, para realização de cálculos aritméticos
+            for plano_padrao in planos_padrao:
+                plano_padrao["valor_contrato"] = float(plano_padrao["valor_contrato"])
 
             planos_sugeridos: list[schemas.PlanoSugeridoOut] = []
 
+            # Iteração entre contratos
             for contrato in contratos:
-                id_vd_contrato = int(contrato.get("id_vd_contrato", None))
+                id_vd_contrato = contrato["id_vd_contrato"]
 
-                if id_vd_contrato in ids_planos_oficiais:
+                # Caso I: Se o plano atual estiver na lista de planos para ignorar
+                if id_vd_contrato in ids_planos_para_ignorar:
                     continue
 
-                grid_param = [utils.Param(TB="vd_contratos.id", P=id_vd_contrato)]
-                plano_vigente_res = await clients.IxcCliente.get(
-                    endpoint="vd_contratos",
+                # --- Plano cliente ---
+                endpoint = "vd_contratos"
+                grid_param = [
+                    utils.Param(TB="vd_contratos.id", OP="=", P=id_vd_contrato)
+                ]
+                res = await clients.IxcCliente.get(
+                    endpoint=endpoint,
                     grid_param=grid_param,
                     pagina=pagina,
                     itens_por_pagina=itens_por_pagina,
                 )
-                plano_vigente = plano_vigente_res.get("registros", [])
-                plano_atual = {}
-                plano_atual["nome"] = plano_vigente[0].get("nome", None)
-                plano_atual["valor"] = float(
-                    plano_vigente[0].get("valor_contrato", None)
-                )
+                regs = res.get("registros", [])
+                plano_cliente: dict[str, Any] = regs[0]
+                plano_cliente = {
+                    **plano_cliente,
+                    "valor_contrato": float(plano_cliente["valor_contrato"]),
+                }
 
-                plano_sugerido = {}
-
-                if plano_atual["valor"] < planos_oficiais[0]["valor_contrato"]:
-                    plano_sugerido["nome"] = planos_oficiais[0]["nome"]
-                    plano_sugerido["valor"] = planos_oficiais[0]["valor_contrato"]
-                elif plano_atual["valor"] < planos_oficiais[1]["valor_contrato"]:
-                    plano_sugerido["nome"] = planos_oficiais[1]["nome"]
-                    plano_sugerido["valor"] = planos_oficiais[1]["valor_contrato"]
-                elif plano_atual["valor"] < planos_oficiais[2]["valor_contrato"]:
-                    plano_sugerido["nome"] = planos_oficiais[2]["nome"]
-                    plano_sugerido["valor"] = planos_oficiais[2]["valor_contrato"]
-                elif plano_atual["valor"] < planos_oficiais[3]["valor_contrato"]:
-                    plano_sugerido["nome"] = planos_oficiais[3]["nome"]
-                    plano_sugerido["valor"] = planos_oficiais[3]["valor_contrato"]
-                else:
-                    plano_sugerido["nome"] = planos_oficiais[4]["nome"]
-                    plano_sugerido["valor"] = planos_oficiais[4]["valor_contrato"]
-
-                planos_sugeridos.append(
-                    schemas.PlanoSugeridoOut(
-                        nome_plano_atual=plano_atual["nome"],
-                        valor_plano_atual=plano_atual["valor"],
-                        nome_plano_sugerido=plano_sugerido["nome"],
-                        valor_plano_sugerido=plano_sugerido["valor"],
+                # --- Fatura referência ---
+                fatura_referencia = (
+                    await services.FinanceiroService.get_fatura_referencia(
+                        id_contrato=contrato["id"]
                     )
                 )
 
-            meta = schemas.Meta(
-                total_itens=len(planos_sugeridos),
-                pagina_atual=pagina,
-                itens_por_pagina=itens_por_pagina,
-            )
+                if fatura_referencia:
+                    plano_cliente = {
+                        **plano_cliente,
+                        "valor_contrato": fatura_referencia["valor"],
+                    }
 
-            return schemas.PlanoSugeridoListOut(data=planos_sugeridos, meta=meta)
-        except Exception:
+                # Caso II: Se o plano atual estiver na lista de planos padrão
+                if plano_cliente["id"] in [p_p["id"] for p_p in planos_padrao]:
+                    # Se o valor do plano atual for maior que o valor do plano referência
+                    plano_referencia: dict[str, Any] = [
+                        p_p for p_p in planos_padrao if p_p["id"] == id_vd_contrato
+                    ][0]
+                    plano_referencia: dict[str, Any] = {
+                        **plano_referencia,
+                        "valor_contrato": float(plano_referencia["valor_contrato"]),
+                    }
+                    if (
+                        plano_cliente["valor_contrato"]
+                        > plano_referencia["valor_contrato"]
+                    ):
+                        for plano_padrao in planos_padrao:
+                            if (
+                                plano_padrao["valor_contrato"]
+                                > plano_cliente["valor_contrato"]
+                            ):
+                                valor_acrescimo = plano_padrao["valor_contrato"] - (
+                                    plano_cliente["valor_contrato"]
+                                )
+                                planos_sugeridos.append(
+                                    schemas.PlanoSugeridoOut(
+                                        nome_plano_atual=plano_cliente["nome"],
+                                        valor_plano_atual=plano_cliente[
+                                            "valor_contrato"
+                                        ],
+                                        nome_plano_sugerido=plano_padrao["nome"],
+                                        valor_plano_sugerido=plano_padrao[
+                                            "valor_contrato"
+                                        ],
+                                        valor_acrescimo=valor_acrescimo,
+                                    )
+                                )
+                                break
+                # Caso III: Se o plano atual não estiver na lista de planos padrão
+                else:
+                    for plano_padrao in planos_padrao:
+                        if (
+                            plano_padrao["valor_contrato"]
+                            >= plano_cliente["valor_contrato"]
+                        ):
+                            valor_acrescimo = plano_padrao["valor_contrato"] - (
+                                plano_cliente["valor_contrato"]
+                            )
+                            planos_sugeridos.append(
+                                schemas.PlanoSugeridoOut(
+                                    nome_plano_atual=plano_cliente["nome"],
+                                    valor_plano_atual=plano_cliente["valor_contrato"],
+                                    nome_plano_sugerido=plano_padrao["nome"],
+                                    valor_plano_sugerido=plano_padrao["valor_contrato"],
+                                    valor_acrescimo=valor_acrescimo,
+                                )
+                            )
+                            break
+
+            return schemas.PlanoSugeridoListOut(
+                data=planos_sugeridos,
+                meta=schemas.Meta(
+                    total_itens=len(planos_sugeridos),
+                    pagina_atual=pagina,
+                    itens_por_pagina=itens_por_pagina,
+                ),
+            )
+        except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Erro interno desconhecido",
+                detail=f"Erro interno desconhecido: {e}",
             )

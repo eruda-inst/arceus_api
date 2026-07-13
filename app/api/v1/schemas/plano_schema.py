@@ -17,6 +17,10 @@ class PlanoSugeridoOut(BaseModel):
     valor_plano_sugerido: float = Field(
         description="Valor do plano sugerido.", examples=[12.34]
     )
+    valor_acrescimo: float = Field(
+        description="Diferença entre valor do plano sugerido para valor do plano atual.",
+        examples=[12.34],
+    )
 
 
 class PlanoSugeridoListOut(BaseModel):
