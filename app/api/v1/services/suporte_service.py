@@ -99,11 +99,11 @@ class SuporteService:
                 )
             onu = regs[0]
 
-            sinal_rx = onu["sinal_rx"]
+            sinal_rx = onu.get("sinal_rx", None)
             if not sinal_rx:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
-                    detail="Sinal ONU inexistente",
+                    detail="Sinal ONU inexistente.",
                 )
 
             return schemas.StatusOnuOut(status_onu=sinal_rx)

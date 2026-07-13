@@ -4,7 +4,8 @@ from pydantic import BaseModel, field_serializer, Field
 
 class StatusOnuOut(BaseModel):
     status_onu: float = Field(
-        description="Status da ONU.", examples=[utils.StatusOnuRot.EXCELENTE]
+        description="Status da ONU.",
+        examples=[utils.StatusOnuRot.EXCELENTE],
     )
 
     @field_serializer("status_onu")
