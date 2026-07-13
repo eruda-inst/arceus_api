@@ -5,6 +5,7 @@ from pydantic import PositiveInt, NonNegativeInt
 
 
 class UpgradeService:
+
     @staticmethod
     async def get_planos_sugeridos(
         # IDs NonNegativeInt, pois o IXC é quebrado
@@ -68,7 +69,7 @@ class UpgradeService:
 
             # Iteração entre contratos
             for contrato in contratos:
-                id_vd_contrato = contrato["id_plano"]
+                id_vd_contrato = int(contrato["id_plano"])
 
                 # Caso I: Se o plano atual estiver na lista de planos para ignorar
                 if id_vd_contrato in ids_planos_para_ignorar:
