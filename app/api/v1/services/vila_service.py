@@ -115,7 +115,15 @@ class VilaService:
                 )
             onu = regs[0]
 
-            return schemas.StatusOnuOut(status_onu=onu["sinal_rx"])
+            # Sinal rx
+            sinal_rx = onu.get("sinal_rx")
+            if not sinal_rx:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Sinal ONU inexistente.",
+                )
+
+            return schemas.StatusOnuOut(status_onu=sinal_rx)
         except HTTPException:
             raise
         except Exception:

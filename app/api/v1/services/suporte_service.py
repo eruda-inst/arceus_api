@@ -99,7 +99,7 @@ class SuporteService:
                 )
             onu = regs[0]
 
-            sinal_rx = onu.get("sinal_rx", None)
+            sinal_rx = onu.get("sinal_rx")
             if not sinal_rx:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,

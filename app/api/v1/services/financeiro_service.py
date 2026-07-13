@@ -226,7 +226,7 @@ class FinanceiroService:
             endpoint = "fn_areceber"
             grid_param = [utils.Param(TB="fn_areceber.id", P=id_fatura)]
             res = await clients.IxcCliente.get(endpoint=endpoint, grid_param=grid_param)
-            regs = res.get("registros")
+            regs = res.get("registros", [])
             if not regs:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND, detail="Fatura inexistente."
@@ -234,7 +234,7 @@ class FinanceiroService:
             fatura = regs[0]
 
             # Linha digitável
-            linha_digitavel = fatura.get("linha_digitavel", None)
+            linha_digitavel = fatura.get("linha_digitavel")
             if not linha_digitavel:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,

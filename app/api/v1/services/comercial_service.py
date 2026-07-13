@@ -108,7 +108,7 @@ class ComercialService:
                 endpoint=endpoint, filter=filter, options=options
             )
             cliente_existe = True
-            data = res.get("data")
+            data = res.get("data", [])
             if not data:
                 cliente_existe = False
 
