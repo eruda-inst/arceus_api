@@ -143,24 +143,44 @@ class UpgradeService:
                                 break
                 # Caso III: Se o plano atual não estiver na lista de planos padrão
                 else:
-                    for plano_padrao in planos_padrao:
-                        if (
-                            plano_padrao["valor_contrato"]
-                            >= plano_cliente["valor_contrato"]
-                        ):
-                            valor_acrescimo = plano_padrao["valor_contrato"] - (
-                                plano_cliente["valor_contrato"]
+                    if (
+                        plano_cliente["valor_contrato"]
+                        > planos_padrao[-1]["valor_contrato"]
+                    ):
+                        planos_sugeridos.append(
+                            schemas.PlanoSugeridoOut(
+                                nome_plano_atual=plano_cliente["nome"],
+                                valor_plano_atual=plano_cliente["valor_contrato"],
+                                nome_plano_sugerido=planos_padrao[-1]["nome"],
+                                valor_plano_sugerido=planos_padrao[-1][
+                                    "valor_contrato"
+                                ],
+                                valor_acrescimo=0,
                             )
-                            planos_sugeridos.append(
-                                schemas.PlanoSugeridoOut(
-                                    nome_plano_atual=plano_cliente["nome"],
-                                    valor_plano_atual=plano_cliente["valor_contrato"],
-                                    nome_plano_sugerido=plano_padrao["nome"],
-                                    valor_plano_sugerido=plano_padrao["valor_contrato"],
-                                    valor_acrescimo=valor_acrescimo,
+                        )
+                    else:
+                        for plano_padrao in planos_padrao:
+                            if (
+                                plano_padrao["valor_contrato"]
+                                >= plano_cliente["valor_contrato"]
+                            ):
+                                valor_acrescimo = plano_padrao["valor_contrato"] - (
+                                    plano_cliente["valor_contrato"]
                                 )
-                            )
-                            break
+                                planos_sugeridos.append(
+                                    schemas.PlanoSugeridoOut(
+                                        nome_plano_atual=plano_cliente["nome"],
+                                        valor_plano_atual=plano_cliente[
+                                            "valor_contrato"
+                                        ],
+                                        nome_plano_sugerido=plano_padrao["nome"],
+                                        valor_plano_sugerido=plano_padrao[
+                                            "valor_contrato"
+                                        ],
+                                        valor_acrescimo=valor_acrescimo,
+                                    )
+                                )
+                                break
 
             return schemas.PlanoSugeridoListOut(
                 data=planos_sugeridos,
