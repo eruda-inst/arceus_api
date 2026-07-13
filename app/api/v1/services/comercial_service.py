@@ -22,7 +22,8 @@ class ComercialService:
                     status_code=status.HTTP_404_NOT_FOUND,
                     detail="Contrato inexistente.",
                 )
-            contrato = regs[0]
+            contratos = regs
+            contrato = contratos[0]
             return schemas.StatusInternetOut(status_acesso=contrato["status_internet"])
         except HTTPException:
             raise
@@ -88,6 +89,7 @@ class ComercialService:
             regs = res.get("registros", [])
             lead_criado = regs[0]
 
+            # **lead_criado aqui
             return schemas.LeadOut(
                 id=lead_criado["id"],
                 ativo=lead_criado["ativo"],

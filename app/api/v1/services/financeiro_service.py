@@ -1,8 +1,8 @@
 import statistics
 from typing import Any
 from . import ClienteService
-from .. import clients, schemas, utils
 from fastapi import HTTPException, status
+from .. import clients, schemas, utils, services
 from pydantic import PositiveInt, NonNegativeInt
 
 
@@ -131,22 +131,13 @@ class FinanceiroService:
         itens_por_pagina: PositiveInt | None,
     ) -> schemas.FaturaListOut:
         try:
-            # --- Cliente ---
-            cliente = await ClienteService.get_cliente_ixc(
-                protocolo=protocolo, cnpj_cpf=cnpj_cpf
+            # --- Contratos ativos ---
+            contratos = await services.ClienteService.get_contratos_ativos(
+                protocolo=protocolo,
+                cnpj_cpf=cnpj_cpf,
+                pagina=pagina,
+                itens_por_pagina=itens_por_pagina,
             )
-
-            # --- Contratos ---
-            endpoint = "cliente_contrato"
-            grid_param = [
-                utils.Param(TB="cliente_contrato.id_cliente", P=cliente["id"]),
-                utils.Param(TB="cliente_contrato.status", OP="!=", P="I"),
-                utils.Param(TB="cliente_contrato.status", OP="!=", P="N"),
-                utils.Param(TB="cliente_contrato.status", OP="!=", P="D"),
-            ]
-            res = await clients.IxcCliente.get(endpoint=endpoint, grid_param=grid_param)
-            regs = res.get("registros", [])
-            contratos = regs
 
             faturas_abertas_parciais: list[schemas.FaturaOut] = []
 
@@ -177,7 +168,7 @@ class FinanceiroService:
                     faturas_abertas_parciais.append(
                         schemas.FaturaOut(
                             id=fatura_aberta["id"],
-                            contrato=contrato["contrato"],
+                            contrato=contrato["nome_plano"],
                             data_vencimento=fatura_aberta["data_vencimento"],
                             id_contrato=id_contrato,
                             preco=fatura_aberta["valor"],
@@ -233,7 +224,7 @@ class FinanceiroService:
         id_fatura: NonNegativeInt,
     ) -> schemas.LinhaDigitavelOut:
         try:
-            # -- Fatura ---
+            # --- Fatura ---
             endpoint = "fn_areceber"
             grid_param = [utils.Param(TB="fn_areceber.id", P=id_fatura)]
             res = await clients.IxcCliente.get(endpoint=endpoint, grid_param=grid_param)
@@ -321,21 +312,16 @@ class FinanceiroService:
     ) -> schemas.CredencialOut:
         try:
             # --- Cliente ---
-            endpoint = "cliente"
-            grid_param = [utils.Param(TB="cliente.id", P=id_cliente)]
-            res = await clients.IxcCliente.get(endpoint=endpoint, grid_param=grid_param)
-            regs = res.get("registros", [])
-            if not regs:
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND, detail="Cliente inexistente."
-                )
-            cliente_antigo = regs[0]
+            cliente_antigo = await services.ClienteService.get_cliente_ixc(
+                id_cliente=id_cliente
+            )
 
             # --- Cliente atualizado ---
             cliente_atualizado: dict[str, Any] = {**cliente_antigo, "senha": senha}
             del cliente_atualizado["id"]
 
             # --- Atualiza cliente ---
+            endpoint = "cliente"
             id = cliente_antigo["id"]
             res = await clients.IxcCliente.put(
                 endpoint=endpoint, id=id, payload=cliente_atualizado

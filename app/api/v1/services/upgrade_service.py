@@ -14,21 +14,9 @@ class UpgradeService:
     ) -> schemas.PlanoSugeridoListOut:
         try:
             # --- Contratos ativos ---
-            grid_param = [
-                utils.Param(TB="cliente_contrato.id_cliente", P=id_cliente),
-                utils.Param(TB="cliente_contrato.status", OP="!=", P="I"),
-                utils.Param(TB="cliente_contrato.status", OP="!=", P="N"),
-                utils.Param(TB="cliente_contrato.status", OP="!=", P="D"),
-            ]
-            endpoint = "cliente_contrato"
-            res = await clients.IxcCliente.get(
-                endpoint=endpoint,
-                grid_param=grid_param,
-                pagina=pagina,
-                itens_por_pagina=itens_por_pagina,
+            contratos = await services.ClienteService.get_contratos_ativos(
+                id_cliente=id_cliente
             )
-            regs = res.get("registros", [])
-            contratos = regs
 
             # IDs de planos
             ids_planos_padrao = (277, 278, 279, 280, 281)
