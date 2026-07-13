@@ -8,7 +8,7 @@ class VilaService:
     @staticmethod
     async def _get_login(numero_residencia: PositiveInt) -> dict[str, Any]:
         try:
-            # --- Login ---
+            # --- Obtém login ---
             endpoint = "radusuarios"
             grid_param = [
                 utils.Param(
@@ -47,10 +47,10 @@ class VilaService:
         cls, numero_residencia: PositiveInt
     ) -> schemas.VilaContratoOut:
         try:
-            # --- Login ---
+            # --- Obtém login ---
             login = await cls._get_login(numero_residencia=numero_residencia)
 
-            # --- Contrato ---
+            # --- Obtém contrato ---
             endpoint = "cliente_contrato"
             grid_param = [
                 utils.Param(TB="cliente_contrato.id_cliente", P=login["id_cliente"])
@@ -82,7 +82,7 @@ class VilaService:
         cls, numero_residencia: PositiveInt
     ) -> schemas.StatusConexaoOut:
         try:
-            # --- Login ---
+            # --- Obtém login ---
             login = await cls._get_login(numero_residencia=numero_residencia)
 
             return schemas.StatusConexaoOut(status_conexao=login["online"])
@@ -97,10 +97,10 @@ class VilaService:
         cls, numero_residencia: PositiveInt
     ) -> schemas.StatusOnuOut:
         try:
-            # --- Login ---
+            # --- Obtém login ---
             login = await cls._get_login(numero_residencia=numero_residencia)
 
-            # --- ONU ---
+            # --- Obtém ONU ---
             endpoint = "radpop_radio_cliente_fibra"
             grid_param = [
                 utils.Param(
@@ -127,7 +127,7 @@ class VilaService:
     @classmethod
     async def get_dados_wifi(cls, numero_residencia: PositiveInt) -> schemas.WifiOut:
         try:
-            # --- Login ---
+            # --- Obtém login ---
             login = await cls._get_login(numero_residencia=numero_residencia)
 
             return schemas.WifiOut(
@@ -150,10 +150,10 @@ class VilaService:
         itens_por_pagina: PositiveInt | None,
     ) -> schemas.AtendimentoListOut:
         try:
-            # --- Login ---
+            # --- Obtém login ---
             login = await cls._get_login(numero_residencia=numero_residencia)
 
-            # --- Atendimentos ---
+            # --- Obtém atendimentos abertos ---
             endpoint = "su_ticket"
             grid_param = [
                 utils.Param(TB="su_ticket.id_login", OP="L", P=f"res{login['id']}"),
@@ -172,7 +172,7 @@ class VilaService:
 
             atendimentos_parciais: list[schemas.AtendimentoOut] = []
 
-            # --- Iteração entre atendimentos ---
+            # Iteração entre atendimentos
             for atendimento in atendimentos:
                 atendimentos_parciais.append(
                     schemas.AtendimentoOut(
@@ -204,10 +204,10 @@ class VilaService:
         cls, numero_residencia: PositiveInt
     ) -> schemas.MensagemOut:
         try:
-            # --- Login ---
+            # --- Obtém login ---
             login = await cls._get_login(numero_residencia=numero_residencia)
 
-            # --- Limpar MAC ---
+            # --- Realiza limpeza de MAC ---
             endpoint = "radusuarios_25452"
             payload = {"get_id": str(login["id"])}
             res = await clients.IxcCliente.post(endpoint=endpoint, payload=payload)
@@ -233,10 +233,10 @@ class VilaService:
         cls, numero_residencia: PositiveInt
     ) -> schemas.MensagemOut:
         try:
-            # --- Login ---
+            # --- Obtém login ---
             login = await cls._get_login(numero_residencia=numero_residencia)
 
-            # --- Desconectar cliente ---
+            # --- Realiza desconexão de cliente ---
             endpoint = "desconectar_clientes"
             payload = {"id": str(login["id"])}
             res = await clients.IxcCliente.post(endpoint=endpoint, payload=payload)
@@ -263,7 +263,7 @@ class VilaService:
         atendimento: schemas.AtendimentoIn,
     ) -> schemas.AtendimentoOut:
         try:
-            # --- Atendimento ---
+            # --- Cria atendimento ---
             endpoint = "su_ticket"
             payload = atendimento.model_dump()
             res = await clients.IxcCliente.post(endpoint=endpoint, payload=payload)
@@ -274,7 +274,7 @@ class VilaService:
                     detail="Cadastro malsucedido.",
                 )
 
-            # --- Atendimento criado ---
+            # --- Obtém atendimento criado ---
             grid_param = [utils.Param(TB="su_ticket.id", P=id)]
             res = await clients.IxcCliente.get(endpoint=endpoint, grid_param=grid_param)
             regs = res.get("registros", [])

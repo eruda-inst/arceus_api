@@ -13,7 +13,7 @@ class FinanceiroService:
         id_contrato: NonNegativeInt,
     ) -> dict[str, Any] | None:
         try:
-            # --- Faturas pagas ---
+            # --- Obtém faturas pagas ---
             endpoint = "fn_areceber"
             grid_param = [
                 utils.Param(TB="fn_areceber.id_contrato", P=id_contrato),
@@ -29,15 +29,15 @@ class FinanceiroService:
                 return None
             faturas_pagas = regs
 
-            # --- Ultima fatura paga ---
+            # Ultima fatura paga
             ultimas_faturas_pagas = faturas_pagas[:3]
             ultima_fatura_paga = ultimas_faturas_pagas[0]
 
-            # --- Valor da fatura ---
+            # Valor da fatura
             valores = [float(u["valor"]) for u in ultimas_faturas_pagas]
             valor = statistics.mode(valores)
 
-            # --- Dia de vencimento da fatura ---
+            # Dia de vencimento da fatura
             datas_vencimento = [u["data_vencimento"] for u in ultimas_faturas_pagas]
             dias_vencimento = [d.split("-")[2] for d in datas_vencimento]
             dia_vencimento = statistics.mode(dias_vencimento)
@@ -60,7 +60,7 @@ class FinanceiroService:
         id_contrato: NonNegativeInt,
     ) -> dict[str, Any] | None:
         try:
-            # --- Faturas abertas ---
+            # --- Obtém faturas abertas ---
             endpoint = "fn_areceber"
             grid_param = [
                 utils.Param(TB="fn_areceber.id_contrato", P=id_contrato),
@@ -73,15 +73,15 @@ class FinanceiroService:
                 return None
             faturas_abertas = regs
 
-            # --- Proxima fatura aberta ---
+            # Proxima fatura aberta
             proximas_faturas_abertas = faturas_abertas[:3]
             proxima_fatura_aberta = proximas_faturas_abertas[0]
 
-            # --- Valor da fatura ---
+            # Valor da fatura
             valores = [float(p["valor"]) for p in proximas_faturas_abertas]
             valor = statistics.mode(valores)
 
-            # --- Dia de vencimento da fatura ---
+            # Dia de vencimento da fatura
             datas_vencimento = [p["data_vencimento"] for p in proximas_faturas_abertas]
             dias_vencimento = [d.split("-")[2] for d in datas_vencimento]
             dia_vencimento = statistics.mode(dias_vencimento)
@@ -131,7 +131,7 @@ class FinanceiroService:
         itens_por_pagina: PositiveInt | None,
     ) -> schemas.FaturaListOut:
         try:
-            # --- Contratos ativos ---
+            # --- Obtém contratos ativos ---
             contratos = await services.ClienteService.get_contratos_ativos(
                 protocolo=protocolo,
                 cnpj_cpf=cnpj_cpf,
@@ -141,12 +141,12 @@ class FinanceiroService:
 
             faturas_abertas_parciais: list[schemas.FaturaOut] = []
 
-            # --- Iteração entre contratos ---
+            # Iteração entre contratos
             # Abordagem mais segura (fatura_aberta["id_contrato"] pode ser 0)
             for contrato in contratos:
                 id_contrato = contrato["id"]
 
-                # --- Faturas Abertas ---
+                # --- Obtém faturas Abertas ---
                 endpoint = "fn_areceber"
                 grid_param = [
                     utils.Param(TB="fn_areceber.id_contrato", P=id_contrato),
@@ -162,9 +162,9 @@ class FinanceiroService:
                 regs = res.get("registros", [])
                 faturas_abertas = regs
 
-                # --- Iteração entre faturas abertas ---
+                # Iteração entre faturas abertas
                 for fatura_aberta in faturas_abertas:
-                    # --- Faturas abertas parciais ---
+                    # Faturas abertas parciais
                     faturas_abertas_parciais.append(
                         schemas.FaturaOut(
                             id=fatura_aberta["id"],
@@ -183,8 +183,6 @@ class FinanceiroService:
                     itens_por_pagina=itens_por_pagina,
                 ),
             )
-        except HTTPException:
-            raise
         except Exception:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -197,7 +195,7 @@ class FinanceiroService:
         id_contrato: NonNegativeInt,
     ) -> schemas.MensagemOut:
         try:
-            # --- Desbloqueio de confiança ---
+            # --- Realiza desbloqueio de confiança ---
             endpoint = "desbloqueio_confianca"
             payload = {"id": id_contrato}
             res = await clients.IxcCliente.post(endpoint=endpoint, payload=payload)
@@ -224,7 +222,7 @@ class FinanceiroService:
         id_fatura: NonNegativeInt,
     ) -> schemas.LinhaDigitavelOut:
         try:
-            # --- Fatura ---
+            # --- Obtém fatura ---
             endpoint = "fn_areceber"
             grid_param = [utils.Param(TB="fn_areceber.id", P=id_fatura)]
             res = await clients.IxcCliente.get(endpoint=endpoint, grid_param=grid_param)
@@ -235,7 +233,7 @@ class FinanceiroService:
                 )
             fatura = regs[0]
 
-            # -- Linha digitável ---
+            # Linha digitável
             linha_digitavel = fatura.get("linha_digitavel", None)
             if not linha_digitavel:
                 raise HTTPException(
@@ -258,15 +256,15 @@ class FinanceiroService:
         id_fatura: NonNegativeInt,
     ) -> schemas.ChavePixOut:
         try:
-            # --- Fatura ---
-            res = await clients.SeteAZCliente.get_chave_pix(id_fatura=id_fatura)
+            # --- Obtém fatura ---
+            res = await clients.SeteAZCliente.get_fatura(id_fatura=id_fatura)
             fatura = res.get("id")
             if not fatura:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND, detail="Fatura inexistente."
                 )
 
-            # --- Chave pix ---
+            # Chave pix
             chave_pix = res.get("pixCode")
             if not chave_pix:
                 raise HTTPException(
@@ -288,7 +286,7 @@ class FinanceiroService:
         protocolo: str | None = None, cnpj_cpf: str | None = None
     ) -> schemas.CredencialOut:
         try:
-            # --- Cliente ---
+            # --- Obtém cliente ---
             cliente = await ClienteService.get_cliente_ixc(
                 protocolo=protocolo, cnpj_cpf=cnpj_cpf
             )
@@ -296,8 +294,6 @@ class FinanceiroService:
             return schemas.CredencialOut(
                 usuario=cliente["hotsite_email"], senha=cliente["senha"]
             )
-        except HTTPException:
-            raise
         except Exception:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -311,12 +307,12 @@ class FinanceiroService:
         senha: str,
     ) -> schemas.CredencialOut:
         try:
-            # --- Cliente ---
+            # --- Obtém cliente atual ---
             cliente_antigo = await services.ClienteService.get_cliente_ixc(
                 id_cliente=id_cliente
             )
 
-            # --- Cliente atualizado ---
+            # Cliente atualizado
             cliente_atualizado: dict[str, Any] = {**cliente_antigo, "senha": senha}
             del cliente_atualizado["id"]
 

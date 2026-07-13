@@ -19,7 +19,7 @@ class SeteAZCliente:
         return f"{cls.base_url}/{endpoint}"
 
     @classmethod
-    async def get_chave_pix(cls, id_fatura: PositiveInt) -> Any:
+    async def get_fatura(cls, id_fatura: PositiveInt) -> Any:
         url = cls._get_url(
             endpoint=f"v2/integrations/omnichannel/invoices/{id_fatura}/payment-data"
         )

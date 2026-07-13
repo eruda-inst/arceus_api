@@ -13,7 +13,7 @@ class UpgradeService:
         itens_por_pagina: PositiveInt | None,
     ) -> schemas.PlanoSugeridoListOut:
         try:
-            # --- Contratos ativos ---
+            # --- Obtém contratos ativos ---
             contratos = await services.ClienteService.get_contratos_ativos(
                 id_cliente=id_cliente
             )
@@ -39,7 +39,7 @@ class UpgradeService:
                 244,
             )
 
-            # --- Planos padrão ---
+            # --- Obtém planos padrão ---
             ids_str = (str(id) for id in ids_planos_padrao)
             ids_str_tratados = str(",").join(ids_str)
             endpoint = "vd_contratos"
@@ -74,7 +74,7 @@ class UpgradeService:
                 if id_vd_contrato in ids_planos_para_ignorar:
                     continue
 
-                # --- Plano cliente ---
+                # --- Obtém plano atual do cliente ---
                 endpoint = "vd_contratos"
                 grid_param = [
                     utils.Param(TB="vd_contratos.id", OP="=", P=id_vd_contrato)
@@ -92,7 +92,7 @@ class UpgradeService:
                     "valor_contrato": float(plano_cliente["valor_contrato"]),
                 }
 
-                # --- Fatura referência ---
+                # --- Obtém fatura referência ---
                 fatura_referencia = (
                     await services.FinanceiroService.get_fatura_referencia(
                         id_contrato=contrato["id"]

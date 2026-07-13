@@ -12,7 +12,7 @@ class ComercialService:
         id_contrato: NonNegativeInt,
     ) -> schemas.StatusInternetOut:
         try:
-            # --- Contrato ---
+            # --- Obtém contrato ---
             endpoint = "cliente_contrato"
             grid_param = [utils.Param(TB="cliente_contrato.id", P=id_contrato)]
             res = await clients.IxcCliente.get(endpoint=endpoint, grid_param=grid_param)
@@ -22,8 +22,8 @@ class ComercialService:
                     status_code=status.HTTP_404_NOT_FOUND,
                     detail="Contrato inexistente.",
                 )
-            contratos = regs
-            contrato = contratos[0]
+            contrato = regs[0]
+
             return schemas.StatusInternetOut(status_acesso=contrato["status_internet"])
         except HTTPException:
             raise
@@ -41,8 +41,8 @@ class ComercialService:
         itens_por_pagina: PositiveInt | None,
     ) -> schemas.ComercialContratoListOut:
         try:
-            # --- Contratos ativos ---
-            contratos_ativos = await ClienteService.get_contratos_ativos(
+            # --- Obtém contratos ativos ---
+            contratos = await ClienteService.get_contratos_ativos(
                 protocolo=protocolo,
                 cnpj_cpf=cnpj_cpf,
                 pagina=pagina,
@@ -50,15 +50,13 @@ class ComercialService:
             )
 
             return schemas.ComercialContratoListOut(
-                data=[schemas.ComercialContratoOut(**c_a) for c_a in contratos_ativos],
+                data=[schemas.ComercialContratoOut(**c) for c in contratos],
                 meta=schemas.Meta(
-                    total_itens=len(contratos_ativos),
+                    total_itens=len(contratos),
                     pagina_atual=pagina,
                     itens_por_pagina=itens_por_pagina,
                 ),
             )
-        except HTTPException:
-            raise
         except Exception:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -68,7 +66,7 @@ class ComercialService:
     @staticmethod
     async def post_leads(lead: schemas.LeadIn) -> schemas.LeadOut:
         try:
-            # --- Lead ---
+            # --- Cria lead ---
             endpoint = "contato"
             payload = lead.model_dump()
             """
@@ -83,38 +81,13 @@ class ComercialService:
                     detail="Cadastro malsucedido.",
                 )
 
-            # --- Lead criado ---
+            # --- Obtém lead criado ---
             grid_param = [utils.Param(TB="contato.id", P=id)]
             res = await clients.IxcCliente.get(endpoint=endpoint, grid_param=grid_param)
             regs = res.get("registros", [])
             lead_criado = regs[0]
 
-            # **lead_criado aqui
-            return schemas.LeadOut(
-                id=lead_criado["id"],
-                ativo=lead_criado["ativo"],
-                bairro=lead_criado["bairro"],
-                cep=lead_criado["cep"],
-                cidade=lead_criado["cidade"],
-                cnpj_cpf=lead_criado["cnpj_cpf"],
-                data_nascimento=lead_criado["data_nascimento"],
-                email=lead_criado["email"],
-                endereco=lead_criado["endereco"],
-                fone_celular=lead_criado["fone_celular"],
-                fone_whatsapp=lead_criado["fone_whatsapp"],
-                id_candidato_tipo=lead_criado["id_candidato_tipo"],
-                id_filial=lead_criado["id_filial"],
-                id_responsavel=lead_criado["id_responsavel"],
-                id_vd_contrato=lead_criado["id_vd_contrato"],
-                lead=lead_criado["lead"],
-                nome=lead_criado["nome"],
-                numero=lead_criado["numero"],
-                obs=lead_criado["obs"],
-                principal=lead_criado["principal"],
-                tipo_pessoa=lead_criado["tipo_pessoa"],
-                uf=lead_criado["uf"],
-            )
-
+            return schemas.LeadOut(**lead_criado)
         except HTTPException:
             raise
         except Exception:
@@ -126,7 +99,7 @@ class ComercialService:
     @staticmethod
     async def cliente_existe(cpf_cnpj: str) -> schemas.ClienteExisteOut:
         try:
-            # --- Busca de cliente no Opa ---
+            # --- Obtém cliente no Opa ---
             cpf_cnpj_limpo = utils.Formatter.only_digits(cpf_cnpj)
             endpoint = "cliente"
             filter = {"cpf_cnpj": cpf_cnpj_limpo}
@@ -149,7 +122,7 @@ class ComercialService:
     @staticmethod
     async def put_lead(cnpj_cpf: str, lead: schemas.LeadUpdate) -> schemas.LeadOut:
         try:
-            # --- Lead ---
+            # --- Obtém lead atual ---
             endpoint = "contato"
             cnpj_cpf_formatado = utils.Formatter.cnpj_cpf(cnpj_cpf)
             grid_param = [utils.Param(TB="contato.cnpj_cpf", P=cnpj_cpf_formatado)]
@@ -161,7 +134,7 @@ class ComercialService:
                 )
             lead_antigo = regs[0]
 
-            # --- Lead atualizado ---
+            # Lead atualizado
             lead_in_data = lead.model_dump(exclude_none=True)
             lead_atualizado: dict[str, Any] = {**lead_antigo, **lead_in_data}
             del lead_atualizado["id"]

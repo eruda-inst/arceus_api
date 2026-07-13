@@ -1,5 +1,5 @@
-from . import ClienteService
 from typing import Any
+from . import ClienteService
 from .. import schemas, clients, utils
 from fastapi import HTTPException, status
 
@@ -10,17 +10,12 @@ class TriagemService:
         protocolo: str | None, cnpj_cpf: str | None
     ) -> schemas.ContatoOut:
         try:
-            # --- Cliente ---
+            # --- Obtém cliente ---
             cliente = await ClienteService.get_cliente_ixc(
                 protocolo=protocolo, cnpj_cpf=cnpj_cpf
             )
 
-            # --- Contato ---
-            telefone_celular = cliente["telefone_celular"]
-
-            return schemas.ContatoOut(telefone_celular=telefone_celular)
-        except HTTPException:
-            raise
+            return schemas.ContatoOut(telefone_celular=cliente["telefone_celular"])
         except Exception:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -34,12 +29,12 @@ class TriagemService:
         cnpj_cpf: str | None = None,
     ) -> schemas.ContatoOut:
         try:
-            # --- Cliente ---
+            # --- Obtém cliente atual ---
             cliente_antigo = await ClienteService.get_cliente_ixc(
                 protocolo=protocolo, cnpj_cpf=cnpj_cpf
             )
 
-            # --- Cliente atualizado ---
+            # Cliente atualizado
             cliente_atualizado: dict[str, Any] = {
                 **cliente_antigo,
                 "telefone_celular": utils.Formatter.cell(cell=telefone_celular),

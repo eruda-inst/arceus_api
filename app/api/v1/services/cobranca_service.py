@@ -15,12 +15,12 @@ class CobrancaService:
         itens_por_pagina: PositiveInt | None,
     ) -> schemas.FaturaListOut:
         try:
-            # --- Cliente ---
+            # --- Obtém cliente ---
             cliente = await ClienteService.get_cliente_ixc(
                 protocolo=protocolo, cnpj_cpf=cnpj_cpf
             )
 
-            # --- Faturas abertas ---
+            # --- Obtém faturas abertas ---
             endpoint = "fn_areceber"
             grid_param = [
                 utils.Param(TB="fn_areceber.id_cliente", P=cliente["id"]),
@@ -38,22 +38,22 @@ class CobrancaService:
 
             faturas_vencidas_parciais: list[schemas.FaturaOut] = []
 
-            # --- Data de hoje ---
+            # Data de hoje
             timezone = ZoneInfo("America/Bahia")
             datetime_hoje = datetime.now(tz=timezone)
             data_hoje = datetime_hoje.date()
             data_hoje_iso = data_hoje.isoformat()  # YYYY-MM-DD
 
-            # --- Iteração entre faturas abertas ---
+            # Iteração entre faturas abertas
             for fatura_aberta in faturas_abertas:
                 data_vencimento_iso = fatura_aberta["data_vencimento"]  # YYYY-MM-DD
 
                 # Pula faturas não vencidas
-                # Datas em formato ISO podem ser comparadas diretamente, como comparações convencionais entre strings
+                # Datas em formato ISO podem ser comparadas como comparações convencionais entre strings
                 if data_hoje_iso <= data_vencimento_iso:
                     continue
 
-                # --- Contrato ---
+                # --- Obtém contrato ---
                 endpoint = "cliente_contrato"
                 id_contrato = fatura_aberta["id_contrato"]
                 grid_param = [utils.Param(TB="cliente_contrato.id", P=id_contrato)]
@@ -68,7 +68,7 @@ class CobrancaService:
                     )
                 contrato = regs[0]
 
-                # --- Faturas vencidas parciais ---
+                # Faturas vencidas parciais
                 faturas_vencidas_parciais.append(
                     schemas.FaturaOut(
                         id=fatura_aberta["id"],

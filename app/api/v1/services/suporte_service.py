@@ -14,8 +14,8 @@ class SuporteService:
         itens_por_pagina: PositiveInt | None,
     ) -> schemas.ContratoListOut:
         try:
-            # --- Contratos ativos ---
-            contratos_ativos = await ClienteService.get_contratos_ativos(
+            # --- Obtém contratos ativos ---
+            contratos = await ClienteService.get_contratos_ativos(
                 protocolo=protocolo,
                 cnpj_cpf=cnpj_cpf,
                 pagina=pagina,
@@ -23,15 +23,13 @@ class SuporteService:
             )
 
             return schemas.ContratoListOut(
-                data=[schemas.ContratoOut(**c_a) for c_a in contratos_ativos],
+                data=[schemas.ContratoOut(**c) for c in contratos],
                 meta=schemas.Meta(
-                    total_itens=len(contratos_ativos),
+                    total_itens=len(contratos),
                     pagina_atual=pagina,
                     itens_por_pagina=itens_por_pagina,
                 ),
             )
-        except HTTPException:
-            raise
         except Exception:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -44,7 +42,7 @@ class SuporteService:
         id_login: NonNegativeInt,
     ) -> schemas.StatusConexaoOut:
         try:
-            # --- Login ---
+            # --- Obtém login ---
             endpoint = "radusuarios"
             grid_param = [utils.Param(TB="radusuarios.id", P=id_login)]
             res = await clients.IxcCliente.get(endpoint=endpoint, grid_param=grid_param)
@@ -86,7 +84,7 @@ class SuporteService:
                     detail="Informe id_login ou mac_onu.",
                 )
 
-            # --- ONU ---
+            # --- Obtém ONU ---
             endpoint = "radpop_radio_cliente_fibra"
             grid_param = [
                 utils.Param(
@@ -117,7 +115,7 @@ class SuporteService:
         id_login: NonNegativeInt,
     ) -> schemas.MensagemOut:
         try:
-            # --- Desconectar cliente ---
+            # --- Realiza desconexão de cliente ---
             payload = {"id": id_login}
             endpoint = "desconectar_clientes"
             res = await clients.IxcCliente.post(endpoint=endpoint, payload=payload)
@@ -147,7 +145,7 @@ class SuporteService:
         itens_por_pagina: PositiveInt | None,
     ) -> schemas.AtendimentoListOut:
         try:
-            # --- Atendimentos ---
+            # --- Obtém atendimentos abertos ---
             endpoint = "su_ticket"
             grid_param = [
                 utils.Param(TB="su_ticket.id_login", P=id_login),
@@ -166,13 +164,13 @@ class SuporteService:
 
             atendimentos_parciais: list[schemas.AtendimentoOut] = []
 
-            # --- Iteração entre atendimentos ---
+            # Iteração entre atendimentos
             for atendimento in atendimentos:
-                # --- Data criação ---
+                # Data criação
                 datetime_criacao = atendimento["data_criacao"]
                 data_criacao = datetime_criacao.split(" ")[0]
 
-                # --- Atendimentos parciais ---
+                # Atendimentos parciais
                 atendimentos_parciais.append(
                     schemas.AtendimentoOut(
                         id=atendimento["id"],
@@ -203,7 +201,7 @@ class SuporteService:
         atendimento: schemas.AtendimentoIn,
     ) -> schemas.AtendimentoOut:
         try:
-            # --- Atendimento ---
+            # --- Cria atendimento ---
             endpoint = "su_ticket"
             payload = atendimento.model_dump()
             menssagem = payload["mensagem"]
@@ -217,13 +215,13 @@ class SuporteService:
                     detail="Cadastro malsucedido.",
                 )
 
-            # --- Atendimento criado ---
+            # --- Obtém atendimento criado ---
             grid_param = [utils.Param(TB="su_ticket.id", P=id)]
             res = await clients.IxcCliente.get(endpoint=endpoint, grid_param=grid_param)
             regs = res.get("registros", [])
             atendimento_criado: dict[str, Any] = regs[0]
 
-            # --- Data criação ---
+            # Data criação
             datetime_criacao = atendimento_criado["data_criacao"]
             data_criacao = datetime_criacao.split(" ")[0]
 
@@ -251,7 +249,7 @@ class SuporteService:
         pool_radius: str | None,
     ) -> schemas.IpOut:
         try:
-            # --- Login ---
+            # --- Obtém login atual ---
             endpoint = "radusuarios"
             grid_param = [utils.Param(TB="radusuarios.id", P=id_login)]
             res = await clients.IxcCliente.get(endpoint=endpoint, grid_param=grid_param)
@@ -263,7 +261,7 @@ class SuporteService:
                 )
             login_antigo = regs[0]
 
-            # --- Login atualizado ---
+            # Login atualizado
             novo_ip = ip if ip else login_antigo["ip"]
             novo_radius = pool_radius if pool_radius else login_antigo["pool_radius"]
             login_atualizado: Any = {
@@ -302,7 +300,7 @@ class SuporteService:
         id_login: NonNegativeInt,
     ) -> schemas.MensagemOut:
         try:
-            # --- Limpar MAC ---
+            # --- Realiza limpeza de MAC ---
             endpoint = "radusuarios_25452"
             payload = {"get_id": id_login}
             res = await clients.IxcCliente.post(endpoint=endpoint, payload=payload)
@@ -329,7 +327,7 @@ class SuporteService:
         id_login: NonNegativeInt,
     ) -> schemas.WifiOut:
         try:
-            # --- Login ---
+            # --- Obtém login ---
             endpoint = "radusuarios"
             grid_param = [utils.Param(TB="radusuarios.id", P=id_login)]
             res = await clients.IxcCliente.get(endpoint=endpoint, grid_param=grid_param)
