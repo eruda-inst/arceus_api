@@ -18,7 +18,7 @@ class ClienteService:
         try:
             if id_cliente:
                 # --- Cliente IXC por ID ---
-                grid_param = [utils.Param(TB="cliente.cnpj_cpf", P=id_cliente)]
+                grid_param = [utils.Param(TB="cliente.id", P=id_cliente)]
                 res = await clients.IxcCliente.get(
                     endpoint=endpoint_cliente_ixc, grid_param=grid_param
                 )
@@ -185,6 +185,7 @@ class ClienteService:
                             "dia_vencimento_fatura"
                         ],
                         "mac_onu": login["onu_mac"] if login["onu_mac"] else None,
+                        "id_plano": contrato["id_vd_contrato"],
                     }
                 )
 

@@ -68,7 +68,7 @@ class UpgradeService:
 
             # Iteração entre contratos
             for contrato in contratos:
-                id_vd_contrato = contrato["id_vd_contrato"]
+                id_vd_contrato = contrato["id_plano"]
 
                 # Caso I: Se o plano atual estiver na lista de planos para ignorar
                 if id_vd_contrato in ids_planos_para_ignorar:
