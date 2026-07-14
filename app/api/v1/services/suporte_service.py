@@ -7,6 +7,32 @@ from pydantic import PositiveInt, NonNegativeInt
 
 class SuporteService:
     @staticmethod
+    async def _get_login(
+        # IDs NonNegativeInt, pois o IXC é quebrado
+        id_login: NonNegativeInt,
+    ):
+        try:
+            # --- Obtém login ---
+            endpoint = "radusuarios"
+            grid_param = [utils.Param(TB="radusuarios.id", P=id_login)]
+            res = await clients.IxcCliente.get(endpoint=endpoint, grid_param=grid_param)
+            regs = res.get("registros", [])
+            if not regs:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND, detail="Login inexistente."
+                )
+            login = regs[0]
+
+            return login
+        except HTTPException:
+            raise
+        except Exception:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Erro interno desconhecido",
+            )
+
+    @staticmethod
     async def get_contratos(
         protocolo: str | None,
         cnpj_cpf: str | None,
@@ -36,59 +62,40 @@ class SuporteService:
                 detail="Erro interno desconhecido",
             )
 
-    @staticmethod
+    @classmethod
     async def get_status_conexao(
+        cls,
         # IDs NonNegativeInt, pois o IXC é quebrado
         id_login: NonNegativeInt,
     ) -> schemas.StatusConexaoOut:
         try:
             # --- Obtém login ---
-            endpoint = "radusuarios"
-            grid_param = [utils.Param(TB="radusuarios.id", P=id_login)]
-            res = await clients.IxcCliente.get(endpoint=endpoint, grid_param=grid_param)
-            regs = res.get("registros", [])
-            if not regs:
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND, detail="Login inexistente."
-                )
-            login = regs[0]
+            login = await cls._get_login(id_login=id_login)
 
             return schemas.StatusConexaoOut(status_conexao=login["online"])
-        except HTTPException:
-            raise
         except Exception:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Erro interno desconhecido",
             )
 
-    @staticmethod
+    @classmethod
     async def get_status_onu(
+        cls,
         # IDs NonNegativeInt, pois o IXC é quebrado
         id_login: NonNegativeInt | None = None,
         mac_onu: str | None = None,
     ) -> schemas.StatusOnuOut:
         try:
+            # Justificativa desta abordagem: O IXC é quebrado
             query_value = None
 
             # Mac é prioridade, pois o custo computacional é menor (uma requisição a menos)
             if mac_onu:
                 query_value = mac_onu
-            # Justificativa desta abordagem: O IXC é quebrado
             elif id_login:
                 # --- Obtém login ---
-                endpoint = "radusuarios"
-                grid_param = [utils.Param(TB="radusuarios.id", P=id_login)]
-                res = await clients.IxcCliente.get(
-                    endpoint=endpoint, grid_param=grid_param
-                )
-                regs = res.get("registros", [])
-                if not regs:
-                    raise HTTPException(
-                        status_code=status.HTTP_404_NOT_FOUND,
-                        detail="Login inexistente.",
-                    )
-                login = regs[0]
+                login = await cls._get_login(id_login=id_login)
 
                 query_value = login["onu_mac"]
             else:
@@ -259,8 +266,9 @@ class SuporteService:
                 detail="Erro interno desconhecido",
             )
 
-    @staticmethod
+    @classmethod
     async def put_ip(
+        cls,
         # IDs NonNegativeInt, pois o IXC é quebrado
         id_login: NonNegativeInt,
         ip: str | None,
@@ -268,16 +276,7 @@ class SuporteService:
     ) -> schemas.IpOut:
         try:
             # --- Obtém login atual ---
-            endpoint = "radusuarios"
-            grid_param = [utils.Param(TB="radusuarios.id", P=id_login)]
-            res = await clients.IxcCliente.get(endpoint=endpoint, grid_param=grid_param)
-            regs = res.get("registros", [])
-            if not regs:
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail="Login inexistente.",
-                )
-            login_antigo = regs[0]
+            login_antigo = await cls._get_login(id_login=id_login)
 
             # Login atualizado
             novo_ip = ip if ip else login_antigo["ip"]
@@ -339,23 +338,15 @@ class SuporteService:
                 detail="Erro interno desconhecido",
             )
 
-    @staticmethod
+    @classmethod
     async def get_dados_wifi(
+        cls,
         # IDs NonNegativeInt, pois o IXC é quebrado
         id_login: NonNegativeInt,
     ) -> schemas.WifiOut:
         try:
             # --- Obtém login ---
-            endpoint = "radusuarios"
-            grid_param = [utils.Param(TB="radusuarios.id", P=id_login)]
-            res = await clients.IxcCliente.get(endpoint=endpoint, grid_param=grid_param)
-            regs = res.get("registros", [])
-            if not regs:
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail="Login inexistente.",
-                )
-            login = regs[0]
+            login = await cls._get_login(id_login=id_login)
 
             return schemas.WifiOut(
                 ssid_wifi_2g=login["ssid_router_wifi"],
@@ -363,8 +354,6 @@ class SuporteService:
                 ssid_wifi_5g=login["ssid_router_wifi_5ghz"],
                 senha_wifi_5g=login["senha_rede_sem_fio_5ghz"],
             )
-        except HTTPException:
-            raise
         except Exception:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
