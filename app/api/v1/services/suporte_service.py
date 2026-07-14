@@ -69,27 +69,38 @@ class SuporteService:
         mac_onu: str | None = None,
     ) -> schemas.StatusOnuOut:
         try:
-            query_param = None
             query_value = None
 
+            # Mac é prioridade, pois o custo computacional é menor (uma requisição a menos)
             if mac_onu:
-                query_param = "mac"
                 query_value = mac_onu
+            # Justificativa desta abordagem: O IXC é quebrado
             elif id_login:
-                query_param = "id_login"
-                query_value = id_login
+                # --- Obtém login ---
+                endpoint = "radusuarios"
+                grid_param = [utils.Param(TB="radusuarios.id", P=id_login)]
+                res = await clients.IxcCliente.get(
+                    endpoint=endpoint, grid_param=grid_param
+                )
+                regs = res.get("registros", [])
+                if not regs:
+                    raise HTTPException(
+                        status_code=status.HTTP_404_NOT_FOUND,
+                        detail="Login inexistente.",
+                    )
+                login = regs[0]
+
+                query_value = login["onu_mac"]
             else:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail="Informe id_login ou mac_onu.",
                 )
 
-            # --- Obtém ONU ---
+            # --- Obtém ONU pelo MAC ---
             endpoint = "radpop_radio_cliente_fibra"
             grid_param = [
-                utils.Param(
-                    TB=f"radpop_radio_cliente_fibra.{query_param}", P=query_value
-                )
+                utils.Param(TB="radpop_radio_cliente_fibra.mac", P=query_value)
             ]
             res = await clients.IxcCliente.get(endpoint=endpoint, grid_param=grid_param)
             regs = res.get("registros", [])
@@ -99,6 +110,7 @@ class SuporteService:
                 )
             onu = regs[0]
 
+            # Sinal rx
             sinal_rx = onu.get("sinal_rx")
             if not sinal_rx:
                 raise HTTPException(
