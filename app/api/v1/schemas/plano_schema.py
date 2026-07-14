@@ -1,5 +1,5 @@
 from . import Meta
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, computed_field
 
 
 class PlanoSugeridoOut(BaseModel):
@@ -17,10 +17,16 @@ class PlanoSugeridoOut(BaseModel):
     valor_plano_sugerido: float = Field(
         description="Valor do plano sugerido.", examples=[12.34]
     )
-    valor_acrescimo: float = Field(
-        description="Diferença entre valor do plano sugerido para valor do plano atual.",
-        examples=[12.34],
-    )
+
+    @computed_field
+    @property
+    def valor_acrescimo(self) -> float:
+        valor_acrescimo = self.valor_plano_sugerido - self.valor_plano_atual
+
+        if valor_acrescimo <= 0.00:
+            return 0.00
+
+        return round(valor_acrescimo, 2)
 
 
 class PlanoSugeridoListOut(BaseModel):

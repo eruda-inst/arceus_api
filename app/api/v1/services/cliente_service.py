@@ -174,8 +174,8 @@ class ClienteService:
                 contratos_parciais.append(
                     {
                         "id": id_contrato,
-                        "id_login": login["id"],
-                        "id_cliente": contrato["id_cliente"],
+                        "id_login": int(login["id"]),
+                        "id_cliente": int(contrato["id_cliente"]),
                         "nome_cliente": nome_cliente,
                         "status": contrato["status"],
                         "status_acesso": contrato["status_internet"],
@@ -185,7 +185,7 @@ class ClienteService:
                             "dia_vencimento_fatura"
                         ],
                         "mac_onu": login["onu_mac"] if login["onu_mac"] else None,
-                        "id_plano": contrato["id_vd_contrato"],
+                        "id_plano": int(contrato["id_vd_contrato"]),
                     }
                 )
 
