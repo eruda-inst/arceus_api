@@ -13,9 +13,8 @@ class Log(db.base_db.Base):
     data = Column(Date, nullable=False)
     hora = Column(Time, nullable=False)
     duracao = Column(Numeric(10, 2), nullable=False)
-    protocolo = Column(String, nullable=False)
-
-    payload = Column(String, nullable=False)
+    protocolo = Column(String, nullable=True)
+    payload = Column(String, nullable=True)
     resposta = Column(String, nullable=True)
     url = Column(String, nullable=False)
     cliente = Column(String, nullable=False)
