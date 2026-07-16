@@ -19,16 +19,26 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    op.add_column("logs", sa.Column("payload", sa.String(), nullable=False))
-    op.add_column("logs", sa.Column("url", sa.String(), nullable=False))
-    op.add_column("logs", sa.Column("cliente", sa.String(), nullable=False))
-    op.add_column("logs", sa.Column("dominio", sa.String(), nullable=False))
-    op.add_column("logs", sa.Column("setor", sa.String(), nullable=False))
+    op.add_column(
+        "logs", sa.Column("payload", sa.String(), nullable=False), if_not_exists=True
+    )
+    op.add_column(
+        "logs", sa.Column("url", sa.String(), nullable=False), if_not_exists=True
+    )
+    op.add_column(
+        "logs", sa.Column("cliente", sa.String(), nullable=False), if_not_exists=True
+    )
+    op.add_column(
+        "logs", sa.Column("dominio", sa.String(), nullable=False), if_not_exists=True
+    )
+    op.add_column(
+        "logs", sa.Column("setor", sa.String(), nullable=False), if_not_exists=True
+    )
 
 
 def downgrade() -> None:
-    op.drop_column("logs", "setor")
-    op.drop_column("logs", "dominio")
-    op.drop_column("logs", "cliente")
-    op.drop_column("logs", "url")
-    op.drop_column("logs", "payload")
+    op.drop_column("logs", "setor", if_exists=True)
+    op.drop_column("logs", "dominio", if_exists=True)
+    op.drop_column("logs", "cliente", if_exists=True)
+    op.drop_column("logs", "url", if_exists=True)
+    op.drop_column("logs", "payload", if_exists=True)
