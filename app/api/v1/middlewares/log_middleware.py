@@ -77,8 +77,8 @@ class LogMiddleware(BaseHTTPMiddleware):
         request: Request,
         status_code: int,
         process_time: float,
-        payload: str,
-        resposta: str | None = None,
+        payload: str | None,
+        resposta: str | None,
     ):
         try:
             await self._log_to_database(
@@ -92,15 +92,14 @@ class LogMiddleware(BaseHTTPMiddleware):
         request: Request,
         status_code: int,
         process_time: float,
-        payload: str,
-        resposta: str | None = None,
+        payload: str | None,
+        resposta: str | None,
     ):
-        protocolo = request.headers.get("x-protocolo", "---")
-        cliente = request.headers.get("user-agent", "---")
-        dominio = request.headers.get("host", "---")
+        protocolo = request.headers.get("x-protocolo")
+        cliente = request.headers["user-agent"]
+        dominio = request.headers["host"]
         url_completa = str(request.url)
 
-        setor = "---"
         path = request.url.path
         if "/suporte" in path:
             setor = "Suporte"
@@ -116,6 +115,8 @@ class LogMiddleware(BaseHTTPMiddleware):
             setor = "Upgrade"
         elif "/vila" in path:
             setor = "Vila"
+        else:
+            setor = "---"
 
         now = datetime.now(ZoneInfo("America/Bahia"))
 
@@ -147,8 +148,6 @@ class LogMiddleware(BaseHTTPMiddleware):
 
     @staticmethod
     def _format_payload(body_bytes: bytes) -> str:
-        if not body_bytes:
-            return "---"
         try:
             # Tenta decodificar e validar como JSON
             body_json = json.loads(body_bytes.decode("utf-8"))

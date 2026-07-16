@@ -15,13 +15,13 @@ class LogCRUD:
         data: date,
         hora: time,
         duracao: float,
-        protocolo: str,
-        payload: str | None = None,
-        resposta: str | None = None,
-        url: str = "---",
-        cliente: str = "---",
-        dominio: str = "---",
-        setor: str = "---",
+        protocolo: str | None,
+        payload: str | None,
+        resposta: str | None,
+        url: str,
+        cliente: str,
+        dominio: str,
+        setor: str,
     ):
         try:
             log_entry = models.Log(
