@@ -86,6 +86,8 @@ class VilaService:
             login = await cls._get_login(numero_residencia=numero_residencia)
 
             return schemas.StatusConexaoOut(status_conexao=login["online"])
+        except HTTPException:
+            raise
         except Exception:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -144,6 +146,8 @@ class VilaService:
                 ssid_wifi_5g=login["ssid_router_wifi_5ghz"],
                 senha_wifi_5g=login["senha_rede_sem_fio_5ghz"],
             )
+        except HTTPException:
+            raise
         except Exception:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -201,6 +205,8 @@ class VilaService:
                     itens_por_pagina=itens_por_pagina,
                 ),
             )
+        except HTTPException:
+            raise
         except Exception:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

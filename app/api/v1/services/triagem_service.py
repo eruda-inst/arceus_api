@@ -10,12 +10,6 @@ class TriagemService:
         protocolo: str | None, cnpj_cpf: str | None
     ) -> schemas.ContatoOut:
         try:
-            if not protocolo and not cnpj_cpf:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Informe protocolo ou cnpj_cpf.",
-                )
-
             # --- Obtém cliente ---
             cliente = await ClienteService.get_cliente_ixc(
                 protocolo=protocolo, cnpj_cpf=cnpj_cpf
@@ -37,12 +31,6 @@ class TriagemService:
         cnpj_cpf: str | None = None,
     ) -> schemas.ContatoOut:
         try:
-            if not protocolo and not cnpj_cpf:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Informe protocolo ou cnpj_cpf.",
-                )
-
             # --- Obtém cliente atual ---
             cliente_antigo = await ClienteService.get_cliente_ixc(
                 protocolo=protocolo, cnpj_cpf=cnpj_cpf

@@ -15,12 +15,6 @@ class CobrancaService:
         itens_por_pagina: PositiveInt | None,
     ) -> schemas.FaturaListOut:
         try:
-            if not protocolo and not cnpj_cpf:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Informe protocolo ou cnpj_cpf.",
-                )
-
             # --- Obtém cliente ---
             cliente = await ClienteService.get_cliente_ixc(
                 protocolo=protocolo, cnpj_cpf=cnpj_cpf

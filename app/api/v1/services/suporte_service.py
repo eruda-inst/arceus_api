@@ -40,12 +40,6 @@ class SuporteService:
         itens_por_pagina: PositiveInt | None,
     ) -> schemas.ContratoListOut:
         try:
-            if not protocolo and not cnpj_cpf:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Informe protocolo ou cnpj_cpf.",
-                )
-
             # --- Obtém contratos ativos ---
             contratos = await ClienteService.get_contratos_ativos(
                 protocolo=protocolo,
@@ -81,6 +75,8 @@ class SuporteService:
             login = await cls._get_login(id_login=id_login)
 
             return schemas.StatusConexaoOut(status_conexao=login["online"])
+        except HTTPException:
+            raise
         except Exception:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -109,7 +105,7 @@ class SuporteService:
             else:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Informe id_login ou mac_onu.",
+                    detail="Forneça id_login ou mac_onu.",
                 )
 
             # --- Obtém ONU pelo MAC ---
@@ -286,7 +282,7 @@ class SuporteService:
             if not ip and not pool_radius:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Informe ip ou pool_radius.",
+                    detail="Forneça ip ou pool_radius.",
                 )
 
             # --- Obtém login atual ---
@@ -368,6 +364,8 @@ class SuporteService:
                 ssid_wifi_5g=login["ssid_router_wifi_5ghz"] or None,
                 senha_wifi_5g=login["senha_rede_sem_fio_5ghz"] or None,
             )
+        except HTTPException:
+            raise
         except Exception:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

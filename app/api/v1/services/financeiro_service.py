@@ -131,12 +131,6 @@ class FinanceiroService:
         itens_por_pagina: PositiveInt | None,
     ) -> schemas.FaturaListOut:
         try:
-            if not protocolo and not cnpj_cpf:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Protocolo ou CPF/CNPJ deve ser informado",
-                )
-
             # --- Obtém contratos ativos ---
             contratos = await services.ClienteService.get_contratos_ativos(
                 protocolo=protocolo,
@@ -294,12 +288,6 @@ class FinanceiroService:
         protocolo: str | None = None, cnpj_cpf: str | None = None
     ) -> schemas.CredencialOut:
         try:
-            if not protocolo and not cnpj_cpf:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Informe protocolo ou cnpj_cpf.",
-                )
-
             # --- Obtém cliente ---
             cliente = await ClienteService.get_cliente_ixc(
                 protocolo=protocolo, cnpj_cpf=cnpj_cpf

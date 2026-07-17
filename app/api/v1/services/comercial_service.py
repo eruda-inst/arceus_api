@@ -41,12 +41,6 @@ class ComercialService:
         itens_por_pagina: PositiveInt | None,
     ) -> schemas.ComercialContratoListOut:
         try:
-            if not protocolo and not cnpj_cpf:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Informe protocolo ou cnpj_cpf.",
-                )
-
             # --- Obtém contratos ativos ---
             contratos = await ClienteService.get_contratos_ativos(
                 protocolo=protocolo,
