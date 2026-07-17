@@ -1,7 +1,5 @@
 import time
 from .. import cruds, db
-from zoneinfo import ZoneInfo
-from datetime import datetime
 from starlette.types import ASGIApp
 from fastapi import Request, Response
 from typing import Awaitable, Callable
@@ -46,14 +44,10 @@ class LogMiddleware(BaseHTTPMiddleware):
         res = await call_next(request)
         end_time = time.perf_counter()
 
-        now = datetime.now(tz=ZoneInfo("America/Bahia"))
-
         duration = end_time - start_time
         domain = request.headers.get("host")
         url = request.url
         protocol = request.headers.get("protocolo")
-        date = now.date()
-        hour = now.time()
         http_method = request.method
         status_code = res.status_code
         endpoint = request.url.path
@@ -72,8 +66,6 @@ class LogMiddleware(BaseHTTPMiddleware):
                 metodo=http_method,
                 endpoint=endpoint,
                 codigo=status_code,
-                data=date,
-                hora=hour,
                 duracao=duration,
                 protocolo=protocol,
                 payload=payload,

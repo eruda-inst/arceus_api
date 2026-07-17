@@ -1,5 +1,5 @@
 from .. import db
-from sqlalchemy import Column, Date, Numeric, Integer, String, Time, func, TIMESTAMP
+from sqlalchemy import Column, Numeric, Integer, String, func, TIMESTAMP
 
 
 class Log(db.base_db.Base):
@@ -9,8 +9,6 @@ class Log(db.base_db.Base):
     metodo = Column(String, nullable=False)
     endpoint = Column(String, nullable=False)
     codigo = Column(Integer, nullable=False)
-    data = Column(Date, nullable=False)
-    hora = Column(Time, nullable=False)
     duracao = Column(Numeric(10, 2), nullable=False)
     protocolo = Column(String, nullable=True)
     payload = Column(String, nullable=True)

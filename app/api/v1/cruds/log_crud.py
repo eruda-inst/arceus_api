@@ -26,8 +26,6 @@ class LogCRUD:
                 metodo=metodo,
                 endpoint=endpoint,
                 codigo=codigo,
-                data=data,
-                hora=hora,
                 duracao=round(duracao, 4),
                 protocolo=protocolo,
                 payload=payload,

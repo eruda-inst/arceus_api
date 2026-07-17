@@ -26,7 +26,7 @@ app.add_middleware(
 @app.get(path="/", summary="Endpoint Raiz da API.")
 def index(request: Request) -> schemas.IndexOut:
     """
-    Retorna os links para a documentação interativa da API.
+    Retorna informações sobre a API, incluíndo URLs para documentações docs e redoc.
     """
     titulo = app.title
     descricao = app.description
