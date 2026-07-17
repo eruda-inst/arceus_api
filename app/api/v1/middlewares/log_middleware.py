@@ -49,7 +49,7 @@ class LogMiddleware(BaseHTTPMiddleware):
         domain = request.headers.get("host")
         url = request.url
 
-        protocol = request.headers.get("protocolo")
+        protocol = request.headers.get("x-protocolo")
         if protocol and not re.search(pattern=r"^NWT\d{9}$", string=protocol):
             protocol = None
 
