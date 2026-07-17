@@ -1,5 +1,5 @@
 from .. import db
-from sqlalchemy import Column, Date, Numeric, Integer, String, Time
+from sqlalchemy import Column, Date, Numeric, Integer, String, Time, func, TIMESTAMP
 
 
 class Log(db.base_db.Base):
@@ -20,3 +20,9 @@ class Log(db.base_db.Base):
     cliente = Column(String, nullable=False)
     dominio = Column(String, nullable=False)
     setor = Column(String, nullable=False)
+
+    criado_em = Column(
+        TIMESTAMP(timezone=True),
+        server_default=func.timezone("America/Bahia", func.now()),
+        nullable=False,
+    )
