@@ -1,5 +1,4 @@
 from .. import models
-from datetime import date, time
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -11,8 +10,6 @@ class LogCRUD:
         metodo: str,
         endpoint: str,
         codigo: int,
-        data: date,
-        hora: time,
         duracao: float,
         protocolo: str | None,
         payload: str | None,

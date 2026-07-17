@@ -1,3 +1,4 @@
+import re
 import time
 from .. import cruds, db
 from starlette.types import ASGIApp
@@ -47,11 +48,18 @@ class LogMiddleware(BaseHTTPMiddleware):
         duration = end_time - start_time
         domain = request.headers.get("host")
         url = request.url
+
         protocol = request.headers.get("protocolo")
+        if protocol and not re.search(pattern=r"^NWT\d{9}$", string=protocol):
+            protocol = None
+
         http_method = request.method
         status_code = res.status_code
         endpoint = request.url.path
+
         payload = payload.decode()
+        payload = payload if payload else None
+
         setor = [d.capitalize() for d in self._departments if d in endpoint][0]
 
         response_body = b""
