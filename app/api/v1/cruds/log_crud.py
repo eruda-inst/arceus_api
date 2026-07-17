@@ -8,7 +8,6 @@ class LogCRUD:
     @staticmethod
     async def create_log(
         db: AsyncSession,
-        ip: str,
         metodo: str,
         endpoint: str,
         codigo: int,
@@ -19,13 +18,11 @@ class LogCRUD:
         payload: str | None,
         resposta: str | None,
         url: str,
-        cliente: str,
-        dominio: str,
-        setor: str,
+        dominio: str | None,
+        setor: str | None,
     ):
         try:
             log_entry = models.Log(
-                ip=ip,
                 metodo=metodo,
                 endpoint=endpoint,
                 codigo=codigo,
@@ -36,7 +33,6 @@ class LogCRUD:
                 payload=payload,
                 resposta=resposta,
                 url=url,
-                cliente=cliente,
                 dominio=dominio,
                 setor=setor,
             )

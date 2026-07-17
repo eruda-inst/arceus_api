@@ -6,7 +6,6 @@ class Log(db.base_db.Base):
     __tablename__ = "logs"
 
     id = Column(Integer, primary_key=True, index=True)
-    ip = Column(String, nullable=False)
     metodo = Column(String, nullable=False)
     endpoint = Column(String, nullable=False)
     codigo = Column(Integer, nullable=False)
@@ -17,7 +16,6 @@ class Log(db.base_db.Base):
     payload = Column(String, nullable=True)
     resposta = Column(String, nullable=True)
     url = Column(String, nullable=False)
-    cliente = Column(String, nullable=False)
     dominio = Column(String, nullable=False)
     setor = Column(String, nullable=False)
 
