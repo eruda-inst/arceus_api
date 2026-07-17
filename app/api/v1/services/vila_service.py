@@ -29,10 +29,10 @@ class VilaService:
                 "login": login["login"],
                 "online": login["online"],
                 "id_cliente": int(login["id_cliente"]),
-                "ssid_router_wifi": login["ssid_router_wifi"],
-                "senha_rede_sem_fio": login["senha_rede_sem_fio"],
-                "ssid_router_wifi_5ghz": login["ssid_router_wifi_5ghz"],
-                "senha_rede_sem_fio_5ghz": login["senha_rede_sem_fio_5ghz"],
+                "ssid_router_wifi": login["ssid_router_wifi"] or None,
+                "senha_rede_sem_fio": login["senha_rede_sem_fio"] or None,
+                "ssid_router_wifi_5ghz": login["ssid_router_wifi_5ghz"] or None,
+                "senha_rede_sem_fio_5ghz": login["senha_rede_sem_fio_5ghz"] or None,
             }
         except HTTPException:
             raise

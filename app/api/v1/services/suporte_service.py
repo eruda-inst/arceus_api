@@ -349,10 +349,10 @@ class SuporteService:
             login = await cls._get_login(id_login=id_login)
 
             return schemas.WifiOut(
-                ssid_wifi_2g=login["ssid_router_wifi"],
-                senha_wifi_2g=login["senha_rede_sem_fio"],
-                ssid_wifi_5g=login["ssid_router_wifi_5ghz"],
-                senha_wifi_5g=login["senha_rede_sem_fio_5ghz"],
+                ssid_wifi_2g=login["ssid_router_wifi"] or None,
+                senha_wifi_2g=login["senha_rede_sem_fio"] or None,
+                ssid_wifi_5g=login["ssid_router_wifi_5ghz"] or None,
+                senha_wifi_5g=login["senha_rede_sem_fio_5ghz"] or None,
             )
         except Exception:
             raise HTTPException(
