@@ -115,10 +115,10 @@ async def post_limpar_mac(id_login: IdLogin) -> schemas.MensagemOut:
 async def put_ip(
     # IDs NonNegativeInt, pois o IXC é quebrado
     id_login: Annotated[int, Path(ge=0, description="ID de login.")],
-    ip: Annotated[str | None, Body(description="IP do login a ser atualizado.")] = "",
+    ip: Annotated[str | None, Body(description="IP do login a ser atualizado.")] = None,
     pool_radius: Annotated[
         str | None, Body(description="Radius do login a ser atualizado.")
-    ] = "",
+    ] = None,
 ) -> schemas.IpOut:
     """
     Atualiza IP e Radius de um login, através do ID de login.

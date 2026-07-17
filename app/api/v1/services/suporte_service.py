@@ -40,6 +40,12 @@ class SuporteService:
         itens_por_pagina: PositiveInt | None,
     ) -> schemas.ContratoListOut:
         try:
+            if not protocolo and not cnpj_cpf:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Informe protocolo ou cnpj_cpf.",
+                )
+
             # --- Obtém contratos ativos ---
             contratos = await ClienteService.get_contratos_ativos(
                 protocolo=protocolo,
@@ -56,6 +62,8 @@ class SuporteService:
                     itens_por_pagina=itens_por_pagina,
                 ),
             )
+        except HTTPException:
+            raise
         except Exception:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -275,6 +283,12 @@ class SuporteService:
         pool_radius: str | None,
     ) -> schemas.IpOut:
         try:
+            if not ip and not pool_radius:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Informe ip ou pool_radius.",
+                )
+
             # --- Obtém login atual ---
             login_antigo = await cls._get_login(id_login=id_login)
 
@@ -283,8 +297,8 @@ class SuporteService:
             novo_radius = pool_radius if pool_radius else login_antigo["pool_radius"]
             login_atualizado: Any = {
                 **login_antigo,
-                "ip": novo_ip,
-                "pool_radius": novo_radius,
+                "ip": novo_ip or "",
+                "pool_radius": novo_radius or "",
             }
             del login_atualizado["id"]
 
