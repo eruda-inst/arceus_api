@@ -12,7 +12,7 @@ class Log(db.base_db.Base):
     duracao = Column(Numeric(10, 2), nullable=False)
     protocolo = Column(String, nullable=True)
     payload = Column(String, nullable=True)
-    resposta = Column(String, nullable=True)
+    resposta = Column(String, nullable=False)
     url = Column(String, nullable=False)
     dominio = Column(String, nullable=False)
     setor = Column(String, nullable=False)
