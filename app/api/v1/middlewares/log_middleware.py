@@ -46,7 +46,6 @@ class LogMiddleware(BaseHTTPMiddleware):
         end_time = time.perf_counter()
 
         duration = end_time - start_time
-        domain = request.headers.get("host")
         url = request.url
 
         protocol = request.headers.get("x-protocolo")
@@ -79,7 +78,6 @@ class LogMiddleware(BaseHTTPMiddleware):
                 payload=payload,
                 resposta=response,  # type: ignore
                 url=str(url),
-                dominio=domain,
                 setor=setor,
             )
 

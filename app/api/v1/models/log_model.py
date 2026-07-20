@@ -14,7 +14,6 @@ class Log(db.base_db.Base):
     payload = Column(String, nullable=True)
     resposta = Column(String, nullable=False)
     url = Column(String, nullable=False)
-    dominio = Column(String, nullable=False)
     setor = Column(String, nullable=False)
 
     criado_em = Column(

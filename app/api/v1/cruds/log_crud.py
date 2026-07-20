@@ -15,7 +15,6 @@ class LogCRUD:
         payload: str | None,
         resposta: str | None,
         url: str,
-        dominio: str | None,
         setor: str | None,
     ):
         try:
@@ -28,7 +27,6 @@ class LogCRUD:
                 payload=payload,
                 resposta=resposta,
                 url=url,
-                dominio=dominio,
                 setor=setor,
             )
             db.add(log_entry)
