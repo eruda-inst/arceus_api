@@ -16,6 +16,7 @@ class LogCRUD:
         resposta: str | None,
         url: str,
         setor: str | None,
+        nome_cliente: str | None,
     ):
         try:
             log_entry = models.Log(
@@ -28,6 +29,7 @@ class LogCRUD:
                 resposta=resposta,
                 url=url,
                 setor=setor,
+                nome_cliente=nome_cliente,
             )
             db.add(log_entry)
             await db.commit()

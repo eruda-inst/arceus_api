@@ -1,6 +1,6 @@
 import re
 import time
-from .. import cruds, db
+from .. import cruds, db, services
 from starlette.types import ASGIApp
 from fastapi import Request, Response
 from typing import Awaitable, Callable
@@ -67,6 +67,13 @@ class LogMiddleware(BaseHTTPMiddleware):
 
         response = response_body.decode()  # type: ignore
 
+        # --- Cliente IXC ---
+        nome_cliente = None
+        if protocol:
+            cliente = await services.ClienteService.get_cliente_ixc(protocolo=protocol)
+            if cliente:
+                nome_cliente = cliente["razao"]
+
         async for session in db.get_db():
             await cruds.log_crud.create_log(
                 db=session,
@@ -79,6 +86,7 @@ class LogMiddleware(BaseHTTPMiddleware):
                 resposta=response,  # type: ignore
                 url=str(url),
                 setor=setor,
+                nome_cliente=nome_cliente,
             )
 
         # A response precisa ser refeita

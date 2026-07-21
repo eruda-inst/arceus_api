@@ -15,6 +15,7 @@ class Log(db.base_db.Base):
     resposta = Column(String, nullable=False)
     url = Column(String, nullable=False)
     setor = Column(String, nullable=False)
+    nome_cliente = Column(String, nullable=True)
 
     criado_em = Column(
         TIMESTAMP(timezone=True),
