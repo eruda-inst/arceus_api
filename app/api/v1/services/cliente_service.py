@@ -1,11 +1,10 @@
 from typing import Any
-from pydantic import PositiveInt, NonNegativeInt
 from .. import clients, utils, services
 from fastapi import HTTPException, status
+from pydantic import PositiveInt, NonNegativeInt
 
 
 class ClienteService:
-
     @staticmethod
     async def get_cliente_ixc(
         # IDs NonNegativeInt, pois o IXC é quebrado
@@ -16,7 +15,7 @@ class ClienteService:
         endpoint_cliente_ixc = "cliente"
 
         try:
-            if id_cliente:
+            if id_cliente is not None:
                 # --- Cliente IXC por ID ---
                 grid_param = [utils.Param(TB="cliente.id", P=id_cliente)]
                 res = await clients.IxcCliente.get(
@@ -30,7 +29,7 @@ class ClienteService:
                     )
                 cliente_ixc = regs[0]
                 return cliente_ixc
-            if cnpj_cpf:
+            elif cnpj_cpf is not None:
                 # --- Cliente IXC por cnpj_cpf ---
                 cnpj_cpf_formatado = utils.Formatter.cnpj_cpf(cnpj_cpf=cnpj_cpf)
                 grid_param = [utils.Param(TB="cliente.cnpj_cpf", P=cnpj_cpf_formatado)]
@@ -45,7 +44,7 @@ class ClienteService:
                     )
                 cliente_ixc = regs[0]
                 return cliente_ixc
-            elif protocolo:
+            elif protocolo is not None:
                 # --- Cliente Opa por protocolo ---
                 endpoint = "atendimento"
                 filter = {"protocolo": protocolo}
@@ -127,13 +126,12 @@ class ClienteService:
                 itens_por_pagina=itens_por_pagina,
             )
             regs = res.get("registros", [])
-            contratos = regs
 
             contratos_parciais: list[dict[str, Any]] = []
 
             # --- Iteração entre contratos ---
-            for contrato in contratos:
-                id_contrato = contrato.get("id")
+            for contrato in regs:
+                id_contrato = contrato["id"]
 
                 # --- Login ---
                 endpoint = "radusuarios"

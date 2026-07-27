@@ -10,7 +10,7 @@ class SuporteService:
     async def _get_login(
         # IDs NonNegativeInt, pois o IXC é quebrado
         id_login: NonNegativeInt,
-    ):
+    ) -> dict[str, Any]:
         try:
             # --- Obtém login ---
             endpoint = "radusuarios"
@@ -95,9 +95,9 @@ class SuporteService:
             query_value = None
 
             # Mac é prioridade, pois o custo computacional é menor (uma requisição a menos)
-            if mac_onu:
+            if mac_onu is not None:
                 query_value = mac_onu
-            elif id_login:
+            elif id_login is not None:
                 # --- Obtém login ---
                 login = await cls._get_login(id_login=id_login)
 
@@ -189,12 +189,11 @@ class SuporteService:
             )
             regs = res.get("registros", [])
             total = res.get("total", 0)
-            atendimentos = regs
 
             atendimentos_parciais: list[schemas.AtendimentoOut] = []
 
             # Iteração entre atendimentos
-            for atendimento in atendimentos:
+            for atendimento in regs:
                 # Data criação
                 datetime_criacao = atendimento["data_criacao"]
                 data_criacao = datetime_criacao.split(" ")[0]
@@ -279,7 +278,7 @@ class SuporteService:
         pool_radius: str | None,
     ) -> schemas.IpOut:
         try:
-            if not ip and not pool_radius:
+            if ip is None and pool_radius is None:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail="Forneça ip ou pool_radius.",

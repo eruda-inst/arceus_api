@@ -1,8 +1,7 @@
 from pydantic import HttpUrl
-from .api import api_v1_router
 from fastapi import FastAPI, Request
-from .api.v1 import schemas, middlewares
 from fastapi.middleware.cors import CORSMiddleware
+from .api.v1 import schemas, middlewares, api_v1_router
 
 app = FastAPI(
     title="Arceus",

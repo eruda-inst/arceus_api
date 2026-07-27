@@ -12,7 +12,7 @@ class VilaService:
             endpoint = "radusuarios"
             grid_param = [
                 utils.Param(
-                    TB="radusuarios.login", OP="L", P=f"res{str(numero_residencia)}"
+                    TB="radusuarios.login", OP="L", P=f"res{numero_residencia}"
                 ),
                 utils.Param(TB="radusuarios.ativo", P="S"),
             ]
@@ -180,12 +180,11 @@ class VilaService:
             )
             regs = res.get("registros", [])
             total = res["total"]
-            atendimentos = regs
 
             atendimentos_parciais: list[schemas.AtendimentoOut] = []
 
             # Iteração entre atendimentos
-            for atendimento in atendimentos:
+            for atendimento in regs:
                 atendimentos_parciais.append(
                     schemas.AtendimentoOut(
                         id=atendimento["id"],
@@ -292,7 +291,12 @@ class VilaService:
             grid_param = [utils.Param(TB="su_ticket.id", P=id)]
             res = await clients.IxcCliente.get(endpoint=endpoint, grid_param=grid_param)
             regs = res.get("registros", [])
-            atendimento_criado: dict[str, Any] = regs[0]
+            if not regs:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Atendimento inexistente.",
+                )
+            atendimento_criado = regs[0]
 
             return schemas.AtendimentoOut(
                 id=atendimento_criado["id"],
