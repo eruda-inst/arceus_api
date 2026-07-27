@@ -5,20 +5,26 @@ from sqlalchemy import Column, Numeric, Integer, String, func, TIMESTAMP
 class Log(db.base_db.Base):
     __tablename__ = "logs"
 
-    id = Column(Integer, primary_key=True, index=True)
-    metodo = Column(String, nullable=False)
-    endpoint = Column(String, nullable=False)
-    codigo = Column(Integer, nullable=False)
-    duracao = Column(Numeric(10, 2), nullable=False)
-    protocolo = Column(String, nullable=True)
-    payload = Column(String, nullable=True)
-    resposta = Column(String, nullable=False)
-    url = Column(String, nullable=False)
-    setor = Column(String, nullable=False)
-    nome_cliente = Column(String, nullable=True)
+    # Métodos utilizados para filtro são indexados (i.e., index=True)
+    # Parãmetros posicionais 'nullable' e 'unique' não possuem valor padrão, devem ser passados
+    id = Column(
+        type_=Integer, primary_key=True, index=True, unique=True, nullable=False
+    )
+    metodo = Column(type_=String, unique=False, nullable=False, index=True)
+    endpoint = Column(type_=String, unique=False, nullable=False, index=True)
+    codigo = Column(type_=Integer, unique=False, nullable=False, index=True)
+    duracao = Column(type_=Numeric(10, 3), unique=False, nullable=False)
+    protocolo = Column(type_=String, unique=False, nullable=True, index=True)
+    payload = Column(type_=String, unique=False, nullable=True)
+    resposta = Column(type_=String, unique=False, nullable=False)
+    url = Column(type_=String, unique=False, nullable=False)
+    setor = Column(type_=String, unique=False, nullable=False, index=True)
+    nome_cliente = Column(type_=String, unique=False, nullable=True, index=True)
 
     criado_em = Column(
-        TIMESTAMP(timezone=True),
+        type_=TIMESTAMP(timezone=True),
         server_default=func.timezone("America/Bahia", func.now()),
+        unique=False,
         nullable=False,
+        index=True,
     )
