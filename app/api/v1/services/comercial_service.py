@@ -16,8 +16,7 @@ class ComercialService:
             endpoint = "cliente_contrato"
             grid_param = [utils.Param(TB="cliente_contrato.id", P=id_contrato)]
             res = await clients.IxcCliente.get(endpoint=endpoint, grid_param=grid_param)
-            regs = res.get("registros", [])
-            if not regs:
+            if not (regs := res.get("registros", [])):
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
                     detail="Contrato inexistente.",
@@ -76,8 +75,7 @@ class ComercialService:
             """
             payload["data_cadastro"] = "N/A"
             res = await clients.IxcCliente.post(endpoint=endpoint, payload=payload)
-            id = res.get("id")
-            if not id:
+            if not (id := res.get("id")):
                 raise HTTPException(
                     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                     detail="Cadastro malsucedido.",
@@ -110,8 +108,7 @@ class ComercialService:
                 endpoint=endpoint, filter=filter, options=options
             )
             cliente_existe = True
-            data = res.get("data", [])
-            if not data:
+            if not (_ := res.get("data", [])):
                 cliente_existe = False
 
             return schemas.ClienteExisteOut(cliente_existe=cliente_existe)
@@ -129,8 +126,7 @@ class ComercialService:
             cnpj_cpf_formatado = utils.Formatter.cnpj_cpf(cnpj_cpf)
             grid_param = [utils.Param(TB="contato.cnpj_cpf", P=cnpj_cpf_formatado)]
             res = await clients.IxcCliente.get(endpoint=endpoint, grid_param=grid_param)
-            regs = res.get("registros", [])
-            if not regs:
+            if not (regs := res.get("registros", [])):
                 raise HTTPException(
                     status.HTTP_404_NOT_FOUND, detail="Lead inexistente."
                 )
@@ -148,8 +144,7 @@ class ComercialService:
             res = await clients.IxcCliente.put(
                 endpoint=endpoint, id=id, payload=payload
             )
-            type = res["type"]
-            if type == "error":
+            if res["type"] == "error":
                 raise HTTPException(
                     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                     detail="Atualização malsucedida.",

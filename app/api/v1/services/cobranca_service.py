@@ -33,8 +33,7 @@ class CobrancaService:
                 pagina=pagina,
                 itens_por_pagina=itens_por_pagina,
             )
-            regs = res.get("registros", [])
-            faturas_abertas = regs
+            faturas_abertas = res.get("registros", [])
 
             faturas_vencidas_parciais: list[schemas.FaturaOut] = []
 
@@ -60,8 +59,7 @@ class CobrancaService:
                 res = await clients.IxcCliente.get(
                     endpoint=endpoint, grid_param=grid_param
                 )
-                regs = res.get("registros", [])
-                if not regs:
+                if not (regs := res.get("registros", [])):
                     raise HTTPException(
                         status_code=status.HTTP_404_NOT_FOUND,
                         detail="Contrato inexistente.",

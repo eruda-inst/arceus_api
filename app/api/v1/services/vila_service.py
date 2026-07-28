@@ -17,8 +17,7 @@ class VilaService:
                 utils.Param(TB="radusuarios.ativo", P="S"),
             ]
             res = await clients.IxcCliente.get(endpoint=endpoint, grid_param=grid_param)
-            regs = res.get("registros", [])
-            if not regs:
+            if not (regs := res.get("registros", [])):
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND, detail="Login inexistente."
                 )
@@ -56,8 +55,7 @@ class VilaService:
                 utils.Param(TB="cliente_contrato.id_cliente", P=login["id_cliente"])
             ]
             res = await clients.IxcCliente.get(endpoint=endpoint, grid_param=grid_param)
-            regs = res.get("registros", [])
-            if not regs:
+            if not (regs := res.get("registros", [])):
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
                     detail="Contrato inexistente.",
@@ -110,16 +108,14 @@ class VilaService:
                 )
             ]
             res = await clients.IxcCliente.get(endpoint=endpoint, grid_param=grid_param)
-            regs = res.get("registros", [])
-            if not regs:
+            if not (regs := res.get("registros", [])):
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND, detail="ONU inexistente."
                 )
             onu = regs[0]
 
             # Sinal rx
-            sinal_rx = onu.get("sinal_rx")
-            if not sinal_rx:
+            if not (sinal_rx := onu.get("sinal_rx")):
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
                     detail="Sinal ONU inexistente.",
@@ -178,13 +174,13 @@ class VilaService:
                 pagina=pagina,
                 itens_por_pagina=itens_por_pagina,
             )
-            regs = res.get("registros", [])
-            total = res["total"]
+            atendimentos = res.get("registros", [])
+            total = res.get("total", 0)
 
             atendimentos_parciais: list[schemas.AtendimentoOut] = []
 
             # Iteração entre atendimentos
-            for atendimento in regs:
+            for atendimento in atendimentos:
                 atendimentos_parciais.append(
                     schemas.AtendimentoOut(
                         id=atendimento["id"],
@@ -224,8 +220,7 @@ class VilaService:
             endpoint = "radusuarios_25452"
             payload = {"get_id": str(login["id"])}
             res = await clients.IxcCliente.post(endpoint=endpoint, payload=payload)
-            type = res["type"]
-            if type == "error":
+            if res["type"] == "error":
                 msg = res.get("message", "Limpeza malsucedida.")
                 raise HTTPException(
                     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -280,8 +275,7 @@ class VilaService:
             endpoint = "su_ticket"
             payload = atendimento.model_dump()
             res = await clients.IxcCliente.post(endpoint=endpoint, payload=payload)
-            id = res.get("id")
-            if not id:
+            if not (id := res.get("id")):
                 raise HTTPException(
                     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                     detail="Cadastro malsucedido.",

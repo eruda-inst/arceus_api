@@ -12,14 +12,13 @@ class UpgradeService:
         try:
             # --- Obtém planos em uso ---
             ids_str = (str(id) for id in cls._ids_planos_em_uso)
-            ids_str_tratados = str(",").join(ids_str)
+            ids_str_tratados = ",".join(ids_str)
             endpoint = "vd_contratos"
             grid_param = [
                 utils.Param(TB="vd_contratos.id", OP="IN", P=ids_str_tratados)
             ]
             res = await clients.IxcCliente.get(endpoint=endpoint, grid_param=grid_param)
-            regs = res.get("registros", [])
-            planos_em_uso = regs
+            planos_em_uso = res.get("registros", [])
 
             planos_em_uso_parciais: list[dict[str, Any]] = []
 
@@ -100,8 +99,7 @@ class UpgradeService:
                     pagina=pagina,
                     itens_por_pagina=itens_por_pagina,
                 )
-                regs = res.get("registros", [])
-                if not regs:
+                if not (regs := res.get("registros", [])):
                     raise HTTPException(
                         status_code=status.HTTP_404_NOT_FOUND,
                         detail="Plano inexistente.",
@@ -193,8 +191,8 @@ class UpgradeService:
             )
         except HTTPException:
             raise
-        except Exception as e:
+        except Exception:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro interno desconhecido: {e}",
+                detail="Erro interno desconhecido",
             )

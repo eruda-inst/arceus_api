@@ -48,8 +48,7 @@ class TriagemService:
             res = await clients.IxcCliente.put(
                 endpoint=endpoint, id=cliente_antigo["id"], payload=cliente_atualizado
             )
-            type = res["type"]
-            if type == "error":
+            if res["type"] == "error":
                 raise HTTPException(
                     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                     detail="Atualização malsucedida.",

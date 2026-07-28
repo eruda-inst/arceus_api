@@ -24,10 +24,8 @@ class FinanceiroService:
                 grid_param=grid_param,
                 sort_order=utils.SortOrder.DESC,
             )
-            regs = res.get("registros", [])
-            if not regs:
+            if not (faturas_pagas := res.get("registros", [])):
                 return None
-            faturas_pagas = regs
 
             # Ultima fatura paga
             ultimas_faturas_pagas = faturas_pagas[:3]
@@ -68,10 +66,8 @@ class FinanceiroService:
                 utils.Param(TB="fn_areceber.status", OP="!=", P="C"),
             ]
             res = await clients.IxcCliente.get(endpoint=endpoint, grid_param=grid_param)
-            regs = res.get("registros", [])
-            if not regs:
+            if not (faturas_abertas := res.get("registros", [])):
                 return None
-            faturas_abertas = regs
 
             # Proxima fatura aberta
             proximas_faturas_abertas = faturas_abertas[:3]
@@ -159,8 +155,7 @@ class FinanceiroService:
                     pagina=pagina,
                     itens_por_pagina=itens_por_pagina,
                 )
-                regs = res.get("registros", [])
-                faturas_abertas = regs
+                faturas_abertas = res.get("registros", [])
 
                 # Iteração entre faturas abertas
                 for fatura_aberta in faturas_abertas:
@@ -201,8 +196,7 @@ class FinanceiroService:
             endpoint = "desbloqueio_confianca"
             payload = {"id": id_contrato}
             res = await clients.IxcCliente.post(endpoint=endpoint, payload=payload)
-            type = res["type"]
-            if type == "error":
+            if res["type"] == "error":
                 msg = res.get("message", "Desbloqueio malsucedido.")
                 raise HTTPException(
                     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -228,16 +222,14 @@ class FinanceiroService:
             endpoint = "fn_areceber"
             grid_param = [utils.Param(TB="fn_areceber.id", P=id_fatura)]
             res = await clients.IxcCliente.get(endpoint=endpoint, grid_param=grid_param)
-            regs = res.get("registros", [])
-            if not regs:
+            if not (regs := res.get("registros", [])):
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND, detail="Fatura inexistente."
                 )
             fatura = regs[0]
 
             # Linha digitável
-            linha_digitavel = fatura.get("linha_digitavel")
-            if not linha_digitavel:
+            if not (linha_digitavel := fatura.get("linha_digitavel")):
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
                     detail="Linha digitável inexistente.",
@@ -260,15 +252,13 @@ class FinanceiroService:
         try:
             # --- Obtém fatura ---
             res = await clients.SeteAZCliente.get_fatura(id_fatura=id_fatura)
-            fatura = res.get("id")
-            if not fatura:
+            if "id" not in res:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND, detail="Fatura inexistente."
                 )
 
             # Chave pix
-            chave_pix = res.get("pixCode")
-            if not chave_pix:
+            if not (chave_pix := res.get("pixCode")):
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
                     detail="Chave pix inexistente.",
@@ -326,8 +316,7 @@ class FinanceiroService:
             res = await clients.IxcCliente.put(
                 endpoint=endpoint, id=id, payload=cliente_atualizado
             )
-            type = res["type"]
-            if type == "error":
+            if res["type"] == "error":
                 raise HTTPException(
                     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                     detail="Cadastro malsucedido.",

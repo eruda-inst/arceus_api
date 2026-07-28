@@ -21,8 +21,7 @@ class ClienteService:
                 res = await clients.IxcCliente.get(
                     endpoint=endpoint_cliente_ixc, grid_param=grid_param
                 )
-                regs = res.get("registros", [])
-                if not regs:
+                if not (regs := res.get("registros", [])):
                     raise HTTPException(
                         status_code=status.HTTP_404_NOT_FOUND,
                         detail="Cliente inexistente no IXC.",
@@ -36,8 +35,7 @@ class ClienteService:
                 res = await clients.IxcCliente.get(
                     endpoint=endpoint_cliente_ixc, grid_param=grid_param
                 )
-                regs = res.get("registros", [])
-                if not regs:
+                if not (regs := res.get("registros", [])):
                     raise HTTPException(
                         status_code=status.HTTP_404_NOT_FOUND,
                         detail="Cliente inexistente no IXC.",
@@ -49,8 +47,7 @@ class ClienteService:
                 endpoint = "atendimento"
                 filter = {"protocolo": protocolo}
                 res = await clients.OpaCliente.get(endpoint=endpoint, filter=filter)
-                data = res.get("data", [])
-                if not data:
+                if not (data := res.get("data", [])):
                     raise HTTPException(
                         status_code=status.HTTP_404_NOT_FOUND,
                         detail="Cliente inexistente no Opa.",
@@ -61,8 +58,7 @@ class ClienteService:
                 endpoint = "cliente"
                 filter = {"_id": cliente_opa["id_cliente"]}
                 res = await clients.OpaCliente.get(endpoint=endpoint, filter=filter)
-                data = res.get("data", [])
-                if not data:
+                if not (data := res.get("data", [])):
                     raise HTTPException(
                         status_code=status.HTTP_404_NOT_FOUND,
                         detail="Cliente inexistente no IXC.",
@@ -74,8 +70,7 @@ class ClienteService:
                 res = await clients.IxcCliente.get(
                     endpoint=endpoint_cliente_ixc, grid_param=grid_param
                 )
-                regs = res.get("registros", [])
-                if not regs:
+                if not (regs := res.get("registros", [])):
                     raise HTTPException(
                         status_code=status.HTTP_404_NOT_FOUND,
                         detail="Cliente inexistente no IXC.",
@@ -125,12 +120,12 @@ class ClienteService:
                 pagina=pagina,
                 itens_por_pagina=itens_por_pagina,
             )
-            regs = res.get("registros", [])
+            contratos = res.get("registros", [])
 
             contratos_parciais: list[dict[str, Any]] = []
 
             # --- Iteração entre contratos ---
-            for contrato in regs:
+            for contrato in contratos:
                 id_contrato = contrato["id"]
 
                 # --- Login ---
@@ -139,8 +134,7 @@ class ClienteService:
                 res = await clients.IxcCliente.get(
                     endpoint=endpoint, grid_param=grid_param
                 )
-                regs = res.get("registros", [])
-                if not regs:
+                if not (regs := res.get("registros", [])):
                     raise HTTPException(
                         status_code=status.HTTP_404_NOT_FOUND,
                         detail="Login inexistente.",
