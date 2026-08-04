@@ -1,35 +1,38 @@
 services:
   db:
-    image: postgres:15
+    image: postgres
     ports:
       - "5432:5432"
     container_name: db-bot
     restart: always
     environment:
-      - POSTGRES_USER=${postgres_user}
-      - POSTGRES_PASSWORD=${postgres_password}
       - POSTGRES_DB=${postgres_db}
+      - POSTGRES_PASSWORD=${postgres_password}
+      - POSTGRES_USER=${postgres_user}
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${postgres_usre} -d ${postgres_db}"]
+      test: ["CMD-SHELL", "pg_isready -U ${postgres_user} -d ${postgres_db}"]
       interval: 5s
       timeout: 5s
       retries: 5
     networks:
       - net-bot
   api:
-    image: zolppy/aggregator-api:latest
+    image: zolppy/arceus-api:latest
     container_name: api-bot
     environment:
       - BASE_URL_7AZ=${base_url_7az}
       - API_KEY_7AZ=${api_key_7az}
       - DB_URL=${db_url}
+      - DB_URL_MIGRATIONS=${db_url_migrations}
+      - DEFAULT_USER_EMAIL=${default_user_email}
+      - DEFAULT_USER_NAME=${default_user_name}
+      - DEFAULT_USER_PASSWORD=${default_user_password}
       - IXC_HOST=${ixc_host}
-      - OPA_TOKEN=${opa_token}
-      - OPA_HOST=${opa_host}
-      - MIGRATE_DB_URL=${migrate_db_url}
       - IXC_TOKEN=${ixc_token}
+      - OPA_HOST=${opa_host}
+      - OPA_TOKEN=${opa_token}
       - RUN_MIGRATIONS=1
     ports:
       - 8000:8000
@@ -38,10 +41,10 @@ services:
     networks:
       - net-bot
     volumes:
-      - ./app:/app/app
-      - ./pyproject.toml:/app/pyproject.toml
-      - ./uv.lock:/app/uv.lock
-      - media:/app/media
+      - ./src:/src/src
+      - ./pyproject.toml:/src/pyproject.toml
+      - ./uv.lock:/src/uv.lock
+      - media:/src/media
 volumes:
   pgdata:
     driver: local

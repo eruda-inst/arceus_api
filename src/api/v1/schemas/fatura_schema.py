@@ -1,0 +1,36 @@
+from pydantic import BaseModel, Field, NonNegativeInt, field_serializer
+
+from .. import utils
+from .misc_schema import Meta
+
+
+class LinhaDigitavelOut(BaseModel):
+    linha_digitavel: str = Field(
+        min_length=47,
+        max_length=47,
+        description="Linha digitável",
+        examples=["123..."],
+    )
+
+
+class FaturaOut(BaseModel):
+    id: NonNegativeInt = Field(description="ID da fatura", examples=[1])
+    data_vencimento: str = Field(
+        description="Data de vencimento da fatura",
+        # Não pode haver isto, pois o IXC é quebrado
+        # min_length=10,  # DD/MM/AAAA
+        # max_length=10,  # DD/MM/AAAA
+        examples=["DD/MM/AAAA"],
+    )
+    preco: float = Field(ge=0, description="Preço da fatura", examples=[12.34])
+    id_contrato: NonNegativeInt = Field(description="ID do contrato", examples=[12])
+    contrato: str = Field(description="Nome do plano", examples=["Nome do plano"])
+
+    @field_serializer("data_vencimento")
+    def serialize_data_vencimento(self, v: str) -> str:
+        return utils.Formatter.data(data=v)
+
+
+class FaturaListOut(BaseModel):
+    data: list[FaturaOut]
+    meta: Meta
