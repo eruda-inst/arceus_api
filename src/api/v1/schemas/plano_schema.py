@@ -1,7 +1,5 @@
 from pydantic import BaseModel, Field, computed_field
 
-from .misc_schema import Meta
-
 
 class PlanoSugeridoOut(BaseModel):
     nome_plano_atual: str = Field(
@@ -28,8 +26,3 @@ class PlanoSugeridoOut(BaseModel):
             return 0.00
 
         return round(valor_acrescimo, 2)
-
-
-class PlanoSugeridoListOut(BaseModel):
-    data: list[PlanoSugeridoOut]
-    meta: Meta

@@ -44,7 +44,7 @@ class UpgradeService:
         id_cliente: NonNegativeInt,
         pagina: PositiveInt | None,
         itens_por_pagina: PositiveInt | None,
-    ) -> schemas.PlanoSugeridoListOut:
+    ) -> schemas.ListOut[schemas.PlanoSugeridoOut]:
         # --- Obtém contratos ativos ---
         contratos = await services.ClienteService.get_contratos_ativos(
             id_cliente=id_cliente, pagina=pagina, itens_por_pagina=itens_por_pagina
@@ -170,11 +170,11 @@ class UpgradeService:
                         )
                         break
 
-        return schemas.PlanoSugeridoListOut(
+        return schemas.ListOut[schemas.PlanoSugeridoOut](
             data=planos_sugeridos,
-            meta=schemas.Meta(
+            meta=schemas.MetaOut(
                 total_itens=len(planos_sugeridos),
-                pagina_atual=pagina,
-                itens_por_pagina=itens_por_pagina,
+                pagina_atual=pagina or 1,
+                itens_por_pagina=itens_por_pagina or 10,
             ),
         )

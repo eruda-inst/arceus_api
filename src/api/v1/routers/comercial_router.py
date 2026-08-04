@@ -26,7 +26,7 @@ async def get_contratos(
     cnpj_cpf: utils.CnpjCpf | None = None,
     pagina: utils.Pagina | None = 1,
     itens_por_pagina: utils.ItensPorPagina | None = 10,
-) -> schemas.ComercialContratoListOut:
+) -> schemas.ListOut[schemas.ComercialContratoOut]:
     """
     Obtém contratos de um cliente, através de protocolo de atendimento ou CPF/CNPJ
     """

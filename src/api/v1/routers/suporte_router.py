@@ -16,7 +16,7 @@ async def get_contratos(
     cnpj_cpf: utils.CnpjCpf | None = None,
     pagina: utils.Pagina | None = 1,
     itens_por_pagina: utils.ItensPorPagina | None = 10,
-) -> schemas.ContratoListOut:
+) -> schemas.ListOut[schemas.ContratoOut]:
     """
     Obtém contratos de um cliente, através de protocolo de atendimento ou CPF/CNPJ
     """
@@ -69,7 +69,7 @@ async def get_atendimentos(
     id_login: IdLogin,
     pagina: utils.Pagina | None = 1,
     itens_por_pagina: utils.ItensPorPagina | None = 10,
-) -> schemas.AtendimentoListOut:
+) -> schemas.ListOut[schemas.AtendimentoOut]:
     """
     Obtém atendimentos abertos de um cliente, através do ID de login
     """

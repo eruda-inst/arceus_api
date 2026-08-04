@@ -107,7 +107,7 @@ class FinanceiroService:
         cnpj_cpf: str | None,
         pagina: PositiveInt | None,
         itens_por_pagina: PositiveInt | None,
-    ) -> schemas.FaturaListOut:
+    ) -> schemas.ListOut[schemas.FaturaOut]:
         # --- Obtém contratos ativos ---
         contratos = await services.ClienteService.get_contratos_ativos(
             protocolo=protocolo,
@@ -151,12 +151,12 @@ class FinanceiroService:
                     )
                 )
 
-        return schemas.FaturaListOut(
+        return schemas.ListOut[schemas.FaturaOut](
             data=faturas_abertas_parciais,
-            meta=schemas.Meta(
+            meta=schemas.MetaOut(
                 total_itens=len(faturas_abertas_parciais),
-                pagina_atual=pagina,
-                itens_por_pagina=itens_por_pagina,
+                pagina_atual=pagina or 1,
+                itens_por_pagina=itens_por_pagina or 10,
             ),
         )
 

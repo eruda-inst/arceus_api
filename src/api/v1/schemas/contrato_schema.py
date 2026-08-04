@@ -1,7 +1,6 @@
 from pydantic import BaseModel, Field, NonNegativeInt, PositiveInt, field_serializer
 
 from .. import utils
-from .misc_schema import Meta
 
 
 class StatusInternetOut(BaseModel):
@@ -90,11 +89,6 @@ class ContratoOut(BaseModel):
         return mapping[v]
 
 
-class ContratoListOut(BaseModel):
-    data: list[ContratoOut]
-    meta: Meta
-
-
 class ComercialContratoOut(BaseModel):
     # IDs NonNegativeInt, pois o IXC é quebrado
     id: NonNegativeInt = Field(description="ID do contrato", examples=[1])
@@ -133,11 +127,6 @@ class ComercialContratoOut(BaseModel):
         }
 
         return mapping[v]
-
-
-class ComercialContratoListOut(BaseModel):
-    data: list[ComercialContratoOut]
-    meta: Meta
 
 
 class VilaContratoOut(BaseModel):

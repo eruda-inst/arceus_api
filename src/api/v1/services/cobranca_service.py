@@ -15,7 +15,7 @@ class CobrancaService:
         cnpj_cpf: str | None,
         pagina: PositiveInt | None,
         itens_por_pagina: PositiveInt | None,
-    ) -> schemas.FaturaListOut:
+    ) -> schemas.ListOut[schemas.FaturaOut]:
         # --- Obtém cliente ---
         cliente = await ClienteService.get_cliente_ixc(
             protocolo=protocolo, cnpj_cpf=cnpj_cpf
@@ -76,11 +76,11 @@ class CobrancaService:
                 )
             )
 
-        return schemas.FaturaListOut(
+        return schemas.ListOut[schemas.FaturaOut](
             data=faturas_vencidas_parciais,
-            meta=schemas.Meta(
+            meta=schemas.MetaOut(
                 total_itens=len(faturas_vencidas_parciais),
-                pagina_atual=pagina,
-                itens_por_pagina=itens_por_pagina,
+                pagina_atual=pagina or 1,
+                itens_por_pagina=itens_por_pagina or 10,
             ),
         )

@@ -1,7 +1,6 @@
 from pydantic import BaseModel, Field, NonNegativeInt, field_serializer
 
 from .. import utils
-from .misc_schema import Meta
 
 
 class LinhaDigitavelOut(BaseModel):
@@ -29,8 +28,3 @@ class FaturaOut(BaseModel):
     @field_serializer("data_vencimento")
     def serialize_data_vencimento(self, v: str) -> str:
         return utils.Formatter.data(data=v)
-
-
-class FaturaListOut(BaseModel):
-    data: list[FaturaOut]
-    meta: Meta

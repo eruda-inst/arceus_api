@@ -114,7 +114,7 @@ class VilaService:
         numero_residencia: PositiveInt,
         pagina: PositiveInt | None,
         itens_por_pagina: PositiveInt | None,
-    ) -> schemas.AtendimentoListOut:
+    ) -> schemas.ListOut[schemas.AtendimentoOut]:
         # --- Obtém login ---
         login = await cls._get_login(numero_residencia=numero_residencia)
 
@@ -149,12 +149,12 @@ class VilaService:
                 ),
             )
 
-        return schemas.AtendimentoListOut(
+        return schemas.ListOut[schemas.AtendimentoOut](
             data=atendimentos_parciais,
-            meta=schemas.Meta(
+            meta=schemas.MetaOut(
                 total_itens=total,
-                pagina_atual=pagina,
-                itens_por_pagina=itens_por_pagina,
+                pagina_atual=pagina or 1,
+                itens_por_pagina=itens_por_pagina or 10,
             ),
         )
 

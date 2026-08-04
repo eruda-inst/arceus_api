@@ -1,7 +1,6 @@
 from pydantic import BaseModel, Field, NonNegativeInt, field_serializer
 
 from .. import utils
-from .misc_schema import Meta
 
 
 class AtendimentoIn(BaseModel):
@@ -87,8 +86,3 @@ class AtendimentoOut(BaseModel):
     @field_serializer("data_criacao")
     def serialize_data_criacao(self, v: str) -> str:
         return utils.Formatter.data(data=v)
-
-
-class AtendimentoListOut(BaseModel):
-    data: list[AtendimentoOut]
-    meta: Meta

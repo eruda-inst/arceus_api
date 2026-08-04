@@ -32,7 +32,7 @@ class ComercialService:
         cnpj_cpf: str | None,
         pagina: PositiveInt | None,
         itens_por_pagina: PositiveInt | None,
-    ) -> schemas.ComercialContratoListOut:
+    ) -> schemas.ListOut[schemas.ComercialContratoOut]:
         # --- Obtém contratos ativos ---
         contratos = await ClienteService.get_contratos_ativos(
             protocolo=protocolo,
@@ -41,12 +41,12 @@ class ComercialService:
             itens_por_pagina=itens_por_pagina,
         )
 
-        return schemas.ComercialContratoListOut(
+        return schemas.ListOut[schemas.ComercialContratoOut](
             data=[schemas.ComercialContratoOut(**c) for c in contratos],
-            meta=schemas.Meta(
+            meta=schemas.MetaOut(
                 total_itens=len(contratos),
-                pagina_atual=pagina,
-                itens_por_pagina=itens_por_pagina,
+                pagina_atual=pagina or 1,
+                itens_por_pagina=itens_por_pagina or 10,
             ),
         )
 

@@ -1,15 +1,13 @@
-from .atendimento_schema import AtendimentoIn, AtendimentoListOut, AtendimentoOut
+from .atendimento_schema import AtendimentoIn, AtendimentoOut
 from .authentication_schema import AccessTokenOut, RefreshTokenIn
 from .cliente_schema import ClienteExisteOut, ContatoOut, CredencialOut
 from .contrato_schema import (
-    ComercialContratoListOut,
     ComercialContratoOut,
-    ContratoListOut,
     ContratoOut,
     StatusInternetOut,
     VilaContratoOut,
 )
-from .fatura_schema import FaturaListOut, FaturaOut, LinhaDigitavelOut
+from .fatura_schema import FaturaOut, LinhaDigitavelOut
 from .group_schema import GroupOut
 from .index_schema import IndexOut
 from .ixc_user_schema import IXCUserOut
@@ -33,28 +31,24 @@ from .metric_schema import (
     TopWeekday,
     TopWorstEndpoint,
 )
-from .misc_schema import ListOut, MensagemOut, Meta, MetaOut, TodayAlwaysOut
+from .misc_schema import ListOut, MensagemOut, MetaOut, TodayAlwaysOut
 from .onu_schema import StatusOnuOut
 from .perm_schema import PermOut
 from .pix_schema import ChavePixOut
-from .plano_schema import PlanoSugeridoListOut, PlanoSugeridoOut
+from .plano_schema import PlanoSugeridoOut
 from .user_schema import UserIn, UserLogin, UserOut, UserUpdate
 
 __all__ = [
     "AccessTokenOut",
     "AtendimentoIn",
-    "AtendimentoListOut",
     "AtendimentoOut",
     "ChavePixOut",
     "ClienteExisteOut",
-    "ComercialContratoListOut",
     "ComercialContratoOut",
     "ContatoOut",
-    "ContratoListOut",
     "ContratoOut",
     "CredencialOut",
     "ErrorStats",
-    "FaturaListOut",
     "FaturaOut",
     "GroupOut",
     "IXCUserOut",
@@ -68,10 +62,8 @@ __all__ = [
     "ListOut",
     "LogOut",
     "MensagemOut",
-    "Meta",
     "MetaOut",
     "PermOut",
-    "PlanoSugeridoListOut",
     "PlanoSugeridoOut",
     "RefreshTokenIn",
     "ResponseTimeStats",
