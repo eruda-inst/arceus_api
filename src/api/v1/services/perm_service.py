@@ -35,6 +35,5 @@ class PermService:
                 itens_por_pagina=10,
                 total_itens=total_items,
                 pagina_atual=1,
-                total_paginas=1,
             ),
         )

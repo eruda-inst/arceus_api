@@ -28,6 +28,5 @@ class GroupService:
                 pagina_atual=1,
                 itens_por_pagina=10,
                 total_itens=total_items,
-                total_paginas=1,
             ),
         )

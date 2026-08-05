@@ -37,14 +37,11 @@ class LogService:
             nome_cliente=nome_cliente,
         )
 
-        total_paginas = (total_items + items_per_page - 1) // items_per_page
-
         return schemas.ListOut[schemas.LogOut](
             data=[schemas.LogOut.model_validate(log) for log in logs],
             meta=schemas.MetaOut(
                 itens_por_pagina=items_per_page,
                 pagina_atual=page,
                 total_itens=total_items,
-                total_paginas=total_paginas,
             ),
         )

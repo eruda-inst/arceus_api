@@ -33,15 +33,12 @@ class IXCUserService:
         total_items = res.get("total", 0)
         total_items = int(total_items)
 
-        total_paginas = (total_items + items_per_page - 1) // items_per_page
-
         return schemas.ListOut[schemas.IXCUserOut](
             data=[schemas.IXCUserOut.model_validate(i) for i in ixc_users],
             meta=schemas.MetaOut(
                 itens_por_pagina=items_per_page,
                 pagina_atual=page,
                 total_itens=total_items,
-                total_paginas=total_paginas,
             ),
         )
 

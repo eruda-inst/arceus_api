@@ -36,15 +36,12 @@ class UserService:
             group_id=group_id,
         )
 
-        total_paginas = (total_items + items_per_page - 1) // items_per_page
-
         return schemas.ListOut[schemas.UserOut](
             data=[schemas.UserOut.model_validate(u) for u in users],
             meta=schemas.MetaOut(
                 pagina_atual=page,
                 itens_por_pagina=items_per_page,
                 total_itens=total_items,
-                total_paginas=total_paginas,
             ),
         )
 
