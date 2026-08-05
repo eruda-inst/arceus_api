@@ -88,8 +88,8 @@ class LogCrud:
         count_stmt = select(func.count()).select_from(stmt.subquery())
         total_items = (await db.execute(count_stmt)).scalar_one()
 
-        # Order results by id ascending (consistent pagination)
-        stmt = stmt.order_by(models.Log.id.asc())
+        # Order results
+        stmt = stmt.order_by(models.Log.id.desc())
 
         # Calculate offset based on page and items_per_page
         offset = (page - 1) * items_per_page
