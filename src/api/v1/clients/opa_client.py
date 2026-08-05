@@ -7,22 +7,20 @@ from .. import cores, utils
 
 
 class OpaCliente:
-    _host = cores.settings.opa_host
-    _token = cores.settings.opa_token.get_secret_value()
-    _headers = {"Authorization": f"Bearer {_token}"}
-    _url = "https://{}/api/v1/{}"  # host, endpoint
-    _client = httpx.AsyncClient(timeout=30.0)
-
-    @classmethod
-    async def _make_request(cls, endpoint: str, payload: Any) -> dict[str, Any]:
+    @staticmethod
+    async def _make_request(endpoint: str, payload: Any) -> dict[str, Any]:
         try:
-            res = await cls._client.request(
-                method=utils.HttpMethod.GET,
-                url=cls._url.format(cls._host, endpoint),
-                headers=cls._headers,
-                json=payload,
+            host = cores.settings.opa_host
+            token = cores.settings.opa_token.get_secret_value()
+            headers = {"Authorization": f"Bearer {token}"}
+            url = f"https://{host}/api/v1/{endpoint}"
+            client = httpx.AsyncClient(timeout=30.0)
+
+            res = await client.request(
+                method=utils.HttpMethod.GET, url=url, headers=headers, json=payload
             )
             res.raise_for_status()
+
             return res.json()
         except httpx.RequestError as e:
             raise HTTPException(

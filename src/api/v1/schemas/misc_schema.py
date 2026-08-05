@@ -1,4 +1,4 @@
-from typing import Generic, TypeVar
+from typing import TypeVar
 
 from pydantic import BaseModel, Field, NonNegativeInt, PositiveInt, computed_field
 
@@ -19,12 +19,12 @@ class MetaOut(BaseModel):
         return (self.total_itens + self.itens_por_pagina - 1) // self.itens_por_pagina
 
 
-class ListOut(BaseModel, Generic[T]):
+class ListOut[T](BaseModel):
     data: list[T]
     meta: MetaOut
 
 
-class TodayAlwaysOut(BaseModel, Generic[T]):
+class TodayAlwaysOut[T](BaseModel):
     hoje: T
     sempre: T
 

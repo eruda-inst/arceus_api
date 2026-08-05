@@ -10,34 +10,33 @@ from .. import cruds, db, services
 
 
 class LogMiddleware(BaseHTTPMiddleware):
-    _include_prefixes = (
-        "/api/v1/cobranca",
-        "/api/v1/comercial",
-        "/api/v1/financeiro",
-        "/api/v1/suporte",
-        "/api/v1/triagem",
-        "/api/v1/upgrade",
-        "/api/v1/vila",
-    )
-    _departments = [
-        "cobrança",
-        "comercial",
-        "financeiro",
-        "suporte",
-        "triagem",
-        "upgrade",
-        "vila",
-    ]
-
     def __init__(self, app: ASGIApp):
         super().__init__(app)
+        self.include_prefixes = (
+            "/api/v1/cobranca",
+            "/api/v1/comercial",
+            "/api/v1/financeiro",
+            "/api/v1/suporte",
+            "/api/v1/triagem",
+            "/api/v1/upgrade",
+            "/api/v1/vila",
+        )
+        self.departments = (
+            "cobrança",
+            "comercial",
+            "financeiro",
+            "suporte",
+            "triagem",
+            "upgrade",
+            "vila",
+        )
 
     async def dispatch(
         self,
         request: Request,
         call_next: Callable[[Request], Awaitable[Response]],
     ):
-        if not request.url.path.startswith(self._include_prefixes):
+        if not request.url.path.startswith(self.include_prefixes):
             return await call_next(request)
 
         # Isto deve estar antes da chamada da rota, i.e., "await call_enxt(request)"
@@ -61,7 +60,7 @@ class LogMiddleware(BaseHTTPMiddleware):
         payload = payload.decode()
         payload = payload if payload else None
 
-        setor = [d.capitalize() for d in self._departments if d in endpoint][0]
+        setor = next((d.capitalize() for d in self.departments if d in endpoint), None)
 
         response_body = b""
         async for chunk in res.body_iterator:  # type: ignore
