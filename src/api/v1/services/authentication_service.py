@@ -9,13 +9,13 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from .. import cruds, models, schemas
-from ..cores import settings
+from ..config_core import settings
 
-SECRET_KEY = settings.secret_key.get_secret_value()
 ALGORITHM = "HS256"
-TOKEN_EXPIRE_MINUTES = 60
-TOKEN_EXPIRE_SECONDS = TOKEN_EXPIRE_MINUTES * 60
-REFRESH_TOKEN_EXPIRE_DAYS = 7
+SECRET_KEY = settings.secret_key.get_secret_value()
+TOKEN_EXPIRE_MINUTES = settings.token_expire_minutes
+REFRESH_TOKEN_EXPIRE_DAYS = settings.refresh_token_expire_days
+TOKEN_EXPIRE_SECONDS = settings.token_expire_seconds
 
 
 class AuthenticationService:

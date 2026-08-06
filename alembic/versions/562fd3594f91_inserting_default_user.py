@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from argon2 import PasswordHasher
 
 from alembic import op
-from src.api.v1.cores import settings
+from src.api.v1.config_core import settings
 from src.api.v1.utils.enums.group_enum import GroupNames
 
 # revision identifiers, used by Alembic.
@@ -25,9 +25,9 @@ depends_on: str | Sequence[str] | None = None
 ph = PasswordHasher()
 
 # Dados do usuário padrão
-ADMIN_NOME = settings.default_user_name
-ADMIN_EMAIL = settings.default_user_email
-ADMIN_SENHA = settings.default_user_password.get_secret_value()
+ADMIN_NOME = settings.dflt_user_name
+ADMIN_EMAIL = settings.dflt_user_email
+ADMIN_SENHA = settings.dflt_user_pass.get_secret_value()
 GRUPO_ADMIN_NOME = GroupNames.ADMIN.value
 
 

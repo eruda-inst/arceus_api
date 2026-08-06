@@ -6,23 +6,20 @@ import httpx
 from fastapi import HTTPException, status
 from pydantic import PositiveInt
 
-from .. import cores, utils
+from .. import utils
+from ..config_core import settings
 
 
 class IxcCliente:
-    _host = cores.settings.ixc_host
-    _token = cores.settings.ixc_token.get_secret_value()
+    _token = settings.ixc_token.get_secret_value()
     _token_encoded = base64.b64encode(_token.encode("utf-8")).decode("utf-8")
-    _client = httpx.AsyncClient(timeout=30.0)
-    _url = "https://{}/webservice/v1/{}"  # host, endpoint
-
-    @classmethod
-    def _create_auth_header(cls) -> str:
-        return f"Basic {cls._token_encoded}"
+    _timeout = httpx.Timeout(connect=5.0, read=30.0, write=10.0, pool=1.0)
+    _client = httpx.AsyncClient(timeout=_timeout)
+    _base_url = settings.base_api_url_ixc
 
     @classmethod
     def _get_headers(cls, include_ixcsoft: bool = True) -> dict[str, str]:
-        headers = {"Authorization": cls._create_auth_header()}
+        headers = {"Authorization": f"Basic {cls._token_encoded}"}
         if include_ixcsoft:
             headers["ixcsoft"] = "listar"
         return headers
@@ -38,7 +35,7 @@ class IxcCliente:
         try:
             res = await cls._client.request(
                 method=method,
-                url=cls._url.format(cls._host, endpoint),
+                url=f"{cls._base_url}/{endpoint}",
                 headers=cls._get_headers(include_ixcsoft=include_ixcsoft),
                 json=payload,
             )

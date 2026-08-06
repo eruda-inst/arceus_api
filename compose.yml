@@ -6,13 +6,13 @@ services:
     container_name: db-bot
     restart: always
     environment:
-      - POSTGRES_DB=${postgres_db}
-      - POSTGRES_PASSWORD=${postgres_password}
-      - POSTGRES_USER=${postgres_user}
+      - POSTGRES_DB=${PG_DB}
+      - POSTGRES_PASSWORD=${PG_PASS}
+      - POSTGRES_USER=${PG_USER}
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${postgres_user} -d ${postgres_db}"]
+      test: ["CMD-SHELL", "pg_isready -U ${PG_USER} -d ${PG_DB}"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -22,18 +22,24 @@ services:
     image: zolppy/arceus-api:latest
     container_name: api-bot
     environment:
-      - BASE_URL_7AZ=${base_url_7az}
-      - API_KEY_7AZ=${api_key_7az}
-      - DB_URL=${db_url}
-      - DB_URL_MIGRATIONS=${db_url_migrations}
-      - DEFAULT_USER_EMAIL=${default_user_email}
-      - DEFAULT_USER_NAME=${default_user_name}
-      - DEFAULT_USER_PASSWORD=${default_user_password}
-      - IXC_HOST=${ixc_host}
-      - IXC_TOKEN=${ixc_token}
-      - OPA_HOST=${opa_host}
-      - OPA_TOKEN=${opa_token}
-      - RUN_MIGRATIONS=1
+      - API_KEY_7AZ=${API_KEY_7AZ}
+      - BASE_API_URL_7AZ=${BASE_API_URL_7AZ}
+      - IXC_TOKEN=${IXC_TOKEN}
+      - BASE_API_URL_IXC=${BASE_API_URL_IXC}
+      - OPA_TOKEN=${OPA_TOKEN}
+      - BASE_API_URL_OPA=${BASE_API_URL_OPA}
+      - DB_URL_SYNC=${DB_URL_SYNC}
+      - DB_URL_ASYNC=${DB_URL_ASYNC}
+      - DFLT_USER_EMAIL=${DFLT_USER_EMAIL}
+      - DFLT_USER_NAME=${DFLT_USER_NAME}
+      - DFLT_USER_PASS=${DFLT_USER_PASS}
+      - PG_DB=${PG_DB}
+      - PG_PASS=${PG_PASS}
+      - PG_USER=${PG_USER}
+      - TOKEN_EXPIRE_MINUTES=${TOKEN_EXPIRE_MINUTES}
+      - REFRESH_TOKEN_EXPIRE_DAYS=${REFRESH_TOKEN_EXPIRE_DAYS}
+      - SECRET_KEY=${SECRET_KEY}
+      - RUN_MIGRATIONS=${RUN_MIGRATIONS}
     ports:
       - 8000:8000
     depends_on:

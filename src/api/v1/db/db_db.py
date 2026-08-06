@@ -3,14 +3,11 @@ from typing import Any
 
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
-from .. import cores
+from ..config_core import settings
 
-DB_URL = cores.settings.db_url
-
-
-engine = create_async_engine(url=DB_URL, future=True, echo=False)
+engine = create_async_engine(url=settings.db_url_async, future=True, echo=False)
 AsyncSessionLocal = async_sessionmaker(
-    engine, expire_on_commit=False, class_=AsyncSession
+    bind=engine, expire_on_commit=False, class_=AsyncSession
 )
 
 

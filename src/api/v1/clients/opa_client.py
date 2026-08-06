@@ -3,20 +3,23 @@ from typing import Any
 import httpx
 from fastapi import HTTPException, status
 
-from .. import cores, utils
+from .. import utils
+from ..config_core import settings
 
 
 class OpaCliente:
-    @staticmethod
-    async def _make_request(endpoint: str, payload: Any) -> dict[str, Any]:
-        try:
-            host = cores.settings.opa_host
-            token = cores.settings.opa_token.get_secret_value()
-            headers = {"Authorization": f"Bearer {token}"}
-            url = f"https://{host}/api/v1/{endpoint}"
-            client = httpx.AsyncClient(timeout=30.0)
+    _token = settings.opa_token.get_secret_value()
+    _timeout = httpx.Timeout(connect=5.0, read=30.0, write=10.0, pool=1.0)
+    _client = httpx.AsyncClient(timeout=_timeout)
+    _base_url = settings.base_api_url_opa
 
-            res = await client.request(
+    @classmethod
+    async def _make_request(cls, endpoint: str, payload: Any) -> dict[str, Any]:
+        try:
+            headers = {"Authorization": f"Bearer {cls._token}"}
+            url = f"{cls._base_url}/{endpoint}"
+
+            res = await cls._client.request(
                 method=utils.HttpMethod.GET, url=url, headers=headers, json=payload
             )
             res.raise_for_status()
