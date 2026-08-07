@@ -63,7 +63,7 @@ async def get_by_id_grupo(
 @perm_router.get(path="/usuario/id/{id}", summary="Obtém permissões por ID do usuário")
 async def get_by_id_usuario(
     db: DbDep,
-    curr_user: CurrUserDep,
+    # curr_user: CurrUserDep,
     id: Annotated[PositiveInt, Path(description="ID do usuário")],
 ) -> schemas.ListOut[schemas.PermOut]:
     """

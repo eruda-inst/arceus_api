@@ -14,7 +14,8 @@ CurrUserDep = Annotated[models.User, Depends(dependency=deps.get_curr_user)]
 
 @group_router.get(path="/", summary="Obtém grupos")
 async def get_all(
-    db: DbDep, curr_user: CurrUserDep
+    db: DbDep,
+    # curr_user: CurrUserDep
 ) -> schemas.ListOut[schemas.GroupOut]:
     """
     Obtém informações de grupos
@@ -25,7 +26,7 @@ async def get_all(
 @group_router.get(path="/id/{id}", summary="Obtém grupo por ID")
 async def get_by_id(
     db: DbDep,
-    curr_user: CurrUserDep,
+    # curr_user: CurrUserDep,
     id: Annotated[PositiveInt, Path(description="ID do grupo")],
 ) -> schemas.GroupOut:
     """
