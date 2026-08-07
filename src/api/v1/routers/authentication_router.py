@@ -1,18 +1,19 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Body, Depends
+from fastapi import APIRouter, Body, Depends, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from .. import db, deps, models, schemas, services
 
 authentication_router = APIRouter(prefix="/autenticacao", tags=["Autenticação"])
 
-db_dep = Annotated[AsyncSession, Depends(dependency=db.get_db)]
+DbDep = Annotated[AsyncSession, Depends(dependency=db.get_db)]
+CurrUserDep = Annotated[models.User, Depends(dependency=deps.get_curr_user)]
 
 
 @authentication_router.post(path="/login", summary="Autenticação de usuário")
 async def login(
-    db: db_dep,
+    db: DbDep,
     user: Annotated[schemas.UserLogin, Body(description="Credenciais de login")],
 ) -> schemas.AccessTokenOut:
     """
@@ -21,11 +22,26 @@ async def login(
     return await services.AuthenticationService.login(user=user, db=db)
 
 
+@authentication_router.post(
+    path="/logout",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Realiza logout do usuário",
+)
+async def logout(
+    curr_user: Annotated[models.User, Depends(deps.get_curr_user)], db: DbDep
+) -> None:
+    """
+    Invalida token de usuário autenticado
+    """
+    curr_user.versao_token += 1  # type: ignore
+    await db.commit()
+
+
 @authentication_router.post(path="/refresh-token", summary="Renova token")
 async def refresh_token(
-    db: db_dep,
+    db: DbDep,
     refresh_token: Annotated[
-        schemas.RefreshTokenIn, Body(description="Token de atualização")
+        str, Body(embed=True, description="Token de atualização", examples=["eyJ..."])
     ],
 ) -> schemas.AccessTokenOut:
     """
@@ -37,11 +53,8 @@ async def refresh_token(
 
 
 @authentication_router.get(path="/me", summary="Usuário atual")
-async def me(
-    db: db_dep,
-    current_user: Annotated[models.User, Depends(dependency=deps.get_curr_user)],
-) -> schemas.UserOut:
+async def me(db: DbDep, curr_user: CurrUserDep) -> schemas.UserOut:
     """
     Usuário atual logado
     """
-    return schemas.UserOut.model_validate(obj=current_user)
+    return schemas.UserOut.model_validate(curr_user)

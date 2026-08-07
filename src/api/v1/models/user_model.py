@@ -19,6 +19,14 @@ class User(db.Base):
     email = Column(type_=String, nullable=False, unique=True, index=True)
     senha = Column(type_=String, nullable=False, unique=True, index=False)
     ativo = Column(type_=Boolean, default=True, nullable=True, unique=False, index=True)
+    versao_token = Column(
+        type_=Integer,
+        default=0,
+        server_default="0",
+        nullable=False,
+        index=False,
+        unique=False,
+    )
     criado_em = Column(
         type_=TIMESTAMP(timezone=True),
         server_default=func.timezone("America/Bahia", func.now()),
