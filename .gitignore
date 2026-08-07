@@ -1,4 +1,104 @@
-.env
+# Byte-compiled / optimized / DLL files
 __pycache__/
-.venv
-.ruff_cache
+*.py[cod]
+*$py.class
+*.so
+*.pyd
+
+# Virtual environments (should NOT be committed)
+venv/
+.venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+pythonenv*
+
+# Environment variables and secrets (CRITICAL)
+.env
+.env.*
+!.env.example          # Allow example file to be committed
+*.key
+*.pem
+*.crt
+*.p12
+secrets/
+.terraform/
+
+# Database files (prevents committing local development data)
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
+data/
+instance/
+
+# Logs
+logs/
+*.log
+uvicorn.log
+gunicorn.log
+
+# Testing & Coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+*.cover
+*.py,cover
+.hypothesis/
+.mypy_cache/
+.ruff_cache/
+.pyre/
+.pytype/
+
+# Distribution / Packaging
+build/
+dist/
+*.egg-info/
+*.egg
+MANIFEST
+wheels/
+share/python-wheels/
+
+# IDE & Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+desktop.ini
+*.iml
+
+# Jupyter Notebooks (if used for exploration)
+.ipynb_checkpoints/
+*.ipynb
+
+# OS & Temporary files
+*.tmp
+*.temp
+*.dump
+*.pkl
+*.pid
+.cache/
+
+# Alembic (database migrations - commit the versions, but not compiled caches)
+alembic/__pycache__/
+alembic/versions/__pycache__/
+
+# Deployment & CI/CD local files
+.github/
+.gitlab/
+.azure/
+*.tfstate
+*.tfvars
+.terraform/
+
+# Project-specific (adjust based on your needs)
+uploads/
+media/
+staticfiles/

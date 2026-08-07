@@ -1,99 +1,87 @@
-# Python
+# Python bytecode & cache
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-share/python-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+.tox/
+.mypy_cache/
+.hypothesis/
 
-# uv
-.uv/
-.venv
+# Virtual environments (should be rebuilt inside the container)
 venv/
+.venv/
 env/
 ENV/
 env.bak/
 venv.bak/
+pythonenv*
 
-# Docker
-Dockerfile*
-docker-compose*
-.dockerignore
+# Version Control
+.git/
+.gitignore
+.gitattributes
+.svn/
+.hg/
 
-# IDE
+# IDE & Editor files
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
-
-# OS
 .DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
 Thumbs.db
+*.iml
 
-# Logs
+# Docker-related (prevents infinite loops and invalidates cache)
+Dockerfile
+docker-compose*.yml
+.dockerignore
+
+# Environment variables and Secrets (CRITICAL for security)
+.env
+.env.*
+*.key
+*.pem
+*.crt
+*.p12
+secrets/
+.terraform/
+
+# Project-specific source code (We will copy specific folders via Dockerfile)
+# Note: We ignore tests, but keep the actual app source.
+tests/
+docs/
+examples/
+notebooks/
+*.rst
+
+# Logs and databases
 logs/
 *.log
+*.sqlite
+*.sqlite3
+*.db
+data/
+
+# OS & Temporary files
+*.tmp
+*.temp
+.cache/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-lerna-debug.log*
 
-# Environment
-.env
-.env.*
-!.env.example
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
-# Testing
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-.hypothesis/
-.pytest_cache/
-
-# Alembic (optional - include if you run migrations at build time)
-# alembic/versions/*  # Uncomment if you generate migrations at runtime
-
-# Project specific
-temp/
-tmp/
-*.tmp
-*.temp
-
-# Documentation
-docs/_build/
-
-# CI/CD
-.gitlab-ci.yml
+# Deployment & CI/CD
 .github/
 .gitlab/
-.circleci/
-.travis.yml
+.azure/
+.vscode/
+.terraform/
+*.tfstate
+*.tfvars
