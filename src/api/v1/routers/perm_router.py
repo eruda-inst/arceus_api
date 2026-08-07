@@ -15,7 +15,7 @@ CurrUserDep = Annotated[models.User, Depends(deps.get_curr_user)]
 @perm_router.get(path="/id/{id}", summary="Obtém permissão por ID")
 async def get_by_id(
     db: DbDep,
-    # curr_user: CurrUserDep,
+    curr_user: CurrUserDep,
     id: Annotated[PositiveInt, Path(description="ID da permissão")],
 ) -> schemas.PermOut:
     """
@@ -27,7 +27,7 @@ async def get_by_id(
 @perm_router.get(path="/nome/{nome}", summary="Obtém permissão por nome")
 async def get_by_nome(
     db: DbDep,
-    # curr_user: CurrUserDep,
+    curr_user: CurrUserDep,
     nome: Annotated[str, Path(description="Nome da permissão")],
 ) -> schemas.PermOut:
     """
@@ -39,7 +39,7 @@ async def get_by_nome(
 @perm_router.get(path="/codigo/{codigo}", summary="Obtém permissão por código")
 async def get_by_codigo(
     db: DbDep,
-    # curr_user: CurrUserDep,
+    curr_user: CurrUserDep,
     codigo: Annotated[str, Path(description="Código da permissão")],
 ) -> schemas.PermOut:
     """
@@ -51,7 +51,7 @@ async def get_by_codigo(
 @perm_router.get(path="/grupo/id/{id}", summary="Obtém permissão por ID do grupo")
 async def get_by_id_grupo(
     db: DbDep,
-    # curr_user: CurrUserDep,
+    curr_user: CurrUserDep,
     id: Annotated[PositiveInt, Path(description="ID do grupo")],
 ) -> schemas.ListOut[schemas.PermOut]:
     """
@@ -63,7 +63,7 @@ async def get_by_id_grupo(
 @perm_router.get(path="/usuario/id/{id}", summary="Obtém permissões por ID do usuário")
 async def get_by_id_usuario(
     db: DbDep,
-    # curr_user: CurrUserDep,
+    curr_user: CurrUserDep,
     id: Annotated[PositiveInt, Path(description="ID do usuário")],
 ) -> schemas.ListOut[schemas.PermOut]:
     """

@@ -20,21 +20,17 @@ TOKEN_EXPIRE_SECONDS = settings.token_expire_seconds
 
 class AuthenticationService:
     @staticmethod
-    async def verify_access_token(
-        db: AsyncSession, access_token: str
-    ) -> models.User | None:
+    async def verify_access_token(db: AsyncSession, access_token: str) -> models.User:
         try:
             payload = jwt.decode(
                 token=access_token, key=SECRET_KEY, algorithms=[ALGORITHM]
             )
             email = payload.get("sub")
             if not email:
-                return None
-        except ValidationException:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Token inválido",
-            )
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Token inválido: e-mail ausente",
+                )
         except ExpiredSignatureError:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -47,6 +43,15 @@ class AuthenticationService:
             )
         try:
             user = await cruds.UserCrud.get_by(db=db, email=email)
+            if not user:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Usuário inexistente",
+                )
+            if not bool(user.ativo):
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN, detail="Usuário inativo"
+                )
             return user
         except SQLAlchemyError:
             raise HTTPException(
@@ -69,11 +74,6 @@ class AuthenticationService:
                     status_code=status.HTTP_401_UNAUTHORIZED,
                     detail="Token inválido: Email ausente",
                 )
-        except ValidationException:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Refresh token inválido",
-            )
         except ExpiredSignatureError:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -89,6 +89,11 @@ class AuthenticationService:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Usuário não encontrado",
+            )
+        if not bool(user_db.ativo):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Usuário inativo",
             )
         data = {"sub": email}
         new_access_token = cls._create_token(
@@ -114,13 +119,13 @@ class AuthenticationService:
             if not user_db:
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail="Email ou senha incorreta",
+                    detail="E-mail ou senha incorretos",
                 )
             is_valid_password = user.verify_senha(plain=plain, hash=str(user_db.senha))
             if not is_valid_password:
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail=f"Falha em login para email: {email}",
+                    detail="E-mail ou senha incorretos",
                 )
             data = {"sub": email}
             access_token = cls._create_token(
@@ -149,16 +154,8 @@ class AuthenticationService:
 
     @staticmethod
     def _create_token(data: dict[str, Any], expires_delta: timedelta) -> str:
-        try:
-            to_encode = data.copy()
-            expire = datetime.now(ZoneInfo("America/Bahia")) + expires_delta
-            to_encode.update({"exp": expire})
-            encoded_jwt = jwt.encode(
-                claims=to_encode, key=SECRET_KEY, algorithm=ALGORITHM
-            )
-            return encoded_jwt
-        except ValidationException:
-            raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail="Erro de validação durante criação de token",
-            )
+        to_encode = data.copy()
+        expire = datetime.now(ZoneInfo("America/Bahia")) + expires_delta
+        to_encode.update({"exp": expire})
+        encoded_jwt = jwt.encode(claims=to_encode, key=SECRET_KEY, algorithm=ALGORITHM)
+        return encoded_jwt
