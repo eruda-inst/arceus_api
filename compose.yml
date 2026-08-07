@@ -1,9 +1,9 @@
 services:
-  db:
+  arceus_db:
     image: postgres
     ports:
       - "5432:5432"
-    container_name: db-bot
+    container_name: arceus_db
     restart: always
     environment:
       - POSTGRES_DB=${PG_DB}
@@ -17,10 +17,10 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - net-bot
-  api:
-    image: zolppy/arceus-api:latest
-    container_name: api-bot
+      - arceus_net
+  arceus_api:
+    image: zolppy/arceus_api:latest
+    container_name: arceus_api
     environment:
       - API_KEY_7AZ=${API_KEY_7AZ}
       - BASE_API_URL_7AZ=${BASE_API_URL_7AZ}
@@ -43,9 +43,9 @@ services:
     ports:
       - 8000:8000
     depends_on:
-      - db
+      - arceus_db
     networks:
-      - net-bot
+      - arceus_net
     volumes:
       - ./src:/src/src
       - ./pyproject.toml:/src/pyproject.toml
@@ -57,5 +57,5 @@ volumes:
   media:
     driver: local
 networks:
-  net-bot:
+  arceus_net:
     driver: bridge
