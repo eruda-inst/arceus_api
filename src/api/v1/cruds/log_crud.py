@@ -23,7 +23,7 @@ class LogCrud:
         setor: str | None,
         nome_cliente: str | None,
     ):
-        log_entry = models.Log(
+        log_entry = models.LogModel(
             metodo=metodo,
             endpoint=endpoint,
             codigo=codigo,
@@ -55,33 +55,33 @@ class LogCrud:
         protocolo: str | None,
         setor: str | None,
         nome_cliente: str | None,
-    ) -> tuple[NonNegativeInt, Sequence[models.Log]]:
+    ) -> tuple[NonNegativeInt, Sequence[models.LogModel]]:
         # Base query: select all logs
-        stmt = select(models.Log)
+        stmt = select(models.LogModel)
 
         # Apply optional filters using case-insensitive partial matching (ILike)
         if metodo:
-            stmt = stmt.where(models.Log.metodo.ilike(f"%{metodo}%"))
+            stmt = stmt.where(models.LogModel.metodo.ilike(f"%{metodo}%"))
         if endpoint:
-            stmt = stmt.where(models.Log.endpoint.ilike(f"%{endpoint}%"))
+            stmt = stmt.where(models.LogModel.endpoint.ilike(f"%{endpoint}%"))
         if codigo:
-            stmt = stmt.where(models.Log.codigo == codigo)
+            stmt = stmt.where(models.LogModel.codigo == codigo)
         if data_inicio:
             # Compare only the date part of criado_em against the given string
-            stmt = stmt.where(func.date(models.Log.criado_em) >= data_inicio)
+            stmt = stmt.where(func.date(models.LogModel.criado_em) >= data_inicio)
         if data_fim:
-            stmt = stmt.where(func.date(models.Log.criado_em) <= data_fim)
+            stmt = stmt.where(func.date(models.LogModel.criado_em) <= data_fim)
         if hora_inicio:
             # Compare only the time part of criado_em against the given string
-            stmt = stmt.where(func.time(models.Log.criado_em) >= hora_inicio)
+            stmt = stmt.where(func.time(models.LogModel.criado_em) >= hora_inicio)
         if hora_fim:
-            stmt = stmt.where(func.time(models.Log.criado_em) <= hora_fim)
+            stmt = stmt.where(func.time(models.LogModel.criado_em) <= hora_fim)
         if protocolo:
-            stmt = stmt.where(models.Log.protocolo.ilike(f"%{protocolo}%"))
+            stmt = stmt.where(models.LogModel.protocolo.ilike(f"%{protocolo}%"))
         if setor:
-            stmt = stmt.where(models.Log.setor.ilike(f"%{setor}%"))
+            stmt = stmt.where(models.LogModel.setor.ilike(f"%{setor}%"))
         if nome_cliente:
-            stmt = stmt.where(models.Log.nome_cliente.ilike(f"%{nome_cliente}%"))
+            stmt = stmt.where(models.LogModel.nome_cliente.ilike(f"%{nome_cliente}%"))
 
         # Build a subquery for counting total number of items after filters
         # This avoids counting the paginated slice
@@ -89,7 +89,7 @@ class LogCrud:
         total_items = (await db.execute(count_stmt)).scalar_one()
 
         # Order results
-        stmt = stmt.order_by(models.Log.id.desc())
+        stmt = stmt.order_by(models.LogModel.id.desc())
 
         # Calculate offset based on page and items_per_page
         offset = (page - 1) * items_per_page

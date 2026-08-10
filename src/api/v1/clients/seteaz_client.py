@@ -6,7 +6,7 @@ from pydantic import PositiveInt
 from ..config_core import settings
 
 
-class SeteAZCliente:
+class SevenAZClient:
     _base_url = settings.base_api_url_7az
     _api_key = settings.api_key_7az.get_secret_value()
     _timeout = httpx.Timeout(connect=5.0, read=30.0, write=10.0, pool=1.0)

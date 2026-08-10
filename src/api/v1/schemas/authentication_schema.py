@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field, NonNegativeInt
 
 
-class AccessTokenOut(BaseModel):
+class AccessTokenOutSchema(BaseModel):
     access_token: str = Field(description="Token de acesso", examples=["eyJ..."])
     refresh_token: str = Field(description="Token de atualização", examples=["eyJ..."])
     token_type: str | None = Field(
@@ -15,5 +15,5 @@ class AccessTokenOut(BaseModel):
     )
 
 
-class RefreshTokenIn(BaseModel):
+class RefreshTokenInSchema(BaseModel):
     refresh_token: str = Field(description="Token de atualização", examples=["eyJ..."])

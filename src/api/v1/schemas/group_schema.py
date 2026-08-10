@@ -3,7 +3,7 @@ from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field, PositiveInt
 
 
-class GroupOut(BaseModel):
+class GroupOutSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: PositiveInt = Field(ge=1, description="ID do grupo", examples=[1])

@@ -12,7 +12,7 @@ class IXCUserService:
         items_per_page: PositiveInt,
         name: str | None = None,
         email: str | None = None,
-    ) -> schemas.ListOut[schemas.IXCUserOut]:
+    ) -> schemas.ListOutSchema[schemas.IXCUsuarioOutSchema]:
         endpoint = "usuarios"
         grid_param = [utils.Param(TB="usuarios.status", P="A")]
 
@@ -23,7 +23,7 @@ class IXCUserService:
         if email is not None:
             grid_param.append(utils.Param(TB="usuarios.email", OP="L", P=email))
 
-        res = await clients.IxcCliente.get(
+        res = await clients.IxcClient.get(
             endpoint=endpoint,
             grid_param=grid_param,
             pagina=page,
@@ -33,9 +33,9 @@ class IXCUserService:
         total_items = res.get("total", 0)
         total_items = int(total_items)
 
-        return schemas.ListOut[schemas.IXCUserOut](
-            data=[schemas.IXCUserOut.model_validate(i) for i in ixc_users],
-            meta=schemas.MetaOut(
+        return schemas.ListOutSchema[schemas.IXCUsuarioOutSchema](
+            data=[schemas.IXCUsuarioOutSchema.model_validate(i) for i in ixc_users],
+            meta=schemas.MetaOutSchema(
                 itens_por_pagina=items_per_page,
                 pagina_atual=page,
                 total_itens=total_items,
@@ -43,17 +43,17 @@ class IXCUserService:
         )
 
     @staticmethod
-    async def get_by_email(email: EmailStr):
+    async def get_by_email(email: EmailStr) -> schemas.IXCUsuarioOutSchema:
         endpoint = "usuarios"
         grid_param = [
             utils.Param(TB="usuarios.status", P="A"),
             utils.Param(TB="usuarios.email", P=email),
         ]
-        res = await clients.IxcCliente.get(endpoint=endpoint, grid_param=grid_param)
+        res = await clients.IxcClient.get(endpoint=endpoint, grid_param=grid_param)
         if not (regs := res.get("registros", [])):
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Usuário IXC inexistente",
             )
         user = regs[0]
-        return schemas.IXCUserOut.model_validate(user)
+        return schemas.IXCUsuarioOutSchema.model_validate(user)

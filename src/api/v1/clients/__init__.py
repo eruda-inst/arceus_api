@@ -1,5 +1,5 @@
-from .ixc_client import IxcCliente
-from .opa_client import OpaCliente
-from .seteaz_client import SeteAZCliente
+from .ixc_client import IxcClient
+from .opa_client import OpaClient
+from .seteaz_client import SevenAZClient
 
-__all__ = ["IxcCliente", "OpaCliente", "SeteAZCliente"]
+__all__ = ["IxcClient", "OpaClient", "SevenAZClient"]

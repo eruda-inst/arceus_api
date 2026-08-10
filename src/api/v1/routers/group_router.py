@@ -9,14 +9,14 @@ from .. import db, deps, models, schemas, services
 group_router = APIRouter(prefix="/grupos", tags=["Grupos"])
 
 DbDep = Annotated[AsyncSession, Depends(dependency=db.get_db)]
-CurrUserDep = Annotated[models.User, Depends(dependency=deps.get_curr_user)]
+CurrUserDep = Annotated[models.UserModel, Depends(dependency=deps.get_curr_user)]
 
 
 @group_router.get(path="/", summary="Obtém grupos")
 async def get_all(
     db: DbDep,
     # curr_user: CurrUserDep
-) -> schemas.ListOut[schemas.GroupOut]:
+) -> schemas.ListOutSchema[schemas.GroupOutSchema]:
     """
     Obtém informações de grupos
     """
@@ -28,7 +28,7 @@ async def get_by_id(
     db: DbDep,
     # curr_user: CurrUserDep,
     id: Annotated[PositiveInt, Path(description="ID do grupo")],
-) -> schemas.GroupOut:
+) -> schemas.GroupOutSchema:
     """
     Obtém informações de grupo por ID
     """
@@ -40,7 +40,7 @@ async def get_by_name(
     db: DbDep,
     curr_user: CurrUserDep,
     nome: Annotated[str, Path(description="Nome do grupo")],
-) -> schemas.GroupOut:
+) -> schemas.GroupOutSchema:
     """
     Obtém informações de grupo por nome
     """
@@ -52,7 +52,7 @@ async def get_by_user_id(
     db: DbDep,
     curr_user: CurrUserDep,
     id: Annotated[PositiveInt, Path(description="ID do usuário")],
-) -> schemas.GroupOut:
+) -> schemas.GroupOutSchema:
     """
     Obtém informações de grupo por id do usuário
     """

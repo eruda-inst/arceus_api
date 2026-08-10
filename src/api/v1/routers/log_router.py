@@ -8,8 +8,10 @@ from .. import db, deps, models, schemas, services, utils
 log_router = APIRouter(prefix="/logs", tags=["Logs"])
 
 DbDep = Annotated[AsyncSession, Depends(db.get_db)]
-CurrUserDep = Annotated[models.User, Depends(deps.get_curr_user)]
-ReadPermDep = Annotated[models.User, Depends(deps.has_perm(utils.PermCodes.READ_LOG))]
+CurrUserDep = Annotated[models.UserModel, Depends(deps.get_curr_user)]
+ReadPermDep = Annotated[
+    models.UserModel, Depends(deps.has_perm(utils.PermCodes.READ_LOG))
+]
 
 
 @log_router.get(path="/", summary="Obtém informações de logs")
@@ -43,7 +45,7 @@ async def get_all(
     nome_cliente: Annotated[
         str | None, Query(description="Filtro parcial por nome do cliente")
     ] = None,
-) -> schemas.ListOut[schemas.LogOut]:
+) -> schemas.ListOutSchema[schemas.LogOutSchema]:
     """
     Obtém informações de logs
     """

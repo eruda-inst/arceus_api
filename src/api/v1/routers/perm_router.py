@@ -9,7 +9,7 @@ from .. import db, deps, models, schemas, services
 perm_router = APIRouter(prefix="/permissoes", tags=["Permissões"])
 
 DbDep = Annotated[AsyncSession, Depends(db.get_db)]
-CurrUserDep = Annotated[models.User, Depends(deps.get_curr_user)]
+CurrUserDep = Annotated[models.UserModel, Depends(deps.get_curr_user)]
 
 
 @perm_router.get(path="/id/{id}", summary="Obtém permissão por ID")
@@ -17,7 +17,7 @@ async def get_by_id(
     db: DbDep,
     curr_user: CurrUserDep,
     id: Annotated[PositiveInt, Path(description="ID da permissão")],
-) -> schemas.PermOut:
+) -> schemas.PermOutSchema:
     """
     Obtém informações de grupo por ID
     """
@@ -29,7 +29,7 @@ async def get_by_nome(
     db: DbDep,
     curr_user: CurrUserDep,
     nome: Annotated[str, Path(description="Nome da permissão")],
-) -> schemas.PermOut:
+) -> schemas.PermOutSchema:
     """
     Obtém informações de grupo por nome
     """
@@ -41,7 +41,7 @@ async def get_by_codigo(
     db: DbDep,
     curr_user: CurrUserDep,
     codigo: Annotated[str, Path(description="Código da permissão")],
-) -> schemas.PermOut:
+) -> schemas.PermOutSchema:
     """
     Obtém informações de grupo por código
     """
@@ -53,7 +53,7 @@ async def get_by_id_grupo(
     db: DbDep,
     curr_user: CurrUserDep,
     id: Annotated[PositiveInt, Path(description="ID do grupo")],
-) -> schemas.ListOut[schemas.PermOut]:
+) -> schemas.ListOutSchema[schemas.PermOutSchema]:
     """
     Obtém informações de grupos por ID do grupo
     """
@@ -65,7 +65,7 @@ async def get_by_id_usuario(
     db: DbDep,
     # curr_user: CurrUserDep,
     id: Annotated[PositiveInt, Path(description="ID do usuário")],
-) -> schemas.ListOut[schemas.PermOut]:
+) -> schemas.ListOutSchema[schemas.PermOutSchema]:
     """
     Obtém informações de grupos por id do usuário
     """

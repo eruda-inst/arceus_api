@@ -16,11 +16,11 @@ ph = PasswordHasher()
 
 class UserCrud:
     @staticmethod
-    async def create(db: AsyncSession, data: schemas.UserIn) -> models.User:
+    async def create(db: AsyncSession, data: schemas.UserInSchema) -> models.UserModel:
         # Update user password to a hash password
         user_data = data.model_dump()
         user_data["senha"] = data.get_hash()
-        new_user = models.User(**user_data)
+        new_user = models.UserModel(**user_data)
 
         # Add new user to database
         db.add(new_user)
@@ -45,13 +45,13 @@ class UserCrud:
         id: PositiveInt | None = None,
         email: EmailStr | None = None,
         load_grupo: bool = False,
-    ) -> models.User | None:
+    ) -> models.UserModel | None:
         # If id is provided, it's used in the query
         if id is not None:
-            stmt = select(models.User).where(models.User.id == id)
+            stmt = select(models.UserModel).where(models.UserModel.id == id)
         # If email is provided, it's used in the query
         elif email is not None:
-            stmt = select(models.User).where(models.User.email == email)
+            stmt = select(models.UserModel).where(models.UserModel.email == email)
         # If neither is provided, it's raised bad request
         else:
             raise HTTPException(
@@ -60,7 +60,7 @@ class UserCrud:
 
         # If load_grupo is True, the user's group is loaded
         if load_grupo:
-            stmt = stmt.options(selectinload(models.User.grupo))
+            stmt = stmt.options(selectinload(models.UserModel.grupo))
 
         user = (await db.execute(stmt)).scalar_one_or_none()
 
@@ -81,26 +81,26 @@ class UserCrud:
         email: str | None = None,
         active: bool | None = None,
         group_id: PositiveInt | None = None,
-    ) -> tuple[NonNegativeInt, Sequence[models.User]]:
-        stmt = select(models.User)
-        count_stmt = select(func.count(models.User.id))
+    ) -> tuple[NonNegativeInt, Sequence[models.UserModel]]:
+        stmt = select(models.UserModel)
+        count_stmt = select(func.count(models.UserModel.id))
 
         # Filter and count by name
         if name is not None:
-            stmt = stmt.where(models.User.nome.ilike(f"%{name}%"))
-            count_stmt = count_stmt.where(models.User.nome.ilike(f"%{name}%"))
+            stmt = stmt.where(models.UserModel.nome.ilike(f"%{name}%"))
+            count_stmt = count_stmt.where(models.UserModel.nome.ilike(f"%{name}%"))
         # Filter and count by e-mail
         if email is not None:
-            stmt = stmt.where(models.User.email.ilike(f"%{email}%"))
-            count_stmt = count_stmt.where(models.User.email.ilike(f"%{email}%"))
+            stmt = stmt.where(models.UserModel.email.ilike(f"%{email}%"))
+            count_stmt = count_stmt.where(models.UserModel.email.ilike(f"%{email}%"))
         # Filter and count by status
         if active is not None:
-            stmt = stmt.where(models.User.ativo == active)
-            count_stmt = count_stmt.where(models.User.ativo == active)
+            stmt = stmt.where(models.UserModel.ativo == active)
+            count_stmt = count_stmt.where(models.UserModel.ativo == active)
         # Filter and count by group name
         if group_id is not None:
-            stmt = stmt.where(models.User.id_grupo == group_id)
-            count_stmt = count_stmt.where(models.User.id_grupo == group_id)
+            stmt = stmt.where(models.UserModel.id_grupo == group_id)
+            count_stmt = count_stmt.where(models.UserModel.id_grupo == group_id)
 
         # Total items for meta info
         total_items = (await db.execute(count_stmt)).scalar()
@@ -109,7 +109,7 @@ class UserCrud:
         # Ordering
         # Ordering should be before pagination
         # Asc is default, but it's good to be explicit
-        stmt = stmt.order_by(models.User.id.asc())
+        stmt = stmt.order_by(models.UserModel.id.asc())
 
         # Pagination
         offset = (page - 1) * items_per_page
@@ -123,7 +123,7 @@ class UserCrud:
     @staticmethod
     async def del_by_id(db: AsyncSession, id: PositiveInt) -> None:
         # Retrieve the current user by id
-        stmt = select(models.User).where(models.User.id == id)
+        stmt = select(models.UserModel).where(models.UserModel.id == id)
         user = (await db.execute(stmt)).scalar_one_or_none()
 
         # Raise not found if no user exists with the given id
@@ -149,9 +149,9 @@ class UserCrud:
     @staticmethod
     async def toggle_status_by_id(
         db: AsyncSession, id: PositiveInt
-    ) -> models.User | None:
+    ) -> models.UserModel | None:
         # Retrieve the current user by id
-        stmt = select(models.User).where(models.User.id == id)
+        stmt = select(models.UserModel).where(models.UserModel.id == id)
         user = (await db.execute(stmt)).scalar_one_or_none()
 
         # Raise not found if no user exists with the given id
@@ -181,9 +181,9 @@ class UserCrud:
     @staticmethod
     async def update_pwd_by_id(
         db: AsyncSession, id: PositiveInt, new_pwd: str
-    ) -> models.User:
+    ) -> models.UserModel:
         # Retrieve the current user by id
-        stmt = select(models.User).where(models.User.id == id)
+        stmt = select(models.UserModel).where(models.UserModel.id == id)
         user = (await db.execute(stmt)).scalar_one_or_none()
 
         # Raise not found if no user exists with the given id

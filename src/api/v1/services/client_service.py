@@ -6,7 +6,7 @@ from pydantic import NonNegativeInt, PositiveInt
 from .. import clients, services, utils
 
 
-class ClienteService:
+class ClientService:
     @staticmethod
     async def get_cliente_ixc(
         # IDs NonNegativeInt, pois o IXC é quebrado
@@ -19,7 +19,7 @@ class ClienteService:
         if id_cliente is not None:
             # --- Cliente IXC por id ---
             grid_param = [utils.Param(TB="cliente.id", P=id_cliente)]
-            res = await clients.IxcCliente.get(
+            res = await clients.IxcClient.get(
                 endpoint=endpoint_cliente_ixc, grid_param=grid_param
             )
             if not (regs := res.get("registros", [])):
@@ -33,7 +33,7 @@ class ClienteService:
             # --- Cliente IXC por cnpj_cpf ---
             cnpj_cpf_formatado = utils.Formatter.cnpj_cpf(cnpj_cpf=cnpj_cpf)
             grid_param = [utils.Param(TB="cliente.cnpj_cpf", P=cnpj_cpf_formatado)]
-            res = await clients.IxcCliente.get(
+            res = await clients.IxcClient.get(
                 endpoint=endpoint_cliente_ixc, grid_param=grid_param
             )
             if not (regs := res.get("registros", [])):
@@ -47,7 +47,7 @@ class ClienteService:
             # --- Cliente Opa por protocolo ---
             endpoint = "atendimento"
             filter = {"protocolo": protocolo}
-            res = await clients.OpaCliente.get(endpoint=endpoint, filter=filter)
+            res = await clients.OpaClient.get(endpoint=endpoint, filter=filter)
             if not (data := res.get("data", [])):
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
@@ -58,7 +58,7 @@ class ClienteService:
             # --- Cliente Opa por id ---
             endpoint = "cliente"
             filter = {"_id": cliente_opa["id_cliente"]}
-            res = await clients.OpaCliente.get(endpoint=endpoint, filter=filter)
+            res = await clients.OpaClient.get(endpoint=endpoint, filter=filter)
             if not (data := res.get("data", [])):
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
@@ -68,7 +68,7 @@ class ClienteService:
 
             # --- Cliente IXC por id ---
             grid_param = [utils.Param(TB="cliente.id", P=cliente_opa["id"])]
-            res = await clients.IxcCliente.get(
+            res = await clients.IxcClient.get(
                 endpoint=endpoint_cliente_ixc, grid_param=grid_param
             )
             if not (regs := res.get("registros", [])):
@@ -107,7 +107,7 @@ class ClienteService:
             utils.Param(TB="cliente_contrato.status", OP="!=", P="N"),
             utils.Param(TB="cliente_contrato.status", OP="!=", P="D"),
         ]
-        res = await clients.IxcCliente.get(
+        res = await clients.IxcClient.get(
             endpoint=endpoint,
             grid_param=grid_param,
             pagina=pagina,
@@ -124,7 +124,7 @@ class ClienteService:
             # --- Login ---
             endpoint = "radusuarios"
             grid_param = [utils.Param(TB="radusuarios.id_contrato", P=id_contrato)]
-            res = await clients.IxcCliente.get(endpoint=endpoint, grid_param=grid_param)
+            res = await clients.IxcClient.get(endpoint=endpoint, grid_param=grid_param)
             if not (regs := res.get("registros", [])):
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND, detail="Login inexistente"

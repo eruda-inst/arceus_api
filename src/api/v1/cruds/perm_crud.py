@@ -21,13 +21,13 @@ class PermCrud:
     ):
         # If id is provided, filter by it
         if id is not None:
-            stmt = select(models.Perm).where(models.Perm.id == id)
+            stmt = select(models.PermModel).where(models.PermModel.id == id)
         # If nome is provided, filter by it
         elif nome is not None:
-            stmt = select(models.Perm).where(models.Perm.nome == nome)
+            stmt = select(models.PermModel).where(models.PermModel.nome == nome)
         # If codigo is provided, filter by it
         elif codigo is not None:
-            stmt = select(models.Perm).where(models.Perm.codigo == codigo)
+            stmt = select(models.PermModel).where(models.PermModel.codigo == codigo)
         # Raise bad request if no param is provided
         else:
             raise HTTPException(
@@ -37,7 +37,7 @@ class PermCrud:
 
         # If load_grupos is True, the perm's groups are loaded
         if load_grupos:
-            stmt = stmt.options(selectinload(models.Perm.grupos))
+            stmt = stmt.options(selectinload(models.PermModel.grupos))
 
         perm = (await db.execute(stmt)).scalar_one_or_none()
 
@@ -54,27 +54,29 @@ class PermCrud:
         db: AsyncSession,
         id_grupo: PositiveInt | None = None,
         id_usuario: PositiveInt | None = None,
-    ) -> tuple[NonNegativeInt, Sequence[models.Perm]]:
-        stmt = select(models.Perm)
-        count_stmt = select(func.count(models.Perm.id))
+    ) -> tuple[NonNegativeInt, Sequence[models.PermModel]]:
+        stmt = select(models.PermModel)
+        count_stmt = select(func.count(models.PermModel.id))
 
         # If id_grupo is provided, filter by it
         if id_grupo is not None:
-            stmt = stmt.join(models.Perm.grupos).where(models.Group.id == id_grupo)
-            count_stmt = count_stmt.join(models.Perm.grupos).where(
-                models.Group.id == id_grupo
+            stmt = stmt.join(models.PermModel.grupos).where(
+                models.GroupModel.id == id_grupo
+            )
+            count_stmt = count_stmt.join(models.PermModel.grupos).where(
+                models.GroupModel.id == id_grupo
             )
         # If id_usuario is provided, filter by it
         elif id_usuario is not None:
             stmt = (
-                stmt.join(models.Perm.grupos)
-                .join(models.Group.usuarios)
-                .where(models.User.id == id_usuario)
+                stmt.join(models.PermModel.grupos)
+                .join(models.GroupModel.usuarios)
+                .where(models.UserModel.id == id_usuario)
             )
             count_stmt = (
-                count_stmt.join(models.Perm.grupos)
-                .join(models.Group.usuarios)
-                .where(models.User.id == id_usuario)
+                count_stmt.join(models.PermModel.grupos)
+                .join(models.GroupModel.usuarios)
+                .where(models.UserModel.id == id_usuario)
             )
         # Raise bad request if no param is provided
         else:
@@ -85,7 +87,7 @@ class PermCrud:
 
         # Ordering
         # Asc is default, but it's good to be explicit
-        stmt = stmt.order_by(models.Perm.id.asc())
+        stmt = stmt.order_by(models.PermModel.id.asc())
 
         users = (await db.execute(stmt)).scalars().all()
 

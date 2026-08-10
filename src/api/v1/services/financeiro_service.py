@@ -5,7 +5,7 @@ from fastapi import HTTPException, status
 from pydantic import NonNegativeInt, PositiveInt
 
 from .. import clients, schemas, services, utils
-from . import ClienteService
+from . import ClientService
 
 
 class FinanceiroService:
@@ -20,7 +20,7 @@ class FinanceiroService:
             utils.Param(TB="fn_areceber.id_contrato", P=id_contrato),
             utils.Param(TB="fn_areceber.status", P="R"),
         ]
-        res = await clients.IxcCliente.get(
+        res = await clients.IxcClient.get(
             endpoint=endpoint,
             grid_param=grid_param,
             sort_order=utils.SortOrder.DESC,
@@ -60,7 +60,7 @@ class FinanceiroService:
             utils.Param(TB="fn_areceber.status", OP="!=", P="R"),
             utils.Param(TB="fn_areceber.status", OP="!=", P="C"),
         ]
-        res = await clients.IxcCliente.get(endpoint=endpoint, grid_param=grid_param)
+        res = await clients.IxcClient.get(endpoint=endpoint, grid_param=grid_param)
         if not (faturas_abertas := res.get("registros", [])):
             return None
 
@@ -107,16 +107,16 @@ class FinanceiroService:
         cnpj_cpf: str | None,
         pagina: PositiveInt | None,
         itens_por_pagina: PositiveInt | None,
-    ) -> schemas.ListOut[schemas.FaturaOut]:
+    ) -> schemas.ListOutSchema[schemas.FaturaOutSchema]:
         # --- Obtém contratos ativos ---
-        contratos = await services.ClienteService.get_contratos_ativos(
+        contratos = await services.ClientService.get_contratos_ativos(
             protocolo=protocolo,
             cnpj_cpf=cnpj_cpf,
             pagina=pagina,
             itens_por_pagina=itens_por_pagina,
         )
 
-        faturas_abertas_parciais: list[schemas.FaturaOut] = []
+        faturas_abertas_parciais: list[schemas.FaturaOutSchema] = []
 
         # Iteração entre contratos
         # Abordagem mais segura (fatura_aberta["id_contrato"] pode ser 0)
@@ -130,7 +130,7 @@ class FinanceiroService:
                 utils.Param(TB="fn_areceber.status", OP="!=", P="R"),
                 utils.Param(TB="fn_areceber.status", OP="!=", P="C"),
             ]
-            res = await clients.IxcCliente.get(
+            res = await clients.IxcClient.get(
                 endpoint=endpoint,
                 grid_param=grid_param,
                 pagina=pagina,
@@ -142,7 +142,7 @@ class FinanceiroService:
             for fatura_aberta in faturas_abertas:
                 # Faturas abertas parciais
                 faturas_abertas_parciais.append(
-                    schemas.FaturaOut(
+                    schemas.FaturaOutSchema(
                         id=fatura_aberta["id"],
                         contrato=contrato["nome_plano"],
                         data_vencimento=fatura_aberta["data_vencimento"],
@@ -151,9 +151,9 @@ class FinanceiroService:
                     )
                 )
 
-        return schemas.ListOut[schemas.FaturaOut](
+        return schemas.ListOutSchema[schemas.FaturaOutSchema](
             data=faturas_abertas_parciais,
-            meta=schemas.MetaOut(
+            meta=schemas.MetaOutSchema(
                 total_itens=len(faturas_abertas_parciais),
                 pagina_atual=pagina or 1,
                 itens_por_pagina=itens_por_pagina or 10,
@@ -164,11 +164,11 @@ class FinanceiroService:
     async def post_desbloqueio_em_confianca(
         # IDs NonNegativeInt, pois o IXC é quebrado
         id_contrato: NonNegativeInt,
-    ) -> schemas.MensagemOut:
+    ) -> schemas.MensagemOutSchema:
         # --- Realiza desbloqueio de confiança ---
         endpoint = "desbloqueio_confianca"
         payload = {"id": id_contrato}
-        res = await clients.IxcCliente.post(endpoint=endpoint, payload=payload)
+        res = await clients.IxcClient.post(endpoint=endpoint, payload=payload)
         if res["type"] == "error":
             msg = res.get("message", "Desbloqueio malsucedido")
             raise HTTPException(
@@ -176,17 +176,17 @@ class FinanceiroService:
                 detail=utils.Formatter.sanitize(string=msg),
             )
 
-        return schemas.MensagemOut(mensagem="Desbloqueio bem-sucedido")
+        return schemas.MensagemOutSchema(mensagem="Desbloqueio bem-sucedido")
 
     @staticmethod
     async def get_linha_digitavel(
         # IDs NonNegativeInt, pois o IXC é quebrado
         id_fatura: NonNegativeInt,
-    ) -> schemas.LinhaDigitavelOut:
+    ) -> schemas.LinhaDigitavelOutSchema:
         # --- Obtém fatura ---
         endpoint = "fn_areceber"
         grid_param = [utils.Param(TB="fn_areceber.id", P=id_fatura)]
-        res = await clients.IxcCliente.get(endpoint=endpoint, grid_param=grid_param)
+        res = await clients.IxcClient.get(endpoint=endpoint, grid_param=grid_param)
         if not (regs := res.get("registros", [])):
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Fatura inexistente"
@@ -200,15 +200,15 @@ class FinanceiroService:
                 detail="Linha digitável inexistente",
             )
 
-        return schemas.LinhaDigitavelOut(linha_digitavel=linha_digitavel)
+        return schemas.LinhaDigitavelOutSchema(linha_digitavel=linha_digitavel)
 
     @staticmethod
     async def get_chave_pix(
         # IDs NonNegativeInt, pois o IXC é quebrado
         id_fatura: NonNegativeInt,
-    ) -> schemas.ChavePixOut:
+    ) -> schemas.ChavePixOutSchema:
         # --- Obtém fatura ---
-        res = await clients.SeteAZCliente.get_fatura(id_fatura=id_fatura)
+        res = await clients.SevenAZClient.get_fatura(id_fatura=id_fatura)
         if "id" not in res:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Fatura inexistente"
@@ -221,18 +221,18 @@ class FinanceiroService:
                 detail="Chave pix inexistente",
             )
 
-        return schemas.ChavePixOut(chave_pix=chave_pix)
+        return schemas.ChavePixOutSchema(chave_pix=chave_pix)
 
     @staticmethod
     async def get_credenciais(
         protocolo: str | None = None, cnpj_cpf: str | None = None
-    ) -> schemas.CredencialOut:
+    ) -> schemas.CredencialOutSchema:
         # --- Obtém cliente ---
-        cliente = await ClienteService.get_cliente_ixc(
+        cliente = await ClientService.get_cliente_ixc(
             protocolo=protocolo, cnpj_cpf=cnpj_cpf
         )
 
-        return schemas.CredencialOut(
+        return schemas.CredencialOutSchema(
             usuario=cliente["hotsite_email"], senha=cliente["senha"]
         )
 
@@ -241,9 +241,9 @@ class FinanceiroService:
         # IDs NonNegativeInt, pois o IXC é quebrado
         id_cliente: NonNegativeInt,
         senha: str,
-    ) -> schemas.CredencialOut:
+    ) -> schemas.CredencialOutSchema:
         # --- Obtém cliente atual ---
-        cliente_antigo = await services.ClienteService.get_cliente_ixc(
+        cliente_antigo = await services.ClientService.get_cliente_ixc(
             id_cliente=id_cliente
         )
 
@@ -254,7 +254,7 @@ class FinanceiroService:
         # --- Atualiza cliente ---
         endpoint = "cliente"
         id = cliente_antigo["id"]
-        res = await clients.IxcCliente.put(
+        res = await clients.IxcClient.put(
             endpoint=endpoint, id=id, payload=cliente_atualizado
         )
         if res["type"] == "error":
@@ -263,6 +263,6 @@ class FinanceiroService:
                 detail="Cadastro malsucedido",
             )
 
-        return schemas.CredencialOut(
+        return schemas.CredencialOutSchema(
             usuario=cliente_atualizado["hotsite_email"], senha=senha
         )

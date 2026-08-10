@@ -20,7 +20,9 @@ TOKEN_EXPIRE_SECONDS = settings.token_expire_seconds
 
 class AuthenticationService:
     @staticmethod
-    async def verify_access_token(db: AsyncSession, access_token: str) -> models.User:
+    async def verify_access_token(
+        db: AsyncSession, access_token: str
+    ) -> models.UserModel:
         try:
             payload = jwt.decode(
                 token=access_token, key=SECRET_KEY, algorithms=[ALGORITHM]
@@ -61,7 +63,7 @@ class AuthenticationService:
     @classmethod
     async def refresh_token(
         cls, refresh_token: str, db: AsyncSession
-    ) -> schemas.AccessTokenOut:
+    ) -> schemas.AccessTokenOutSchema:
         try:
             payload = jwt.decode(
                 token=refresh_token, key=SECRET_KEY, algorithms=[ALGORITHM]
@@ -107,7 +109,7 @@ class AuthenticationService:
             expires_delta=timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS),
             version=user_db.versao_token,  # type: ignore
         )
-        return schemas.AccessTokenOut(
+        return schemas.AccessTokenOutSchema(
             access_token=new_access_token,
             refresh_token=new_refresh_token,
             expires_in=TOKEN_EXPIRE_SECONDS,
@@ -115,8 +117,8 @@ class AuthenticationService:
 
     @classmethod
     async def login(
-        cls, db: AsyncSession, user: schemas.UserLogin
-    ) -> schemas.AccessTokenOut:
+        cls, db: AsyncSession, user: schemas.UserLoginSchema
+    ) -> schemas.AccessTokenOutSchema:
         try:
             email = user.email
             plain = user.senha.get_secret_value()
@@ -145,7 +147,7 @@ class AuthenticationService:
                 expires_delta=timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS),
                 version=user_db.versao_token,  # type: ignore
             )
-            return schemas.AccessTokenOut(
+            return schemas.AccessTokenOutSchema(
                 access_token=access_token,
                 refresh_token=refresh_token,
                 expires_in=TOKEN_EXPIRE_SECONDS,

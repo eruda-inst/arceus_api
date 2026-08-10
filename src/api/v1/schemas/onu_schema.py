@@ -3,7 +3,7 @@ from pydantic import BaseModel, Field, field_serializer
 from .. import utils
 
 
-class StatusOnuOut(BaseModel):
+class StatusOnuOutSchema(BaseModel):
     status_onu: float = Field(
         description="Status da ONU",
         examples=[utils.StatusOnuRot.EXCELENTE],

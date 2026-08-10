@@ -13,7 +13,7 @@ comercial_router = APIRouter(prefix="/comercial", tags=["Comercial"])
 async def get_status_acesso(
     # IDs NonNegativeInt, pois o IXC é quebrado
     id_contrato: Annotated[int, Query(ge=0, description="ID do contrato")],
-) -> schemas.StatusInternetOut:
+) -> schemas.StatusInternetOutSchema:
     """
     Obtém status de acesso de um contrato, através do id do contrato
     """
@@ -26,7 +26,7 @@ async def get_contratos(
     cnpj_cpf: utils.CnpjCpf | None = None,
     pagina: utils.Pagina | None = 1,
     itens_por_pagina: utils.ItensPorPagina | None = 10,
-) -> schemas.ListOut[schemas.ComercialContratoOut]:
+) -> schemas.ListOutSchema[schemas.ComercialContratoOutSchema]:
     """
     Obtém contratos de um cliente, através de protocolo de atendimento ou CPF/CNPJ
     """
@@ -41,7 +41,7 @@ async def get_contratos(
 @comercial_router.get(
     path="/cliente_existe", summary="Checa se um cliente existe no Opa"
 )
-async def cliente_existe(cpf_cnpj: utils.CnpjCpf) -> schemas.ClienteExisteOut:
+async def cliente_existe(cpf_cnpj: utils.CnpjCpf) -> schemas.ClienteExisteOutSchema:
     """
     Checa se um cliente existe no Opa, através do CPF/CNPJ
     """
@@ -52,8 +52,8 @@ async def cliente_existe(cpf_cnpj: utils.CnpjCpf) -> schemas.ClienteExisteOut:
     path="/leads", status_code=status.HTTP_201_CREATED, summary="Cadastra novo lead"
 )
 async def post_leads(
-    lead: Annotated[schemas.LeadIn, Body(description="Lead a ser cadastrado")],
-) -> schemas.LeadOut:
+    lead: Annotated[schemas.LeadInSchema, Body(description="Lead a ser cadastrado")],
+) -> schemas.LeadOutSchema:
     """
     Cadastra novo lead e retorna o id dele
     """
@@ -64,8 +64,8 @@ async def post_leads(
 @comercial_router.put(path="/leads", summary="Atualiza lead parcialmente")
 async def put_lead(
     cnpj_cpf: utils.CnpjCpf,
-    lead: Annotated[schemas.LeadUpdate, Body(description="Dados do lead")],
-) -> schemas.LeadOut:
+    lead: Annotated[schemas.LeadUpdateSchema, Body(description="Dados do lead")],
+) -> schemas.LeadOutSchema:
     """
     Atualiza lead parcialmente, através de dados do lead
     """

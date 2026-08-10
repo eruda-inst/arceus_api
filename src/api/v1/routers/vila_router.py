@@ -10,7 +10,9 @@ NumeroResidencia = Annotated[int, Query(ge=1, description="Número da residênci
 
 
 @vila_router.get(path="/contrato", summary="Obtém contrato de um cliente")
-async def get_contrato(numero_residencia: NumeroResidencia) -> schemas.VilaContratoOut:
+async def get_contrato(
+    numero_residencia: NumeroResidencia,
+) -> schemas.VilaContratoOutSchema:
     """
     Obtém contrato de um cliente, através do número da residência
     """
@@ -22,7 +24,7 @@ async def get_contrato(numero_residencia: NumeroResidencia) -> schemas.VilaContr
 )
 async def get_status_conexao(
     numero_residencia: NumeroResidencia,
-) -> schemas.StatusConexaoOut:
+) -> schemas.StatusConexaoOutSchema:
     """
     Obtém status da conexão de um cliente, através do número da residência
     """
@@ -32,7 +34,9 @@ async def get_status_conexao(
 
 
 @vila_router.get(path="/status_onu", summary="Obtém status da ONU de um cliente")
-async def get_status_onu(numero_residencia: NumeroResidencia) -> schemas.StatusOnuOut:
+async def get_status_onu(
+    numero_residencia: NumeroResidencia,
+) -> schemas.StatusOnuOutSchema:
     """
     Obtém status da ONU de um cliente, através do número da residência
     """
@@ -42,7 +46,7 @@ async def get_status_onu(numero_residencia: NumeroResidencia) -> schemas.StatusO
 
 
 @vila_router.get(path="/dados_wifi", summary="Obtém dados do WiFi de um cliente")
-async def get_dados_wifi(numero_residencia: NumeroResidencia) -> schemas.WifiOut:
+async def get_dados_wifi(numero_residencia: NumeroResidencia) -> schemas.WifiOutSchema:
     """
     Obtém dados do WiFi de um cliente, através do número da residência
     """
@@ -60,7 +64,7 @@ async def get_atendimentos(
     itens_por_pagina: Annotated[
         int | None, Query(ge=1, description="Itens por página")
     ] = 10,
-) -> schemas.ListOut[schemas.AtendimentoOut]:
+) -> schemas.ListOutSchema[schemas.AtendimentoOutSchema]:
     """
     Obtém atendimentos abertos de um cliente, através do número da residência
     """
@@ -72,7 +76,9 @@ async def get_atendimentos(
 
 
 @vila_router.post(path="/limpar_mac", summary="Limpa MAC Address de um cliente")
-async def post_limpar_mac(numero_residencia: NumeroResidencia) -> schemas.MensagemOut:
+async def post_limpar_mac(
+    numero_residencia: NumeroResidencia,
+) -> schemas.MensagemOutSchema:
     """
     Limpa MAC Address de um cliente, através do número da residência
     """
@@ -84,7 +90,7 @@ async def post_limpar_mac(numero_residencia: NumeroResidencia) -> schemas.Mensag
 @vila_router.post(path="/desconectar_cliente", summary="Desconecta um cliente")
 async def post_desconectar_cliente(
     numero_residencia: NumeroResidencia,
-) -> schemas.MensagemOut:
+) -> schemas.MensagemOutSchema:
     """
     Desconecta um cliente, através do número da residência
     """
@@ -98,9 +104,9 @@ async def post_desconectar_cliente(
 )
 async def post_atendimentos(
     atendimento: Annotated[
-        schemas.AtendimentoIn, Body(description="Dados do atendimento")
+        schemas.AtendimentoInSchema, Body(description="Dados do atendimento")
     ],
-) -> schemas.AtendimentoOut:
+) -> schemas.AtendimentoOutSchema:
     """
     Abre ticket de atendimento, através de dados do atendimento
     """

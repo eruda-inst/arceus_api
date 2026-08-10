@@ -4,7 +4,7 @@ from sqlalchemy.orm import relationship
 from .. import db
 
 
-class Perm(db.Base):
+class PermModel(db.Base):
     __tablename__ = "permissoes"
 
     id = Column(
@@ -25,5 +25,7 @@ class Perm(db.Base):
         unique=False,
     )
     grupos = relationship(
-        argument="Group", secondary="grupos_permissoes", back_populates="permissoes"
+        argument="GroupModel",
+        secondary="grupos_permissoes",
+        back_populates="permissoes",
     )

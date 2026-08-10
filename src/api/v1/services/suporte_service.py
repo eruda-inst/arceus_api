@@ -4,7 +4,7 @@ from fastapi import HTTPException, status
 from pydantic import NonNegativeInt, PositiveInt
 
 from .. import clients, schemas, utils
-from . import ClienteService
+from . import ClientService
 
 
 class SuporteService:
@@ -16,7 +16,7 @@ class SuporteService:
         # --- Obtém login ---
         endpoint = "radusuarios"
         grid_param = [utils.Param(TB="radusuarios.id", P=id_login)]
-        res = await clients.IxcCliente.get(endpoint=endpoint, grid_param=grid_param)
+        res = await clients.IxcClient.get(endpoint=endpoint, grid_param=grid_param)
         if not (regs := res.get("registros", [])):
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Login inexistente"
@@ -31,18 +31,18 @@ class SuporteService:
         cnpj_cpf: str | None,
         pagina: PositiveInt | None,
         itens_por_pagina: PositiveInt | None,
-    ) -> schemas.ListOut[schemas.ContratoOut]:
+    ) -> schemas.ListOutSchema[schemas.ContratoOutSchema]:
         # --- Obtém contratos ativos ---
-        contratos = await ClienteService.get_contratos_ativos(
+        contratos = await ClientService.get_contratos_ativos(
             protocolo=protocolo,
             cnpj_cpf=cnpj_cpf,
             pagina=pagina,
             itens_por_pagina=itens_por_pagina,
         )
 
-        return schemas.ListOut[schemas.ContratoOut](
-            data=[schemas.ContratoOut(**c) for c in contratos],
-            meta=schemas.MetaOut(
+        return schemas.ListOutSchema[schemas.ContratoOutSchema](
+            data=[schemas.ContratoOutSchema(**c) for c in contratos],
+            meta=schemas.MetaOutSchema(
                 total_itens=len(contratos),
                 pagina_atual=pagina or 1,
                 itens_por_pagina=itens_por_pagina or 10,
@@ -54,11 +54,11 @@ class SuporteService:
         cls,
         # IDs NonNegativeInt, pois o IXC é quebrado
         id_login: NonNegativeInt,
-    ) -> schemas.StatusConexaoOut:
+    ) -> schemas.StatusConexaoOutSchema:
         # --- Obtém login ---
         login = await cls._get_login(id_login=id_login)
 
-        return schemas.StatusConexaoOut(status_conexao=login["online"])
+        return schemas.StatusConexaoOutSchema(status_conexao=login["online"])
 
     @classmethod
     async def get_status_onu(
@@ -66,7 +66,7 @@ class SuporteService:
         # IDs NonNegativeInt, pois o IXC é quebrado
         id_login: NonNegativeInt | None = None,
         mac_onu: str | None = None,
-    ) -> schemas.StatusOnuOut:
+    ) -> schemas.StatusOnuOutSchema:
         # Justificativa desta abordagem: O IXC é quebrado
         query_value = None
 
@@ -87,7 +87,7 @@ class SuporteService:
         # --- Obtém ONU pelo MAC ---
         endpoint = "radpop_radio_cliente_fibra"
         grid_param = [utils.Param(TB="radpop_radio_cliente_fibra.mac", P=query_value)]
-        res = await clients.IxcCliente.get(endpoint=endpoint, grid_param=grid_param)
+        res = await clients.IxcClient.get(endpoint=endpoint, grid_param=grid_param)
         if not (regs := res.get("registros", [])):
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="ONU inexistente"
@@ -101,17 +101,17 @@ class SuporteService:
                 detail="Sinal ONU inexistente",
             )
 
-        return schemas.StatusOnuOut(status_onu=sinal_rx)
+        return schemas.StatusOnuOutSchema(status_onu=sinal_rx)
 
     @staticmethod
     async def post_desconectar_cliente(
         # IDs NonNegativeInt, pois o IXC é quebrado
         id_login: NonNegativeInt,
-    ) -> schemas.MensagemOut:
+    ) -> schemas.MensagemOutSchema:
         # --- Realiza desconexão de cliente ---
         payload = {"id": id_login}
         endpoint = "desconectar_clientes"
-        res = await clients.IxcCliente.post(endpoint=endpoint, payload=payload)
+        res = await clients.IxcClient.post(endpoint=endpoint, payload=payload)
         type = res["msg"][0]["type"]
         if type == "error":
             msgs = res.get("msg", [])
@@ -121,7 +121,7 @@ class SuporteService:
                 detail=utils.Formatter.sanitize(string=msg),
             )
 
-        return schemas.MensagemOut(mensagem="Desconexão bem-sucedida")
+        return schemas.MensagemOutSchema(mensagem="Desconexão bem-sucedida")
 
     @staticmethod
     async def get_atendimentos(
@@ -129,7 +129,7 @@ class SuporteService:
         id_login: NonNegativeInt,
         pagina: PositiveInt | None,
         itens_por_pagina: PositiveInt | None,
-    ) -> schemas.ListOut[schemas.AtendimentoOut]:
+    ) -> schemas.ListOutSchema[schemas.AtendimentoOutSchema]:
         # --- Obtém atendimentos abertos ---
         endpoint = "su_ticket"
         grid_param = [
@@ -137,7 +137,7 @@ class SuporteService:
             utils.Param(TB="su_ticket.su_status", OP="!=", P="S"),
             utils.Param(TB="su_ticket.su_status", OP="!=", P="C"),
         ]
-        res = await clients.IxcCliente.get(
+        res = await clients.IxcClient.get(
             endpoint=endpoint,
             grid_param=grid_param,
             pagina=pagina,
@@ -146,7 +146,7 @@ class SuporteService:
         atendimentos = res.get("registros", [])
         total = res.get("total", 0)
 
-        atendimentos_parciais: list[schemas.AtendimentoOut] = []
+        atendimentos_parciais: list[schemas.AtendimentoOutSchema] = []
 
         # Iteração entre atendimentos
         for atendimento in atendimentos:
@@ -156,7 +156,7 @@ class SuporteService:
 
             # Atendimentos parciais
             atendimentos_parciais.append(
-                schemas.AtendimentoOut(
+                schemas.AtendimentoOutSchema(
                     id=atendimento["id"],
                     id_assunto=atendimento["id_assunto"],
                     status=atendimento["su_status"],
@@ -166,9 +166,9 @@ class SuporteService:
                 )
             )
 
-        return schemas.ListOut[schemas.AtendimentoOut](
+        return schemas.ListOutSchema[schemas.AtendimentoOutSchema](
             data=atendimentos_parciais,
-            meta=schemas.MetaOut(
+            meta=schemas.MetaOutSchema(
                 itens_por_pagina=itens_por_pagina or 10,
                 pagina_atual=pagina or 1,
                 total_itens=total,
@@ -177,15 +177,15 @@ class SuporteService:
 
     @staticmethod
     async def post_atendimentos(
-        atendimento: schemas.AtendimentoIn,
-    ) -> schemas.AtendimentoOut:
+        atendimento: schemas.AtendimentoInSchema,
+    ) -> schemas.AtendimentoOutSchema:
         # --- Cria atendimento ---
         endpoint = "su_ticket"
         payload = atendimento.model_dump()
         menssagem = payload["mensagem"]
         del payload["mensagem"]
         payload["menssagem"] = menssagem
-        res = await clients.IxcCliente.post(endpoint=endpoint, payload=payload)
+        res = await clients.IxcClient.post(endpoint=endpoint, payload=payload)
         if not (id := res.get("id")):
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -194,7 +194,7 @@ class SuporteService:
 
         # --- Obtém atendimento criado ---
         grid_param = [utils.Param(TB="su_ticket.id", P=id)]
-        res = await clients.IxcCliente.get(endpoint=endpoint, grid_param=grid_param)
+        res = await clients.IxcClient.get(endpoint=endpoint, grid_param=grid_param)
         regs = res.get("registros", [])
         atendimento_criado = regs[0]
 
@@ -202,7 +202,7 @@ class SuporteService:
         datetime_criacao = atendimento_criado["data_criacao"]
         data_criacao = datetime_criacao.split(" ")[0]
 
-        return schemas.AtendimentoOut(
+        return schemas.AtendimentoOutSchema(
             id=atendimento_criado["id"],
             data_criacao=data_criacao,
             id_assunto=atendimento_criado["id_assunto"],
@@ -218,7 +218,7 @@ class SuporteService:
         id_login: NonNegativeInt,
         ip: str | None,
         pool_radius: str | None,
-    ) -> schemas.IpOut:
+    ) -> schemas.IpOutSchema:
         if ip is None and pool_radius is None:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -242,24 +242,24 @@ class SuporteService:
         endpoint = "radusuarios"
         id = id_login
         payload = login_atualizado
-        res = await clients.IxcCliente.put(endpoint=endpoint, id=id, payload=payload)
+        res = await clients.IxcClient.put(endpoint=endpoint, id=id, payload=payload)
         if res["type"] == "error":
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Atualização malsucedida",
             )
 
-        return schemas.IpOut(ip=novo_ip, pool_radius=int(novo_radius))
+        return schemas.IpOutSchema(ip=novo_ip, pool_radius=int(novo_radius))
 
     @staticmethod
     async def post_limpar_mac(
         # IDs NonNegativeInt, pois o IXC é quebrado
         id_login: NonNegativeInt,
-    ) -> schemas.MensagemOut:
+    ) -> schemas.MensagemOutSchema:
         # --- Realiza limpeza de MAC ---
         endpoint = "radusuarios_25452"
         payload = {"get_id": id_login}
-        res = await clients.IxcCliente.post(endpoint=endpoint, payload=payload)
+        res = await clients.IxcClient.post(endpoint=endpoint, payload=payload)
         if res["type"] == "error":
             msg = res.get("message", "Limpeza malsucedida")
             raise HTTPException(
@@ -267,18 +267,18 @@ class SuporteService:
                 detail=utils.Formatter.sanitize(string=msg),
             )
 
-        return schemas.MensagemOut(mensagem="Limpeza bem-sucedida")
+        return schemas.MensagemOutSchema(mensagem="Limpeza bem-sucedida")
 
     @classmethod
     async def get_dados_wifi(
         cls,
         # IDs NonNegativeInt, pois o IXC é quebrado
         id_login: NonNegativeInt,
-    ) -> schemas.WifiOut:
+    ) -> schemas.WifiOutSchema:
         # --- Obtém login ---
         login = await cls._get_login(id_login=id_login)
 
-        return schemas.WifiOut(
+        return schemas.WifiOutSchema(
             ssid_wifi_2g=login["ssid_router_wifi"] or None,
             senha_wifi_2g=login["senha_rede_sem_fio"] or None,
             ssid_wifi_5g=login["ssid_router_wifi_5ghz"] or None,

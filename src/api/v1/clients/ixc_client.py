@@ -10,7 +10,7 @@ from .. import utils
 from ..config_core import settings
 
 
-class IxcCliente:
+class IxcClient:
     _token = settings.ixc_token.get_secret_value()
     _token_encoded = base64.b64encode(_token.encode("utf-8")).decode("utf-8")
     _timeout = httpx.Timeout(connect=5.0, read=30.0, write=10.0, pool=1.0)

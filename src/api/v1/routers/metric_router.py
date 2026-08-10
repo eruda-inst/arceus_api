@@ -9,16 +9,16 @@ from .. import cruds, db, deps, models, schemas, utils
 metric_router = APIRouter(prefix="/metricas", tags=["Métricas"])
 
 db_dep = Annotated[AsyncSession, Depends(db.get_db)]
-current_user_dep = Annotated[models.User, Depends(deps.get_curr_user)]
+current_user_dep = Annotated[models.UserModel, Depends(deps.get_curr_user)]
 read_metric_perm_dep = Annotated[
-    models.User, Depends(deps.has_perm(utils.PermCodes.READ_METRIC))
+    models.UserModel, Depends(deps.has_perm(utils.PermCodes.READ_METRIC))
 ]
 
 
 @metric_router.get(path="/total-requisicoes", summary="Obtém o total de requisições")
 async def get_total_reqs(
     db: db_dep, current_user: current_user_dep, perm: read_metric_perm_dep
-) -> schemas.TodayAlwaysOut[NonNegativeInt]:
+) -> schemas.TodayAlwaysOutSchema[NonNegativeInt]:
     """
     Obtém o total de requisições de hoje e sempre
     """
@@ -28,7 +28,7 @@ async def get_total_reqs(
 @metric_router.get(path="/total-atendimentos", summary="Obtém o total de atendimentos")
 async def get_total_services(
     db: db_dep, current_user: current_user_dep, perm: read_metric_perm_dep
-) -> schemas.TodayAlwaysOut[NonNegativeInt]:
+) -> schemas.TodayAlwaysOutSchema[NonNegativeInt]:
     """
     Obtém o total de atendimentos de hoje e sempre
     """
@@ -40,7 +40,7 @@ async def get_total_services(
 )
 async def get_top_endpoints(
     db: db_dep, current_user: current_user_dep, perm: read_metric_perm_dep
-) -> schemas.TodayAlwaysOut[list[schemas.TopEndpoint]]:
+) -> schemas.TodayAlwaysOutSchema[list[schemas.TopEndpointSchema]]:
     """
     Obtém os 10 endpoints mais acessados de hoje e sempre
     """
@@ -52,7 +52,7 @@ async def get_top_endpoints(
 )
 async def get_top_status_codes(
     db: db_dep, current_user: current_user_dep, perm: read_metric_perm_dep
-) -> schemas.TodayAlwaysOut[list[schemas.TopStatusCode]]:
+) -> schemas.TodayAlwaysOutSchema[list[schemas.TopStatusCodeSchema]]:
     """
     Obtém os 10 status codes mais recebidos de hoje e sempre
     """
@@ -64,7 +64,7 @@ async def get_top_status_codes(
 )
 async def get_top_hours(
     db: db_dep, current_user: current_user_dep, perm: read_metric_perm_dep
-) -> schemas.TodayAlwaysOut[list[schemas.TopHour]]:
+) -> schemas.TodayAlwaysOutSchema[list[schemas.TopHourSchema]]:
     """
     Obtém as 10 horas de maior pico de acessos de hoje e sempre
     """
@@ -77,7 +77,7 @@ async def get_top_hours(
 )
 async def get_top_weekdays(
     db: db_dep, current_user: current_user_dep, perm: read_metric_perm_dep
-) -> schemas.TodayAlwaysOut[list[schemas.TopWeekday]]:
+) -> schemas.TodayAlwaysOutSchema[list[schemas.TopWeekdaySchema]]:
     """
     Obtém os dias da semana de maior pico de acessos de hoje e sempre
     """
@@ -89,7 +89,7 @@ async def get_top_weekdays(
 )
 async def get_worst_endpoints(
     db: db_dep, current_user: current_user_dep, perm: read_metric_perm_dep
-) -> schemas.TodayAlwaysOut[list[schemas.TopWorstEndpoint]]:
+) -> schemas.TodayAlwaysOutSchema[list[schemas.TopWorstEndpointSchema]]:
     """
     Obtém os 10 endpoints com mais erros de hoje e sempre
     """
@@ -101,7 +101,7 @@ async def get_worst_endpoints(
 )
 async def get_top_month_days(
     db: db_dep, current_user: current_user_dep, perm: read_metric_perm_dep
-) -> schemas.TodayAlwaysOut[list[schemas.TopMonthDay]]:
+) -> schemas.TodayAlwaysOutSchema[list[schemas.TopMonthDaySchema]]:
     """
     Obtém os 10 dias do mês com maior número de requisições no mês atual e em todo o período
     """
@@ -113,7 +113,7 @@ async def get_top_month_days(
 )
 async def get_top_slowest_endpoints(
     db: db_dep, current_user: current_user_dep, perm: read_metric_perm_dep
-) -> schemas.TodayAlwaysOut[list[schemas.TopSlowestEndpoint]]:
+) -> schemas.TodayAlwaysOutSchema[list[schemas.TopSlowestEndpointSchema]]:
     """
     Obtém os 10 endpoints mais lentos de hoje e sempre
     """
@@ -125,7 +125,7 @@ async def get_top_slowest_endpoints(
 )
 async def get_top_http_methods(
     db: db_dep, current_user: current_user_dep, perm: read_metric_perm_dep
-) -> schemas.TodayAlwaysOut[list[schemas.TopHttpMethod]]:
+) -> schemas.TodayAlwaysOutSchema[list[schemas.TopHttpMethodSchema]]:
     """
     Obtém os métodos HTTP mais utilizados de hoje e sempre
     """
@@ -135,7 +135,7 @@ async def get_top_http_methods(
 @metric_router.get(path="/top-setores", summary="Obtém os setores mais utilizados")
 async def get_top_departments(
     db: db_dep, current_user: current_user_dep, perm: read_metric_perm_dep
-) -> schemas.TodayAlwaysOut[list[schemas.TopDepartment]]:
+) -> schemas.TodayAlwaysOutSchema[list[schemas.TopDepartmentSchema]]:
     """
     Obtém os setores mais utilizados de hoje e sempre
     """
@@ -147,7 +147,7 @@ async def get_top_departments(
 )
 async def get_success_stats(
     db: db_dep, current_user: current_user_dep, perm: read_metric_perm_dep
-) -> schemas.TodayAlwaysOut[schemas.SuccessStats]:
+) -> schemas.TodayAlwaysOutSchema[schemas.SuccessStatsSchema]:
     """
     Retorna, para hoje e para todo o histórico:
     - Total de requisições com sucesso (código 200-299)
@@ -161,7 +161,7 @@ async def get_success_stats(
 )
 async def get_error_stats(
     db: db_dep, current_user: current_user_dep, perm: read_metric_perm_dep
-) -> schemas.TodayAlwaysOut[schemas.ErrorStats]:
+) -> schemas.TodayAlwaysOutSchema[schemas.ErrorStatsSchema]:
     """
     Retorna, para hoje e para todo o histórico:
     - Total de requisições com erro (código 400-499 ou 500-599)
@@ -176,7 +176,7 @@ async def get_error_stats(
 )
 async def get_res_time(
     db: db_dep, current_user: current_user_dep, perm: read_metric_perm_dep
-) -> schemas.TodayAlwaysOut[schemas.ResponseTimeStats]:
+) -> schemas.TodayAlwaysOutSchema[schemas.ResponseTimeStatsSchema]:
     """
     Retorna, para hoje e para todo o histórico (entre requisições bem-sucedidas):
     - Tempo mínimo de resposta
@@ -193,7 +193,7 @@ async def get_top_clients(
     db: db_dep,
     current_user: current_user_dep,
     perm: read_metric_perm_dep,
-) -> schemas.TodayAlwaysOut[list[schemas.TopClientName]]:
+) -> schemas.TodayAlwaysOutSchema[list[schemas.TopClientNameSchema]]:
     """
     Obtém os 10 clientes que mais fizeram requisições de hoje e sempre
     """

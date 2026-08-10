@@ -10,8 +10,8 @@ from .authentication_dep import get_curr_user
 def has_perm(req_perm: utils.PermCodes):
     async def dep(
         db: Annotated[AsyncSession, Depends(db.get_db)],
-        current_user: Annotated[models.User, Depends(get_curr_user)],
-    ) -> models.User:
+        current_user: Annotated[models.UserModel, Depends(get_curr_user)],
+    ) -> models.UserModel:
         _, user_perms = await cruds.PermCrud.get_all_by(
             db=db,
             id_usuario=current_user.id,  # type: ignore

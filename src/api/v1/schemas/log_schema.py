@@ -3,7 +3,7 @@ from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field, PositiveInt
 
 
-class LogOut(BaseModel):
+class LogOutSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: PositiveInt = Field(description="ID do log", examples=[1])

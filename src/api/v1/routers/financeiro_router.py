@@ -15,7 +15,7 @@ async def get_faturas_abertas(
     cnpj_cpf: utils.CnpjCpf | None = None,
     pagina: utils.Pagina | None = 1,
     itens_por_pagina: utils.ItensPorPagina | None = 15,
-) -> schemas.ListOut[schemas.FaturaOut]:
+) -> schemas.ListOutSchema[schemas.FaturaOutSchema]:
     """
     Obtém faturas abertas de um cliente, através de protocolo de atendimento ou CPF/CNPJ
     """
@@ -33,7 +33,7 @@ async def get_contratos(
     cnpj_cpf: utils.CnpjCpf | None = None,
     pagina: utils.Pagina | None = 1,
     itens_por_pagina: utils.ItensPorPagina | None = 10,
-) -> schemas.ListOut[schemas.ComercialContratoOut]:
+) -> schemas.ListOutSchema[schemas.ComercialContratoOutSchema]:
     """
     Obtém contratos de um cliente, através de protocolo de atendimento ou CPF/CNPJ
     """
@@ -51,7 +51,7 @@ async def get_contratos(
 async def get_linha_digitavel(
     # IDs NonNegativeInt, pois o IXC é quebrado
     id_fatura: Annotated[int, Path(ge=0, description="ID da fatura")],
-) -> schemas.LinhaDigitavelOut:
+) -> schemas.LinhaDigitavelOutSchema:
     """
     Obtém linha digitável de uma fatura, através do ID dela
     """
@@ -62,7 +62,7 @@ async def get_linha_digitavel(
 async def get_chave_pix(
     # IDs NonNegativeInt, pois o IXC é quebrado
     id_fatura: Annotated[int, Query(ge=0, description="ID da fatura")],
-) -> schemas.ChavePixOut:
+) -> schemas.ChavePixOutSchema:
     """
     Obtém chave pix de uma fatura, através do ID dela
     """
@@ -75,7 +75,7 @@ async def get_chave_pix(
 )
 async def get_credenciais(
     protocolo: utils.Protocolo | None = None, cnpj_cpf: utils.CnpjCpf | None = None
-) -> schemas.CredencialOut:
+) -> schemas.CredencialOutSchema:
     """
     Obtém credenciais da central do assinante de um cliente, através de protocolo de atendimento ou CPF/CNPJ
     """
@@ -91,7 +91,7 @@ async def get_credenciais(
 async def post_desbloqueio_em_confianca(
     # IDs NonNegativeInt, pois o IXC é quebrado
     id_contrato: Annotated[int, Query(ge=0, description="ID do contrato")],
-) -> schemas.MensagemOut:
+) -> schemas.MensagemOutSchema:
     """
     Realiza desbloqueio em confiança de um cliente, através do id do contrato
     """
@@ -109,7 +109,7 @@ async def put_credenciais(
     # IDs NonNegativeInt, pois o IXC é quebrado
     id_cliente: Annotated[int, Path(ge=0, description="ID do cliente")],
     senha: Annotated[str, Body(embed=True, description="Nova senha")],
-) -> schemas.CredencialOut:
+) -> schemas.CredencialOutSchema:
     """
     Atualiza senha da central do assinante de um cliente, através do id do cliente
     """

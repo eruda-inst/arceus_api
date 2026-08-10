@@ -2,7 +2,7 @@ from sqlalchemy import Column, ForeignKey, Integer, Table
 
 from .. import db
 
-group_permission = Table(
+group_perm = Table(
     "grupos_permissoes",
     db.Base.metadata,
     Column("group_id", Integer, ForeignKey("grupos.id")),

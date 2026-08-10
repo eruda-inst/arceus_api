@@ -20,7 +20,7 @@ class LogService:
         protocolo: str | None = None,
         setor: str | None = None,
         nome_cliente: str | None = None,
-    ) -> schemas.ListOut[schemas.LogOut]:
+    ) -> schemas.ListOutSchema[schemas.LogOutSchema]:
         total_items, logs = await cruds.LogCrud.get_all(
             db=db,
             page=page,
@@ -37,9 +37,9 @@ class LogService:
             nome_cliente=nome_cliente,
         )
 
-        return schemas.ListOut[schemas.LogOut](
-            data=[schemas.LogOut.model_validate(log) for log in logs],
-            meta=schemas.MetaOut(
+        return schemas.ListOutSchema[schemas.LogOutSchema](
+            data=[schemas.LogOutSchema.model_validate(log) for log in logs],
+            meta=schemas.MetaOutSchema(
                 itens_por_pagina=items_per_page,
                 pagina_atual=page,
                 total_itens=total_items,

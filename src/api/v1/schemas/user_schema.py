@@ -35,7 +35,7 @@ OptSenhaField = Field(
 OptIdGrupoField = Field(default=None, ge=1, description="ID do grupo", examples=[1])
 
 
-class UserLogin(BaseModel):
+class UserLoginSchema(BaseModel):
     email: EmailStr = EmailField
     senha: SecretStr = SenhaField
 
@@ -44,7 +44,7 @@ class UserLogin(BaseModel):
         return ph.verify(password=plain, hash=hash)
 
 
-class UserIn(BaseModel):
+class UserInSchema(BaseModel):
     nome: str = NomeField
     senha: SecretStr = SenhaField
     email: EmailStr = EmailField
@@ -61,7 +61,7 @@ class UserIn(BaseModel):
         return ph.verify(password=plain, hash=hash)
 
 
-class UserUpdate(BaseModel):
+class UserUpdateSchema(BaseModel):
     nome: str | None = OptNomeField
     ativo: bool | None = OptAtivoField
     email: EmailStr | None = OptEmailField
@@ -74,7 +74,7 @@ class UserUpdate(BaseModel):
         return ph.hash(password=self.senha.get_secret_value())
 
 
-class UserOut(BaseModel):
+class UserOutSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: PositiveInt = IdField

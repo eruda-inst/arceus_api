@@ -3,7 +3,7 @@ from pydantic import BaseModel, Field, NonNegativeInt, PositiveInt, field_serial
 from .. import utils
 
 
-class StatusInternetOut(BaseModel):
+class StatusInternetOutSchema(BaseModel):
     status_acesso: utils.StatusInternetCod = Field(
         description="Status de acesso", examples=[utils.StatusInternetRot.ATIVO]
     )
@@ -25,7 +25,7 @@ class StatusInternetOut(BaseModel):
         return mapping[v]
 
 
-class ContratoOut(BaseModel):
+class ContratoOutSchema(BaseModel):
     # IDs NonNegativeInt, pois o IXC é quebrado
     id: NonNegativeInt = Field(description="ID do contrato", examples=[1])
     id_login: NonNegativeInt = Field(description="ID do login", examples=[12])
@@ -89,7 +89,7 @@ class ContratoOut(BaseModel):
         return mapping[v]
 
 
-class ComercialContratoOut(BaseModel):
+class ComercialContratoOutSchema(BaseModel):
     # IDs NonNegativeInt, pois o IXC é quebrado
     id: NonNegativeInt = Field(description="ID do contrato", examples=[1])
     id_login: NonNegativeInt = Field(description="ID do login", examples=[12])
@@ -129,7 +129,7 @@ class ComercialContratoOut(BaseModel):
         return mapping[v]
 
 
-class VilaContratoOut(BaseModel):
+class VilaContratoOutSchema(BaseModel):
     # IDs NonNegativeInt, pois o IXC é quebrado
     id: NonNegativeInt = Field(description="ID do contrato", examples=[1])
     id_login: NonNegativeInt = Field(description="ID do login", examples=[12])

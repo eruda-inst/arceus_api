@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
 
 
-class ChavePixOut(BaseModel):
+class ChavePixOutSchema(BaseModel):
     chave_pix: str = Field(description="Chave pix", examples=["000..."])

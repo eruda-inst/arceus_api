@@ -3,7 +3,7 @@ from pydantic import BaseModel, EmailStr, Field, PositiveInt, field_serializer
 from .. import utils
 
 
-class IXCUserOut(BaseModel):
+class IXCUsuarioOutSchema(BaseModel):
     id: PositiveInt = Field(description="ID do usuário", examples=[1])
     nome: str = Field(description="Nome do usuário", examples=["Nome do usuário"])
     email: EmailStr = Field(

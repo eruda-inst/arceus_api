@@ -71,7 +71,7 @@ class LogMiddleware(BaseHTTPMiddleware):
         # --- Cliente IXC ---
         nome_cliente = None
         if protocol:
-            cliente = await services.ClienteService.get_cliente_ixc(protocolo=protocol)
+            cliente = await services.ClientService.get_cliente_ixc(protocolo=protocol)
             if cliente:
                 nome_cliente = cliente["razao"]
 

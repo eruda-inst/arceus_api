@@ -16,7 +16,7 @@ class UpgradeService:
         ids_str_tratados = ",".join(ids_str)
         endpoint = "vd_contratos"
         grid_param = [utils.Param(TB="vd_contratos.id", OP="IN", P=ids_str_tratados)]
-        res = await clients.IxcCliente.get(endpoint=endpoint, grid_param=grid_param)
+        res = await clients.IxcClient.get(endpoint=endpoint, grid_param=grid_param)
         planos_em_uso = res.get("registros", [])
 
         planos_em_uso_parciais: list[dict[str, Any]] = []
@@ -44,9 +44,9 @@ class UpgradeService:
         id_cliente: NonNegativeInt,
         pagina: PositiveInt | None,
         itens_por_pagina: PositiveInt | None,
-    ) -> schemas.ListOut[schemas.PlanoSugeridoOut]:
+    ) -> schemas.ListOutSchema[schemas.PlanoSugeridoOutSchema]:
         # --- Obtém contratos ativos ---
-        contratos = await services.ClienteService.get_contratos_ativos(
+        contratos = await services.ClientService.get_contratos_ativos(
             id_cliente=id_cliente, pagina=pagina, itens_por_pagina=itens_por_pagina
         )
 
@@ -73,7 +73,7 @@ class UpgradeService:
         # --- Obtém planos para checar ---
         planos_para_checar = await cls._get_planos_em_uso()
 
-        planos_sugeridos: list[schemas.PlanoSugeridoOut] = []
+        planos_sugeridos: list[schemas.PlanoSugeridoOutSchema] = []
 
         # Iteração entre contratos
         for contrato in contratos:
@@ -86,7 +86,7 @@ class UpgradeService:
             # --- Obtém plano atual do cliente ---
             endpoint = "vd_contratos"
             grid_param = [utils.Param(TB="vd_contratos.id", P=id_plano)]
-            res = await clients.IxcCliente.get(
+            res = await clients.IxcClient.get(
                 endpoint=endpoint,
                 grid_param=grid_param,
                 pagina=pagina,
@@ -132,7 +132,7 @@ class UpgradeService:
                         # Se o valor do plano sugerido for maior que o do plano do cliente
                         if p["valor"] > plano_cliente["valor_contrato"]:
                             planos_sugeridos.append(
-                                schemas.PlanoSugeridoOut(
+                                schemas.PlanoSugeridoOutSchema(
                                     nome_plano_atual=plano_cliente["nome"],
                                     valor_plano_atual=plano_cliente["valor_contrato"],
                                     nome_plano_sugerido=p["nome"],
@@ -147,7 +147,7 @@ class UpgradeService:
                 # Se o cliente pagar igual ou mais que o melhor plano
                 if plano_cliente["valor_contrato"] >= melhor_plano["valor"]:
                     planos_sugeridos.append(
-                        schemas.PlanoSugeridoOut(
+                        schemas.PlanoSugeridoOutSchema(
                             nome_plano_atual=plano_cliente["nome"],
                             valor_plano_atual=plano_cliente["valor_contrato"],
                             nome_plano_sugerido=melhor_plano["nome"],
@@ -161,7 +161,7 @@ class UpgradeService:
                     # Se o valor do plano para checar for maior ou igual ao do plano do cliente
                     if p["valor"] >= plano_cliente["valor_contrato"]:
                         planos_sugeridos.append(
-                            schemas.PlanoSugeridoOut(
+                            schemas.PlanoSugeridoOutSchema(
                                 nome_plano_atual=plano_cliente["nome"],
                                 valor_plano_atual=plano_cliente["valor_contrato"],
                                 nome_plano_sugerido=p["nome"],
@@ -170,9 +170,9 @@ class UpgradeService:
                         )
                         break
 
-        return schemas.ListOut[schemas.PlanoSugeridoOut](
+        return schemas.ListOutSchema[schemas.PlanoSugeridoOutSchema](
             data=planos_sugeridos,
-            meta=schemas.MetaOut(
+            meta=schemas.MetaOutSchema(
                 total_itens=len(planos_sugeridos),
                 pagina_atual=pagina or 1,
                 itens_por_pagina=itens_por_pagina or 10,

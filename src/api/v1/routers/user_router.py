@@ -10,15 +10,19 @@ user_router = APIRouter(prefix="/usuarios", tags=["Usuários"])
 
 
 DbDep = Annotated[AsyncSession, Depends(db.get_db)]
-CurrUserDep = Annotated[models.User, Depends(deps.get_curr_user)]
+CurrUserDep = Annotated[models.UserModel, Depends(deps.get_curr_user)]
 CreatePermDep = Annotated[
-    models.User, Depends(deps.has_perm(utils.PermCodes.CREATE_USER))
+    models.UserModel, Depends(deps.has_perm(utils.PermCodes.CREATE_USER))
 ]
-ReadPermDep = Annotated[models.User, Depends(deps.has_perm(utils.PermCodes.READ_USER))]
+ReadPermDep = Annotated[
+    models.UserModel, Depends(deps.has_perm(utils.PermCodes.READ_USER))
+]
 UpdatePermDep = Annotated[
-    models.User, Depends(deps.has_perm(utils.PermCodes.UPDATE_USER))
+    models.UserModel, Depends(deps.has_perm(utils.PermCodes.UPDATE_USER))
 ]
-DelPermDep = Annotated[models.User, Depends(deps.has_perm(utils.PermCodes.DEL_USER))]
+DelPermDep = Annotated[
+    models.UserModel, Depends(deps.has_perm(utils.PermCodes.DEL_USER))
+]
 
 
 @user_router.post(
@@ -28,12 +32,12 @@ async def create(
     db: DbDep,
     curr_user: CurrUserDep,
     perm: CreatePermDep,
-    dados: Annotated[schemas.UserIn, Body(description="Dados do novo usuário")],
-) -> schemas.UserOut:
+    dados: Annotated[schemas.UserInSchema, Body(description="Dados do novo usuário")],
+) -> schemas.UserOutSchema:
     """
     Cadastra um novo usuário
     """
-    return await services.UserService.create(db=db, data=dados)
+    return await services.UsuarioService.create(db=db, data=dados)
 
 
 @user_router.get(path="/", summary="Obtém informações dos usuários")
@@ -49,11 +53,11 @@ async def get_all_by(
     id_grupo: Annotated[
         int | None, Query(ge=1, description="Filtro parcial por id do grupo")
     ] = None,
-) -> schemas.ListOut[schemas.UserOut]:
+) -> schemas.ListOutSchema[schemas.UserOutSchema]:
     """
     Obtém informações dos usuários
     """
-    return await services.UserService.get_all_by(
+    return await services.UsuarioService.get_all_by(
         db=db,
         page=pagina if pagina is not None else 1,
         items_per_page=itens_por_pagina if itens_por_pagina is not None else 10,
@@ -76,7 +80,7 @@ async def del_by_id(
     """
     Remove um usuário
     """
-    await services.UserService.del_by_id(id=id, db=db)
+    await services.UsuarioService.del_by_id(id=id, db=db)
 
 
 @user_router.patch(
@@ -87,11 +91,11 @@ async def toggle_status_by_id(
     curr_user: CurrUserDep,
     perm: UpdatePermDep,
     id: PositiveInt,
-) -> schemas.UserOut:
+) -> schemas.UserOutSchema:
     """
     Alterna o status do usuário, i.e., se estiver ativo, fica inativo, e vice-versa
     """
-    return await services.UserService.toggle_status_by_id(id=id, db=db)
+    return await services.UsuarioService.toggle_status_by_id(id=id, db=db)
 
 
 @user_router.patch(path="/mudar-senha/id/{id}", summary="Atualiza senha de um usuário")
@@ -104,8 +108,10 @@ async def update_pwd_by_id(
         str,
         Body(embed=True, description="Nova senha", min_length=8, examples=["12345678"]),
     ],
-) -> schemas.UserOut:
+) -> schemas.UserOutSchema:
     """
     Atualiza senha de um usuário
     """
-    return await services.UserService.update_pwd_by_id(id=id, db=db, new_pwd=nova_senha)
+    return await services.UsuarioService.update_pwd_by_id(
+        id=id, db=db, new_pwd=nova_senha
+    )

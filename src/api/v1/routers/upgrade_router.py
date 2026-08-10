@@ -16,7 +16,7 @@ async def get_planos_sugeridos(
     id_cliente: Annotated[int, Query(get=0, description="ID do cliente no IXC")],
     pagina: utils.Pagina | None = 1,
     itens_por_pagina: utils.ItensPorPagina | None = 10,
-) -> schemas.ListOut[schemas.PlanoSugeridoOut]:
+) -> schemas.ListOutSchema[schemas.PlanoSugeridoOutSchema]:
     """
     Sugere planos de venda oficiais de acordo com planos de venda desatualizados, para cada cadastro associado a um cliente
     """

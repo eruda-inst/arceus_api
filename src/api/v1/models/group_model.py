@@ -2,10 +2,10 @@ from sqlalchemy import TIMESTAMP, Column, Integer, String, func
 from sqlalchemy.orm import relationship
 
 from .. import db
-from .group_perm_model import group_permission
+from .group_perm_model import group_perm
 
 
-class Group(db.Base):
+class GroupModel(db.Base):
     __tablename__ = "grupos"
 
     id = Column(
@@ -24,7 +24,7 @@ class Group(db.Base):
         unique=False,
         index=False,
     )
-    usuarios = relationship(argument="User", back_populates="grupo")
+    usuarios = relationship(argument="UserModel", back_populates="grupo")
     permissoes = relationship(
-        argument="Perm", secondary=group_permission, back_populates="grupos"
+        argument="PermModel", secondary=group_perm, back_populates="grupos"
     )

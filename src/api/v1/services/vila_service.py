@@ -15,7 +15,7 @@ class VilaService:
             utils.Param(TB="radusuarios.login", OP="L", P=f"res{numero_residencia}"),
             utils.Param(TB="radusuarios.ativo", P="S"),
         ]
-        res = await clients.IxcCliente.get(endpoint=endpoint, grid_param=grid_param)
+        res = await clients.IxcClient.get(endpoint=endpoint, grid_param=grid_param)
         if not (regs := res.get("registros", [])):
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Login inexistente"
@@ -27,16 +27,16 @@ class VilaService:
             "login": login["login"],
             "online": login["online"],
             "id_cliente": int(login["id_cliente"]),
-            "ssid_router_wifi": login["ssid_router_wifi"] or None,
-            "senha_rede_sem_fio": login["senha_rede_sem_fio"] or None,
-            "ssid_router_wifi_5ghz": login["ssid_router_wifi_5ghz"] or None,
-            "senha_rede_sem_fio_5ghz": login["senha_rede_sem_fio_5ghz"] or None,
+            "ssid_router_wifi": login.get("ssid_router_wifi"),
+            "senha_rede_sem_fio": login.get("senha_rede_sem_fio"),
+            "ssid_router_wifi_5ghz": login.get("ssid_router_wifi_5ghz"),
+            "senha_rede_sem_fio_5ghz": login.get("senha_rede_sem_fio_5ghz"),
         }
 
     @classmethod
     async def get_contrato(
         cls, numero_residencia: PositiveInt
-    ) -> schemas.VilaContratoOut:
+    ) -> schemas.VilaContratoOutSchema:
         # --- Obtém login ---
         login = await cls._get_login(numero_residencia=numero_residencia)
 
@@ -45,7 +45,7 @@ class VilaService:
         grid_param = [
             utils.Param(TB="cliente_contrato.id_cliente", P=login["id_cliente"])
         ]
-        res = await clients.IxcCliente.get(endpoint=endpoint, grid_param=grid_param)
+        res = await clients.IxcClient.get(endpoint=endpoint, grid_param=grid_param)
         if not (regs := res.get("registros", [])):
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -53,7 +53,7 @@ class VilaService:
             )
         contrato = regs[0]
 
-        return schemas.VilaContratoOut(
+        return schemas.VilaContratoOutSchema(
             id=contrato["id"],
             id_login=login["id"],
             id_cliente=contrato["id_cliente"],
@@ -62,16 +62,16 @@ class VilaService:
     @classmethod
     async def get_status_conexao(
         cls, numero_residencia: PositiveInt
-    ) -> schemas.StatusConexaoOut:
+    ) -> schemas.StatusConexaoOutSchema:
         # --- Obtém login ---
         login = await cls._get_login(numero_residencia=numero_residencia)
 
-        return schemas.StatusConexaoOut(status_conexao=login["online"])
+        return schemas.StatusConexaoOutSchema(status_conexao=login["online"])
 
     @classmethod
     async def get_status_onu(
         cls, numero_residencia: PositiveInt
-    ) -> schemas.StatusOnuOut:
+    ) -> schemas.StatusOnuOutSchema:
         # --- Obtém login ---
         login = await cls._get_login(numero_residencia=numero_residencia)
 
@@ -80,7 +80,7 @@ class VilaService:
         grid_param = [
             utils.Param(TB="radpop_radio_cliente_fibra.id_login", P=f"res{login['id']}")
         ]
-        res = await clients.IxcCliente.get(endpoint=endpoint, grid_param=grid_param)
+        res = await clients.IxcClient.get(endpoint=endpoint, grid_param=grid_param)
         if not (regs := res.get("registros", [])):
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="ONU inexistente"
@@ -94,14 +94,16 @@ class VilaService:
                 detail="Sinal ONU inexistente",
             )
 
-        return schemas.StatusOnuOut(status_onu=sinal_rx)
+        return schemas.StatusOnuOutSchema(status_onu=sinal_rx)
 
     @classmethod
-    async def get_dados_wifi(cls, numero_residencia: PositiveInt) -> schemas.WifiOut:
+    async def get_dados_wifi(
+        cls, numero_residencia: PositiveInt
+    ) -> schemas.WifiOutSchema:
         # --- Obtém login ---
         login = await cls._get_login(numero_residencia=numero_residencia)
 
-        return schemas.WifiOut(
+        return schemas.WifiOutSchema(
             ssid_wifi_2g=login["ssid_router_wifi"],
             senha_wifi_2g=login["senha_rede_sem_fio"],
             ssid_wifi_5g=login["ssid_router_wifi_5ghz"],
@@ -114,7 +116,7 @@ class VilaService:
         numero_residencia: PositiveInt,
         pagina: PositiveInt | None,
         itens_por_pagina: PositiveInt | None,
-    ) -> schemas.ListOut[schemas.AtendimentoOut]:
+    ) -> schemas.ListOutSchema[schemas.AtendimentoOutSchema]:
         # --- Obtém login ---
         login = await cls._get_login(numero_residencia=numero_residencia)
 
@@ -125,7 +127,7 @@ class VilaService:
             utils.Param(TB="su_ticket.su_status", OP="!=", P="S"),
             utils.Param(TB="su_ticket.su_status", OP="!=", P="C"),
         ]
-        res = await clients.IxcCliente.get(
+        res = await clients.IxcClient.get(
             endpoint=endpoint,
             grid_param=grid_param,
             pagina=pagina,
@@ -134,12 +136,12 @@ class VilaService:
         atendimentos = res.get("registros", [])
         total = res.get("total", 0)
 
-        atendimentos_parciais: list[schemas.AtendimentoOut] = []
+        atendimentos_parciais: list[schemas.AtendimentoOutSchema] = []
 
         # Iteração entre atendimentos
         for atendimento in atendimentos:
             atendimentos_parciais.append(
-                schemas.AtendimentoOut(
+                schemas.AtendimentoOutSchema(
                     id=atendimento["id"],
                     id_assunto=atendimento["id_assunto"],
                     status=atendimento["su_status"],
@@ -149,9 +151,9 @@ class VilaService:
                 ),
             )
 
-        return schemas.ListOut[schemas.AtendimentoOut](
+        return schemas.ListOutSchema[schemas.AtendimentoOutSchema](
             data=atendimentos_parciais,
-            meta=schemas.MetaOut(
+            meta=schemas.MetaOutSchema(
                 total_itens=total,
                 pagina_atual=pagina or 1,
                 itens_por_pagina=itens_por_pagina or 10,
@@ -161,14 +163,14 @@ class VilaService:
     @classmethod
     async def post_limpar_mac(
         cls, numero_residencia: PositiveInt
-    ) -> schemas.MensagemOut:
+    ) -> schemas.MensagemOutSchema:
         # --- Obtém login ---
         login = await cls._get_login(numero_residencia=numero_residencia)
 
         # --- Realiza limpeza de MAC ---
         endpoint = "radusuarios_25452"
         payload = {"get_id": str(login["id"])}
-        res = await clients.IxcCliente.post(endpoint=endpoint, payload=payload)
+        res = await clients.IxcClient.post(endpoint=endpoint, payload=payload)
         if res["type"] == "error":
             msg = res.get("message", "Limpeza malsucedida")
             raise HTTPException(
@@ -176,19 +178,19 @@ class VilaService:
                 detail=utils.Formatter.sanitize(string=msg),
             )
 
-        return schemas.MensagemOut(mensagem="Limpeza bem-sucedida")
+        return schemas.MensagemOutSchema(mensagem="Limpeza bem-sucedida")
 
     @classmethod
     async def post_desconectar_cliente(
         cls, numero_residencia: PositiveInt
-    ) -> schemas.MensagemOut:
+    ) -> schemas.MensagemOutSchema:
         # --- Obtém login ---
         login = await cls._get_login(numero_residencia=numero_residencia)
 
         # --- Realiza desconexão de cliente ---
         endpoint = "desconectar_clientes"
         payload = {"id": str(login["id"])}
-        res = await clients.IxcCliente.post(endpoint=endpoint, payload=payload)
+        res = await clients.IxcClient.post(endpoint=endpoint, payload=payload)
         type = res["msg"][0]["type"]
         if type == "error":
             msgs = res.get("msg", [])
@@ -198,16 +200,16 @@ class VilaService:
                 detail=utils.Formatter.sanitize(string=msg),
             )
 
-        return schemas.MensagemOut(mensagem="Desconexão bem-sucedida")
+        return schemas.MensagemOutSchema(mensagem="Desconexão bem-sucedida")
 
     @staticmethod
     async def post_atendimentos(
-        atendimento: schemas.AtendimentoIn,
-    ) -> schemas.AtendimentoOut:
+        atendimento: schemas.AtendimentoInSchema,
+    ) -> schemas.AtendimentoOutSchema:
         # --- Cria atendimento ---
         endpoint = "su_ticket"
         payload = atendimento.model_dump()
-        res = await clients.IxcCliente.post(endpoint=endpoint, payload=payload)
+        res = await clients.IxcClient.post(endpoint=endpoint, payload=payload)
         if not (id := res.get("id")):
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -216,7 +218,7 @@ class VilaService:
 
         # --- Obtém atendimento criado ---
         grid_param = [utils.Param(TB="su_ticket.id", P=id)]
-        res = await clients.IxcCliente.get(endpoint=endpoint, grid_param=grid_param)
+        res = await clients.IxcClient.get(endpoint=endpoint, grid_param=grid_param)
         regs = res.get("registros", [])
         if not regs:
             raise HTTPException(
@@ -225,7 +227,7 @@ class VilaService:
             )
         atendimento_criado = regs[0]
 
-        return schemas.AtendimentoOut(
+        return schemas.AtendimentoOutSchema(
             id=atendimento_criado["id"],
             data_criacao=atendimento_criado["data_criacao"],
             id_assunto=atendimento_criado["id_assunto"],

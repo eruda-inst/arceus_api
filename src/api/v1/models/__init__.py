@@ -1,6 +1,6 @@
-from .group_model import Group
-from .log_model import Log
-from .perm_model import Perm
-from .user_model import User
+from .group_model import GroupModel
+from .log_model import LogModel
+from .perm_model import PermModel
+from .user_model import UserModel
 
-__all__ = ["Group", "Log", "Perm", "User"]
+__all__ = ["GroupModel", "LogModel", "PermModel", "UserModel"]

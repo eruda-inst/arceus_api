@@ -16,7 +16,7 @@ async def get_contratos(
     cnpj_cpf: utils.CnpjCpf | None = None,
     pagina: utils.Pagina | None = 1,
     itens_por_pagina: utils.ItensPorPagina | None = 10,
-) -> schemas.ListOut[schemas.ContratoOut]:
+) -> schemas.ListOutSchema[schemas.ContratoOutSchema]:
     """
     Obtém contratos de um cliente, através de protocolo de atendimento ou CPF/CNPJ
     """
@@ -31,7 +31,7 @@ async def get_contratos(
 @suporte_router.get(
     path="/status_conexao", summary="Obtém status de conexão de um cliente"
 )
-async def get_status_conexao(id_login: IdLogin) -> schemas.StatusConexaoOut:
+async def get_status_conexao(id_login: IdLogin) -> schemas.StatusConexaoOutSchema:
     """
     Obtém status de conexão de um cliente, através do id de login
     """
@@ -45,7 +45,7 @@ async def get_status_onu(
         str | None,
         Query(min_length=12, max_length=12, description="MAC Address da ONU."),
     ] = None,
-) -> schemas.StatusOnuOut:
+) -> schemas.StatusOnuOutSchema:
     """
     Obtém status de ONU de um cliente, através do ID de login ou MAC Address
     """
@@ -55,7 +55,7 @@ async def get_status_onu(
 
 
 @suporte_router.get(path="/dados_wifi", summary="Obtém dados do WiFi de um cliente")
-async def get_dados_wifi(id_login: IdLogin) -> schemas.WifiOut:
+async def get_dados_wifi(id_login: IdLogin) -> schemas.WifiOutSchema:
     """
     Obtém dados do WiFi de um cliente, através do ID de login
     """
@@ -69,7 +69,7 @@ async def get_atendimentos(
     id_login: IdLogin,
     pagina: utils.Pagina | None = 1,
     itens_por_pagina: utils.ItensPorPagina | None = 10,
-) -> schemas.ListOut[schemas.AtendimentoOut]:
+) -> schemas.ListOutSchema[schemas.AtendimentoOutSchema]:
     """
     Obtém atendimentos abertos de um cliente, através do ID de login
     """
@@ -85,9 +85,9 @@ async def get_atendimentos(
 )
 async def post_atendimentos(
     atendimento: Annotated[
-        schemas.AtendimentoIn, Body(description="Dados do atendimento")
+        schemas.AtendimentoInSchema, Body(description="Dados do atendimento")
     ],
-) -> schemas.AtendimentoOut:
+) -> schemas.AtendimentoOutSchema:
     """
     Abre um atendimento para um cliente, atravé de dados do atendimento
     """
@@ -97,7 +97,7 @@ async def post_atendimentos(
 @suporte_router.post(
     path="/desconectar_cliente", summary="Envia sinal de desconexão para um cliente"
 )
-async def post_desconectar_cliente(id_login: IdLogin) -> schemas.MensagemOut:
+async def post_desconectar_cliente(id_login: IdLogin) -> schemas.MensagemOutSchema:
     """
     Envia sinal de desconexão para um cliente, através do id de login
     """
@@ -105,7 +105,7 @@ async def post_desconectar_cliente(id_login: IdLogin) -> schemas.MensagemOut:
 
 
 @suporte_router.post(path="/limpar_mac", summary="Limpa MAC Address")
-async def post_limpar_mac(id_login: IdLogin) -> schemas.MensagemOut:
+async def post_limpar_mac(id_login: IdLogin) -> schemas.MensagemOutSchema:
     """
     Limpa MAC Address, através do id de login
     """
@@ -121,7 +121,7 @@ async def put_ip(
     pool_radius: Annotated[
         str | None, Body(description="Radius do login a ser atualizado")
     ] = None,
-) -> schemas.IpOut:
+) -> schemas.IpOutSchema:
     """
     Atualiza IP e Radius de um login, através do id de login
     """

@@ -12,7 +12,7 @@ security = HTTPBearer()
 async def get_curr_user(
     db: Annotated[AsyncSession, Depends(db.get_db)],
     credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)],
-) -> models.User:
+) -> models.UserModel:
     access_token = credentials.credentials
     user = await services.AuthenticationService.verify_access_token(
         db=db, access_token=access_token

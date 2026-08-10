@@ -7,7 +7,7 @@ from .. import utils
 from ..config_core import settings
 
 
-class OpaCliente:
+class OpaClient:
     _token = settings.opa_token.get_secret_value()
     _timeout = httpx.Timeout(connect=5.0, read=30.0, write=10.0, pool=1.0)
     _client = httpx.AsyncClient(timeout=_timeout)

@@ -8,14 +8,14 @@ from .. import db, deps, models, schemas, services
 authentication_router = APIRouter(prefix="/autenticacao", tags=["Autenticação"])
 
 DbDep = Annotated[AsyncSession, Depends(dependency=db.get_db)]
-CurrUserDep = Annotated[models.User, Depends(dependency=deps.get_curr_user)]
+CurrUserDep = Annotated[models.UserModel, Depends(dependency=deps.get_curr_user)]
 
 
 @authentication_router.post(path="/login", summary="Autenticação de usuário")
 async def login(
     db: DbDep,
-    user: Annotated[schemas.UserLogin, Body(description="Credenciais de login")],
-) -> schemas.AccessTokenOut:
+    user: Annotated[schemas.UserLoginSchema, Body(description="Credenciais de login")],
+) -> schemas.AccessTokenOutSchema:
     """
     Autenticação de usuário para acessar o sistema
     """
@@ -28,7 +28,7 @@ async def login(
     summary="Realiza logout do usuário",
 )
 async def logout(
-    curr_user: Annotated[models.User, Depends(deps.get_curr_user)], db: DbDep
+    curr_user: Annotated[models.UserModel, Depends(deps.get_curr_user)], db: DbDep
 ) -> None:
     """
     Invalida token de usuário autenticado
@@ -43,7 +43,7 @@ async def refresh_token(
     refresh_token: Annotated[
         str, Body(embed=True, description="Token de atualização", examples=["eyJ..."])
     ],
-) -> schemas.AccessTokenOut:
+) -> schemas.AccessTokenOutSchema:
     """
     Renova token de acesso
     """
@@ -53,8 +53,8 @@ async def refresh_token(
 
 
 @authentication_router.get(path="/me", summary="Usuário atual")
-async def me(db: DbDep, curr_user: CurrUserDep) -> schemas.UserOut:
+async def me(db: DbDep, curr_user: CurrUserDep) -> schemas.UserOutSchema:
     """
     Usuário atual logado
     """
-    return schemas.UserOut.model_validate(curr_user)
+    return schemas.UserOutSchema.model_validate(curr_user)

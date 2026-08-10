@@ -3,7 +3,7 @@ from pydantic import BaseModel, Field, NonNegativeInt, field_serializer
 from .. import utils
 
 
-class AtendimentoIn(BaseModel):
+class AtendimentoInSchema(BaseModel):
     # IDs NonNegativeInt, pois o IXC é quebrado
     id_login: NonNegativeInt = Field(description="ID de login", examples=[1])
     id_assunto: NonNegativeInt = Field(description="ID do assunto", examples=[12])
@@ -47,7 +47,7 @@ class AtendimentoIn(BaseModel):
     )
 
 
-class AtendimentoOut(BaseModel):
+class AtendimentoOutSchema(BaseModel):
     # IDs NonNegativeInt, pois o IXC é quebrado
     id: NonNegativeInt = Field(description="ID do atendimento", examples=[1])
     id_assunto: NonNegativeInt = Field(description="ID do assunto", examples=[12])

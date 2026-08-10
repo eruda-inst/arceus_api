@@ -5,7 +5,7 @@ from pydantic import BaseModel, Field, NonNegativeInt, PositiveInt, computed_fie
 T = TypeVar("T")
 
 
-class MetaOut(BaseModel):
+class MetaOutSchema(BaseModel):
     pagina_atual: PositiveInt = Field(ge=1, description="Página atual")
     itens_por_pagina: PositiveInt = Field(ge=1, description="Itens por página")
     total_itens: NonNegativeInt = Field(ge=0, description="Total de itens")
@@ -19,17 +19,17 @@ class MetaOut(BaseModel):
         return (self.total_itens + self.itens_por_pagina - 1) // self.itens_por_pagina
 
 
-class ListOut[T](BaseModel):
+class ListOutSchema[T](BaseModel):
     data: list[T]
-    meta: MetaOut
+    meta: MetaOutSchema
 
 
-class TodayAlwaysOut[T](BaseModel):
+class TodayAlwaysOutSchema[T](BaseModel):
     hoje: T
     sempre: T
 
 
-class MensagemOut(BaseModel):
+class MensagemOutSchema(BaseModel):
     mensagem: str = Field(
         description="Mensagem de retorno", examples=["Mensagem de retorno"]
     )

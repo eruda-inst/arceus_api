@@ -5,7 +5,7 @@ from fastapi import HTTPException, status
 from pydantic import PositiveInt
 
 from .. import clients, schemas, utils
-from . import ClienteService
+from . import ClientService
 
 
 class CobrancaService:
@@ -15,9 +15,9 @@ class CobrancaService:
         cnpj_cpf: str | None,
         pagina: PositiveInt | None,
         itens_por_pagina: PositiveInt | None,
-    ) -> schemas.ListOut[schemas.FaturaOut]:
+    ) -> schemas.ListOutSchema[schemas.FaturaOutSchema]:
         # --- Obtém cliente ---
-        cliente = await ClienteService.get_cliente_ixc(
+        cliente = await ClientService.get_cliente_ixc(
             protocolo=protocolo, cnpj_cpf=cnpj_cpf
         )
 
@@ -28,7 +28,7 @@ class CobrancaService:
             utils.Param(TB="fn_areceber.status", OP="!=", P="R"),
             utils.Param(TB="fn_areceber.status", OP="!=", P="C"),
         ]
-        res = await clients.IxcCliente.get(
+        res = await clients.IxcClient.get(
             endpoint=endpoint,
             grid_param=grid_param,
             pagina=pagina,
@@ -36,7 +36,7 @@ class CobrancaService:
         )
         faturas_abertas = res.get("registros", [])
 
-        faturas_vencidas_parciais: list[schemas.FaturaOut] = []
+        faturas_vencidas_parciais: list[schemas.FaturaOutSchema] = []
 
         # Data de hoje
         timezone = ZoneInfo("America/Bahia")
@@ -57,7 +57,7 @@ class CobrancaService:
             endpoint = "cliente_contrato"
             id_contrato = fatura_aberta["id_contrato"]
             grid_param = [utils.Param(TB="cliente_contrato.id", P=id_contrato)]
-            res = await clients.IxcCliente.get(endpoint=endpoint, grid_param=grid_param)
+            res = await clients.IxcClient.get(endpoint=endpoint, grid_param=grid_param)
             if not (regs := res.get("registros", [])):
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
@@ -67,7 +67,7 @@ class CobrancaService:
 
             # Faturas vencidas parciais
             faturas_vencidas_parciais.append(
-                schemas.FaturaOut(
+                schemas.FaturaOutSchema(
                     id=fatura_aberta["id"],
                     id_contrato=fatura_aberta["id_contrato"],
                     contrato=contrato["contrato"],
@@ -76,9 +76,9 @@ class CobrancaService:
                 )
             )
 
-        return schemas.ListOut[schemas.FaturaOut](
+        return schemas.ListOutSchema[schemas.FaturaOutSchema](
             data=faturas_vencidas_parciais,
-            meta=schemas.MetaOut(
+            meta=schemas.MetaOutSchema(
                 total_itens=len(faturas_vencidas_parciais),
                 pagina_atual=pagina or 1,
                 itens_por_pagina=itens_por_pagina or 10,

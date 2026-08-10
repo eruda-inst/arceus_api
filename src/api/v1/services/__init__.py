@@ -1,5 +1,5 @@
 from .authentication_service import AuthenticationService
-from .cliente_service import ClienteService
+from .client_service import ClientService
 from .cobranca_service import CobrancaService
 from .comercial_service import ComercialService
 from .financeiro_service import FinanceiroService
@@ -10,12 +10,12 @@ from .perm_service import PermService
 from .suporte_service import SuporteService
 from .triagem_service import TriagemService
 from .upgrade_service import UpgradeService
-from .user_service import UserService
+from .user_service import UsuarioService
 from .vila_service import VilaService
 
 __all__ = [
     "AuthenticationService",
-    "ClienteService",
+    "ClientService",
     "CobrancaService",
     "ComercialService",
     "FinanceiroService",
@@ -26,6 +26,6 @@ __all__ = [
     "SuporteService",
     "TriagemService",
     "UpgradeService",
-    "UserService",
+    "UsuarioService",
     "VilaService",
 ]

@@ -3,7 +3,7 @@ from pydantic import BaseModel, Field, field_serializer
 from .. import utils
 
 
-class ContatoOut(BaseModel):
+class ContatoOutSchema(BaseModel):
     telefone_celular: str = Field(
         description="Celular do cliente",
         min_length=11,  # 12934567890
@@ -16,11 +16,11 @@ class ContatoOut(BaseModel):
         return utils.Formatter.cell(cell=v)
 
 
-class ClienteExisteOut(BaseModel):
+class ClienteExisteOutSchema(BaseModel):
     cliente_existe: bool = Field(description="Indica se o cliente existe")
 
 
-class CredencialOut(BaseModel):
+class CredencialOutSchema(BaseModel):
     senha: str = Field(
         description="Senha da central do assinante", examples=["12345678"]
     )

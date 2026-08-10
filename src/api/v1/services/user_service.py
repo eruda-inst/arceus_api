@@ -4,9 +4,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from .. import cruds, schemas, services
 
 
-class UserService:
+class UsuarioService:
     @staticmethod
-    async def create(db: AsyncSession, data: schemas.UserIn) -> schemas.UserOut:
+    async def create(
+        db: AsyncSession, data: schemas.UserInSchema
+    ) -> schemas.UserOutSchema:
         # Only users that exist in the external IXC system are allowed to be created locally.
         # If get_by_email() does not find the user, it raises a "not found" exception,
         # which prevents the local user from being created.
@@ -14,7 +16,7 @@ class UserService:
 
         created_user = await cruds.UserCrud.create(db=db, data=data)
 
-        return schemas.UserOut.model_validate(created_user)
+        return schemas.UserOutSchema.model_validate(created_user)
 
     @staticmethod
     async def get_all_by(
@@ -25,7 +27,7 @@ class UserService:
         email: str | None = None,
         active: bool | None = None,
         group_id: PositiveInt | None = None,
-    ) -> schemas.ListOut[schemas.UserOut]:
+    ) -> schemas.ListOutSchema[schemas.UserOutSchema]:
         total_items, users = await cruds.UserCrud.get_all_by(
             db=db,
             page=page,
@@ -36,9 +38,9 @@ class UserService:
             group_id=group_id,
         )
 
-        return schemas.ListOut[schemas.UserOut](
-            data=[schemas.UserOut.model_validate(u) for u in users],
-            meta=schemas.MetaOut(
+        return schemas.ListOutSchema[schemas.UserOutSchema](
+            data=[schemas.UserOutSchema.model_validate(u) for u in users],
+            meta=schemas.MetaOutSchema(
                 pagina_atual=page,
                 itens_por_pagina=items_per_page,
                 total_itens=total_items,
@@ -50,17 +52,19 @@ class UserService:
         await cruds.UserCrud.del_by_id(db=db, id=id)
 
     @staticmethod
-    async def toggle_status_by_id(id: PositiveInt, db: AsyncSession) -> schemas.UserOut:
+    async def toggle_status_by_id(
+        id: PositiveInt, db: AsyncSession
+    ) -> schemas.UserOutSchema:
         updated_user = await cruds.UserCrud.toggle_status_by_id(db=db, id=id)
 
-        return schemas.UserOut.model_validate(updated_user)
+        return schemas.UserOutSchema.model_validate(updated_user)
 
     @staticmethod
     async def update_pwd_by_id(
         id: PositiveInt, db: AsyncSession, new_pwd: str
-    ) -> schemas.UserOut:
+    ) -> schemas.UserOutSchema:
         updated_user = await cruds.UserCrud.update_pwd_by_id(
             db=db, id=id, new_pwd=new_pwd
         )
 
-        return schemas.UserOut.model_validate(updated_user)
+        return schemas.UserOutSchema.model_validate(updated_user)

@@ -10,7 +10,7 @@ from pydantic import (
 from .. import utils
 
 
-class LeadOut(BaseModel):
+class LeadOutSchema(BaseModel):
     id: NonNegativeInt = Field(description="ID do lead", examples=[1])
     ativo: utils.AtivoCod = Field(
         description="Indica se o lead está ativo",
@@ -151,7 +151,7 @@ class LeadOut(BaseModel):
         return utils.Formatter.cnpj_cpf(cnpj_cpf=v)
 
 
-class LeadUpdate(BaseModel):
+class LeadUpdateSchema(BaseModel):
     ativo: utils.AtivoCod | None = Field(
         default=None,
         min_length=1,  # S
@@ -283,7 +283,7 @@ class LeadUpdate(BaseModel):
         return utils.Formatter.cnpj_cpf(cnpj_cpf=v)
 
 
-class LeadIn(BaseModel):
+class LeadInSchema(BaseModel):
     ativo: utils.AtivoCod | None = Field(
         default=utils.AtivoCod.SIM,
         min_length=1,  # S
@@ -413,5 +413,5 @@ class LeadIn(BaseModel):
         return utils.Formatter.data(data=v)
 
 
-class LeadCreate(BaseModel):
+class LeadCreateSchema(BaseModel):
     id: NonNegativeInt = Field(description="ID do lead criado", examples=[42])

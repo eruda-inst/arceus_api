@@ -12,7 +12,7 @@ triagem_router = APIRouter(prefix="/triagem", tags=["Triagem"])
 )
 async def get_contato_cliente(
     protocolo: utils.Protocolo | None = None, cnpj_cpf: utils.CnpjCpf | None = None
-) -> schemas.ContatoOut:
+) -> schemas.ContatoOutSchema:
     """
     Obtém dados de contato de um cliente, através do protocolo de atendimento ou CPF/CNPJ
     """
@@ -29,7 +29,7 @@ async def put_contato_cliente(
     ],
     protocolo: utils.Protocolo | None = None,
     cnpj_cpf: utils.CnpjCpf | None = None,
-) -> schemas.ContatoOut:
+) -> schemas.ContatoOutSchema:
     """
     Atualiza contato de um cliente, através do protocolo de atendimento ou CPF/CNPJ
     """

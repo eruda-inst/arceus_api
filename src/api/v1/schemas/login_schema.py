@@ -3,14 +3,14 @@ from pydantic import BaseModel, Field, PositiveInt, field_serializer
 from .. import utils
 
 
-class IpOut(BaseModel):
+class IpOutSchema(BaseModel):
     ip: str = Field(description="IP do login", examples=["123.456.7.890"])
     pool_radius: PositiveInt = Field(
         ge=1, description="Pool Radius do login", examples=[1]
     )
 
 
-class StatusConexaoOut(BaseModel):
+class StatusConexaoOutSchema(BaseModel):
     status_conexao: utils.StatusConexaoCod = Field(
         description="Status da conexão", examples=[utils.StatusConexaoRot.CONECTADO]
     )
@@ -29,7 +29,7 @@ class StatusConexaoOut(BaseModel):
         return mapping[v]
 
 
-class WifiOut(BaseModel):
+class WifiOutSchema(BaseModel):
     ssid_wifi_2g: str | None = Field(
         default=None, description="Nome da rede WiFi 2G", examples=["Rede 2G"]
     )

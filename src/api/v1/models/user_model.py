@@ -4,7 +4,7 @@ from sqlalchemy.orm import relationship
 from .. import db
 
 
-class User(db.Base):
+class UserModel(db.Base):
     __tablename__ = "usuarios"
 
     id = Column(
@@ -49,4 +49,4 @@ class User(db.Base):
         index=False,
     )
 
-    grupo = relationship("Group", back_populates="usuarios")
+    grupo = relationship("GroupModel", back_populates="usuarios")

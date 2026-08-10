@@ -3,7 +3,7 @@ from sqlalchemy import TIMESTAMP, Column, Integer, Numeric, String, func
 from .. import db
 
 
-class Log(db.base_db.Base):
+class LogModel(db.base_db.Base):
     __tablename__ = "logs"
 
     # Métodos utilizados para filtro são indexados (i.e., index=True)
