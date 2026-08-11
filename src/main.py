@@ -7,12 +7,9 @@ from .api.v1 import api_v1_router, middlewares, schemas
 app = FastAPI(
     title="Arceus",
     description="Integra com sistemas IXC, Opa e 7AZ. Oferece autenticação, gestão de usuários e permissões, operações comerciais (contratos, leads), financeiras (faturas, cobrança), suporte (atendimentos, status de conexão), além de logs e métricas para monitoramento",
-    version="1.0.3",
+    version="1.0.6",
     routes=api_v1_router.routes,
 )
-
-
-app.add_middleware(middlewares.LogMiddleware)
 
 app.add_middleware(
     middleware_class=CORSMiddleware,
@@ -21,6 +18,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.add_middleware(middlewares.LogMiddleware)
 
 
 @app.get(path="/", summary="Endpoint raíz da API")

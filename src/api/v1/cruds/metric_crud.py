@@ -604,7 +604,10 @@ class MetricCrud:
                     models.LogModel.setor,
                     func.count(models.LogModel.id).label("total_requisicoes"),
                 )
-                .where(func.date(models.LogModel.criado_em) == today)
+                .where(
+                    func.date(models.LogModel.criado_em) == today,
+                    models.LogModel.setor.is_not(None),
+                )
                 .group_by(models.LogModel.setor)
                 .order_by(func.count(models.LogModel.id).desc())
                 .limit(10)
@@ -624,7 +627,10 @@ class MetricCrud:
                     func.count(models.LogModel.id).label("total_requisicoes"),
                 )
                 .group_by(models.LogModel.setor)
-                .order_by(func.count(models.LogModel.id).desc())
+                .order_by(
+                    func.count(models.LogModel.id).desc(),
+                    models.LogModel.setor.is_not(None),
+                )
                 .limit(10)
             )
             result_always = await db.execute(stmt_always)

@@ -60,7 +60,11 @@ class LogMiddleware(BaseHTTPMiddleware):
         payload = payload.decode()
         payload = payload if payload else None
 
-        setor = next((d.capitalize() for d in self.departments if d in endpoint), None)
+        setor = ""
+        for d in self.departments:
+            if d in endpoint:
+                setor = str(d).capitalize()
+                break
 
         response_body = b""
         async for chunk in res.body_iterator:  # type: ignore
