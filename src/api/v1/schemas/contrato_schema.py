@@ -92,7 +92,9 @@ class ContratoOutSchema(BaseModel):
 class ComercialContratoOutSchema(BaseModel):
     # IDs NonNegativeInt, pois o IXC é quebrado
     id: NonNegativeInt = Field(description="ID do contrato", examples=[1])
-    id_login: NonNegativeInt = Field(description="ID do login", examples=[12])
+    id_login: NonNegativeInt | None = Field(
+        default=None, description="ID do login", examples=[12]
+    )
     id_cliente: NonNegativeInt = Field(description="ID do cliente", examples=[123])
     nome_cliente: str = Field(
         description="Nome do cliente", examples=["Nome do cliente"]

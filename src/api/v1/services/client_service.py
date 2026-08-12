@@ -120,11 +120,8 @@ class ClientService:
             endpoint = "radusuarios"
             grid_param = [utils.Param(TB="radusuarios.id_contrato", P=id_contrato)]
             res = await clients.IxcClient.get(endpoint=endpoint, grid_param=grid_param)
-            if not (regs := res.get("registros", [])):
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND, detail="Login inexistente"
-                )
-            login = regs[0]
+            regs = res.get("registros", [])
+            login = regs[0] if len(regs) > 0 else {}
 
             # --- Nome do cliente ---
             nome = cliente.get("nome")
@@ -151,7 +148,7 @@ class ClientService:
             contratos_parciais.append(
                 {
                     "id": id_contrato,
-                    "id_login": int(login["id"]),
+                    "id_login": login.get("id"),
                     "id_cliente": int(contrato["id_cliente"]),
                     "nome_cliente": nome_cliente,
                     "status": contrato["status"],
@@ -159,7 +156,7 @@ class ClientService:
                     "nome_plano": contrato["contrato"],
                     "valor_fatura": fatura_parcial["valor_fatura"],
                     "dia_vencimento_fatura": fatura_parcial["dia_vencimento_fatura"],
-                    "mac_onu": login["onu_mac"] if login["onu_mac"] else None,
+                    "mac_onu": login.get("onu_mac"),
                     "id_plano": int(contrato["id_vd_contrato"]),
                 }
             )
