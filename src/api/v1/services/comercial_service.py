@@ -35,8 +35,8 @@ class ComercialService:
         pagina: PositiveInt | None,
         itens_por_pagina: PositiveInt | None,
     ) -> schemas.ListOutSchema[schemas.ComercialContratoOutSchema]:
-        # --- Obtém contratos ativos ---
-        contratos = await ClientService.get_contratos_ativos(
+        # --- Obtém contratos ---
+        contratos = await ClientService.get_contratos(
             protocolo=protocolo,
             cnpj_cpf=cnpj_cpf,
             pagina=pagina,

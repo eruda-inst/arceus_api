@@ -85,6 +85,88 @@ class ClientService:
             )
 
     @classmethod
+    async def get_contratos(
+        cls,
+        # IDs NonNegativeInt, pois o IXC é quebrado
+        id_cliente: NonNegativeInt | None = None,
+        protocolo: str | None = None,
+        cnpj_cpf: str | None = None,
+        pagina: PositiveInt | None = None,
+        itens_por_pagina: PositiveInt | None = None,
+    ) -> list[dict[str, Any]]:
+        # --- Cliente ---
+        cliente = await cls.get_cliente_ixc(
+            id_cliente=id_cliente, protocolo=protocolo, cnpj_cpf=cnpj_cpf
+        )
+
+        # --- Contratos ---
+        endpoint = "cliente_contrato"
+        grid_param = [utils.Param(TB="cliente_contrato.id_cliente", P=cliente["id"])]
+        res = await clients.IxcClient.get(
+            endpoint=endpoint,
+            grid_param=grid_param,
+            pagina=pagina,
+            itens_por_pagina=itens_por_pagina,
+        )
+        contratos = res.get("registros", [])
+
+        contratos_parciais: list[dict[str, Any]] = []
+
+        # --- Iteração entre contratos ---
+        for contrato in contratos:
+            id_contrato = contrato["id"]
+
+            # --- Login ---
+            endpoint = "radusuarios"
+            grid_param = [utils.Param(TB="radusuarios.id_contrato", P=id_contrato)]
+            res = await clients.IxcClient.get(endpoint=endpoint, grid_param=grid_param)
+            if not (regs := res.get("registros", [])):
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND, detail="Login inexistente"
+                )
+            login = regs[0]
+
+            # --- Nome do cliente ---
+            nome = cliente.get("nome")
+            razao = cliente.get("razao")
+            nome_cliente = str(nome if nome else razao)
+
+            # --- Fatura referência ---
+            fatura_referencia: (
+                dict[str, Any] | None
+            ) = await services.FinanceiroService.get_fatura_referencia(
+                id_contrato=id_contrato
+            )
+
+            # --- Dados fatura ---
+            fatura_parcial = {"valor_fatura": None, "dia_vencimento_fatura": None}
+
+            if fatura_referencia:
+                fatura_parcial["valor_fatura"] = fatura_referencia["valor"]
+                fatura_parcial["dia_vencimento_fatura"] = fatura_referencia[
+                    "dia_vencimento_fatura"
+                ]
+
+            # --- Contrato parcial ---
+            contratos_parciais.append(
+                {
+                    "id": id_contrato,
+                    "id_login": int(login["id"]),
+                    "id_cliente": int(contrato["id_cliente"]),
+                    "nome_cliente": nome_cliente,
+                    "status": contrato["status"],
+                    "status_acesso": contrato["status_internet"],
+                    "nome_plano": contrato["contrato"],
+                    "valor_fatura": fatura_parcial["valor_fatura"],
+                    "dia_vencimento_fatura": fatura_parcial["dia_vencimento_fatura"],
+                    "mac_onu": login["onu_mac"] if login["onu_mac"] else None,
+                    "id_plano": int(contrato["id_vd_contrato"]),
+                }
+            )
+
+        return contratos_parciais
+
+    @classmethod
     async def get_contratos_ativos(
         cls,
         # IDs NonNegativeInt, pois o IXC é quebrado

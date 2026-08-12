@@ -39,5 +39,7 @@ class OpaClient:
         options: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         payload: dict[str, Any] = {"filter": filter, "options": options}
+        if payload["options"] is None:
+            del payload["options"]
         data = await cls._make_request(endpoint=endpoint, payload=payload)
         return data
