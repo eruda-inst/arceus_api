@@ -22,7 +22,7 @@ class LogMiddleware(BaseHTTPMiddleware):
             "/api/v1/vila",
         )
         self.departments = (
-            "cobrança",
+            "cobranca",
             "comercial",
             "financeiro",
             "suporte",
@@ -60,10 +60,12 @@ class LogMiddleware(BaseHTTPMiddleware):
         payload = payload.decode()
         payload = payload if payload else None
 
-        setor = ""
+        setor = None
         for d in self.departments:
             if d in endpoint:
                 setor = str(d).capitalize()
+                if setor == "Cobranca":
+                    setor = "Cobrança"
                 break
 
         response_body = b""

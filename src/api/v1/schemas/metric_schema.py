@@ -78,7 +78,7 @@ class TopHttpMethodSchema(BaseModel):
 
 
 class TopDepartmentSchema(BaseModel):
-    setor: str | None = Field(
+    setor: str = Field(
         description="Setor/departamento responsável pela requisição",
         examples=["Financeiro", "Suporte"],
     )

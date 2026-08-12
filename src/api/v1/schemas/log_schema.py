@@ -27,7 +27,7 @@ class LogOutSchema(BaseModel):
         default=None, description="Payload da requisição", examples=["{...}"]
     )
     resposta: str = Field(description="Resposta", examples=["{...}"])
-    setor: str | None = Field(
+    setor: str = Field(
         description="Setor envolvido na requisição", examples=["SUPPORT"]
     )
     nome_cliente: str | None = Field(
