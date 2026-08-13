@@ -104,6 +104,7 @@ class FinanceiroService:
 
     @staticmethod
     async def get_faturas_abertas(
+        # IDs NonNegativeInt, pois o IXC é quebrado
         id_contrato: NonNegativeInt,
         pagina: PositiveInt | None,
         itens_por_pagina: PositiveInt | None,

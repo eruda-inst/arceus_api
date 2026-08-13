@@ -94,12 +94,12 @@ class ClientService:
         pagina: PositiveInt | None = None,
         itens_por_pagina: PositiveInt | None = None,
     ) -> list[dict[str, Any]]:
-        # --- Cliente ---
+        # --- Obtém cliente ---
         cliente = await cls.get_cliente_ixc(
             id_cliente=id_cliente, protocolo=protocolo, cnpj_cpf=cnpj_cpf
         )
 
-        # --- Contratos ---
+        # --- Obtém contratos ---
         endpoint = "cliente_contrato"
         grid_param = [utils.Param(TB="cliente_contrato.id_cliente", P=cliente["id"])]
         res = await clients.IxcClient.get(
@@ -112,30 +112,30 @@ class ClientService:
 
         contratos_parciais: list[dict[str, Any]] = []
 
-        # --- Iteração entre contratos ---
+        # Iteração entre contratos
         for contrato in contratos:
             id_contrato = contrato["id"]
 
-            # --- Login ---
+            # --- Obtém login ---
             endpoint = "radusuarios"
             grid_param = [utils.Param(TB="radusuarios.id_contrato", P=id_contrato)]
             res = await clients.IxcClient.get(endpoint=endpoint, grid_param=grid_param)
             regs = res.get("registros", [])
             login = regs[0] if len(regs) > 0 else {}
 
-            # --- Nome do cliente ---
+            # Nome do cliente
             nome = cliente.get("nome")
             razao = cliente.get("razao")
             nome_cliente = str(nome if nome else razao)
 
-            # --- Fatura referência ---
+            # Fatura referência
             fatura_referencia: (
                 dict[str, Any] | None
             ) = await services.FinanceiroService.get_fatura_referencia(
                 id_contrato=id_contrato
             )
 
-            # --- Dados fatura ---
+            # Dados fatura
             fatura_parcial = {"valor_fatura": None, "dia_vencimento_fatura": None}
 
             if fatura_referencia:
@@ -144,7 +144,7 @@ class ClientService:
                     "dia_vencimento_fatura"
                 ]
 
-            # --- Contrato parcial ---
+            # Contrato parcial
             contratos_parciais.append(
                 {
                     "id": id_contrato,

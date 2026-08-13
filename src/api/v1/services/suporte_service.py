@@ -4,7 +4,8 @@ from fastapi import HTTPException, status
 from pydantic import NonNegativeInt, PositiveInt
 
 from .. import clients, schemas, utils
-from . import ClientService
+from .client_service import ClientService
+from .financeiro_service import FinanceiroService
 
 
 class SuporteService:
@@ -24,6 +25,64 @@ class SuporteService:
         login = regs[0]
 
         return login
+
+    @staticmethod
+    async def get_contrato(
+        # IDs NonNegativeInt, pois o IXC é quebrado
+        id_contrato: NonNegativeInt,
+    ) -> schemas.ContratoOutSchema:
+        # --- Obtém contrato ---
+        endpoint = "cliente_contrato"
+        grid_param = [utils.Param(TB="cliente_contrato.id", P=id_contrato)]
+        res = await clients.IxcClient.get(endpoint=endpoint, grid_param=grid_param)
+        if not (regs := res.get("registros", [])):
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Contrato inexistente"
+            )
+        contrato = regs[0]
+
+        # --- Obtém login ---
+        endpoint = "radusuarios"
+        id_cliente = contrato["id_cliente"]
+        grid_param = [utils.Param(TB="radusuarios.id_cliente", P=id_cliente)]
+        res = await clients.IxcClient.get(endpoint=endpoint, grid_param=grid_param)
+        regs = res.get("registros", [])
+        login = regs[0] if len(regs) > 0 else {}
+
+        # --- Obtém cliente IXC ---
+        cliente = await ClientService.get_cliente_ixc(id_cliente=id_cliente)
+
+        # Nome do cliente
+        nome = cliente.get("nome")
+        razao = cliente.get("razao")
+        nome_cliente = str(nome if nome else razao)
+
+        # Fatura referência
+        fatura_referencia: (
+            dict[str, Any] | None
+        ) = await FinanceiroService.get_fatura_referencia(id_contrato=id_contrato)
+
+        # Dados fatura
+        fatura_parcial = {"valor_fatura": None, "dia_vencimento_fatura": None}
+
+        if fatura_referencia:
+            fatura_parcial["valor_fatura"] = fatura_referencia["valor"]
+            fatura_parcial["dia_vencimento_fatura"] = fatura_referencia[
+                "dia_vencimento_fatura"
+            ]
+
+        return schemas.ContratoOutSchema(
+            id=contrato["id"],
+            id_login=login.get("id"),
+            id_cliente=id_cliente,
+            nome_cliente=nome_cliente,
+            status=contrato["status"],
+            status_acesso=contrato["status_internet"],
+            nome_plano=contrato["contrato"],
+            valor_fatura=fatura_parcial["valor_fatura"],
+            dia_vencimento_fatura=fatura_parcial["dia_vencimento_fatura"],
+            mac_onu=login.get("onu_mac"),
+        )
 
     @staticmethod
     async def get_contratos(

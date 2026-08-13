@@ -10,6 +10,17 @@ suporte_router = APIRouter(prefix="/suporte", tags=["Suporte"])
 IdLogin = Annotated[int, Query(ge=0, description="ID de login do cliente")]
 
 
+@suporte_router.get(path="/contrato", summary="Obtém contrato de um cliente")
+async def get_contrato(
+    # IDs NonNegativeInt, pois o IXC é quebrado
+    id_contrato: Annotated[int, Query(ge=0, description="ID do contrato")],
+) -> schemas.ContratoOutSchema:
+    """
+    Obtém contrato de um cliente, através de protocolo ID do contrato
+    """
+    return await services.SuporteService.get_contrato(id_contrato=id_contrato)
+
+
 @suporte_router.get(path="/contratos", summary="Obtém contratos de um cliente")
 async def get_contratos(
     protocolo: utils.Protocolo | None = None,
