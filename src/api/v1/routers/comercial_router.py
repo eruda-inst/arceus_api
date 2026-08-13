@@ -8,7 +8,7 @@ comercial_router = APIRouter(prefix="/comercial", tags=["Comercial"])
 
 
 @comercial_router.get(
-    path="/status_acesso", summary="Obtém status de acesso de um contrato"
+    path="/status-acesso", summary="Obtém status de acesso de um contrato"
 )
 async def get_status_acesso(
     # IDs NonNegativeInt, pois o IXC é quebrado
@@ -39,7 +39,7 @@ async def get_contratos(
 
 
 @comercial_router.get(
-    path="/cliente_existe", summary="Checa se um cliente existe no Opa"
+    path="/cliente-existe", summary="Checa se um cliente existe no Opa"
 )
 async def cliente_existe(cpf_cnpj: utils.CnpjCpf) -> schemas.ClienteExisteOutSchema:
     """
