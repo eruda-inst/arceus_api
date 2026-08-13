@@ -3,6 +3,7 @@ from typing import Any
 
 from fastapi import HTTPException, status
 from pydantic import NonNegativeInt, PositiveInt
+from starlette.status import HTTP_404_NOT_FOUND
 
 from .. import clients, schemas, services, utils
 from . import ClientService
@@ -103,53 +104,49 @@ class FinanceiroService:
 
     @staticmethod
     async def get_faturas_abertas(
-        protocolo: str | None,
-        cnpj_cpf: str | None,
+        id_contrato: NonNegativeInt,
         pagina: PositiveInt | None,
         itens_por_pagina: PositiveInt | None,
     ) -> schemas.ListOutSchema[schemas.FaturaOutSchema]:
-        # --- Obtém contratos ativos ---
-        contratos = await services.ClientService.get_contratos_ativos(
-            protocolo=protocolo,
-            cnpj_cpf=cnpj_cpf,
+        # --- Obtém contrato ---
+        endpoint = "cliente_contrato"
+        grid_param = [utils.Param(TB="cliente_contrato.id", P=id_contrato)]
+        res = await clients.IxcClient.get(endpoint=endpoint, grid_param=grid_param)
+        if not (regs := res.get("registros", [])):
+            raise HTTPException(
+                status_code=HTTP_404_NOT_FOUND, detail="Contrato inexistente"
+            )
+        contrato = regs[0]
+
+        # --- Obtém faturas Abertas ---
+        endpoint = "fn_areceber"
+        grid_param = [
+            utils.Param(TB="fn_areceber.id_contrato", P=id_contrato),
+            utils.Param(TB="fn_areceber.status", OP="!=", P="R"),
+            utils.Param(TB="fn_areceber.status", OP="!=", P="C"),
+        ]
+        res = await clients.IxcClient.get(
+            endpoint=endpoint,
+            grid_param=grid_param,
             pagina=pagina,
             itens_por_pagina=itens_por_pagina,
         )
+        faturas_abertas = res.get("registros", [])
 
         faturas_abertas_parciais: list[schemas.FaturaOutSchema] = []
 
-        # Iteração entre contratos
-        # Abordagem mais segura (fatura_aberta["id_contrato"] pode ser 0)
-        for contrato in contratos:
-            id_contrato = contrato["id"]
-
-            # --- Obtém faturas Abertas ---
-            endpoint = "fn_areceber"
-            grid_param = [
-                utils.Param(TB="fn_areceber.id_contrato", P=id_contrato),
-                utils.Param(TB="fn_areceber.status", OP="!=", P="R"),
-                utils.Param(TB="fn_areceber.status", OP="!=", P="C"),
-            ]
-            res = await clients.IxcClient.get(
-                endpoint=endpoint,
-                grid_param=grid_param,
-                pagina=pagina,
-                itens_por_pagina=itens_por_pagina,
-            )
-            faturas_abertas = res.get("registros", [])
-
-            # Iteração entre faturas abertas
-            for fatura_aberta in faturas_abertas:
-                # Faturas abertas parciais
-                faturas_abertas_parciais.append(
-                    schemas.FaturaOutSchema(
-                        id=fatura_aberta["id"],
-                        contrato=contrato["nome_plano"],
-                        data_vencimento=fatura_aberta["data_vencimento"],
-                        id_contrato=id_contrato,
-                        preco=fatura_aberta["valor"],
-                    )
+        # Iteração entre faturas abertas
+        for fatura_aberta in faturas_abertas:
+            # Faturas abertas parciais
+            faturas_abertas_parciais.append(
+                schemas.FaturaOutSchema(
+                    id=fatura_aberta["id"],
+                    contrato=contrato["contrato"],
+                    data_vencimento=fatura_aberta["data_vencimento"],
+                    id_contrato=id_contrato,
+                    preco=fatura_aberta["valor"],
                 )
+            )
 
         return schemas.ListOutSchema[schemas.FaturaOutSchema](
             data=faturas_abertas_parciais,
