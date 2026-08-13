@@ -7,7 +7,7 @@ from .api.v1 import api_v1_router, middlewares, schemas
 app = FastAPI(
     title="Arceus",
     description="Integra com sistemas IXC, Opa e 7AZ. Oferece autenticação, gestão de usuários e permissões, operações comerciais (contratos, leads), financeiras (faturas, cobrança), suporte (atendimentos, status de conexão), além de logs e métricas para monitoramento",
-    version="1.1.7",
+    version="1.1.8",
     routes=api_v1_router.routes,
 )
 

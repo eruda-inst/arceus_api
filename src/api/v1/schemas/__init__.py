@@ -6,7 +6,6 @@ from .cliente_schema import (
     CredencialOutSchema,
 )
 from .contrato_schema import (
-    ComercialContratoOutSchema,
     ContratoOutSchema,
     StatusInternetOutSchema,
     VilaContratoOutSchema,
@@ -56,7 +55,6 @@ __all__ = [
     "AtendimentoOutSchema",
     "ChavePixOutSchema",
     "ClienteExisteOutSchema",
-    "ComercialContratoOutSchema",
     "ContatoOutSchema",
     "ContratoOutSchema",
     "CredencialOutSchema",
