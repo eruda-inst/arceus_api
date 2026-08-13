@@ -2,29 +2,33 @@ from datetime import datetime
 from zoneinfo import ZoneInfo
 
 from fastapi import HTTPException, status
-from pydantic import PositiveInt
+from pydantic import NonNegativeInt, PositiveInt
 
 from .. import clients, schemas, utils
-from . import ClientService
 
 
 class CobrancaService:
     @staticmethod
     async def get_faturas_vencidas(
-        protocolo: str | None,
-        cnpj_cpf: str | None,
+        # IDs NonNegativeInt, pois o IXC é quebrado
+        id_contrato: NonNegativeInt,
         pagina: PositiveInt | None,
         itens_por_pagina: PositiveInt | None,
     ) -> schemas.ListOutSchema[schemas.FaturaOutSchema]:
-        # --- Obtém cliente ---
-        cliente = await ClientService.get_cliente_ixc(
-            protocolo=protocolo, cnpj_cpf=cnpj_cpf
-        )
+        # --- Obtém contrato ---
+        endpoint = "cliente_contrato"
+        grid_param = [utils.Param(TB="cliente_contrato.id", P=id_contrato)]
+        res = await clients.IxcClient.get(endpoint=endpoint, grid_param=grid_param)
+        if not (regs := res.get("registros", [])):
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Contrato inexistente"
+            )
+        contrato = regs[0]
 
-        # --- Obtém faturas abertas ---
+        # --- Obtém faturas Abertas ---
         endpoint = "fn_areceber"
         grid_param = [
-            utils.Param(TB="fn_areceber.id_cliente", P=cliente["id"]),
+            utils.Param(TB="fn_areceber.id_contrato", P=id_contrato),
             utils.Param(TB="fn_areceber.status", OP="!=", P="R"),
             utils.Param(TB="fn_areceber.status", OP="!=", P="C"),
         ]

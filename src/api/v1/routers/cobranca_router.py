@@ -30,8 +30,8 @@ async def get_faturas_abertas(
     path="/faturas-vencidas", summary="Obtém faturas vencidas de um cliente"
 )
 async def get_faturas_vencidas(
-    protocolo: utils.Protocolo | None = None,
-    cnpj_cpf: utils.CnpjCpf | None = None,
+    # IDs NonNegativeInt, pois o IXC é quebrado
+    id_contrato: Annotated[int, Query(ge=0, description="ID do contrato")],
     pagina: utils.Pagina | None = 1,
     itens_por_pagina: utils.ItensPorPagina = 15,
 ) -> schemas.ListOutSchema[schemas.FaturaOutSchema]:
@@ -39,8 +39,7 @@ async def get_faturas_vencidas(
     Obtém faturas vencidas de um cliente, através de protocolo de atendimento ou CPF/CNPJ
     """
     return await services.CobrancaService.get_faturas_vencidas(
-        protocolo=protocolo,
-        cnpj_cpf=cnpj_cpf,
+        id_contrato=id_contrato,
         pagina=pagina,
         itens_por_pagina=itens_por_pagina,
     )
