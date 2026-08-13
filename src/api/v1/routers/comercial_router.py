@@ -20,24 +20,6 @@ async def get_status_acesso(
     return await services.ComercialService.get_status_acesso(id_contrato=id_contrato)
 
 
-@comercial_router.get(path="/contratos", summary="Obtém contratos de um cliente")
-async def get_contratos(
-    protocolo: utils.Protocolo | None = None,
-    cnpj_cpf: utils.CnpjCpf | None = None,
-    pagina: utils.Pagina | None = 1,
-    itens_por_pagina: utils.ItensPorPagina | None = 10,
-) -> schemas.ListOutSchema[schemas.ComercialContratoOutSchema]:
-    """
-    Obtém contratos de um cliente, através de protocolo de atendimento ou CPF/CNPJ
-    """
-    return await services.ComercialService.get_contratos(
-        protocolo=protocolo,
-        cnpj_cpf=cnpj_cpf,
-        pagina=pagina,
-        itens_por_pagina=itens_por_pagina,
-    )
-
-
 @comercial_router.get(
     path="/cliente-existe", summary="Checa se um cliente existe no Opa"
 )

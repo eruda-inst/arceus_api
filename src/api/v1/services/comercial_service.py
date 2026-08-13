@@ -1,10 +1,9 @@
 from typing import Any
 
 from fastapi import HTTPException, status
-from pydantic import NonNegativeInt, PositiveInt
+from pydantic import NonNegativeInt
 
 from .. import clients, schemas, utils
-from . import ClientService
 
 
 class ComercialService:
@@ -26,30 +25,6 @@ class ComercialService:
 
         return schemas.StatusInternetOutSchema(
             status_acesso=contrato["status_internet"]
-        )
-
-    @staticmethod
-    async def get_contratos(
-        protocolo: str | None,
-        cnpj_cpf: str | None,
-        pagina: PositiveInt | None,
-        itens_por_pagina: PositiveInt | None,
-    ) -> schemas.ListOutSchema[schemas.ComercialContratoOutSchema]:
-        # --- Obtém contratos ---
-        contratos = await ClientService.get_contratos(
-            protocolo=protocolo,
-            cnpj_cpf=cnpj_cpf,
-            pagina=pagina,
-            itens_por_pagina=itens_por_pagina,
-        )
-
-        return schemas.ListOutSchema[schemas.ComercialContratoOutSchema](
-            data=[schemas.ComercialContratoOutSchema(**c) for c in contratos],
-            meta=schemas.MetaOutSchema(
-                total_itens=len(contratos),
-                pagina_atual=pagina or 1,
-                itens_por_pagina=itens_por_pagina or 10,
-            ),
         )
 
     @staticmethod
