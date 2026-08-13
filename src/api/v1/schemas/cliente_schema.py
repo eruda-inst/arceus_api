@@ -16,10 +16,6 @@ class ContatoOutSchema(BaseModel):
         return utils.Formatter.cell(cell=v)
 
 
-class ClienteExisteOutSchema(BaseModel):
-    cliente_existe: bool = Field(description="Indica se o cliente existe")
-
-
 class CredencialOutSchema(BaseModel):
     senha: str = Field(
         description="Senha da central do assinante", examples=["12345678"]

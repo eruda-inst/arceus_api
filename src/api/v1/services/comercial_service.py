@@ -52,22 +52,6 @@ class ComercialService:
         return schemas.LeadOutSchema(**lead_criado)
 
     @staticmethod
-    async def cliente_existe(cpf_cnpj: str) -> schemas.ClienteExisteOutSchema:
-        # --- Obtém cliente no Opa ---
-        cpf_cnpj_limpo = utils.Formatter.only_digits(cpf_cnpj)
-        endpoint = "cliente"
-        filter = {"cpf_cnpj": cpf_cnpj_limpo}
-        options = {"limit": 1}
-        res = await clients.OpaClient.get(
-            endpoint=endpoint, filter=filter, options=options
-        )
-        cliente_existe = True
-        if not (_ := res.get("data", [])):
-            cliente_existe = False
-
-        return schemas.ClienteExisteOutSchema(cliente_existe=cliente_existe)
-
-    @staticmethod
     async def put_lead(
         cnpj_cpf: str, lead: schemas.LeadUpdateSchema
     ) -> schemas.LeadOutSchema:

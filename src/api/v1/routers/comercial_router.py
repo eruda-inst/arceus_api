@@ -20,16 +20,6 @@ async def get_status_acesso(
     return await services.ComercialService.get_status_acesso(id_contrato=id_contrato)
 
 
-@comercial_router.get(
-    path="/cliente-existe", summary="Checa se um cliente existe no Opa"
-)
-async def cliente_existe(cpf_cnpj: utils.CnpjCpf) -> schemas.ClienteExisteOutSchema:
-    """
-    Checa se um cliente existe no Opa, através do CPF/CNPJ
-    """
-    return await services.ComercialService.cliente_existe(cpf_cnpj=cpf_cnpj)
-
-
 @comercial_router.post(
     path="/leads", status_code=status.HTTP_201_CREATED, summary="Cadastra novo lead"
 )

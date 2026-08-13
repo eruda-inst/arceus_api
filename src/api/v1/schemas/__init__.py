@@ -1,10 +1,6 @@
 from .atendimento_schema import AtendimentoInSchema, AtendimentoOutSchema
 from .authentication_schema import AccessTokenOutSchema, RefreshTokenInSchema
-from .cliente_schema import (
-    ClienteExisteOutSchema,
-    ContatoOutSchema,
-    CredencialOutSchema,
-)
+from .cliente_schema import ContatoOutSchema, CredencialOutSchema
 from .contrato_schema import (
     ContratoOutSchema,
     StatusInternetOutSchema,
@@ -54,7 +50,6 @@ __all__ = [
     "AtendimentoInSchema",
     "AtendimentoOutSchema",
     "ChavePixOutSchema",
-    "ClienteExisteOutSchema",
     "ContatoOutSchema",
     "ContratoOutSchema",
     "CredencialOutSchema",
