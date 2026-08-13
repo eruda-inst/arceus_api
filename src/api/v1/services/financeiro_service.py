@@ -1,5 +1,7 @@
 import statistics
+from datetime import date, datetime
 from typing import Any
+from zoneinfo import ZoneInfo
 
 from fastapi import HTTPException, status
 from pydantic import NonNegativeInt, PositiveInt
@@ -148,6 +150,104 @@ class FinanceiroService:
                     preco=fatura_aberta["valor"],
                 )
             )
+
+        return schemas.ListOutSchema[schemas.FaturaOutSchema](
+            data=faturas_abertas_parciais,
+            meta=schemas.MetaOutSchema(
+                total_itens=len(faturas_abertas_parciais),
+                pagina_atual=pagina or 1,
+                itens_por_pagina=itens_por_pagina or 10,
+            ),
+        )
+
+    @staticmethod
+    async def get_3_faturas_abertas(
+        # IDs NonNegativeInt, pois o IXC é quebrado
+        id_contrato: NonNegativeInt,
+        pagina: PositiveInt | None,
+        itens_por_pagina: PositiveInt | None,
+    ) -> schemas.ListOutSchema[schemas.FaturaOutSchema]:
+        # --- Obtém contrato ---
+        endpoint = "cliente_contrato"
+        grid_param = [utils.Param(TB="cliente_contrato.id", P=id_contrato)]
+        res = await clients.IxcClient.get(endpoint=endpoint, grid_param=grid_param)
+        if not (regs := res.get("registros", [])):
+            raise HTTPException(
+                status_code=HTTP_404_NOT_FOUND, detail="Contrato inexistente"
+            )
+        contrato = regs[0]
+
+        # --- Obtém faturas Abertas ---
+        endpoint = "fn_areceber"
+        grid_param = [
+            utils.Param(TB="fn_areceber.id_contrato", P=id_contrato),
+            utils.Param(TB="fn_areceber.status", OP="!=", P="R"),
+            utils.Param(TB="fn_areceber.status", OP="!=", P="C"),
+        ]
+        res = await clients.IxcClient.get(
+            endpoint=endpoint,
+            grid_param=grid_param,
+            pagina=pagina,
+            itens_por_pagina=itens_por_pagina,
+        )
+        faturas_abertas = res.get("registros", [])
+
+        faturas_abertas_parciais: list[schemas.FaturaOutSchema] = []
+
+        total_faturas_vencidas = 0
+        timestamp = datetime.now(ZoneInfo("America/Bahia"))
+        data_atual = timestamp.date()
+        data_atual_iso = data_atual.isoformat()  # AAAA-MM-DD
+        mes_atual = str(data_atual.month).zfill(2)  # 01, ao invés de 1, por exemplo
+
+        for fatura_aberta in faturas_abertas:
+            data_vencimento = date.fromisoformat(fatura_aberta["data_vencimento"])
+            mes_vencimento = str(data_vencimento.month).zfill(2)
+            if mes_atual == mes_vencimento:
+                continue
+            if data_atual_iso > fatura_aberta["data_vencimento"]:
+                total_faturas_vencidas += 1
+
+        if total_faturas_vencidas == 0:
+            faturas_abertas = faturas_abertas[:3]
+            for fatura_aberta in faturas_abertas:
+                faturas_abertas_parciais.append(
+                    schemas.FaturaOutSchema(
+                        id=fatura_aberta["id"],
+                        contrato=contrato["contrato"],
+                        data_vencimento=fatura_aberta["data_vencimento"],
+                        id_contrato=id_contrato,
+                        preco=fatura_aberta["valor"],
+                    )
+                )
+        elif total_faturas_vencidas == 1:
+            for fatura_aberta in faturas_abertas:
+                faturas_abertas_parciais.append(
+                    schemas.FaturaOutSchema(
+                        id=fatura_aberta["id"],
+                        contrato=contrato["contrato"],
+                        data_vencimento=fatura_aberta["data_vencimento"],
+                        id_contrato=id_contrato,
+                        preco=fatura_aberta["valor"],
+                    )
+                )
+                if len(faturas_abertas_parciais) == 3:
+                    break
+        else:
+            for fatura_aberta in faturas_abertas:
+                faturas_abertas_parciais.append(
+                    schemas.FaturaOutSchema(
+                        id=fatura_aberta["id"],
+                        contrato=contrato["contrato"],
+                        data_vencimento=fatura_aberta["data_vencimento"],
+                        id_contrato=id_contrato,
+                        preco=fatura_aberta["valor"],
+                    )
+                )
+                data_vencimento = date.fromisoformat(fatura_aberta["data_vencimento"])
+                mes_vencimento = str(data_vencimento.month).zfill(2)
+                if mes_atual == mes_vencimento:
+                    break
 
         return schemas.ListOutSchema[schemas.FaturaOutSchema](
             data=faturas_abertas_parciais,
