@@ -223,12 +223,11 @@ class FinanceiroService:
 
     @staticmethod
     async def get_credenciais(
-        protocolo: str | None = None, cnpj_cpf: str | None = None
+        # IDs NonNegativeInt, pois o IXC é quebrado
+        id_cliente: NonNegativeInt,
     ) -> schemas.CredencialOutSchema:
         # --- Obtém cliente ---
-        cliente = await ClientService.get_cliente_ixc(
-            protocolo=protocolo, cnpj_cpf=cnpj_cpf
-        )
+        cliente = await ClientService.get_cliente_ixc(id_cliente=id_cliente)
 
         return schemas.CredencialOutSchema(
             usuario=cliente["hotsite_email"], senha=cliente["senha"]

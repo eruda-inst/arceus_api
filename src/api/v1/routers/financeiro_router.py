@@ -51,18 +51,17 @@ async def get_chave_pix(
 
 
 @financeiro_router.get(
-    path="/credenciais",
+    path="/credenciais/{id_cliente}",
     summary="Obtém credenciais da central do assinante de um cliente",
 )
 async def get_credenciais(
-    protocolo: utils.Protocolo | None = None, cnpj_cpf: utils.CnpjCpf | None = None
+    # IDs NonNegativeInt, pois o IXC é quebrado
+    id_cliente: Annotated[int, Path(description="ID do cliente")],
 ) -> schemas.CredencialOutSchema:
     """
-    Obtém credenciais da central do assinante de um cliente, através de protocolo de atendimento ou CPF/CNPJ
+    Obtém credenciais da central do assinante de um cliente, através de ID do cliente
     """
-    return await services.FinanceiroService.get_credenciais(
-        protocolo=protocolo, cnpj_cpf=cnpj_cpf
-    )
+    return await services.FinanceiroService.get_credenciais(id_cliente=id_cliente)
 
 
 @financeiro_router.post(
