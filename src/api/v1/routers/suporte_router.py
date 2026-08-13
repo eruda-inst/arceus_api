@@ -29,7 +29,7 @@ async def get_contratos(
 
 
 @suporte_router.get(
-    path="/status_conexao", summary="Obtém status de conexão de um cliente"
+    path="/status-conexao", summary="Obtém status de conexão de um cliente"
 )
 async def get_status_conexao(id_login: IdLogin) -> schemas.StatusConexaoOutSchema:
     """
@@ -38,7 +38,7 @@ async def get_status_conexao(id_login: IdLogin) -> schemas.StatusConexaoOutSchem
     return await services.SuporteService.get_status_conexao(id_login=id_login)
 
 
-@suporte_router.get(path="/status_onu", summary="Obtém status de ONU de um cliente")
+@suporte_router.get(path="/status-onu", summary="Obtém status de ONU de um cliente")
 async def get_status_onu(
     id_login: IdLogin | None = None,
     mac_onu: Annotated[
@@ -54,7 +54,7 @@ async def get_status_onu(
     )
 
 
-@suporte_router.get(path="/dados_wifi", summary="Obtém dados do WiFi de um cliente")
+@suporte_router.get(path="/dados-wifi", summary="Obtém dados do WiFi de um cliente")
 async def get_dados_wifi(id_login: IdLogin) -> schemas.WifiOutSchema:
     """
     Obtém dados do WiFi de um cliente, através do ID de login
@@ -95,7 +95,7 @@ async def post_atendimentos(
 
 
 @suporte_router.post(
-    path="/desconectar_cliente", summary="Envia sinal de desconexão para um cliente"
+    path="/desconectar-cliente", summary="Envia sinal de desconexão para um cliente"
 )
 async def post_desconectar_cliente(id_login: IdLogin) -> schemas.MensagemOutSchema:
     """
@@ -104,7 +104,7 @@ async def post_desconectar_cliente(id_login: IdLogin) -> schemas.MensagemOutSche
     return await services.SuporteService.post_desconectar_cliente(id_login=id_login)
 
 
-@suporte_router.post(path="/limpar_mac", summary="Limpa MAC Address")
+@suporte_router.post(path="/limpar-mac", summary="Limpa MAC Address")
 async def post_limpar_mac(id_login: IdLogin) -> schemas.MensagemOutSchema:
     """
     Limpa MAC Address, através do id de login
