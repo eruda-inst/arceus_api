@@ -8,7 +8,7 @@ upgrade_router = APIRouter(prefix="/upgrade", tags=["Upgrade"])
 
 
 @upgrade_router.get(
-    path="/planos_sugeridos",
+    path="/planos-sugeridos",
     summary="Sugere planos oficiais de acordo com planos desatualizados",
 )
 async def get_planos_sugeridos(

@@ -20,7 +20,7 @@ async def get_contrato(
 
 
 @vila_router.get(
-    path="/status_conexao", summary="Obtém status da conexão de um cliente"
+    path="/status-conexao", summary="Obtém status da conexão de um cliente"
 )
 async def get_status_conexao(
     numero_residencia: NumeroResidencia,
@@ -33,7 +33,7 @@ async def get_status_conexao(
     )
 
 
-@vila_router.get(path="/status_onu", summary="Obtém status da ONU de um cliente")
+@vila_router.get(path="/status-onu", summary="Obtém status da ONU de um cliente")
 async def get_status_onu(
     numero_residencia: NumeroResidencia,
 ) -> schemas.StatusOnuOutSchema:
@@ -45,7 +45,7 @@ async def get_status_onu(
     )
 
 
-@vila_router.get(path="/dados_wifi", summary="Obtém dados do WiFi de um cliente")
+@vila_router.get(path="/dados-wifi", summary="Obtém dados do WiFi de um cliente")
 async def get_dados_wifi(numero_residencia: NumeroResidencia) -> schemas.WifiOutSchema:
     """
     Obtém dados do WiFi de um cliente, através do número da residência
@@ -75,7 +75,7 @@ async def get_atendimentos(
     )
 
 
-@vila_router.post(path="/limpar_mac", summary="Limpa MAC Address de um cliente")
+@vila_router.post(path="/limpar-mac", summary="Limpa MAC Address de um cliente")
 async def post_limpar_mac(
     numero_residencia: NumeroResidencia,
 ) -> schemas.MensagemOutSchema:
@@ -87,7 +87,7 @@ async def post_limpar_mac(
     )
 
 
-@vila_router.post(path="/desconectar_cliente", summary="Desconecta um cliente")
+@vila_router.post(path="/desconectar-cliente", summary="Desconecta um cliente")
 async def post_desconectar_cliente(
     numero_residencia: NumeroResidencia,
 ) -> schemas.MensagemOutSchema:
