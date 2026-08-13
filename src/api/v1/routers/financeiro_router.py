@@ -8,7 +8,7 @@ financeiro_router = APIRouter(prefix="/financeiro", tags=["Financeiro"])
 
 
 @financeiro_router.get(
-    path="/faturas_abertas", summary="Obtém faturas abertas de um cliente"
+    path="/faturas-abertas", summary="Obtém faturas abertas de um cliente"
 )
 async def get_faturas_abertas(
     # IDs NonNegativeInt, pois o IXC é quebrado
@@ -45,7 +45,7 @@ async def get_contratos(
 
 
 @financeiro_router.get(
-    path="/linha_digitavel/{id_fatura}", summary="Obtém linha digitável de uma fatura"
+    path="/linha-digitavel/{id_fatura}", summary="Obtém linha digitável de uma fatura"
 )
 async def get_linha_digitavel(
     # IDs NonNegativeInt, pois o IXC é quebrado
@@ -57,7 +57,7 @@ async def get_linha_digitavel(
     return await services.FinanceiroService.get_linha_digitavel(id_fatura=id_fatura)
 
 
-@financeiro_router.get(path="/chave_pix", summary="Obtém chave pix de uma fatura")
+@financeiro_router.get(path="/chave-pix", summary="Obtém chave pix de uma fatura")
 async def get_chave_pix(
     # IDs NonNegativeInt, pois o IXC é quebrado
     id_fatura: Annotated[int, Query(ge=0, description="ID da fatura")],
@@ -84,7 +84,7 @@ async def get_credenciais(
 
 
 @financeiro_router.post(
-    path="/desbloqueio_em_confianca",
+    path="/desbloqueio-em-confianca",
     summary="Realiza desbloqueio em confiança de um cliente",
 )
 async def post_desbloqueio_em_confianca(
