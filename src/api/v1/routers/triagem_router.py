@@ -8,7 +8,7 @@ triagem_router = APIRouter(prefix="/triagem", tags=["Triagem"])
 
 
 @triagem_router.get(
-    path="/contato_cliente", summary="Obtém dados de contato de um cliente"
+    path="/contato-cliente", summary="Obtém dados de contato de um cliente"
 )
 async def get_contato_cliente(
     protocolo: utils.Protocolo | None = None, cnpj_cpf: utils.CnpjCpf | None = None
@@ -22,7 +22,7 @@ async def get_contato_cliente(
 
 
 # Por razões de limitações na plataforma opa, o verbo deve ser put, ao invés de patch
-@triagem_router.put(path="/contato_cliente", summary="Atualiza contato de um cliente")
+@triagem_router.put(path="/contato-cliente", summary="Atualiza contato de um cliente")
 async def put_contato_cliente(
     telefone_celular: Annotated[
         str, Body(embed=True, description="Novo telefone celular")
