@@ -1,22 +1,29 @@
 import re
+from typing import ClassVar
 
 
 class Formatter:
-    CNPJ_PATTERN = r"^\d{2}\.\d{3}\.\d{3}\/\d{4}\-\d{2}$"
-    CPF_PATTERN = r"^\d{3}\.\d{3}\.\d{3}\-\d{2}$"
-    CELL_PATTERN = r"^\(\d{2}\) \d{4,5}-\d{4}$"
-    CEP_PATTERN = r"^\d{5}-\d{3}$"
+    _cnpj_pattern: ClassVar[str] = (
+        r"^\d{2}\.\d{3}\.\d{3}\/\d{4}\-\d{2}$"  # 11.111.111/1111-11
+    )
+    _cpf_pattern: ClassVar[str] = r"^\d{3}\.\d{3}\.\d{3}\-\d{2}$"  # 111.111.111-11
+    _cell_pattern: ClassVar[str] = (
+        r"^\(\d{2}\) \d{4,5}-\d{4}$"  # (11) 1111-1111 or (11) 11111-1111
+    )
+    _cep_pattern: ClassVar[str] = r"^\d{5}-\d{3}$"  # 11111-111
 
+    # 111.111.111-11 -> 11111111111
     @staticmethod
-    def only_digits(string: str) -> str:
+    def _only_digits(string: str) -> str:
         return re.sub(r"\D", "", string)
 
+    # 11111111111 -> 111.111.111-11
     @classmethod
     def cpf(cls, cpf: str) -> str:
-        if re.fullmatch(cls.CPF_PATTERN, cpf):
+        if re.fullmatch(cls._cpf_pattern, cpf):
             return cpf
 
-        cpf_limpo = cls.only_digits(string=cpf)
+        cpf_limpo = cls._only_digits(string=cpf)
         if len(cpf_limpo) != 11:
             raise ValueError("CPF deve ter 11 dígitos")
 
@@ -25,30 +32,33 @@ class Formatter:
         )
         return cpf_formatado
 
+    # 11111111111111 -> 11.111.111/1111-11
     @classmethod
     def cnpj(cls, cnpj: str) -> str:
-        if re.fullmatch(cls.CNPJ_PATTERN, cnpj):
+        if re.fullmatch(cls._cnpj_pattern, cnpj):
             return cnpj
 
-        cnpj_limpo = cls.only_digits(string=cnpj)
+        cnpj_limpo = cls._only_digits(string=cnpj)
         if len(cnpj_limpo) != 14:
             raise ValueError("CNPJ deve conter 14 dígitos")
 
         cnpj_formatado = f"{cnpj_limpo[:2]}.{cnpj_limpo[2:5]}.{cnpj_limpo[5:8]}/{cnpj_limpo[8:12]}-{cnpj_limpo[12:]}"
         return cnpj_formatado
 
+    # 11111111111 -> 111.111.111-11
+    # 11111111111111 -> 11.111.111/1111-11
     @classmethod
     def cnpj_cpf(cls, cnpj_cpf: str) -> str:
-        cnpj_cpf_limpo = cls.only_digits(string=cnpj_cpf)
+        cnpj_cpf_limpo = cls._only_digits(string=cnpj_cpf)
 
         tamanho = len(cnpj_cpf_limpo)
 
         if tamanho == 11:
-            if re.fullmatch(cls.CPF_PATTERN, cnpj_cpf):
+            if re.fullmatch(cls._cpf_pattern, cnpj_cpf):
                 return cnpj_cpf
             return cls.cpf(cnpj_cpf_limpo)
         elif tamanho == 14:
-            if re.fullmatch(cls.CNPJ_PATTERN, cnpj_cpf):
+            if re.fullmatch(cls._cnpj_pattern, cnpj_cpf):
                 return cnpj_cpf
             return cls.cnpj(cnpj_cpf_limpo)
         else:
@@ -56,11 +66,13 @@ class Formatter:
                 "CNPJ/CPF inválido. Deve ter 11 (CPF) ou 14 (CNPJ) dígitos"
             )
 
+    # 1111111111 -> (11) 1111-1111
+    # 1111111111 -> (11) 11111-1111
     @classmethod
     def cell(cls, cell: str) -> str:
-        cell_limpo = cls.only_digits(string=cell)
+        cell_limpo = cls._only_digits(string=cell)
 
-        if re.fullmatch(cls.CELL_PATTERN, cell):
+        if re.fullmatch(cls._cell_pattern, cell):
             return cell
 
         if len(cell_limpo) not in (10, 11):
@@ -79,12 +91,13 @@ class Formatter:
             parte2 = numero[5:]
             return f"({ddd}) {parte1}-{parte2}"
 
+    # 11111111 -> 11111-11
     @classmethod
     def cep(cls, cep: str) -> str:
-        if re.fullmatch(cls.CEP_PATTERN, cep):
+        if re.fullmatch(cls._cep_pattern, cep):
             return cep
 
-        cep_limpo = cls.only_digits(string=cep)
+        cep_limpo = cls._only_digits(string=cep)
         if len(cep_limpo) != 8:
             raise ValueError("CEP deve ter 8 dígitos")
 
@@ -92,7 +105,7 @@ class Formatter:
         return cep_formatado
 
     @staticmethod
-    # De YYYY-MM-DD para DD/MM/AAAA
+    # YYYY-MM-DD -> DD/MM/AAAA
     def data(data: str) -> str:
         FORMATO_BR = r"(\d{2})\/(\d{2})\/(\d{4})"
         FORMATO_ISO = r"(\d{4})-(\d{2})-(\d{2})"
@@ -104,6 +117,7 @@ class Formatter:
         # Se não estiver, converte
         return re.sub(FORMATO_ISO, r"\3/\2/\1", data)
 
+    # " str  \ning\\ " -> "String."
     @staticmethod
     def sanitize(string: str) -> str:
         # Remove espaços do início e fim

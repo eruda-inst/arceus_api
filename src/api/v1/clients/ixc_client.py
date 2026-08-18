@@ -1,6 +1,6 @@
 import base64
 import json
-from typing import ClassVar
+from typing import Any, ClassVar
 
 from httpx import URL, Headers
 from pydantic import PositiveInt
@@ -23,18 +23,14 @@ class IxcClient(HttpxClient):
         return Headers({**cls._headers, "ixcsoft": "listar"})
 
     @classmethod
-    async def post(
-        cls, endpoint: str, payload: dict[str, str | int]
-    ) -> dict[str, str | int]:
+    async def post(cls, endpoint: str, payload: Any) -> Any:
         url = URL(f"{cls._base_url}/{endpoint}")
         return await cls._make_request(
             url=url, payload=payload, method=utils.HttpMethod.POST, headers=cls._headers
         )
 
     @classmethod
-    async def put(
-        cls, endpoint: str, id: PositiveInt, payload: dict[str, str | int]
-    ) -> dict[str, str | int]:
+    async def put(cls, endpoint: str, id: PositiveInt, payload: Any) -> Any:
         url = URL(f"{cls._base_url}/{endpoint}/{id}")
         return await cls._make_request(
             url=url, payload=payload, method=utils.HttpMethod.PUT, headers=cls._headers
@@ -48,7 +44,7 @@ class IxcClient(HttpxClient):
         pagina: PositiveInt | None = 1,
         itens_por_pagina: PositiveInt | None = 10,
         sort_order: utils.SortOrder | None = utils.SortOrder.ASC,
-    ) -> dict[str, str | int]:
+    ) -> Any:
         grid_param_dict = [gp.model_dump() for gp in grid_param]
         payload = {
             "grid_param": json.dumps(grid_param_dict),

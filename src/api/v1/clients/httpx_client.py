@@ -1,4 +1,4 @@
-from typing import ClassVar
+from typing import Any, ClassVar
 
 from httpx import (
     URL,
@@ -24,11 +24,8 @@ class HttpxClient:
         url: URL,
         headers: Headers,
         method: utils.HttpMethod = utils.HttpMethod.GET,
-        payload: dict[str, str]
-        | dict[str, str | int]
-        | dict[str, dict[str, str | int]]
-        | None = None,
-    ) -> dict[str, str | int]:
+        payload: Any = None,
+    ) -> Any:
         try:
             res = await cls._client.request(
                 method=method, url=url, headers=headers, json=payload

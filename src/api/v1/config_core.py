@@ -1,9 +1,13 @@
+from typing import ClassVar
+
 from pydantic import EmailStr, Field, NonNegativeInt, SecretStr, computed_field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
+    model_config: ClassVar[SettingsConfigDict] = SettingsConfigDict(
+        env_file=".env", env_file_encoding="utf-8"
+    )
 
     api_key_7az: SecretStr = Field(default=SecretStr("api_key_7az"))
     base_api_url_7az: str = Field(default="http://exemplo.com")

@@ -1,4 +1,4 @@
-from typing import ClassVar
+from typing import Any, ClassVar
 
 from httpx import URL, Headers
 
@@ -12,9 +12,7 @@ class OpaClient(HttpxClient):
     _headers: ClassVar[Headers] = Headers({"Authorization": f"Bearer {_token}"})
 
     @classmethod
-    async def get(
-        cls, endpoint: str, filter: dict[str, str | int]
-    ) -> dict[str, str | int]:
+    async def get(cls, endpoint: str, filter: dict[str, str | int]) -> Any:
         payload = {"filter": filter}
         url = URL(f"{cls._base_url}/{endpoint}")
         data = await cls._make_request(url=url, headers=cls._headers, payload=payload)

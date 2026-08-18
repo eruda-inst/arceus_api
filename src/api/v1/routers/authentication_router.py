@@ -33,7 +33,7 @@ async def logout(
     """
     Invalida token de usuário autenticado
     """
-    curr_user.versao_token += 1  # type: ignore
+    curr_user.versao_token += 1
     await db.commit()
 
 
@@ -53,7 +53,7 @@ async def refresh_token(
 
 
 @authentication_router.get(path="/me", summary="Usuário atual")
-async def me(db: DbDep, curr_user: CurrUserDep) -> schemas.UserOutSchema:
+async def me(_: DbDep, curr_user: CurrUserDep) -> schemas.UserOutSchema:
     """
     Usuário atual logado
     """

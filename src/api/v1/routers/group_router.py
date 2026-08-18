@@ -38,7 +38,7 @@ async def get_by_id(
 @group_router.get(path="/nome/{nome}", summary="Obtém grupo por nome")
 async def get_by_name(
     db: DbDep,
-    curr_user: CurrUserDep,
+    _: CurrUserDep,
     nome: Annotated[str, Path(description="Nome do grupo")],
 ) -> schemas.GroupOutSchema:
     """
@@ -50,7 +50,7 @@ async def get_by_name(
 @group_router.get(path="/usuario/id/{id}", summary="Obtém grupo por ID do usuário")
 async def get_by_user_id(
     db: DbDep,
-    curr_user: CurrUserDep,
+    _: CurrUserDep,
     id: Annotated[PositiveInt, Path(description="ID do usuário")],
 ) -> schemas.GroupOutSchema:
     """
