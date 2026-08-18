@@ -306,7 +306,9 @@ class FinanceiroService:
         id_fatura: NonNegativeInt,
     ) -> schemas.ChavePixOutSchema:
         # --- Obtém fatura ---
-        res = await clients.SevenAZClient.get_fatura(id_fatura=id_fatura)
+        endpoint = f"invoices/{id_fatura}/payment-data"
+        res = await clients.SevenAZClient.get(endpoint=endpoint)
+
         if "id" not in res:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Fatura inexistente"

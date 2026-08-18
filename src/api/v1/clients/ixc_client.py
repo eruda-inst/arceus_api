@@ -1,77 +1,43 @@
 import base64
 import json
-from typing import Any
+from typing import ClassVar
 
-import httpx
-from fastapi import HTTPException, status
+from httpx import URL, Headers
 from pydantic import PositiveInt
 
 from .. import utils
 from ..config_core import settings
+from .httpx_client import HttpxClient
 
 
-class IxcClient:
-    _token = settings.ixc_token.get_secret_value()
-    _token_encoded = base64.b64encode(_token.encode("utf-8")).decode("utf-8")
-    _timeout = httpx.Timeout(connect=5.0, read=30.0, write=10.0, pool=1.0)
-    _client = httpx.AsyncClient(timeout=_timeout)
-    _base_url = settings.base_api_url_ixc
-
-    @classmethod
-    def _get_headers(cls, include_ixcsoft: bool = True) -> dict[str, str]:
-        headers = {"Authorization": f"Basic {cls._token_encoded}"}
-        if include_ixcsoft:
-            headers["ixcsoft"] = "listar"
-        return headers
+class IxcClient(HttpxClient):
+    _token: ClassVar[str] = settings.ixc_token.get_secret_value()
+    _token_encoded: ClassVar[str] = base64.b64encode(_token.encode("utf-8")).decode(
+        "utf-8"
+    )
+    _base_url: ClassVar[str] = settings.base_api_url_ixc
+    _headers: ClassVar[Headers] = Headers({"Authorization": f"Basic {_token_encoded}"})
 
     @classmethod
-    async def _make_request(
-        cls,
-        endpoint: str,
-        payload: dict[str, Any],
-        method: utils.HttpMethod = utils.HttpMethod.POST,
-        include_ixcsoft: bool = True,
-    ) -> dict[str, Any]:
-        try:
-            res = await cls._client.request(
-                method=method,
-                url=f"{cls._base_url}/{endpoint}",
-                headers=cls._get_headers(include_ixcsoft=include_ixcsoft),
-                json=payload,
-            )
-            res.raise_for_status()
-            return res.json()
-        except httpx.HTTPStatusError as e:
-            raise HTTPException(
-                status_code=e.response.status_code,
-                detail=f"Erro do IXC: {e}",
-            )
-        except httpx.RequestError as e:
-            raise HTTPException(
-                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail=f"Falha na comunicação com o IXC: {e}",
-            )
-        except ValueError as e:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Resposta inválida do IXC: {e}",
-            )
+    def _include_ixcsoft(cls) -> Headers:
+        return Headers({**cls._headers, "ixcsoft": "listar"})
 
     @classmethod
-    async def post(cls, endpoint: str, payload: dict[str, Any]) -> dict[str, Any]:
+    async def post(
+        cls, endpoint: str, payload: dict[str, str | int]
+    ) -> dict[str, str | int]:
+        url = URL(f"{cls._base_url}/{endpoint}")
         return await cls._make_request(
-            endpoint=endpoint, payload=payload, include_ixcsoft=False
+            url=url, payload=payload, method=utils.HttpMethod.POST, headers=cls._headers
         )
 
     @classmethod
     async def put(
-        cls, endpoint: str, id: PositiveInt, payload: dict[str, Any]
-    ) -> dict[str, Any]:
+        cls, endpoint: str, id: PositiveInt, payload: dict[str, str | int]
+    ) -> dict[str, str | int]:
+        url = URL(f"{cls._base_url}/{endpoint}/{id}")
         return await cls._make_request(
-            endpoint=f"{endpoint}/{id}",
-            payload=payload,
-            include_ixcsoft=False,
-            method=utils.HttpMethod.PUT,
+            url=url, payload=payload, method=utils.HttpMethod.PUT, headers=cls._headers
         )
 
     @classmethod
@@ -82,7 +48,7 @@ class IxcClient:
         pagina: PositiveInt | None = 1,
         itens_por_pagina: PositiveInt | None = 10,
         sort_order: utils.SortOrder | None = utils.SortOrder.ASC,
-    ) -> dict[str, Any]:
+    ) -> dict[str, str | int]:
         grid_param_dict = [gp.model_dump() for gp in grid_param]
         payload = {
             "grid_param": json.dumps(grid_param_dict),
@@ -90,4 +56,8 @@ class IxcClient:
             "rp": str(itens_por_pagina),
             "sortorder": str(sort_order),
         }
-        return await cls._make_request(endpoint=endpoint, payload=payload)
+        url = URL(f"{cls._base_url}/{endpoint}")
+        headers = cls._include_ixcsoft()
+        return await cls._make_request(
+            url=url, payload=payload, method=utils.HttpMethod.POST, headers=headers
+        )

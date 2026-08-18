@@ -1,34 +1,18 @@
-from typing import Any
+from typing import ClassVar
 
-import httpx
-from pydantic import PositiveInt
+from httpx import URL, Headers
 
 from ..config_core import settings
+from .httpx_client import HttpxClient
 
 
-class SevenAZClient:
-    _base_url = settings.base_api_url_7az
-    _api_key = settings.api_key_7az.get_secret_value()
-    _timeout = httpx.Timeout(connect=5.0, read=30.0, write=10.0, pool=1.0)
-    _client = httpx.AsyncClient(timeout=_timeout)
-
-    @classmethod
-    def _get_headers(cls) -> Any:
-        return {"X-API-Key": cls._api_key}
+class SevenAZClient(HttpxClient):
+    _headers: ClassVar[Headers] = Headers(
+        {"X-API-Key": settings.api_key_7az.get_secret_value()}
+    )
+    _base_url: ClassVar[str] = settings.base_api_url_7az
 
     @classmethod
-    def _get_url(cls, endpoint: str) -> str:
-        return f"{cls._base_url}/{endpoint}"
-
-    @classmethod
-    async def get_fatura(cls, id_fatura: PositiveInt) -> Any:
-        url = cls._get_url(
-            endpoint=f"v2/integrations/omnichannel/invoices/{id_fatura}/payment-data"
-        )
-        headers = cls._get_headers()
-        res = await cls._client.request(method="GET", url=url, headers=headers)
-        return res.json()
-
-    @classmethod
-    async def aclose(cls) -> None:
-        await cls._client.aclose()
+    async def get(cls, endpoint: str) -> dict[str, str | int]:
+        url = URL(f"{cls._base_url}/{endpoint}")
+        return await cls._make_request(url=url, headers=cls._headers)
