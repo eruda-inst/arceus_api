@@ -21,22 +21,12 @@ from .ixc_user_enum import (
     IXCUserStatusCod,
     IXCUserStatusLabel,
 )
-from .lead_enum import (
-    AtivoCod,
-    AtivoRot,
-    LeadCod,
-    LeadRot,
-    PrincipalCod,
-    PrincipalRot,
-    TipoPessoaCod,
-    TipoPessoaRot,
-)
+from .lead_enum import TipoPessoaCod, TipoPessoaRot
 from .login_enum import StatusConexaoCod, StatusConexaoRot, StatusOnuRot
+from .misc_enum import SimNaoCod, SimNaoRot
 from .perm_enum import PermCodes, PermNames
 
 __all__ = [
-    "AtivoCod",
-    "AtivoRot",
     "Default",
     "Departments",
     "GroupNames",
@@ -45,14 +35,12 @@ __all__ = [
     "IXCUserAccessTypeLabel",
     "IXCUserStatusCod",
     "IXCUserStatusLabel",
-    "LeadCod",
-    "LeadRot",
     "OrigemEnderecoCod",
     "PermCodes",
     "PermNames",
-    "PrincipalCod",
-    "PrincipalRot",
     "PrioridadeCod",
+    "SimNaoCod",
+    "SimNaoRot",
     "StatusConexaoCod",
     "StatusConexaoRot",
     "StatusContratoCod",
