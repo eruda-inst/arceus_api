@@ -1,8 +1,10 @@
 import re
 import time
 from collections.abc import Awaitable, Callable
+from typing import override
 
 from fastapi import Request, Response
+from fastapi.logger import logger
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.types import ASGIApp
 
@@ -31,6 +33,7 @@ class LogMiddleware(BaseHTTPMiddleware):
             "vila",
         )
 
+    @override
     async def dispatch(
         self,
         request: Request,
@@ -81,20 +84,23 @@ class LogMiddleware(BaseHTTPMiddleware):
             if cliente:
                 nome_cliente = cliente["razao"]
 
-        async for session in db.get_db():
-            await cruds.LogCrud.create_log(
-                db=session,
-                metodo=http_method,
-                endpoint=endpoint,
-                codigo=status_code,
-                duracao=duration,
-                protocolo=protocol,
-                payload=payload,
-                resposta=response,  # type: ignore
-                url=str(url),
-                setor=setor,
-                nome_cliente=nome_cliente,
-            )
+        try:
+            async with db.AsyncSessionLocal() as session:
+                await cruds.LogCrud.create_log(
+                    db=session,
+                    metodo=http_method,
+                    endpoint=endpoint,
+                    codigo=status_code,
+                    duracao=duration,
+                    protocolo=protocol,
+                    payload=payload,
+                    resposta=response_body.decode(),
+                    url=str(request.url),
+                    setor=setor,
+                    nome_cliente=nome_cliente,
+                )
+        except Exception as e:
+            logger.error("Failed to write log entry: %s", e, exc_info=True)
 
         # A response precisa ser refeita
         return Response(
