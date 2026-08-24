@@ -45,16 +45,6 @@ async def get_status_onu(
     )
 
 
-@vila_router.get(path="/dados-wifi", summary="Obtém dados do WiFi de um cliente")
-async def get_dados_wifi(numero_residencia: NumeroResidencia) -> schemas.WifiOutSchema:
-    """
-    Obtém dados do WiFi de um cliente, através do número da residência
-    """
-    return await services.VilaService.get_dados_wifi(
-        numero_residencia=numero_residencia
-    )
-
-
 @vila_router.get(
     path="/atendimentos", summary="Obtém atendimentos abertos de um cliente"
 )

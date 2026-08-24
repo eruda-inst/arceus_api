@@ -97,20 +97,6 @@ class VilaService:
         return schemas.StatusOnuOutSchema(status_onu=sinal_rx)
 
     @classmethod
-    async def get_dados_wifi(
-        cls, numero_residencia: PositiveInt
-    ) -> schemas.WifiOutSchema:
-        # --- Obtém login ---
-        login = await cls._get_login(numero_residencia=numero_residencia)
-
-        return schemas.WifiOutSchema(
-            ssid_wifi_2g=login["ssid_router_wifi"],
-            senha_wifi_2g=login["senha_rede_sem_fio"],
-            ssid_wifi_5g=login["ssid_router_wifi_5ghz"],
-            senha_wifi_5g=login["senha_rede_sem_fio_5ghz"],
-        )
-
-    @classmethod
     async def get_atendimentos(
         cls,
         numero_residencia: PositiveInt,
@@ -211,7 +197,6 @@ class VilaService:
         payload = atendimento.model_dump()
         payload["menssagem"] = atendimento.mensagem
         res = await clients.IxcClient.post(endpoint=endpoint, payload=payload)
-        print(res)
         if not (id := res.get("id")):
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
