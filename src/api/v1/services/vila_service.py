@@ -209,7 +209,9 @@ class VilaService:
         # --- Cria atendimento ---
         endpoint = "su_ticket"
         payload = atendimento.model_dump()
+        payload["menssagem"] = atendimento.mensagem
         res = await clients.IxcClient.post(endpoint=endpoint, payload=payload)
+        print(res)
         if not (id := res.get("id")):
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
