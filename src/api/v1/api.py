@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from . import routers
+from . import routers, websockets
 
 api_v1_router = APIRouter(prefix="/api/v1")
 
@@ -18,3 +18,4 @@ api_v1_router.include_router(router=routers.user_router)
 api_v1_router.include_router(router=routers.ixc_user_router)
 api_v1_router.include_router(router=routers.log_router)
 api_v1_router.include_router(router=routers.metric_router)
+api_v1_router.include_router(router=websockets.metric_ws_router)

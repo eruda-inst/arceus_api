@@ -15,14 +15,62 @@ read_metric_perm_dep = Annotated[
 ]
 
 
-@metric_router.get(path="/total-requisicoes", summary="Obtém o total de requisições")
-async def get_total_reqs(
+@metric_router.get(
+    path="/erros", summary="Obtém total e percentual de erros (hoje/sempre)"
+)
+async def get_error_stats(
     db: db_dep, current_user: current_user_dep, perm: read_metric_perm_dep
-) -> schemas.TodayAlwaysOutSchema[NonNegativeInt]:
+) -> schemas.TodayAlwaysOutSchema[schemas.ErrorStatsSchema]:
     """
-    Obtém o total de requisições de hoje e sempre
+    Retorna, para hoje e para todo o histórico:
+    - Total de requisições com erro (código 400-499 ou 500-599)
+    - Percentual de erro (0 a 100)
     """
-    return await cruds.MetricCrud.get_total_reqs(db=db)
+    return await cruds.MetricCrud.get_error_stats(db=db)
+
+
+@metric_router.get(
+    path="/sucessos", summary="Obtém total e percentual de sucessos (hoje/sempre)"
+)
+async def get_success_stats(
+    db: db_dep, current_user: current_user_dep, perm: read_metric_perm_dep
+) -> schemas.TodayAlwaysOutSchema[schemas.SuccessStatsSchema]:
+    """
+    Retorna, para hoje e para todo o histórico:
+    - Total de requisições com sucesso (código 200-299)
+    - Percentual de sucesso (0 a 100)
+    """
+    return await cruds.MetricCrud.get_success_stats(db=db)
+
+
+@metric_router.get(
+    path="/tempo-resposta",
+    summary="Obtém estatísticas de tempo de resposta (mínimo, média, máximo)",
+)
+async def get_res_time(
+    db: db_dep, current_user: current_user_dep, perm: read_metric_perm_dep
+) -> schemas.TodayAlwaysOutSchema[schemas.ResponseTimeStatsSchema]:
+    """
+    Retorna, para hoje e para todo o histórico (entre requisições bem-sucedidas):
+    - Tempo mínimo de resposta
+    - Tempo médio de resposta
+    - Tempo máximo de resposta
+    """
+    return await cruds.MetricCrud.get_res_time(db=db)
+
+
+@metric_router.get(
+    path="/top-clientes", summary="Obtém os 10 clientes que mais fizeram requisições"
+)
+async def get_top_clients(
+    db: db_dep,
+    current_user: current_user_dep,
+    perm: read_metric_perm_dep,
+) -> schemas.TodayAlwaysOutSchema[list[schemas.TopClientNameSchema]]:
+    """
+    Obtém os 10 clientes que mais fizeram requisições de hoje e sempre
+    """
+    return await cruds.MetricCrud.get_top_clients(db=db)
 
 
 @metric_router.get(path="/total-atendimentos", summary="Obtém o total de atendimentos")
@@ -33,6 +81,28 @@ async def get_total_services(
     Obtém o total de atendimentos de hoje e sempre
     """
     return await cruds.MetricCrud.get_total_services(db=db)
+
+
+@metric_router.get(path="/total-requisicoes", summary="Obtém o total de requisições")
+async def get_total_reqs(
+    db: db_dep, current_user: current_user_dep, perm: read_metric_perm_dep
+) -> schemas.TodayAlwaysOutSchema[NonNegativeInt]:
+    """
+    Obtém o total de requisições de hoje e sempre
+    """
+    return await cruds.MetricCrud.get_total_reqs(db=db)
+
+
+@metric_router.get(
+    path="/top-dias-mes", summary="Obtém os 10 dias do mês com mais requisições"
+)
+async def get_top_month_days(
+    db: db_dep, current_user: current_user_dep, perm: read_metric_perm_dep
+) -> schemas.TodayAlwaysOutSchema[list[schemas.TopMonthDaySchema]]:
+    """
+    Obtém os 10 dias do mês com maior número de requisições no mês atual e em todo o período
+    """
+    return await cruds.MetricCrud.get_top_month_days(db=db)
 
 
 @metric_router.get(
@@ -97,18 +167,6 @@ async def get_worst_endpoints(
 
 
 @metric_router.get(
-    path="/top-dias-mes", summary="Obtém os 10 dias do mês com mais requisições"
-)
-async def get_top_month_days(
-    db: db_dep, current_user: current_user_dep, perm: read_metric_perm_dep
-) -> schemas.TodayAlwaysOutSchema[list[schemas.TopMonthDaySchema]]:
-    """
-    Obtém os 10 dias do mês com maior número de requisições no mês atual e em todo o período
-    """
-    return await cruds.MetricCrud.get_top_month_days(db=db)
-
-
-@metric_router.get(
     path="/top-endpoints-mais-lentos", summary="Obtém os 10 endpoints mais lentos"
 )
 async def get_top_slowest_endpoints(
@@ -140,61 +198,3 @@ async def get_top_departments(
     Obtém os setores mais utilizados de hoje e sempre
     """
     return await cruds.MetricCrud.get_top_departments(db=db)
-
-
-@metric_router.get(
-    path="/sucessos", summary="Obtém total e percentual de sucessos (hoje/sempre)"
-)
-async def get_success_stats(
-    db: db_dep, current_user: current_user_dep, perm: read_metric_perm_dep
-) -> schemas.TodayAlwaysOutSchema[schemas.SuccessStatsSchema]:
-    """
-    Retorna, para hoje e para todo o histórico:
-    - Total de requisições com sucesso (código 200-299)
-    - Percentual de sucesso (0 a 100)
-    """
-    return await cruds.MetricCrud.get_success_stats(db=db)
-
-
-@metric_router.get(
-    path="/erros", summary="Obtém total e percentual de erros (hoje/sempre)"
-)
-async def get_error_stats(
-    db: db_dep, current_user: current_user_dep, perm: read_metric_perm_dep
-) -> schemas.TodayAlwaysOutSchema[schemas.ErrorStatsSchema]:
-    """
-    Retorna, para hoje e para todo o histórico:
-    - Total de requisições com erro (código 400-499 ou 500-599)
-    - Percentual de erro (0 a 100)
-    """
-    return await cruds.MetricCrud.get_error_stats(db=db)
-
-
-@metric_router.get(
-    path="/tempo-resposta",
-    summary="Obtém estatísticas de tempo de resposta (mínimo, média, máximo)",
-)
-async def get_res_time(
-    db: db_dep, current_user: current_user_dep, perm: read_metric_perm_dep
-) -> schemas.TodayAlwaysOutSchema[schemas.ResponseTimeStatsSchema]:
-    """
-    Retorna, para hoje e para todo o histórico (entre requisições bem-sucedidas):
-    - Tempo mínimo de resposta
-    - Tempo médio de resposta
-    - Tempo máximo de resposta
-    """
-    return await cruds.MetricCrud.get_res_time(db=db)
-
-
-@metric_router.get(
-    path="/top-clientes", summary="Obtém os 10 clientes que mais fizeram requisições"
-)
-async def get_top_clients(
-    db: db_dep,
-    current_user: current_user_dep,
-    perm: read_metric_perm_dep,
-) -> schemas.TodayAlwaysOutSchema[list[schemas.TopClientNameSchema]]:
-    """
-    Obtém os 10 clientes que mais fizeram requisições de hoje e sempre
-    """
-    return await cruds.MetricCrud.get_top_clients(db=db)
