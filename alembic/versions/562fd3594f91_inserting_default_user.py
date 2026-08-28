@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from argon2 import PasswordHasher
 
 from alembic import op
-from src.api.v1.config_core import settings
+from src.api.v1.config import settings
 from src.api.v1.utils.enums.group_enum import GroupNames
 
 # revision identifiers, used by Alembic.
