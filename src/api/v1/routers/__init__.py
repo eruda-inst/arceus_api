@@ -5,7 +5,6 @@ from .financeiro_router import financeiro_router
 from .group_router import group_router
 from .ixc_user_router import ixc_user_router
 from .log_router import log_router
-from .metric_router import metric_router
 from .perm_router import perm_router
 from .suporte_router import suporte_router
 from .triagem_router import triagem_router
@@ -21,7 +20,6 @@ __all__ = [
     "group_router",
     "ixc_user_router",
     "log_router",
-    "metric_router",
     "perm_router",
     "suporte_router",
     "triagem_router",

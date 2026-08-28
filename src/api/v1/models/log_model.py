@@ -1,3 +1,5 @@
+from typing import Any
+
 from sqlalchemy import TIMESTAMP, Column, Integer, Numeric, String, func
 
 from .. import db
@@ -29,3 +31,20 @@ class LogModel(db.base_db.Base):
         nullable=False,
         index=True,
     )
+
+    def to_dict(self) -> dict[str, Any]:
+        """Converte o objeto em um dicionário com tipos Python nativos."""
+        return {
+            "id": self.id,
+            "metodo": self.metodo,
+            "endpoint": self.endpoint,
+            "codigo": self.codigo,
+            "duracao": self.duracao,
+            "protocolo": self.protocolo,
+            "payload": self.payload,
+            "resposta": self.resposta,
+            "url": self.url,
+            "setor": self.setor,
+            "nome_cliente": self.nome_cliente,
+            "criado_em": self.criado_em,
+        }

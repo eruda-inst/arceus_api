@@ -9,7 +9,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from .. import cruds, models, schemas
-from ..config_core import settings
+from ..config import settings
 
 ALGORITHM = "HS256"
 SECRET_KEY = settings.secret_key.get_secret_value()
