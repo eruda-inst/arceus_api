@@ -10,24 +10,24 @@ from .. import clients, schemas, utils
 class VilaService:
     @staticmethod
     async def _get_login(
-        numero_residencia: PositiveInt | None = None, ppoe: str | None = None
+        numero_residencia: PositiveInt | None = None, pppoe: str | None = None
     ) -> dict[str, Any]:
-        search_ppoe = None
+        search_pppoe = None
 
         if numero_residencia is not None:
-            search_ppoe = f"res{numero_residencia}"
-        elif ppoe is not None:
-            search_ppoe = ppoe
+            search_pppoe = f"res{numero_residencia}"
+        elif pppoe is not None:
+            search_pppoe = pppoe
         else:
             raise HTTPException(
                 status_code=HTTP_400_BAD_REQUEST,
-                detail="Forneça numero_ressidencia ou ppoe",
+                detail="Forneça numero_ressidencia ou ppppoe",
             )
 
         # --- Obtém login ---
         endpoint = "radusuarios"
         grid_param = [
-            utils.Param(TB="radusuarios.login", OP="L", P=search_ppoe),
+            utils.Param(TB="radusuarios.login", OP="L", P=search_pppoe),
             utils.Param(TB="radusuarios.ativo", P="S"),
         ]
         res = await clients.IxcClient.get(endpoint=endpoint, grid_param=grid_param)
@@ -50,10 +50,10 @@ class VilaService:
 
     @classmethod
     async def get_contrato(
-        cls, numero_residencia: PositiveInt | None = None, ppoe: str | None = None
+        cls, numero_residencia: PositiveInt | None = None, pppoe: str | None = None
     ) -> schemas.VilaContratoOutSchema:
         # --- Obtém login ---
-        login = await cls._get_login(numero_residencia=numero_residencia, ppoe=ppoe)
+        login = await cls._get_login(numero_residencia=numero_residencia, pppoe=pppoe)
 
         # --- Obtém contrato ---
         endpoint = "cliente_contrato"
@@ -76,19 +76,19 @@ class VilaService:
 
     @classmethod
     async def get_status_conexao(
-        cls, numero_residencia: PositiveInt | None, ppoe: str | None
+        cls, numero_residencia: PositiveInt | None, pppoe: str | None
     ) -> schemas.StatusConexaoOutSchema:
         # --- Obtém login ---
-        login = await cls._get_login(numero_residencia=numero_residencia, ppoe=ppoe)
+        login = await cls._get_login(numero_residencia=numero_residencia, pppoe=pppoe)
 
         return schemas.StatusConexaoOutSchema(status_conexao=login["online"])
 
     @classmethod
     async def get_status_onu(
-        cls, numero_residencia: PositiveInt | None, ppoe: str | None
+        cls, numero_residencia: PositiveInt | None, pppoe: str | None
     ) -> schemas.StatusOnuOutSchema:
         # --- Obtém login ---
-        login = await cls._get_login(numero_residencia=numero_residencia, ppoe=ppoe)
+        login = await cls._get_login(numero_residencia=numero_residencia, pppoe=pppoe)
 
         # --- Obtém ONU ---
         endpoint = "radpop_radio_cliente_fibra"
@@ -115,12 +115,12 @@ class VilaService:
     async def get_atendimentos(
         cls,
         numero_residencia: PositiveInt | None,
-        ppoe: str | None,
+        pppoe: str | None,
         pagina: PositiveInt | None,
         itens_por_pagina: PositiveInt | None,
     ) -> schemas.ListOutSchema[schemas.AtendimentoOutSchema]:
         # --- Obtém login ---
-        login = await cls._get_login(numero_residencia=numero_residencia, ppoe=ppoe)
+        login = await cls._get_login(numero_residencia=numero_residencia, pppoe=pppoe)
 
         # --- Obtém atendimentos abertos ---
         endpoint = "su_ticket"
@@ -164,10 +164,10 @@ class VilaService:
 
     @classmethod
     async def post_limpar_mac(
-        cls, numero_residencia: PositiveInt | None, ppoe: str | None
+        cls, numero_residencia: PositiveInt | None, pppoe: str | None
     ) -> schemas.MensagemOutSchema:
         # --- Obtém login ---
-        login = await cls._get_login(numero_residencia=numero_residencia, ppoe=ppoe)
+        login = await cls._get_login(numero_residencia=numero_residencia, pppoe=pppoe)
 
         # --- Realiza limpeza de MAC ---
         endpoint = "radusuarios_25452"
@@ -184,10 +184,10 @@ class VilaService:
 
     @classmethod
     async def post_desconectar_cliente(
-        cls, numero_residencia: PositiveInt | None, ppoe: str | None
+        cls, numero_residencia: PositiveInt | None, pppoe: str | None
     ) -> schemas.MensagemOutSchema:
         # --- Obtém login ---
-        login = await cls._get_login(numero_residencia=numero_residencia, ppoe=ppoe)
+        login = await cls._get_login(numero_residencia=numero_residencia, pppoe=pppoe)
 
         # --- Realiza desconexão de cliente ---
         endpoint = "desconectar_clientes"
