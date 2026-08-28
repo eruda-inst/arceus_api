@@ -2,7 +2,7 @@ from typing import Any, ClassVar
 
 from httpx import URL, Headers
 
-from ..config_core import settings
+from ..config import settings
 from .httpx_client import HttpxClient
 
 

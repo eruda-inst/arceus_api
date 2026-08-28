@@ -6,7 +6,7 @@ from httpx import URL, Headers
 from pydantic import PositiveInt
 
 from .. import utils
-from ..config_core import settings
+from ..config import settings
 from .httpx_client import HttpxClient
 
 
