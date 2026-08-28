@@ -11,7 +11,7 @@ Ppoe = Annotated[str, Query(description="PPOE associado ao cliente")]
 
 
 @vila_router.get(
-    path="/contrato/numero_residencia/{numero_residencia}",
+    path="/contrato/numero-residencia/{numero_residencia}",
     summary="Obtém contrato de um cliente",
 )
 async def get_contrato_by_numero_residencia(
