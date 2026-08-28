@@ -191,7 +191,7 @@ class ConnectionManager:
                     ),
                 )
 
-                await a_c.socket.send_json(res.model_dump())
+                await a_c.socket.send_json(res.model_dump(mode="json"))
 
 
 log_manager = ConnectionManager()
