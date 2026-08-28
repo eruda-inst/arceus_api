@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Body, Query
+from fastapi import APIRouter, Body, Path, Query
 
 from .. import schemas, services
 
@@ -10,16 +10,27 @@ NumeroResidencia = Annotated[int, Query(ge=1, description="Número da residênci
 Ppoe = Annotated[str, Query(description="PPOE associado ao cliente")]
 
 
-@vila_router.get(path="/contrato", summary="Obtém contrato de um cliente")
-async def get_contrato(
-    numero_residencia: NumeroResidencia | None = None, ppoe: Ppoe | None = None
+@vila_router.get(
+    path="/contrato/numero_residencia/{numero_residencia}",
+    summary="Obtém contrato de um cliente",
+)
+async def get_contrato_by_numero_residencia(
+    numero_residencia: Annotated[int, Path(ge=1, description="Número da residência")],
 ) -> schemas.VilaContratoOutSchema:
     """
     Obtém contrato de um cliente, através do número da residência
     """
-    return await services.VilaService.get_contrato(
-        numero_residencia=numero_residencia, ppoe=ppoe
-    )
+    return await services.VilaService.get_contrato(numero_residencia=numero_residencia)
+
+
+@vila_router.get(path="/contrato/ppoe/{ppoe}", summary="Obtém contrato de um cliente")
+async def get_contrato_by_ppoe(
+    ppoe: Annotated[str, Path(description="PPOE do login")],
+) -> schemas.VilaContratoOutSchema:
+    """
+    Obtém contrato de um cliente, através do PPOE
+    """
+    return await services.VilaService.get_contrato(ppoe=ppoe)
 
 
 @vila_router.get(

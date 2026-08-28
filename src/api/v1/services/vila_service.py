@@ -10,7 +10,7 @@ from .. import clients, schemas, utils
 class VilaService:
     @staticmethod
     async def _get_login(
-        numero_residencia: PositiveInt | None, ppoe: str | None
+        numero_residencia: PositiveInt | None = None, ppoe: str | None = None
     ) -> dict[str, Any]:
         search_ppoe = None
 
@@ -50,7 +50,7 @@ class VilaService:
 
     @classmethod
     async def get_contrato(
-        cls, numero_residencia: PositiveInt | None, ppoe: str | None
+        cls, numero_residencia: PositiveInt | None = None, ppoe: str | None = None
     ) -> schemas.VilaContratoOutSchema:
         # --- Obtém login ---
         login = await cls._get_login(numero_residencia=numero_residencia, ppoe=ppoe)
