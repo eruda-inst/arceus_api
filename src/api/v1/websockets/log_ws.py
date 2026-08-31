@@ -4,10 +4,9 @@ from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect, status
 from pydantic import BaseModel, Field, PositiveInt, ValidationError
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from .. import cruds, db, models, schemas
+from .. import cruds, db, schemas
 
 log_ws_router = APIRouter(prefix="/logs", tags=["Logs WS"])
 
@@ -115,9 +114,7 @@ class ConnectionManager:
 
     async def broadcast(self) -> None:
         async with db.AsyncSessionLocal() as session:
-            stmt = select(models.LogModel).order_by(models.LogModel.id.desc())
-            result = await session.execute(stmt)
-            all_logs = result.scalars().all()
+            _, all_logs = await cruds.LogCrud.get_all(db=session)
 
             all_dicts: list[dict[str, Any]] = [log.to_dict() for log in all_logs]
 

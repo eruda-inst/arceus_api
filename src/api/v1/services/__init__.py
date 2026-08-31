@@ -5,7 +5,6 @@ from .comercial_service import ComercialService
 from .financeiro_service import FinanceiroService
 from .group_service import GroupService
 from .ixc_user_service import IXCUserService
-from .log_service import LogService
 from .perm_service import PermService
 from .suporte_service import SuporteService
 from .triagem_service import TriagemService
@@ -21,7 +20,6 @@ __all__ = [
     "FinanceiroService",
     "GroupService",
     "IXCUserService",
-    "LogService",
     "PermService",
     "SuporteService",
     "TriagemService",

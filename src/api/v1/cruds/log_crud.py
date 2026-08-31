@@ -45,18 +45,18 @@ class LogCrud:
     @staticmethod
     async def get_all(
         db: AsyncSession,
-        page: PositiveInt,
-        items_per_page: PositiveInt,
-        metodo: str | None,
-        endpoint: str | None,
-        codigo: PositiveInt | None,
-        data_inicio: str | None,
-        data_fim: str | None,
-        hora_inicio: str | None,
-        hora_fim: str | None,
-        protocolo: str | None,
-        setor: str | None,
-        nome_cliente: str | None,
+        page: PositiveInt = 1,
+        items_per_page: PositiveInt = 10,
+        metodo: str | None = None,
+        endpoint: str | None = None,
+        codigo: PositiveInt | None = None,
+        data_inicio: str | None = None,
+        data_fim: str | None = None,
+        hora_inicio: str | None = None,
+        hora_fim: str | None = None,
+        protocolo: str | None = None,
+        setor: str | None = None,
+        nome_cliente: str | None = None,
     ) -> tuple[NonNegativeInt, Sequence[models.LogModel]]:
         # Start with a base query selecting all log records
         stmt = select(models.LogModel)

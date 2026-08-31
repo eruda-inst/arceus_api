@@ -5,7 +5,6 @@ from collections.abc import Awaitable, Callable
 from typing import override
 
 from fastapi import Request, Response
-from fastapi.logger import logger
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.types import ASGIApp
 
@@ -52,7 +51,6 @@ class LogMiddleware(BaseHTTPMiddleware):
         end_time = time.perf_counter()
 
         duration = end_time - start_time
-        url = request.url
 
         protocol = request.headers.get("x-protocolo")
         if protocol and not re.search(pattern=r"^NWT\d{9}$", string=protocol):
@@ -86,7 +84,6 @@ class LogMiddleware(BaseHTTPMiddleware):
             if cliente:
                 nome_cliente = cliente["razao"]
 
-        try:
             async with db.AsyncSessionLocal() as session:
                 await cruds.LogCrud.create_log(
                     db=session,
@@ -101,15 +98,13 @@ class LogMiddleware(BaseHTTPMiddleware):
                     setor=setor,
                     nome_cliente=nome_cliente,
                 )
-        except Exception as e:
-            logger.error("Failed to write log entry: %s", e, exc_info=True)
 
         asyncio.create_task(websockets.metric_manager.broadcast())
         asyncio.create_task(websockets.log_manager.broadcast())
 
         # A response precisa ser refeita
         return Response(
-            content=response_body,
+            content=response,
             status_code=res.status_code,
             headers=dict(res.headers),
             media_type=res.media_type,
