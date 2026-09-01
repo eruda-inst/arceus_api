@@ -1,3 +1,4 @@
+import re
 from typing import Any
 
 from fastapi import HTTPException, status
@@ -130,7 +131,7 @@ class SuporteService:
         query_value = None
 
         # Mac é prioridade, pois o custo computacional é menor (uma requisição a menos)
-        if mac_onu is not None:
+        if mac_onu is not None and not re.match(pattern=r"{{\w+}}", string=mac_onu):
             query_value = mac_onu
         elif id_login is not None:
             # --- Obtém login ---

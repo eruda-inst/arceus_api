@@ -1,3 +1,4 @@
+import re
 from typing import Any
 
 from fastapi import HTTPException, status
@@ -29,7 +30,7 @@ class ClientService:
                 )
             cliente_ixc = regs[0]
             return cliente_ixc
-        elif cnpj_cpf is not None:
+        elif cnpj_cpf is not None and not re.match(pattern=r"{{\w+}}", string=cnpj_cpf):
             # --- Cliente IXC por cnpj_cpf ---
             cnpj_cpf_formatado = utils.Formatter.cnpj_cpf(cnpj_cpf=cnpj_cpf)
             grid_param = [utils.Param(TB="cliente.cnpj_cpf", P=cnpj_cpf_formatado)]
@@ -43,7 +44,9 @@ class ClientService:
                 )
             cliente_ixc = regs[0]
             return cliente_ixc
-        elif protocolo is not None:
+        elif protocolo is not None and not re.match(
+            pattern=r"{{\w+}}", string=protocolo
+        ):
             # --- Cliente Opa por protocolo ---
             endpoint = "atendimento"
             filter = {"protocolo": protocolo}

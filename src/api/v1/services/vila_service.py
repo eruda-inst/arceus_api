@@ -1,3 +1,4 @@
+import re
 from typing import Any
 
 from fastapi import HTTPException, status
@@ -16,7 +17,7 @@ class VilaService:
 
         if numero_residencia is not None:
             search_pppoe = f"res{numero_residencia}"
-        elif pppoe is not None:
+        elif pppoe is not None and not re.match(pattern=r"{{\w+}}", string=pppoe):
             search_pppoe = pppoe
         else:
             raise HTTPException(
