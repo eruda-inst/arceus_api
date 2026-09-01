@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, ClassVar, Literal
 
 from fastapi import HTTPException, status
 from pydantic import NonNegativeInt, PositiveInt
@@ -117,13 +117,13 @@ class UpgradeService:
                 }
 
             # Se o plano do cliente estiver na lista de planos para checar
-            if plano_cliente["id"] in cls._ids_planos_em_uso:
+            if int(plano_cliente["id"]) in cls._ids_planos_em_uso:
                 # Plano referência, i.e., mesmo plano do cliente, mas com valor sem descontos/acréscimos
                 planos_referencia: list[dict[str, Any]] = [
                     p for p in planos_para_checar if p["id"] == plano_cliente["id"]
                 ]
                 plano_referencia = planos_referencia[0]
-                valor_plano_referencia = float(plano_referencia["valor_contrato"])
+                valor_plano_referencia = float(plano_referencia["valor"])
 
                 # Se o cliente paga mais do que deveria
                 if plano_cliente["valor_contrato"] > valor_plano_referencia:
