@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from .. import cruds, db, schemas
 
 # Roteador para WebSockets de logs, prefixo "/logs"
-log_ws_router = APIRouter(prefix="/logs", tags=["Logs WS"])
+log_ws_router = APIRouter(prefix="/logs-ws", tags=["Logs WS"])
 
 
 class ParamsInSchema(BaseModel):
@@ -289,7 +289,7 @@ async def get_logs(
             {
                 "type": "error",
                 "status_code": status.HTTP_422_UNPROCESSABLE_CONTENT,
-                "detail": e,
+                "detail": e.errors,
             }
         )
         await ws.close()
@@ -316,7 +316,7 @@ async def get_logs(
                 {
                     "type": "error",
                     "status_code": status.HTTP_422_UNPROCESSABLE_CONTENT,
-                    "detail": e,
+                    "detail": e.errors,
                 }
             )
         except WebSocketDisconnect:

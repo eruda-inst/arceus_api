@@ -1,3 +1,5 @@
+from typing import Any
+
 from sqlalchemy import TIMESTAMP, Boolean, Column, ForeignKey, Integer, String, func
 from sqlalchemy.orm import relationship
 
@@ -50,3 +52,17 @@ class UserModel(db.Base):
     )
 
     grupo = relationship("GroupModel", back_populates="usuarios")
+
+    def to_dict(self) -> dict[str, Any]:
+        """
+        Converte o objeto em um dicionário com tipos Python nativos
+        """
+        return {
+            "id": self.id,
+            "nome": self.nome,
+            "email": self.email,
+            "ativo": self.ativo,
+            "id_grupo": self.id_grupo,
+            "criado_em": self.criado_em,
+            "atualizado_em": self.atualizado_em,
+        }

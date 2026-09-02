@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from .. import cruds, db
 
-metric_ws_router = APIRouter(prefix="/metricas", tags=["Métricas WS"])
+metric_ws_router = APIRouter(prefix="/metricas-ws", tags=["Métricas WS"])
 
 
 Action = Literal["enroll", "unenroll"]

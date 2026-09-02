@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
 
-from .. import models, schemas
+from .. import models, schemas, websockets
 
 ph = PasswordHasher()
 
@@ -36,6 +36,7 @@ class UserCrud:
             )
 
         await db.refresh(new_user)
+        await websockets.user_manager.broadcast()
 
         return new_user
 
@@ -81,6 +82,8 @@ class UserCrud:
         email: str | None = None,
         active: bool | None = None,
         group_id: PositiveInt | None = None,
+        group_name: str | None = None,
+        load_grupo: bool = False,
     ) -> tuple[NonNegativeInt, Sequence[models.UserModel]]:
         stmt = select(models.UserModel)
         count_stmt = select(func.count(models.UserModel.id))
@@ -97,10 +100,21 @@ class UserCrud:
         if active is not None:
             stmt = stmt.where(models.UserModel.ativo == active)
             count_stmt = count_stmt.where(models.UserModel.ativo == active)
-        # Filter and count by group name
+        # Filter and count by id
         if group_id is not None:
             stmt = stmt.where(models.UserModel.id_grupo == group_id)
             count_stmt = count_stmt.where(models.UserModel.id_grupo == group_id)
+        # Filter and count by group name
+        if group_name is not None:
+            stmt = stmt.join(models.UserModel.grupo).where(
+                models.GroupModel.nome.ilike(f"%{group_name}%")
+            )
+            count_stmt = count_stmt.join(models.UserModel.grupo).where(
+                models.GroupModel.nome.ilike(f"%{group_name}%")
+            )
+
+        if load_grupo:
+            stmt = stmt.options(selectinload(models.UserModel.grupo))
 
         # Total items for meta info
         total_items = (await db.execute(count_stmt)).scalar()
@@ -117,7 +131,6 @@ class UserCrud:
 
         # Users
         users = (await db.execute(stmt)).scalars().all()
-
         return total_items, users
 
     @staticmethod
@@ -145,6 +158,8 @@ class UserCrud:
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Erro desconhecido no banco de dados",
             )
+
+        await websockets.user_manager.broadcast()
 
     @staticmethod
     async def toggle_status_by_id(
@@ -175,6 +190,7 @@ class UserCrud:
 
         # Refresh the instance to load any database-generated defaults or updates
         await db.refresh(user)
+        await websockets.user_manager.broadcast()
 
         return user
 

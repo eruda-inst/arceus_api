@@ -19,35 +19,6 @@ class UsuarioService:
         return schemas.UserOutSchema.model_validate(created_user)
 
     @staticmethod
-    async def get_all_by(
-        db: AsyncSession,
-        page: PositiveInt,
-        items_per_page: PositiveInt,
-        name: str | None = None,
-        email: str | None = None,
-        active: bool | None = None,
-        group_id: PositiveInt | None = None,
-    ) -> schemas.ListOutSchema[schemas.UserOutSchema]:
-        total_items, users = await cruds.UserCrud.get_all_by(
-            db=db,
-            page=page,
-            items_per_page=items_per_page,
-            name=name,
-            email=email,
-            active=active,
-            group_id=group_id,
-        )
-
-        return schemas.ListOutSchema[schemas.UserOutSchema](
-            data=[schemas.UserOutSchema.model_validate(u) for u in users],
-            meta=schemas.MetaOutSchema(
-                pagina_atual=page,
-                itens_por_pagina=items_per_page,
-                total_itens=total_items,
-            ),
-        )
-
-    @staticmethod
     async def del_by_id(id: PositiveInt, db: AsyncSession) -> None:
         await cruds.UserCrud.del_by_id(db=db, id=id)
 

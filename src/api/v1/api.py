@@ -21,3 +21,4 @@ api_v1_router.include_router(router=routers.ixc_user_router)
 # WebSockets
 api_v1_router.include_router(router=websockets.metric_ws_router)
 api_v1_router.include_router(router=websockets.log_ws_router)
+api_v1_router.include_router(router=websockets.user_ws_router)

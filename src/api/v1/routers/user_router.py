@@ -14,9 +14,6 @@ CurrUserDep = Annotated[models.UserModel, Depends(deps.get_curr_user)]
 CreatePermDep = Annotated[
     models.UserModel, Depends(deps.has_perm(utils.PermCodes.CREATE_USER))
 ]
-ReadPermDep = Annotated[
-    models.UserModel, Depends(deps.has_perm(utils.PermCodes.READ_USER))
-]
 UpdatePermDep = Annotated[
     models.UserModel, Depends(deps.has_perm(utils.PermCodes.UPDATE_USER))
 ]
@@ -38,34 +35,6 @@ async def create(
     Cadastra um novo usuário
     """
     return await services.UsuarioService.create(db=db, data=dados)
-
-
-@user_router.get(path="/", summary="Obtém informações dos usuários")
-async def get_all_by(
-    db: DbDep,
-    curr_user: CurrUserDep,
-    perm: ReadPermDep,
-    pagina: utils.Pagina | None = 1,
-    itens_por_pagina: utils.ItensPorPagina | None = 10,
-    nome: Annotated[str | None, Query(description="Filtro parcial por nome")] = None,
-    email: Annotated[str | None, Query(description="Filtro parcial por e-mail")] = None,
-    ativo: Annotated[bool | None, Query(description="Filtro por status")] = None,
-    id_grupo: Annotated[
-        int | None, Query(ge=1, description="Filtro parcial por id do grupo")
-    ] = None,
-) -> schemas.ListOutSchema[schemas.UserOutSchema]:
-    """
-    Obtém informações dos usuários
-    """
-    return await services.UsuarioService.get_all_by(
-        db=db,
-        page=pagina if pagina is not None else 1,
-        items_per_page=itens_por_pagina if itens_por_pagina is not None else 10,
-        name=nome,
-        email=email,
-        active=ativo,
-        group_id=id_grupo,
-    )
 
 
 @user_router.delete(
