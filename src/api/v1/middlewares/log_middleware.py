@@ -39,7 +39,6 @@ class LogMiddleware(BaseHTTPMiddleware):
         request: Request,
         call_next: Callable[[Request], Awaitable[Response]],
     ) -> Response:
-
         if not request.url.path.startswith(self.include_prefixes):
             return await call_next(request)
 
@@ -84,20 +83,20 @@ class LogMiddleware(BaseHTTPMiddleware):
             if cliente:
                 nome_cliente = cliente["razao"]
 
-            async with db.AsyncSessionLocal() as session:
-                await cruds.LogCrud.create_log(
-                    db=session,
-                    metodo=http_method,
-                    endpoint=endpoint,
-                    codigo=status_code,
-                    duracao=duration,
-                    protocolo=protocol,
-                    payload=payload,
-                    resposta=response_body.decode(),
-                    url=str(request.url),
-                    setor=setor,
-                    nome_cliente=nome_cliente,
-                )
+        async with db.AsyncSessionLocal() as session:
+            await cruds.LogCrud.create_log(
+                db=session,
+                metodo=http_method,
+                endpoint=endpoint,
+                codigo=status_code,
+                duracao=duration,
+                protocolo=protocol,
+                payload=payload,
+                resposta=response_body.decode(),
+                url=str(request.url),
+                setor=setor,
+                nome_cliente=nome_cliente,
+            )
 
         asyncio.create_task(websockets.metric_manager.broadcast())
         asyncio.create_task(websockets.log_manager.broadcast())
