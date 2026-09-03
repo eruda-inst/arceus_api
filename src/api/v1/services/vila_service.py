@@ -2,7 +2,7 @@ import re
 from typing import Any
 
 from fastapi import HTTPException, status
-from pydantic import PositiveInt
+from pydantic import NonNegativeInt, PositiveInt
 from starlette.status import HTTP_400_BAD_REQUEST
 
 from .. import clients, schemas, utils
@@ -11,14 +11,23 @@ from .. import clients, schemas, utils
 class VilaService:
     @staticmethod
     async def _get_login(
-        numero_residencia: PositiveInt | None = None, pppoe: str | None = None
+        # IDs NonNegativeInt, pois o IXC é quebrado
+        id_login: NonNegativeInt | None = None,
+        numero_residencia: PositiveInt | None = None,
+        pppoe: str | None = None,
     ) -> dict[str, Any]:
-        search_pppoe = None
+        search_key = None
+        search_value = None
 
-        if numero_residencia is not None:
-            search_pppoe = f"res{numero_residencia}"
+        if id_login is not None:
+            search_key = "id"
+            search_value = id_login
+        elif numero_residencia is not None:
+            search_key = "login"
+            search_value = f"res{numero_residencia}"
         elif pppoe is not None and not re.match(pattern=r"{{\w+}}", string=pppoe):
-            search_pppoe = pppoe
+            search_key = "login"
+            search_value = pppoe
         else:
             raise HTTPException(
                 status_code=HTTP_400_BAD_REQUEST,
@@ -28,7 +37,11 @@ class VilaService:
         # --- Obtém login ---
         endpoint = "radusuarios"
         grid_param = [
-            utils.Param(TB="radusuarios.login", OP="L", P=search_pppoe),
+            utils.Param(
+                TB=f"radusuarios.{search_key}",
+                OP="L" if search_key == "login" else "=",
+                P=search_value,
+            ),
             utils.Param(TB="radusuarios.ativo", P="S"),
         ]
         res = await clients.IxcClient.get(endpoint=endpoint, grid_param=grid_param)
@@ -77,19 +90,23 @@ class VilaService:
 
     @classmethod
     async def get_status_conexao(
-        cls, numero_residencia: PositiveInt | None, pppoe: str | None
+        cls,
+        # IDs NonNegativeInt, pois o IXC é quebrado
+        id_login: NonNegativeInt,
     ) -> schemas.StatusConexaoOutSchema:
         # --- Obtém login ---
-        login = await cls._get_login(numero_residencia=numero_residencia, pppoe=pppoe)
+        login = await cls._get_login(id_login=id_login)
 
         return schemas.StatusConexaoOutSchema(status_conexao=login["online"])
 
     @classmethod
     async def get_status_onu(
-        cls, numero_residencia: PositiveInt | None, pppoe: str | None
+        cls,
+        # IDs NonNegativeInt, pois o IXC é quebrado
+        id_login: NonNegativeInt,
     ) -> schemas.StatusOnuOutSchema:
         # --- Obtém login ---
-        login = await cls._get_login(numero_residencia=numero_residencia, pppoe=pppoe)
+        login = await cls._get_login(id_login=id_login)
 
         # --- Obtém ONU ---
         endpoint = "radpop_radio_cliente_fibra"
@@ -115,13 +132,13 @@ class VilaService:
     @classmethod
     async def get_atendimentos(
         cls,
-        numero_residencia: PositiveInt | None,
-        pppoe: str | None,
+        # IDs NonNegativeInt, pois o IXC é quebrado
+        id_login: NonNegativeInt,
         pagina: PositiveInt | None,
         itens_por_pagina: PositiveInt | None,
     ) -> schemas.ListOutSchema[schemas.AtendimentoOutSchema]:
         # --- Obtém login ---
-        login = await cls._get_login(numero_residencia=numero_residencia, pppoe=pppoe)
+        login = await cls._get_login(id_login=id_login)
 
         # --- Obtém atendimentos abertos ---
         endpoint = "su_ticket"
@@ -165,10 +182,12 @@ class VilaService:
 
     @classmethod
     async def post_limpar_mac(
-        cls, numero_residencia: PositiveInt | None, pppoe: str | None
+        cls,
+        # IDs NonNegativeInt, pois o IXC é quebrado
+        id_login: NonNegativeInt,
     ) -> schemas.MensagemOutSchema:
         # --- Obtém login ---
-        login = await cls._get_login(numero_residencia=numero_residencia, pppoe=pppoe)
+        login = await cls._get_login(id_login=id_login)
 
         # --- Realiza limpeza de MAC ---
         endpoint = "radusuarios_25452"
@@ -185,10 +204,12 @@ class VilaService:
 
     @classmethod
     async def post_desconectar_cliente(
-        cls, numero_residencia: PositiveInt | None, pppoe: str | None
+        cls,
+        # IDs NonNegativeInt, pois o IXC é quebrado
+        id_login: NonNegativeInt,
     ) -> schemas.MensagemOutSchema:
         # --- Obtém login ---
-        login = await cls._get_login(numero_residencia=numero_residencia, pppoe=pppoe)
+        login = await cls._get_login(id_login=id_login)
 
         # --- Realiza desconexão de cliente ---
         endpoint = "desconectar_clientes"
