@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Body, Depends, Query, status
+from fastapi import APIRouter, Body, Depends, status
 from pydantic import PositiveInt
 from sqlalchemy.ext.asyncio import AsyncSession
 

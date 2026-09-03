@@ -42,10 +42,7 @@ class UserCrud:
 
     @staticmethod
     async def get_by(
-        db: AsyncSession,
-        id: PositiveInt | None = None,
-        email: EmailStr | None = None,
-        load_grupo: bool = False,
+        db: AsyncSession, id: PositiveInt | None = None, email: EmailStr | None = None
     ) -> models.UserModel | None:
         # If id is provided, it's used in the query
         if id is not None:
@@ -59,9 +56,7 @@ class UserCrud:
                 status_code=status.HTTP_400_BAD_REQUEST, detail="Forneça id ou email"
             )
 
-        # If load_grupo is True, the user's group is loaded
-        if load_grupo:
-            stmt = stmt.options(selectinload(models.UserModel.grupo))
+        stmt = stmt.options(selectinload(models.UserModel.grupo))
 
         user = (await db.execute(stmt)).scalar_one_or_none()
 
@@ -83,7 +78,6 @@ class UserCrud:
         active: bool | None = None,
         group_id: PositiveInt | None = None,
         group_name: str | None = None,
-        load_grupo: bool = False,
     ) -> tuple[NonNegativeInt, Sequence[models.UserModel]]:
         stmt = select(models.UserModel)
         count_stmt = select(func.count(models.UserModel.id))
@@ -113,8 +107,7 @@ class UserCrud:
                 models.GroupModel.nome.ilike(f"%{group_name}%")
             )
 
-        if load_grupo:
-            stmt = stmt.options(selectinload(models.UserModel.grupo))
+        stmt = stmt.options(selectinload(models.UserModel.grupo))
 
         # Total items for meta info
         total_items = (await db.execute(count_stmt)).scalar()

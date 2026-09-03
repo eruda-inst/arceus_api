@@ -11,6 +11,7 @@ EmailField = Field(description="E-mail do usuário", examples=["exemplo@exemplo.
 SenhaField = Field(min_length=8, description="Senha do usuário", examples=["12345678"])
 NomeField = Field(description="Nome do usuário", examples=["Nome do usuário"])
 IdGrupoField = Field(ge=1, description="ID do grupo", examples=[1])
+NomeGrupoField = Field(description="Nome do grupo", examples=["Administrador"])
 AtivoField = Field(default=True, description="Status do usuário", examples=[True])
 IdField = Field(ge=1, description="ID do usuário", examples=[1])
 CriadoEmField = Field(
@@ -84,3 +85,4 @@ class UserOutSchema(BaseModel):
     criado_em: datetime = CriadoEmField
     atualizado_em: datetime | None = AtualizadoEmField
     id_grupo: PositiveInt = IdGrupoField
+    nome_grupo: str = NomeGrupoField
