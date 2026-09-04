@@ -159,7 +159,11 @@ class UserCrud:
         db: AsyncSession, id: PositiveInt
     ) -> models.UserModel | None:
         # Retrieve the current user by id
-        stmt = select(models.UserModel).where(models.UserModel.id == id)
+        stmt = (
+            select(models.UserModel)
+            .where(models.UserModel.id == id)
+            .options(selectinload(models.UserModel.grupo))
+        )
         user = (await db.execute(stmt)).scalar_one_or_none()
 
         # Raise not found if no user exists with the given id
@@ -192,7 +196,11 @@ class UserCrud:
         db: AsyncSession, id: PositiveInt, new_pwd: str
     ) -> models.UserModel:
         # Retrieve the current user by id
-        stmt = select(models.UserModel).where(models.UserModel.id == id)
+        stmt = (
+            select(models.UserModel)
+            .where(models.UserModel.id == id)
+            .options(selectinload(models.UserModel.grupo))
+        )
         user = (await db.execute(stmt)).scalar_one_or_none()
 
         # Raise not found if no user exists with the given id
