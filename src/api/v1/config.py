@@ -29,6 +29,9 @@ class Settings(BaseSettings):
     pg_pass: SecretStr = Field(default=SecretStr("pg_pass"))
     pg_user: str = Field(default="pg_user")
 
+    bot_pass: SecretStr = Field(default=SecretStr("bot_pass"))
+    bot_username: str = Field(default="bot_username")
+
     token_expire_minutes: NonNegativeInt = Field(default=0)
     refresh_token_expire_days: NonNegativeInt = Field(default=0)
 

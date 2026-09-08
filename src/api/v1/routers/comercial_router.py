@@ -1,8 +1,8 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Body, Query, status
+from fastapi import APIRouter, Body, Depends, Query, status
 
-from .. import schemas, services, utils
+from .. import deps, schemas, services, utils
 
 comercial_router = APIRouter(prefix="/comercial", tags=["Comercial"])
 
@@ -11,6 +11,7 @@ comercial_router = APIRouter(prefix="/comercial", tags=["Comercial"])
     path="/status-acesso", summary="Obtém status de acesso de um contrato"
 )
 async def get_status_acesso(
+    _: Annotated[bool, Depends(deps.get_creds)],
     # IDs NonNegativeInt, pois o IXC é quebrado
     id_contrato: Annotated[int, Query(ge=0, description="ID do contrato")],
 ) -> schemas.StatusInternetOutSchema:
@@ -24,6 +25,7 @@ async def get_status_acesso(
     path="/leads", status_code=status.HTTP_201_CREATED, summary="Cadastra novo lead"
 )
 async def post_leads(
+    _: Annotated[bool, Depends(deps.get_creds)],
     lead: Annotated[schemas.LeadInSchema, Body(description="Lead a ser cadastrado")],
 ) -> schemas.LeadOutSchema:
     """
@@ -35,6 +37,7 @@ async def post_leads(
 # Por razões de limitações na plataforma opa, o verbo deve ser put, ao invés de patch
 @comercial_router.put(path="/leads", summary="Atualiza lead parcialmente")
 async def put_lead(
+    _: Annotated[bool, Depends(deps.get_creds)],
     cnpj_cpf: utils.CnpjCpf,
     lead: Annotated[schemas.LeadUpdateSchema, Body(description="Dados do lead")],
 ) -> schemas.LeadOutSchema:

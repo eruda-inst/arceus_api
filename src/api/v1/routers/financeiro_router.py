@@ -1,8 +1,8 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Body, Path, Query
+from fastapi import APIRouter, Body, Depends, Path, Query
 
-from .. import schemas, services, utils
+from .. import deps, schemas, services, utils
 
 financeiro_router = APIRouter(prefix="/financeiro", tags=["Financeiro"])
 
@@ -11,6 +11,7 @@ financeiro_router = APIRouter(prefix="/financeiro", tags=["Financeiro"])
     path="/faturas-abertas", summary="Obtém faturas abertas de um cliente"
 )
 async def get_faturas_abertas(
+    _: Annotated[bool, Depends(deps.get_creds)],
     # IDs NonNegativeInt, pois o IXC é quebrado
     id_contrato: Annotated[int, Query(ge=0, description="ID do contrato")],
     pagina: utils.Pagina | None = 1,
@@ -30,6 +31,7 @@ async def get_faturas_abertas(
     path="/tres-faturas-abertas", summary="Obtém 3 faturas abertas de um cliente"
 )
 async def get_3_faturas_abertas(
+    _: Annotated[bool, Depends(deps.get_creds)],
     # IDs NonNegativeInt, pois o IXC é quebrado
     id_contrato: Annotated[int, Query(ge=0, description="ID do contrato")],
     pagina: utils.Pagina | None = 1,
@@ -49,6 +51,7 @@ async def get_3_faturas_abertas(
     path="/linha-digitavel/{id_fatura}", summary="Obtém linha digitável de uma fatura"
 )
 async def get_linha_digitavel(
+    _: Annotated[bool, Depends(deps.get_creds)],
     # IDs NonNegativeInt, pois o IXC é quebrado
     id_fatura: Annotated[int, Path(ge=0, description="ID da fatura")],
 ) -> schemas.LinhaDigitavelOutSchema:
@@ -60,6 +63,7 @@ async def get_linha_digitavel(
 
 @financeiro_router.get(path="/chave-pix", summary="Obtém chave pix de uma fatura")
 async def get_chave_pix(
+    _: Annotated[bool, Depends(deps.get_creds)],
     # IDs NonNegativeInt, pois o IXC é quebrado
     id_fatura: Annotated[int, Query(ge=0, description="ID da fatura")],
 ) -> schemas.ChavePixOutSchema:
@@ -74,6 +78,7 @@ async def get_chave_pix(
     summary="Obtém credenciais da central do assinante de um cliente",
 )
 async def get_credenciais(
+    _: Annotated[bool, Depends(deps.get_creds)],
     # IDs NonNegativeInt, pois o IXC é quebrado
     id_cliente: Annotated[int, Path(description="ID do cliente")],
 ) -> schemas.CredencialOutSchema:
@@ -88,6 +93,7 @@ async def get_credenciais(
     summary="Realiza desbloqueio em confiança de um cliente",
 )
 async def post_desbloqueio_em_confianca(
+    _: Annotated[bool, Depends(deps.get_creds)],
     # IDs NonNegativeInt, pois o IXC é quebrado
     id_contrato: Annotated[int, Query(ge=0, description="ID do contrato")],
 ) -> schemas.MensagemOutSchema:
@@ -105,6 +111,7 @@ async def post_desbloqueio_em_confianca(
     summary="Atualiza senha da central do assinante de um cliente",
 )
 async def put_credenciais(
+    _: Annotated[bool, Depends(deps.get_creds)],
     # IDs NonNegativeInt, pois o IXC é quebrado
     id_cliente: Annotated[int, Path(ge=0, description="ID do cliente")],
     senha: Annotated[str, Body(embed=True, description="Nova senha")],

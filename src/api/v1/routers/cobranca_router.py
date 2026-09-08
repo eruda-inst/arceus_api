@@ -1,8 +1,8 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Depends, Query
 
-from .. import schemas, services, utils
+from .. import deps, schemas, services, utils
 
 cobranca_router = APIRouter(prefix="/cobranca", tags=["Cobrança"])
 
@@ -11,6 +11,7 @@ cobranca_router = APIRouter(prefix="/cobranca", tags=["Cobrança"])
     path="/faturas-abertas", summary="Obtém faturas abertas de um cliente"
 )
 async def get_faturas_abertas(
+    _: Annotated[bool, Depends(deps.get_creds)],
     # IDs NonNegativeInt, pois o IXC é quebrado
     id_contrato: Annotated[int, Query(ge=0, description="ID do contrato")],
     pagina: utils.Pagina | None = 1,
@@ -30,6 +31,7 @@ async def get_faturas_abertas(
     path="/faturas-vencidas", summary="Obtém faturas vencidas de um cliente"
 )
 async def get_faturas_vencidas(
+    _: Annotated[bool, Depends(deps.get_creds)],
     # IDs NonNegativeInt, pois o IXC é quebrado
     id_contrato: Annotated[int, Query(ge=0, description="ID do contrato")],
     pagina: utils.Pagina | None = 1,

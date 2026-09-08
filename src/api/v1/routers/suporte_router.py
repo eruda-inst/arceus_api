@@ -1,8 +1,8 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Body, Path, Query, status
+from fastapi import APIRouter, Body, Depends, Path, Query, status
 
-from .. import schemas, services, utils
+from .. import deps, schemas, services, utils
 
 suporte_router = APIRouter(prefix="/suporte", tags=["Suporte"])
 
@@ -12,6 +12,7 @@ IdLogin = Annotated[int, Query(ge=0, description="ID de login do cliente")]
 
 @suporte_router.get(path="/contratos", summary="Obtém contratos de um cliente")
 async def get_contratos(
+    _: Annotated[bool, Depends(deps.get_creds)],
     protocolo: utils.Protocolo | None = None,
     cnpj_cpf: utils.CnpjCpf | None = None,
     pagina: utils.Pagina | None = 1,
@@ -31,7 +32,9 @@ async def get_contratos(
 @suporte_router.get(
     path="/status-conexao", summary="Obtém status de conexão de um cliente"
 )
-async def get_status_conexao(id_login: IdLogin) -> schemas.StatusConexaoOutSchema:
+async def get_status_conexao(
+    _: Annotated[bool, Depends(deps.get_creds)], id_login: IdLogin
+) -> schemas.StatusConexaoOutSchema:
     """
     Obtém status de conexão de um cliente, através do id de login
     """
@@ -40,6 +43,7 @@ async def get_status_conexao(id_login: IdLogin) -> schemas.StatusConexaoOutSchem
 
 @suporte_router.get(path="/status-onu", summary="Obtém status de ONU de um cliente")
 async def get_status_onu(
+    _: Annotated[bool, Depends(deps.get_creds)],
     id_login: IdLogin | None = None,
     mac_onu: Annotated[
         str | None,
@@ -55,7 +59,9 @@ async def get_status_onu(
 
 
 @suporte_router.get(path="/dados-wifi", summary="Obtém dados do WiFi de um cliente")
-async def get_dados_wifi(id_login: IdLogin) -> schemas.WifiOutSchema:
+async def get_dados_wifi(
+    _: Annotated[bool, Depends(deps.get_creds)], id_login: IdLogin
+) -> schemas.WifiOutSchema:
     """
     Obtém dados do WiFi de um cliente, através do ID de login
     """
@@ -66,6 +72,7 @@ async def get_dados_wifi(id_login: IdLogin) -> schemas.WifiOutSchema:
     path="/atendimentos", summary="Obtém atendimentos abertos de um cliente"
 )
 async def get_atendimentos(
+    _: Annotated[bool, Depends(deps.get_creds)],
     id_login: IdLogin,
     pagina: utils.Pagina | None = 1,
     itens_por_pagina: utils.ItensPorPagina | None = 10,
@@ -84,6 +91,7 @@ async def get_atendimentos(
     summary="Abre um atendimento para um cliente",
 )
 async def post_atendimentos(
+    _: Annotated[bool, Depends(deps.get_creds)],
     atendimento: Annotated[
         schemas.AtendimentoInSchema, Body(description="Dados do atendimento")
     ],
@@ -97,7 +105,9 @@ async def post_atendimentos(
 @suporte_router.post(
     path="/desconectar-cliente", summary="Envia sinal de desconexão para um cliente"
 )
-async def post_desconectar_cliente(id_login: IdLogin) -> schemas.MensagemOutSchema:
+async def post_desconectar_cliente(
+    _: Annotated[bool, Depends(deps.get_creds)], id_login: IdLogin
+) -> schemas.MensagemOutSchema:
     """
     Envia sinal de desconexão para um cliente, através do id de login
     """
@@ -105,7 +115,9 @@ async def post_desconectar_cliente(id_login: IdLogin) -> schemas.MensagemOutSche
 
 
 @suporte_router.post(path="/limpar-mac", summary="Limpa MAC Address")
-async def post_limpar_mac(id_login: IdLogin) -> schemas.MensagemOutSchema:
+async def post_limpar_mac(
+    _: Annotated[bool, Depends(deps.get_creds)], id_login: IdLogin
+) -> schemas.MensagemOutSchema:
     """
     Limpa MAC Address, através do id de login
     """
@@ -115,6 +127,7 @@ async def post_limpar_mac(id_login: IdLogin) -> schemas.MensagemOutSchema:
 # Por razões de limitações na plataforma opa, o verbo deve ser put, ao invés de patch
 @suporte_router.put(path="/ip/{id_login}", summary="Atualiza IP e Radius de um login")
 async def put_ip(
+    _: Annotated[bool, Depends(deps.get_creds)],
     # IDs NonNegativeInt, pois o IXC é quebrado
     id_login: Annotated[int, Path(ge=0, description="ID de login")],
     ip: Annotated[str | None, Body(description="IP do login a ser atualizado")] = None,

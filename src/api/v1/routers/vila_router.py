@@ -1,9 +1,9 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Body, Path, Query
+from fastapi import APIRouter, Body, Depends, Path, Query
 from pydantic import NonNegativeInt
 
-from .. import schemas, services
+from .. import deps, schemas, services
 
 vila_router = APIRouter(prefix="/vila", tags=["Vila"])
 
@@ -18,6 +18,7 @@ IdLogin = Annotated[NonNegativeInt, Query(description="ID login associado ao cli
     summary="Obtém contrato de um cliente",
 )
 async def get_contrato_by_numero_residencia(
+    _: Annotated[bool, Depends(deps.get_creds)],
     numero_residencia: Annotated[int, Path(ge=1, description="Número da residência")],
 ) -> schemas.VilaContratoOutSchema:
     """
@@ -28,6 +29,7 @@ async def get_contrato_by_numero_residencia(
 
 @vila_router.get(path="/contrato/pppoe/{pppoe}", summary="Obtém contrato de um cliente")
 async def get_contrato_by_ppoe(
+    _: Annotated[bool, Depends(deps.get_creds)],
     pppoe: Annotated[str, Path(description="PPPOE do login")],
 ) -> schemas.VilaContratoOutSchema:
     """
@@ -39,7 +41,9 @@ async def get_contrato_by_ppoe(
 @vila_router.get(
     path="/status-conexao", summary="Obtém status da conexão de um cliente"
 )
-async def get_status_conexao(id_login: IdLogin) -> schemas.StatusConexaoOutSchema:
+async def get_status_conexao(
+    _: Annotated[bool, Depends(deps.get_creds)], id_login: IdLogin
+) -> schemas.StatusConexaoOutSchema:
     """
     Obtém status da conexão de um cliente, através do ID de login
     """
@@ -47,7 +51,9 @@ async def get_status_conexao(id_login: IdLogin) -> schemas.StatusConexaoOutSchem
 
 
 @vila_router.get(path="/status-onu", summary="Obtém status da ONU de um cliente")
-async def get_status_onu(id_login: IdLogin) -> schemas.StatusOnuOutSchema:
+async def get_status_onu(
+    _: Annotated[bool, Depends(deps.get_creds)], id_login: IdLogin
+) -> schemas.StatusOnuOutSchema:
     """
     Obtém status da ONU de um cliente, através do ID de login
     """
@@ -58,6 +64,7 @@ async def get_status_onu(id_login: IdLogin) -> schemas.StatusOnuOutSchema:
     path="/atendimentos", summary="Obtém atendimentos abertos de um cliente"
 )
 async def get_atendimentos(
+    _: Annotated[bool, Depends(deps.get_creds)],
     id_login: IdLogin,
     pagina: Annotated[int | None, Query(ge=1, description="Número da página")] = 1,
     itens_por_pagina: Annotated[
@@ -75,7 +82,9 @@ async def get_atendimentos(
 
 
 @vila_router.post(path="/limpar-mac", summary="Limpa MAC Address de um cliente")
-async def post_limpar_mac(id_login: IdLogin) -> schemas.MensagemOutSchema:
+async def post_limpar_mac(
+    _: Annotated[bool, Depends(deps.get_creds)], id_login: IdLogin
+) -> schemas.MensagemOutSchema:
     """
     Limpa MAC Address de um cliente, através do ID de login
     """
@@ -83,7 +92,9 @@ async def post_limpar_mac(id_login: IdLogin) -> schemas.MensagemOutSchema:
 
 
 @vila_router.post(path="/desconectar-cliente", summary="Desconecta um cliente")
-async def post_desconectar_cliente(id_login: IdLogin) -> schemas.MensagemOutSchema:
+async def post_desconectar_cliente(
+    _: Annotated[bool, Depends(deps.get_creds)], id_login: IdLogin
+) -> schemas.MensagemOutSchema:
     """
     Desconecta um cliente, através do ID de login
     """
@@ -94,6 +105,7 @@ async def post_desconectar_cliente(id_login: IdLogin) -> schemas.MensagemOutSche
     path="/atendimentos", summary="Obtém atendimentos abertos de um cliente"
 )
 async def post_atendimentos(
+    _: Annotated[bool, Depends(deps.get_creds)],
     atendimento: Annotated[
         schemas.AtendimentoInSchema, Body(description="Dados do atendimento")
     ],
