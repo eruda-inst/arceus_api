@@ -35,7 +35,7 @@ async def get_curr_user(
 def get_creds(creds: Annotated[HTTPBasicCredentials, Depends(basic_security)]) -> bool:
     if (
         creds.username != config.settings.bot_username
-        or creds.password != config.settings.bot_pass
+        or creds.password != config.settings.bot_pass.get_secret_value()
     ):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
