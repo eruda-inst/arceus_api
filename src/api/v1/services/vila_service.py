@@ -31,7 +31,7 @@ class VilaService:
         else:
             raise HTTPException(
                 status_code=HTTP_400_BAD_REQUEST,
-                detail="Forneça numero_ressidencia ou ppppoe",
+                detail="Forneça numero_residencia ou ppppoe",
             )
 
         # --- Obtém login ---
