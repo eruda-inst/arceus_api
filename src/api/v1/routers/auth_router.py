@@ -5,13 +5,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from .. import db, deps, models, schemas, services
 
-authentication_router = APIRouter(prefix="/autenticacao", tags=["Autenticação"])
+auth_router = APIRouter(prefix="/autenticacao", tags=["Autenticação"])
 
 DbDep = Annotated[AsyncSession, Depends(dependency=db.get_db)]
 CurrUserDep = Annotated[models.UserModel, Depends(dependency=deps.get_curr_user)]
 
 
-@authentication_router.post(path="/login", summary="Autenticação de usuário")
+@auth_router.post(path="/login", summary="Autenticação de usuário")
 async def login(
     db: DbDep,
     user: Annotated[schemas.UserLoginSchema, Body(description="Credenciais de login")],
@@ -19,10 +19,10 @@ async def login(
     """
     Autenticação de usuário para acessar o sistema
     """
-    return await services.AuthenticationService.login(user=user, db=db)
+    return await services.AuthService.login(user=user, db=db)
 
 
-@authentication_router.post(
+@auth_router.post(
     path="/logout",
     status_code=status.HTTP_204_NO_CONTENT,
     summary="Realiza logout do usuário",
@@ -37,7 +37,7 @@ async def logout(
     await db.commit()
 
 
-@authentication_router.post(path="/refresh-token", summary="Renova token")
+@auth_router.post(path="/refresh-token", summary="Renova token")
 async def refresh_token(
     db: DbDep,
     refresh_token: Annotated[
@@ -47,12 +47,10 @@ async def refresh_token(
     """
     Renova token de acesso
     """
-    return await services.AuthenticationService.refresh_token(
-        refresh_token=refresh_token, db=db
-    )
+    return await services.AuthService.refresh_token(refresh_token=refresh_token, db=db)
 
 
-@authentication_router.get(path="/me", summary="Usuário atual")
+@auth_router.get(path="/me", summary="Usuário atual")
 async def me(_: DbDep, curr_user: CurrUserDep) -> schemas.UserOutSchema:
     """
     Usuário atual logado

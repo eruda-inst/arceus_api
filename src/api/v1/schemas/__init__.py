@@ -1,5 +1,5 @@
 from .atendimento_schema import AtendimentoInSchema, AtendimentoOutSchema
-from .authentication_schema import AccessTokenOutSchema, RefreshTokenInSchema
+from .auth_schema import AccessTokenOutSchema, RefreshTokenInSchema
 from .cliente_schema import ContatoOutSchema, CredencialOutSchema
 from .contrato_schema import (
     ContratoOutSchema,

@@ -1,4 +1,4 @@
-from .authentication_service import AuthenticationService
+from .auth_service import AuthService
 from .client_service import ClientService
 from .cobranca_service import CobrancaService
 from .comercial_service import ComercialService
@@ -10,7 +10,7 @@ from .upgrade_service import UpgradeService
 from .vila_service import VilaService
 
 __all__ = [
-    "AuthenticationService",
+    "AuthService",
     "ClientService",
     "CobrancaService",
     "ComercialService",

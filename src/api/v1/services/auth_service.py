@@ -18,7 +18,7 @@ REFRESH_TOKEN_EXPIRE_DAYS = settings.refresh_token_expire_days
 TOKEN_EXPIRE_SECONDS = settings.token_expire_seconds
 
 
-class AuthenticationService:
+class AuthService:
     @staticmethod
     async def verify_access_token(
         db: AsyncSession, access_token: str

@@ -1,4 +1,4 @@
-from .authentication_router import authentication_router
+from .auth_router import auth_router
 from .cobranca_router import cobranca_router
 from .comercial_router import comercial_router
 from .financeiro_router import financeiro_router
@@ -12,7 +12,7 @@ from .user_router import user_router
 from .vila_router import vila_router
 
 __all__ = [
-    "authentication_router",
+    "auth_router",
     "cobranca_router",
     "comercial_router",
     "financeiro_router",
