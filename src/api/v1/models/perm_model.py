@@ -3,26 +3,25 @@ from sqlalchemy.orm import relationship
 
 from .. import db
 
+# Default value for unique: False
+# Default value for index: False
+# Default value for nullable: True
+
+# Primary keys have: nullable=False
+# Primary keys have: unique=True
+# Primary keys index: index=True
+
 
 class PermModel(db.Base):
     __tablename__ = "permissoes"
 
-    id = Column(
-        type_=Integer,
-        primary_key=True,
-        index=True,
-        autoincrement=True,
-        nullable=False,
-        unique=True,
-    )
-    nome = Column(type_=String, nullable=False, unique=True, index=False)
-    codigo = Column(type_=String, nullable=False, unique=True, index=False)
+    id = Column(type_=Integer, primary_key=True, autoincrement=True)
+    nome = Column(type_=String, nullable=False, unique=True)
+    codigo = Column(type_=String, nullable=False, unique=True)
     criado_em = Column(
         type_=TIMESTAMP(timezone=True),
         server_default=func.timezone("America/Bahia", func.now()),
         nullable=False,
-        index=False,
-        unique=False,
     )
     grupos = relationship(
         argument="GroupModel",

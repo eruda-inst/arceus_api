@@ -5,19 +5,20 @@ from sqlalchemy.orm import relationship
 
 from .. import db
 
-# Valor padrão para unique: False
-# Valor padrão para index: False
-# Valor padrão para nullable: True
+# Default value for unique: False
+# Default value for index: False
+# Default value for nullable: True
 
-# Primary keys possuem: nullable=False
-# Primary keys possuem: unique=True
+# Primary keys have: nullable=False
+# Primary keys have: unique=True
 # Primary keys index: index=True
+
+# Columns used for filtering are indexed (i.e., index=True)
 
 
 class UserModel(db.Base):
     __tablename__ = "usuarios"
 
-    # Colunas utilizadas em filtro são indexadas
     id = Column(type_=Integer, primary_key=True, autoincrement=True)
     nome = Column(type_=String, nullable=False, unique=True, index=True)
     email = Column(type_=String, nullable=False, unique=True, index=True)
@@ -46,13 +47,13 @@ class UserModel(db.Base):
     @property
     def nome_grupo(self) -> str | None:
         """
-        Retorna o nome do grupo associado
+        Return the associated group name
         """
         return self.grupo.nome
 
     def to_dict(self) -> dict[str, Any]:
         """
-        Converte o objeto em um dicionário com tipos Python nativos
+        Turn an object into a dict with built-in Python types
         """
         return {
             "id": self.id,

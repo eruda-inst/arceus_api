@@ -4,7 +4,7 @@ from fastapi import APIRouter, Body, Depends, status
 from pydantic import PositiveInt
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from .. import db, deps, models, schemas, services, utils
+from .. import cruds, db, deps, models, schemas, services, utils
 
 user_router = APIRouter(prefix="/usuarios", tags=["Usuários"])
 
@@ -34,7 +34,12 @@ async def create(
     """
     Cadastra um novo usuário
     """
-    return await services.UsuarioService.create(db=db, data=dados)
+    # Only users that exist in the external IXC system are allowed to be created locally.
+    # If get_by_email() does not find the user, it raises a "not found" exception,
+    # which prevents the local user from being created.
+    _ = await services.IXCUserService.get_by_email(email=dados.email)
+    created_user = await cruds.UserCrud.create(db=db, data=dados)
+    return schemas.UserOutSchema.model_validate(created_user)
 
 
 @user_router.delete(
@@ -47,9 +52,9 @@ async def del_by_id(
     id: PositiveInt,
 ) -> None:
     """
-    Remove um usuário
+    Remove um usuário pelo ID
     """
-    await services.UsuarioService.del_by_id(id=id, db=db)
+    await cruds.UserCrud.del_by_id(db=db, id=id)
 
 
 @user_router.patch(
@@ -64,7 +69,8 @@ async def toggle_status_by_id(
     """
     Alterna o status do usuário, i.e., se estiver ativo, fica inativo, e vice-versa
     """
-    return await services.UsuarioService.toggle_status_by_id(id=id, db=db)
+    updated_user = await cruds.UserCrud.toggle_status_by_id(db=db, id=id)
+    return schemas.UserOutSchema.model_validate(updated_user)
 
 
 @user_router.patch(path="/mudar-senha/id/{id}", summary="Atualiza senha de um usuário")
@@ -81,6 +87,7 @@ async def update_pwd_by_id(
     """
     Atualiza senha de um usuário
     """
-    return await services.UsuarioService.update_pwd_by_id(
-        id=id, db=db, new_pwd=nova_senha
+    updated_user = await cruds.UserCrud.update_pwd_by_id(
+        db=db, id=id, new_pwd=nova_senha
     )
+    return schemas.UserOutSchema.model_validate(updated_user)
