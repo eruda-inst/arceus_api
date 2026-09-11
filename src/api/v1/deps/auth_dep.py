@@ -1,3 +1,4 @@
+import secrets
 from typing import Annotated
 
 from fastapi import Depends, HTTPException, status
@@ -32,18 +33,20 @@ async def get_curr_user(
 
 
 def get_creds(creds: Annotated[HTTPBasicCredentials, Depends(basic_security)]) -> bool:
-    cred_username = creds.username
-    cred_pass = creds.password
+    cred_username = creds.username.encode()
+    cred_pass = creds.password.encode()
 
-    config_username = config.settings.bot_username
-    config_pass = config.settings.bot_pass.get_secret_value()
+    config_username = config.settings.bot_username.encode()
+    config_pass = config.settings.bot_pass.get_secret_value().encode()
 
-    diff_usernames = cred_username != config_username
-    diff_passwords = cred_pass != config_pass
+    valid_username = secrets.compare_digest(cred_username, config_username)
+    valid_password = secrets.compare_digest(cred_pass, config_pass)
 
-    if diff_usernames or diff_passwords:
+    if not (valid_username and valid_password):
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Credenciais inválidas"
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Credenciais inválidas",
+            headers={"WWW-Authenticate": "Basic"},
         )
     return True
 
