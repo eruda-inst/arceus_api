@@ -14,8 +14,8 @@ async def get_faturas_abertas(
     _: Annotated[bool, Depends(deps.get_creds)],
     # IDs NonNegativeInt, pois o IXC é quebrado
     id_contrato: Annotated[int, Query(ge=0, description="ID do contrato")],
-    pagina: utils.Pagina | None = 1,
-    itens_por_pagina: utils.ItensPorPagina | None = 15,
+    pagina: utils.Pagina = 1,
+    itens_por_pagina: utils.ItensPorPagina = 15,
 ) -> schemas.ListOutSchema[schemas.FaturaOutSchema]:
     """
     Obtém faturas abertas de um cliente, através do ID do contrato
@@ -34,8 +34,8 @@ async def get_3_faturas_abertas(
     _: Annotated[bool, Depends(deps.get_creds)],
     # IDs NonNegativeInt, pois o IXC é quebrado
     id_contrato: Annotated[int, Query(ge=0, description="ID do contrato")],
-    pagina: utils.Pagina | None = 1,
-    itens_por_pagina: utils.ItensPorPagina | None = 15,
+    pagina: utils.Pagina = 1,
+    itens_por_pagina: utils.ItensPorPagina = 15,
 ) -> schemas.ListOutSchema[schemas.FaturaOutSchema]:
     """
     Obtém faturas 3 abertas de um cliente, através do ID do contrato

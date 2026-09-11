@@ -134,8 +134,8 @@ class VilaService:
         cls,
         # IDs NonNegativeInt, pois o IXC é quebrado
         id_login: NonNegativeInt,
-        pagina: PositiveInt | None,
-        itens_por_pagina: PositiveInt | None,
+        pagina: PositiveInt,
+        itens_por_pagina: PositiveInt,
     ) -> schemas.ListOutSchema[schemas.AtendimentoOutSchema]:
         # --- Obtém login ---
         login = await cls._get_login(id_login=id_login)

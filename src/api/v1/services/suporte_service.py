@@ -53,8 +53,8 @@ class SuporteService:
     async def get_contratos(
         protocolo: str | None,
         cnpj_cpf: str | None,
-        pagina: PositiveInt | None,
-        itens_por_pagina: PositiveInt | None,
+        pagina: PositiveInt,
+        itens_por_pagina: PositiveInt,
     ) -> schemas.ListOutSchema[schemas.ContratoOutSchema]:
         # --- Obtém contratos ativos ---
         contratos = await ClientService.get_contratos_ativos(
@@ -68,8 +68,8 @@ class SuporteService:
             data=[schemas.ContratoOutSchema(**c) for c in contratos],
             meta=schemas.MetaOutSchema(
                 total_itens=len(contratos),
-                pagina_atual=pagina or 1,
-                itens_por_pagina=itens_por_pagina or 10,
+                pagina_atual=pagina,
+                itens_por_pagina=itens_por_pagina,
             ),
         )
 
@@ -151,8 +151,8 @@ class SuporteService:
     async def get_atendimentos(
         # IDs NonNegativeInt, pois o IXC é quebrado
         id_login: NonNegativeInt,
-        pagina: PositiveInt | None,
-        itens_por_pagina: PositiveInt | None,
+        pagina: PositiveInt,
+        itens_por_pagina: PositiveInt,
     ) -> schemas.ListOutSchema[schemas.AtendimentoOutSchema]:
         # --- Obtém atendimentos abertos ---
         endpoint = "su_ticket"
@@ -193,8 +193,8 @@ class SuporteService:
         return schemas.ListOutSchema[schemas.AtendimentoOutSchema](
             data=atendimentos_parciais,
             meta=schemas.MetaOutSchema(
-                itens_por_pagina=itens_por_pagina or 10,
-                pagina_atual=pagina or 1,
+                itens_por_pagina=itens_por_pagina,
+                pagina_atual=pagina,
                 total_itens=total,
             ),
         )

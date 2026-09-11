@@ -42,8 +42,8 @@ class UpgradeService:
         cls,
         # IDs NonNegativeInt, pois o IXC é quebrado
         id_cliente: NonNegativeInt,
-        pagina: PositiveInt | None,
-        itens_por_pagina: PositiveInt | None,
+        pagina: PositiveInt,
+        itens_por_pagina: PositiveInt,
     ) -> schemas.ListOutSchema[schemas.PlanoSugeridoOutSchema]:
         # --- Obtém contratos ativos ---
         contratos = await services.ClientService.get_contratos_ativos(
@@ -174,7 +174,7 @@ class UpgradeService:
             data=planos_sugeridos,
             meta=schemas.MetaOutSchema(
                 total_itens=len(planos_sugeridos),
-                pagina_atual=pagina or 1,
-                itens_por_pagina=itens_por_pagina or 10,
+                pagina_atual=pagina,
+                itens_por_pagina=itens_por_pagina,
             ),
         )

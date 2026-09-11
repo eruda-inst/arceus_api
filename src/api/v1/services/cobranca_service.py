@@ -12,8 +12,8 @@ class CobrancaService:
     async def get_faturas_vencidas(
         # IDs NonNegativeInt, pois o IXC é quebrado
         id_contrato: NonNegativeInt,
-        pagina: PositiveInt | None,
-        itens_por_pagina: PositiveInt | None,
+        pagina: PositiveInt,
+        itens_por_pagina: PositiveInt,
     ) -> schemas.ListOutSchema[schemas.FaturaOutSchema]:
         # --- Obtém contrato ---
         endpoint = "cliente_contrato"
@@ -84,7 +84,7 @@ class CobrancaService:
             data=faturas_vencidas_parciais,
             meta=schemas.MetaOutSchema(
                 total_itens=len(faturas_vencidas_parciais),
-                pagina_atual=pagina or 1,
-                itens_por_pagina=itens_por_pagina or 10,
+                pagina_atual=pagina,
+                itens_por_pagina=itens_por_pagina,
             ),
         )

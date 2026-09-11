@@ -76,10 +76,8 @@ async def get_status_onu(
 async def get_atendimentos(
     _: Annotated[bool, Depends(deps.get_creds)],
     id_login: IdLogin,
-    pagina: Annotated[int | None, Query(ge=1, description="Número da página")] = 1,
-    itens_por_pagina: Annotated[
-        int | None, Query(ge=1, description="Itens por página")
-    ] = 10,
+    pagina: Annotated[int, Query(ge=1, description="Número da página")] = 1,
+    itens_por_pagina: Annotated[int, Query(ge=1, description="Itens por página")] = 10,
 ) -> schemas.ListOutSchema[schemas.AtendimentoOutSchema]:
     """
     Obtém atendimentos abertos de um cliente, através do ID de login

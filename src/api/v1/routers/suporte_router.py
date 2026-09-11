@@ -25,8 +25,8 @@ async def get_contratos(
     _: Annotated[bool, Depends(deps.get_creds)],
     protocolo: utils.Protocolo | None = None,
     cnpj_cpf: utils.CnpjCpf | None = None,
-    pagina: utils.Pagina | None = 1,
-    itens_por_pagina: utils.ItensPorPagina | None = 10,
+    pagina: utils.Pagina = 1,
+    itens_por_pagina: utils.ItensPorPagina = 10,
 ) -> schemas.ListOutSchema[schemas.ContratoOutSchema]:
     """
     Obtém contratos de um cliente, através de protocolo de atendimento ou CPF/CNPJ
@@ -84,8 +84,8 @@ async def get_dados_wifi(
 async def get_atendimentos(
     _: Annotated[bool, Depends(deps.get_creds)],
     id_login: IdLogin,
-    pagina: utils.Pagina | None = 1,
-    itens_por_pagina: utils.ItensPorPagina | None = 10,
+    pagina: utils.Pagina = 1,
+    itens_por_pagina: utils.ItensPorPagina = 10,
 ) -> schemas.ListOutSchema[schemas.AtendimentoOutSchema]:
     """
     Obtém atendimentos abertos de um cliente, através do ID de login

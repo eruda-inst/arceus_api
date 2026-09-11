@@ -108,8 +108,8 @@ class FinanceiroService:
     async def get_faturas_abertas(
         # IDs NonNegativeInt, pois o IXC é quebrado
         id_contrato: NonNegativeInt,
-        pagina: PositiveInt | None,
-        itens_por_pagina: PositiveInt | None,
+        pagina: PositiveInt,
+        itens_por_pagina: PositiveInt,
     ) -> schemas.ListOutSchema[schemas.FaturaOutSchema]:
         # --- Obtém contrato ---
         endpoint = "cliente_contrato"
@@ -155,8 +155,8 @@ class FinanceiroService:
             data=faturas_abertas_parciais,
             meta=schemas.MetaOutSchema(
                 total_itens=len(faturas_abertas_parciais),
-                pagina_atual=pagina or 1,
-                itens_por_pagina=itens_por_pagina or 10,
+                pagina_atual=pagina,
+                itens_por_pagina=itens_por_pagina,
             ),
         )
 
@@ -164,8 +164,8 @@ class FinanceiroService:
     async def get_3_faturas_abertas(
         # IDs NonNegativeInt, pois o IXC é quebrado
         id_contrato: NonNegativeInt,
-        pagina: PositiveInt | None,
-        itens_por_pagina: PositiveInt | None,
+        pagina: PositiveInt,
+        itens_por_pagina: PositiveInt,
     ) -> schemas.ListOutSchema[schemas.FaturaOutSchema]:
         # --- Obtém contrato ---
         endpoint = "cliente_contrato"
@@ -253,8 +253,8 @@ class FinanceiroService:
             data=faturas_abertas_parciais,
             meta=schemas.MetaOutSchema(
                 total_itens=len(faturas_abertas_parciais),
-                pagina_atual=pagina or 1,
-                itens_por_pagina=itens_por_pagina or 10,
+                pagina_atual=pagina,
+                itens_por_pagina=itens_por_pagina,
             ),
         )
 

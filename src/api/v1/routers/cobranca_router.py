@@ -14,7 +14,7 @@ async def get_faturas_abertas(
     _: Annotated[bool, Depends(deps.get_creds)],
     # IDs NonNegativeInt, pois o IXC é quebrado
     id_contrato: Annotated[int, Query(ge=0, description="ID do contrato")],
-    pagina: utils.Pagina | None = 1,
+    pagina: utils.Pagina = 1,
     itens_por_pagina: utils.ItensPorPagina = 15,
 ) -> schemas.ListOutSchema[schemas.FaturaOutSchema]:
     """
@@ -34,7 +34,7 @@ async def get_faturas_vencidas(
     _: Annotated[bool, Depends(deps.get_creds)],
     # IDs NonNegativeInt, pois o IXC é quebrado
     id_contrato: Annotated[int, Query(ge=0, description="ID do contrato")],
-    pagina: utils.Pagina | None = 1,
+    pagina: utils.Pagina = 1,
     itens_por_pagina: utils.ItensPorPagina = 15,
 ) -> schemas.ListOutSchema[schemas.FaturaOutSchema]:
     """
