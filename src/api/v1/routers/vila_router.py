@@ -38,6 +38,16 @@ async def get_contrato_by_ppoe(
     return await services.VilaService.get_contrato(pppoe=pppoe)
 
 
+@vila_router.get(path="/dns-server", summary="Obtém servidor DNS de um cliente")
+async def get_dns_server(
+    _: Annotated[bool, Depends(deps.get_creds)], id_login: IdLogin
+) -> schemas.DnsServerOut:
+    """
+    Obtém servidor DNS de um cliente, a partir do ID de login
+    """
+    return await services.SuporteService.get_dns_server(id_login=id_login)
+
+
 @vila_router.get(
     path="/status-conexao", summary="Obtém status da conexão de um cliente"
 )

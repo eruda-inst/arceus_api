@@ -1,3 +1,4 @@
+from .acs_schema import DnsServerOut
 from .atendimento_schema import AtendimentoInSchema, AtendimentoOutSchema
 from .auth_schema import AccessTokenOutSchema, RefreshTokenInSchema
 from .cliente_schema import ContatoOutSchema, CredencialOutSchema
@@ -53,6 +54,7 @@ __all__ = [
     "ContatoOutSchema",
     "ContratoOutSchema",
     "CredencialOutSchema",
+    "DnsServerOut",
     "ErrorStatsSchema",
     "FaturaOutSchema",
     "GroupOutSchema",

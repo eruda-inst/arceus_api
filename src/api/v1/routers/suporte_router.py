@@ -13,7 +13,7 @@ IdLogin = Annotated[int, Query(ge=0, description="ID de login do cliente")]
 @suporte_router.get(path="/dns-server", summary="Obtém servidor DNS de um cliente")
 async def get_dns_server(
     _: Annotated[bool, Depends(deps.get_creds)], id_login: IdLogin
-) -> dict[str, str]:
+) -> schemas.DnsServerOut:
     """
     Obtém servidor DNS de um cliente, a partir do ID de login
     """

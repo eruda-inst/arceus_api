@@ -31,7 +31,7 @@ class SuporteService:
         cls,
         # IDs NonNegativeInt, because IXC is broken
         id_login: NonNegativeInt,
-    ) -> dict[str, str]:
+    ) -> schemas.DnsServerOut:
         # --- Get login ---
         login = await cls._get_login(id_login=id_login)
         if not (onu_mac := login.get("onu_mac")):
@@ -47,7 +47,7 @@ class SuporteService:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Dispositivo inexistente"
             )
-        return {"dns_server": dns_server}
+        return schemas.DnsServerOut(dns_server=dns_server)
 
     @staticmethod
     async def get_contratos(
