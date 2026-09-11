@@ -26,6 +26,29 @@ class SuporteService:
 
         return login
 
+    @classmethod
+    async def get_dns_server(
+        cls,
+        # IDs NonNegativeInt, pois o IXC é quebrado
+        id_login: NonNegativeInt,
+    ) -> dict[str, str]:
+        # --- Get login ---
+        login = await cls._get_login(id_login=id_login)
+        if not (onu_mac := login.get("onu_mac")):
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="ONU inexistente"
+            )
+        serial_number = onu_mac.upper()
+
+        # --- Get DNS server
+        endpoint = f"devices/{serial_number}/lan/network"
+        lan = await clients.IxcAcsClient.get(endpoint=endpoint)
+        if not (dns_server := lan.get("dnsServer")):
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Dispositivo inexistente"
+            )
+        return {"dns_server": dns_server}
+
     @staticmethod
     async def get_contratos(
         protocolo: str | None,

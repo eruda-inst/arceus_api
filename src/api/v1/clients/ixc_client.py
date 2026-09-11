@@ -11,11 +11,11 @@ from .httpx_client import HttpxClient
 
 
 class IxcClient(HttpxClient):
-    _token: ClassVar[str] = settings.ixc_token.get_secret_value()
+    _token: ClassVar[str] = settings.ixc_access_token.get_secret_value()
     _token_encoded: ClassVar[str] = base64.b64encode(_token.encode("utf-8")).decode(
         "utf-8"
     )
-    _base_url: ClassVar[str] = settings.base_api_url_ixc
+    _base_url: ClassVar[str] = settings.ixc_base_api_url
     _headers: ClassVar[Headers] = Headers({"Authorization": f"Basic {_token_encoded}"})
 
     @classmethod

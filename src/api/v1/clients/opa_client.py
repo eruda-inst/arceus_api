@@ -7,8 +7,8 @@ from .httpx_client import HttpxClient
 
 
 class OpaClient(HttpxClient):
-    _token: ClassVar[str] = settings.opa_token.get_secret_value()
-    _base_url: ClassVar[str] = settings.base_api_url_opa
+    _token: ClassVar[str] = settings.opa_access_token.get_secret_value()
+    _base_url: ClassVar[str] = settings.opa_base_api_url
     _headers: ClassVar[Headers] = Headers({"Authorization": f"Bearer {_token}"})
 
     @classmethod

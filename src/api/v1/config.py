@@ -9,20 +9,24 @@ class Settings(BaseSettings):
         env_file=".env", env_file_encoding="utf-8"
     )
 
-    api_key_7az: SecretStr = Field(default=SecretStr("api_key_7az"))
-    base_api_url_7az: str = Field(default="http://exemplo.com")
+    seven_az_api_key: SecretStr = Field(default=SecretStr("seven_az_api_key"))
+    seven_az_base_api_url: str = Field(default="http://example.com")
 
-    ixc_token: SecretStr = Field(default=SecretStr("api_key_ixc"))
-    base_api_url_ixc: str = Field(default="http://exemplo.com")
+    ixc_access_token: SecretStr = Field(default=SecretStr("ixc_access_token"))
+    ixc_base_api_url: str = Field(default="http://example.com")
 
-    opa_token: SecretStr = Field(default=SecretStr("base_api_url_opa"))
-    base_api_url_opa: str = Field(default="http://exemplo.com")
+    opa_access_token: SecretStr = Field(default=SecretStr("opa_access_token"))
+    opa_base_api_url: str = Field(default="http://example.com")
+
+    ixc_acs_base_api_url: str = Field(default="http://example.com")
+    ixc_acs_client_id: str = Field(default="client_id")
+    ixc_acs_client_secret: SecretStr = Field(default=SecretStr("client_secret"))
 
     db_url_sync: str = Field(default="driver://user:pass@localhost/dbname")
     db_url_async: str = Field(default="driver://user:pass@localhost/dbname")
 
     dflt_user_email: EmailStr = Field(default="email@email.com")
-    dflt_user_name: str = Field(default="default_user_name")
+    dflt_user_name: str = Field(default="dflt_user_name")
     dflt_user_pass: SecretStr = Field(default=SecretStr("dflt_user_pass"))
 
     pg_db: str = Field(default="pg_db")

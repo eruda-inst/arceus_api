@@ -8,9 +8,9 @@ from .httpx_client import HttpxClient
 
 class SevenAZClient(HttpxClient):
     _headers: ClassVar[Headers] = Headers(
-        {"X-API-Key": settings.api_key_7az.get_secret_value()}
+        {"X-API-Key": settings.seven_az_api_key.get_secret_value()}
     )
-    _base_url: ClassVar[str] = settings.base_api_url_7az
+    _base_url: ClassVar[str] = settings.seven_az_base_api_url
 
     @classmethod
     async def get(cls, endpoint: str) -> Any:
