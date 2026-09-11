@@ -29,7 +29,7 @@ class SuporteService:
     @classmethod
     async def get_dns_server(
         cls,
-        # IDs NonNegativeInt, pois o IXC é quebrado
+        # IDs NonNegativeInt, because IXC is broken
         id_login: NonNegativeInt,
     ) -> dict[str, str]:
         # --- Get login ---
@@ -38,7 +38,7 @@ class SuporteService:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="ONU inexistente"
             )
-        serial_number = onu_mac.upper()
+        serial_number = onu_mac.upper()  # It must be uppercased
 
         # --- Get DNS server
         endpoint = f"devices/{serial_number}/lan/network"

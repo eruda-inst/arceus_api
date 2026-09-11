@@ -10,9 +10,7 @@ suporte_router = APIRouter(prefix="/suporte", tags=["Suporte"])
 IdLogin = Annotated[int, Query(ge=0, description="ID de login do cliente")]
 
 
-@suporte_router.get(
-    path="/dns-server/{serial}", summary="Obtém servidor DNS de um cliente"
-)
+@suporte_router.get(path="/dns-server", summary="Obtém servidor DNS de um cliente")
 async def get_dns_server(
     _: Annotated[bool, Depends(deps.get_creds)], id_login: IdLogin
 ) -> dict[str, str]:
