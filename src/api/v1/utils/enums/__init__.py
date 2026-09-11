@@ -14,7 +14,7 @@ from .contrato_enum import (
 from .default_enum import Default
 from .department_enum import Departments
 from .group_enum import GroupNames
-from .http_method_enum import HttpMethod
+from .http_enum import HttpMethod
 from .ixc_user_enum import (
     IXCUserAccessTypeCod,
     IXCUserAccessTypeLabel,
