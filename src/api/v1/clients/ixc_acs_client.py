@@ -21,7 +21,7 @@ class IxcAcsClient:
     """Client for interacting with the IXC ACS API."""
 
     # Base URL used for all API requests.
-    _base_api_url: ClassVar[str] = config.settings.ixc_acs_base_api_url
+    _base_api_url: ClassVar[URL] = URL(config.settings.ixc_acs_base_api_url)
 
     # Timeout configuration applied to the shared HTTP client.
     _timeout: ClassVar[Timeout] = Timeout(connect=5.0, read=30.0, write=10.0, pool=1.0)
@@ -38,10 +38,10 @@ class IxcAcsClient:
     _headers: ClassVar[Headers] = Headers({"Content-Type": "application/json"})
 
     # Cached OAuth token payload. None until the first authentication.
-    _auth: ClassVar[dict[str, str | int] | None] = None
+    _auth: ClassVar[dict[str, Any] | None] = None
 
     @classmethod
-    async def _post_auth(cls) -> dict[str, str | int]:
+    async def _post_auth(cls) -> dict[str, Any]:
         """Request a new OAuth token from the IXC ACS API."""
         auth_url = URL(f"{cls._base_api_url}/token/oauth")
 
@@ -62,8 +62,8 @@ class IxcAcsClient:
         cls,
         endpoint: str,
         method: utils.HttpMethod = utils.HttpMethod.GET,
-        payload: Any = None,
-    ) -> Any:
+        payload: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
         """
         Send an authenticated request to an API endpoint.
 
@@ -76,7 +76,7 @@ class IxcAcsClient:
             # Parse token expiration and compare it in the API's expected timezone.
             datetime_ = datetime.fromisoformat(str(cls._auth["expires_at"]))
 
-            expires_at = datetime_.astimezone(ZoneInfo("America/Bahia"))
+            expires_at = datetime_.astimezone(tz=ZoneInfo("America/Bahia"))
             now = datetime.now(tz=ZoneInfo("America/Bahia"))
 
             # Refresh the token if it has expired.
