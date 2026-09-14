@@ -97,6 +97,11 @@ class OpaClient:
             raise StreamError(message=f"StreamError: {exc}")
 
     @classmethod
+    async def aclose(cls) -> None:
+        "Close the shared AsyncClient and releases resources."
+        await cls._async_client.aclose()
+
+    @classmethod
     async def get(
         cls, endpoint: str, filter: dict[str, Any] | None = None
     ) -> dict[str, Any]:
