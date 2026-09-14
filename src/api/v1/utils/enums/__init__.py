@@ -14,7 +14,6 @@ from .contrato_enum import (
 from .default_enum import Default
 from .department_enum import Departments
 from .group_enum import GroupNames
-from .http_enum import HttpMethod
 from .ixc_user_enum import (
     IXCUserAccessTypeCod,
     IXCUserAccessTypeLabel,
@@ -30,7 +29,6 @@ __all__ = [
     "Default",
     "Departments",
     "GroupNames",
-    "HttpMethod",
     "IXCUserAccessTypeCod",
     "IXCUserAccessTypeLabel",
     "IXCUserStatusCod",

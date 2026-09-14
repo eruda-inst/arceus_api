@@ -42,6 +42,7 @@ services:
       - REFRESH_TOKEN_EXPIRE_DAYS=${REFRESH_TOKEN_EXPIRE_DAYS}
       - SECRET_KEY=${SECRET_KEY}
       - RUN_MIGRATIONS=${RUN_MIGRATIONS}
+      - TIMEZONE=${TIMEZONE}
     ports:
       - 8000:8000
     depends_on:

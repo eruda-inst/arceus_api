@@ -1,5 +1,6 @@
 import json
 from base64 import b64encode
+from http import HTTPMethod
 from typing import Any, ClassVar
 
 from httpx import (
@@ -58,7 +59,7 @@ class IxcClient:
     async def _make_request(
         cls,
         endpoint: str,
-        method: utils.HttpMethod = utils.HttpMethod.POST,
+        method: HTTPMethod = HTTPMethod.POST,
         payload: dict[str, Any] | None = None,
         include_ixcsoft: bool = False,
     ) -> dict[str, Any]:
@@ -128,7 +129,7 @@ class IxcClient:
     ) -> dict[str, Any]:
         """Update an IXC resource by ID using PUT."""
         return await cls._make_request(
-            endpoint=f"{endpoint}/{id}", payload=payload, method=utils.HttpMethod.PUT
+            endpoint=f"{endpoint}/{id}", payload=payload, method=HTTPMethod.PUT
         )
 
     @classmethod

@@ -1,4 +1,5 @@
-from datetime import datetime
+import datetime as dt
+from http import HTTPMethod
 from typing import Any, ClassVar
 from zoneinfo import ZoneInfo
 
@@ -14,7 +15,7 @@ from httpx import (
     Timeout,
 )
 
-from .. import config, utils
+from .. import config
 
 
 class IxcAcsClient:
@@ -40,6 +41,9 @@ class IxcAcsClient:
     # Cached OAuth token payload. None until the first authentication.
     _auth: ClassVar[dict[str, Any] | None] = None
 
+    # Timezone used when comparing OAuth token expiration times.
+    _tz: ClassVar[ZoneInfo] = ZoneInfo(config.settings.timezone)
+
     @classmethod
     async def _post_auth(cls) -> dict[str, Any]:
         """Request a new OAuth token from the IXC ACS API."""
@@ -61,7 +65,7 @@ class IxcAcsClient:
     async def _make_request(
         cls,
         endpoint: str,
-        method: utils.HttpMethod = utils.HttpMethod.GET,
+        method: HTTPMethod = HTTPMethod.GET,
         payload: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         """
@@ -73,13 +77,19 @@ class IxcAcsClient:
         if cls._auth is None:
             cls._auth = await cls._post_auth()
         else:
-            # Parse token expiration and compare it in the API's expected timezone.
-            datetime_ = datetime.fromisoformat(str(cls._auth["expires_at"]))
+            # A cached token exists; parse its expiration timestamp from ISO format.
+            expires_at = dt.datetime.fromisoformat(cls._auth["expires_at"])
 
-            expires_at = datetime_.astimezone(tz=ZoneInfo("America/Bahia"))
-            now = datetime.now(tz=ZoneInfo("America/Bahia"))
+            # Refresh one minute early to avoid using a token that expires mid-request.
+            expires_at += dt.timedelta(minutes=-1)
 
-            # Refresh the token if it has expired.
+            # Convert the expiration time to the API's local timezone.
+            expires_at = expires_at.astimezone(tz=cls._tz)
+
+            # Get the current time in the same timezone for an accurate comparison.
+            now = dt.datetime.now(tz=cls._tz)
+
+            # If the token is expired or within the 1-minute buffer, request a new one.
             if now >= expires_at:
                 cls._auth = await cls._post_auth()
 

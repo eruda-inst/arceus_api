@@ -1,3 +1,4 @@
+from http import HTTPMethod
 from typing import Any, ClassVar
 
 from httpx import (
@@ -12,7 +13,7 @@ from httpx import (
     Timeout,
 )
 
-from .. import config, utils
+from .. import config
 
 
 class OpaClient:
@@ -50,7 +51,7 @@ class OpaClient:
     async def _make_request(
         cls,
         endpoint: str,
-        method: utils.HttpMethod = utils.HttpMethod.GET,
+        method: HTTPMethod = HTTPMethod.GET,
         payload: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         """Send an HTTP request to OPA and return the decoded JSON body.

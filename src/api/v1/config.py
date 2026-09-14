@@ -43,6 +43,8 @@ class Settings(BaseSettings):
 
     run_migrations: str = Field(default="run_migrations")
 
+    timezone: str = Field(default="timezone")
+
     @computed_field
     @property
     def token_expire_seconds(self) -> NonNegativeInt:
