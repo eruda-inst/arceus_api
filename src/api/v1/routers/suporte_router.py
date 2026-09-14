@@ -151,3 +151,24 @@ async def put_ip(
     return await services.SuporteService.put_ip(
         id_login=id_login, ip=ip, pool_radius=pool_radius
     )
+
+
+@suporte_router.patch(
+    path="/dados-wifi",
+    summary="Atualiza dados wifi de um cliente",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+async def patch_dados_wifi(
+    _: Annotated[bool, Depends(deps.get_creds)],
+    id_login: IdLogin,
+    ssid: Annotated[str | None, Body(description="Novo SSID da rede wifi")] = None,
+    senha_ssid: Annotated[
+        str | None, Body(description="Nova senha da rede wifi")
+    ] = None,
+) -> None:
+    """
+    Atualiza dados da rede wifi 2.5G e 5G de um cliente
+    """
+    return await services.SuporteService.patch_dados_wifi(
+        id_login=id_login, ssid=ssid, senha_ssid=senha_ssid
+    )

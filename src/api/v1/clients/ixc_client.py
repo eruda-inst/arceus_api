@@ -39,9 +39,9 @@ class IxcClient:
         cls,
         endpoint: str,
         method: HTTPMethod = HTTPMethod.POST,
-        payload: Any = None,
+        payload: dict[str, Any] | None = None,
         include_ixcsoft: bool = False,
-    ) -> Any:
+    ) -> dict[str, Any]:
         try:
             headers = cls._headers.copy()
 
@@ -70,11 +70,11 @@ class IxcClient:
         await cls._async_client.aclose()
 
     @classmethod
-    async def post(cls, endpoint: str, payload: Any) -> Any:
+    async def post(cls, endpoint: str, payload: dict[str, Any]) -> dict[str, Any]:
         return await cls._make_request(endpoint=endpoint, payload=payload)
 
     @classmethod
-    async def put(cls, endpoint: str, id: PositiveInt, payload: Any) -> Any:
+    async def put(cls, endpoint: str, payload: dict[str, Any]) -> dict[str, Any]:
         return await cls._make_request(
             endpoint=endpoint, payload=payload, method=HTTPMethod.PUT
         )

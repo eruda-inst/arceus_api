@@ -123,3 +123,10 @@ class IxcAcsClient:
     async def get(cls, endpoint: str) -> dict[str, Any]:
         """Perform an authenticated GET request to the given endpoint."""
         return await cls._make_request(endpoint=endpoint)
+
+    @classmethod
+    async def patch(cls, endpoint: str, payload: dict[str, Any]) -> dict[str, Any]:
+        """Add a comment here."""
+        return await cls._make_request(
+            endpoint=endpoint, payload=payload, method=HTTPMethod.PATCH
+        )

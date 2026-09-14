@@ -264,9 +264,9 @@ class SuporteService:
 
         # --- Atualiza login ---
         endpoint = "radusuarios"
-        id = id_login
-        payload = login_atualizado
-        res = await clients.IxcClient.put(endpoint=endpoint, id=id, payload=payload)
+        res = await clients.IxcClient.put(
+            endpoint=f"{endpoint}/{id_login}", payload=login_atualizado
+        )
         if res["type"] == "error":
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -307,4 +307,45 @@ class SuporteService:
             senha_wifi_2g=login["senha_rede_sem_fio"] or None,
             ssid_wifi_5g=login["ssid_router_wifi_5ghz"] or None,
             senha_wifi_5g=login["senha_rede_sem_fio_5ghz"] or None,
+        )
+
+    @classmethod
+    async def patch_dados_wifi(
+        cls,
+        # IDs NonNegativeInt, pois o IXC é quebrado
+        id_login: NonNegativeInt,
+        ssid: str | None = None,
+        senha_ssid: str | None = None,
+    ) -> None:
+        login = await cls._get_login(id_login=id_login)
+        if not (onu_mac := login.get("onu_mac")):
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="ONU inexistente"
+            )
+        serial_number = onu_mac.upper()  # It must be uppercased
+
+        wifi = await clients.IxcAcsClient.get(endpoint=f"devices/{serial_number}/wifi")
+
+        interface_2g = next(i for i in wifi["2.4"] if i["enable"])
+        interface_5g = next(i for i in wifi["5.8"] if i["enable"])
+
+        payload_2g = {}
+        payload_5g = {}
+
+        if ssid is not None:
+            payload_2g["ssid"] = ssid
+            payload_5g["ssid"] = f"{ssid}_5G"
+
+        if senha_ssid is not None:
+            payload_2g["password"] = senha_ssid
+            payload_5g["password"] = senha_ssid
+
+        await clients.IxcAcsClient.patch(
+            endpoint=f"devices/{serial_number}/wifi/{interface_2g['id']}",
+            payload=payload_2g,
+        )
+
+        await clients.IxcAcsClient.patch(
+            endpoint=f"devices/{serial_number}/wifi/{interface_5g['id']}",
+            payload=payload_5g,
         )
