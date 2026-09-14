@@ -17,29 +17,26 @@ from .. import config
 
 
 class SevenAZClient:
-    """Async client for the SevenAZ API.
+    """Client for interacting with the SevenAZ API."""
 
-    SevenAZ uses API-key authentication and a shared ``httpx.AsyncClient``.
-    """
-
-    # Base API URL from settings; endpoint paths are appended to it.
+    # Base URL used for all API requests.
     _base_api_url: ClassVar[URL] = URL(config.settings.seven_az_base_api_url)
 
-    # API key is unwrapped once at import time. Avoid logging this value.
+    # API key loaded from settings.
     _api_key: ClassVar[str] = config.settings.seven_az_api_key.get_secret_value()
 
-    # Per-phase timeout: connect, read, write and pool checkout.
+    # Timeout configuration applied to the shared HTTP client.
     _timeout: ClassVar[Timeout] = Timeout(connect=5.0, read=30.0, write=10.0, pool=1.0)
 
-    # Retry transient transport errors up to 3 times.
+    # Transport with automatic retries for transient network failures.
     _transport: ClassVar[AsyncHTTPTransport] = AsyncHTTPTransport(retries=3)
 
-    # Shared async HTTP client. Reusing it keeps the connection pool warm.
+    # Shared AsyncClient instance. Reusing it enables connection pooling.
     _async_client: ClassVar[AsyncClient] = AsyncClient(
         timeout=_timeout, transport=_transport
     )
 
-    # Default headers shared by every request, including API-key auth.
+    # Default headers sent with every request, including API-key authentication.
     _headers: ClassVar[Headers] = Headers(
         {"Content-Type": "application/json", "X-API-Key": _api_key}
     )
@@ -51,57 +48,32 @@ class SevenAZClient:
         method: HTTPMethod = HTTPMethod.GET,
         payload: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
-        """Send an HTTP request to SevenAZ and return the decoded JSON body.
-
-        Args:
-            endpoint: API path appended to the base URL.
-            method: HTTP method; defaults to GET.
-            payload: Optional JSON-serializable request body.
-
-        Returns:
-            The parsed JSON response as a dictionary.
-
-        Raises:
-            HTTPError: If the request fails or returns an error status.
-            InvalidURL: If the constructed URL is invalid.
-            CookieConflict: If httpx detects conflicting cookies.
-            StreamError: If the response stream fails.
-        """
+        """Send an authenticated request to an API endpoint."""
         try:
-            # Build the full endpoint URL from the configured base URL.
+            # Build the full endpoint URL and perform the request.
             url = URL(f"{cls._base_api_url}/{endpoint}")
-
-            # Execute the request with shared timeout/transport/client settings.
             res = await cls._async_client.request(
                 method=method, url=url, headers=cls._headers, json=payload
             )
-
-            # Raise for 4xx/5xx responses before trying to decode JSON.
             res.raise_for_status()
             return res.json()
 
+        # Normalize low-level httpx errors with clearer context.
         except HTTPError as exc:
-            # Re-raise httpx HTTP errors with a consistent prefix.
             raise HTTPError(message=f"HTTPError: {exc}")
         except InvalidURL as exc:
-            # Re-raise URL construction/parsing errors with context.
             raise InvalidURL(message=f"InvalidURL: {exc}")
         except CookieConflict as exc:
-            # Re-raise cookie conflicts with context.
             raise CookieConflict(message=f"CookieConflict: {exc}")
         except StreamError as exc:
-            # Re-raise response stream errors with context.
             raise StreamError(message=f"StreamError: {exc}")
 
     @classmethod
     async def aclose(cls) -> None:
-        "Close the shared AsyncClient and releases resources."
+        """Close the shared AsyncClient and release resources."""
         await cls._async_client.aclose()
 
     @classmethod
     async def get(cls, endpoint: str) -> dict[str, Any]:
-        """GET a SevenAZ endpoint.
-
-        SevenAZ does not require a request body for this method.
-        """
+        """Perform an authenticated GET request to the given endpoint."""
         return await cls._make_request(endpoint=endpoint)

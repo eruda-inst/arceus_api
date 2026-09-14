@@ -3,38 +3,80 @@ import json
 from http import HTTPMethod
 from typing import Any, ClassVar
 
-from httpx import URL, Headers
+from httpx import (
+    URL,
+    AsyncClient,
+    AsyncHTTPTransport,
+    CookieConflict,
+    Headers,
+    HTTPError,
+    InvalidURL,
+    StreamError,
+    Timeout,
+)
 from pydantic import PositiveInt
 
-from .. import utils
-from ..config import settings
-from .httpx_client import HttpxClient
+from .. import config, utils
 
 
-class IxcClient(HttpxClient):
-    _token: ClassVar[str] = settings.ixc_access_token.get_secret_value()
+class IxcClient:
+    _timeout: ClassVar[Timeout] = Timeout(connect=5.0, read=30.0, write=10.0, pool=1.0)
+    _transport: ClassVar[AsyncHTTPTransport] = AsyncHTTPTransport(retries=3)
+    _async_client: ClassVar[AsyncClient] = AsyncClient(
+        timeout=_timeout, transport=_transport
+    )
+    _token: ClassVar[str] = config.settings.ixc_access_token.get_secret_value()
     _token_encoded: ClassVar[str] = base64.b64encode(_token.encode("utf-8")).decode(
         "utf-8"
     )
-    _base_url: ClassVar[str] = settings.ixc_base_api_url
-    _headers: ClassVar[Headers] = Headers({"Authorization": f"Basic {_token_encoded}"})
+    _base_api_url: ClassVar[str] = config.settings.ixc_base_api_url
+    _headers: ClassVar[Headers] = Headers(
+        {"Content-Type": "application/json", "Authorization": f"Basic {_token_encoded}"}
+    )
 
     @classmethod
-    def _include_ixcsoft(cls) -> Headers:
-        return Headers({**cls._headers, "ixcsoft": "listar"})
+    async def _make_request(
+        cls,
+        endpoint: str,
+        method: HTTPMethod = HTTPMethod.POST,
+        payload: Any = None,
+        include_ixcsoft: bool = False,
+    ) -> Any:
+        try:
+            headers = cls._headers.copy()
+
+            if include_ixcsoft:
+                headers["ixcsoft"] = "listar"
+
+            url = URL(f"{cls._base_api_url}/{endpoint}")
+
+            res = await cls._async_client.request(
+                method=method, url=url, headers=headers, json=payload
+            )
+            res.raise_for_status()
+            return res.json()
+        except HTTPError as exc:
+            raise HTTPError(message=f"HTTPError: {exc}")
+        except InvalidURL as exc:
+            raise InvalidURL(message=f"InvalidURL: {exc}")
+        except CookieConflict as exc:
+            raise CookieConflict(message=f"CookieConflict: {exc}")
+        except StreamError as exc:
+            raise StreamError(message=f"StreamError: {exc}")
+
+    @classmethod
+    async def aclose(cls) -> None:
+        "Close the shared AsyncClient and releases resources."
+        await cls._async_client.aclose()
 
     @classmethod
     async def post(cls, endpoint: str, payload: Any) -> Any:
-        url = URL(f"{cls._base_url}/{endpoint}")
-        return await cls._make_request(
-            url=url, payload=payload, method=HTTPMethod.POST, headers=cls._headers
-        )
+        return await cls._make_request(endpoint=endpoint, payload=payload)
 
     @classmethod
     async def put(cls, endpoint: str, id: PositiveInt, payload: Any) -> Any:
-        url = URL(f"{cls._base_url}/{endpoint}/{id}")
         return await cls._make_request(
-            url=url, payload=payload, method=HTTPMethod.PUT, headers=cls._headers
+            endpoint=endpoint, payload=payload, method=HTTPMethod.PUT
         )
 
     @classmethod
@@ -53,8 +95,6 @@ class IxcClient(HttpxClient):
             "rp": str(itens_por_pagina),
             "sortorder": str(sort_order),
         }
-        url = URL(f"{cls._base_url}/{endpoint}")
-        headers = cls._include_ixcsoft()
         return await cls._make_request(
-            url=url, payload=payload, method=HTTPMethod.POST, headers=headers
+            endpoint=endpoint, payload=payload, include_ixcsoft=True
         )

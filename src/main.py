@@ -17,12 +17,13 @@ async def lifespan(app: FastAPI):
     await clients.IxcAcsClient.aclose()
     await clients.OpaClient.aclose()
     await clients.SevenAZClient.aclose()
+    await clients.IxcClient.aclose()
 
 
 app = FastAPI(
     title="Arceus",
     description="Integra com sistemas IXC, Opa e 7AZ. Oferece autenticação, gestão de usuários e permissões, operações comerciais (contratos, leads), financeiras (faturas, cobrança), suporte (atendimentos, status de conexão), além de logs e métricas para monitoramento",
-    version="1.7.2",
+    version="1.7.4",
     routes=api_v1_router.routes,
     lifespan=lifespan,
 )
