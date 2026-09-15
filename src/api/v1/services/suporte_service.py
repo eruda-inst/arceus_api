@@ -11,10 +11,10 @@ from .client_service import ClientService
 class SuporteService:
     @staticmethod
     async def _get_login(
-        # IDs NonNegativeInt, pois o IXC é quebrado
+        # IDs NonNegativeInt, because IXC
         id_login: NonNegativeInt,
     ) -> dict[str, Any]:
-        # --- Obtém login ---
+        # --- Get login ---
         endpoint = "radusuarios"
         grid_param = [utils.Param(TB="radusuarios.id", P=id_login)]
         res = await clients.IxcClient.get(endpoint=endpoint, grid_param=grid_param)
@@ -27,17 +27,13 @@ class SuporteService:
         return login
 
     @classmethod
-    async def get_dns_server(
+    async def _get_device(
         cls,
-        # IDs NonNegativeInt, because IXC is broken
+        # IDs NonNegativeInt, because IXC
         id_login: NonNegativeInt,
-    ) -> schemas.DnsServerOut:
+    ) -> dict[str, Any]:
         # --- Get login ---
         login = await cls._get_login(id_login=id_login)
-        if login is None:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="Login inexistente"
-            )
 
         # --- Get client ---
         client = await ClientService.get_cliente_ixc(id_cliente=login["id_cliente"])
@@ -53,10 +49,20 @@ class SuporteService:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Dispositivo inexistente"
             )
-        serial_number = device["registers"][0]["serialNumber"]
+
+        return device["registers"][0]
+
+    @classmethod
+    async def get_dns_server(
+        cls,
+        # IDs NonNegativeInt, because IXC
+        id_login: NonNegativeInt,
+    ) -> schemas.DnsServerOut:
+        # --- Get device ---
+        device = await cls._get_device(id_login=id_login)
 
         # --- Get LAN ---
-        endpoint = f"devices/{serial_number}/lan/network"
+        endpoint = f"devices/{device['serialNumber']}/lan/network"
         lan = await clients.IxcAcsClient.get(endpoint=endpoint)
         if lan is None:
             raise HTTPException(
