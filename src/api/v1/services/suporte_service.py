@@ -44,13 +44,14 @@ class SuporteService:
 
         # --- Get device ---
         endpoint = f"devices/views/natural?search[column]=customer.cpfCnpj&search[search]={client['cnpj_cpf']}"
-        device = await clients.IxcAcsClient.get(endpoint=endpoint)
-        if device is None:
+        res = await clients.IxcAcsClient.get(endpoint=endpoint)
+        if not (regs := res.get("registers", [])):
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Dispositivo inexistente"
             )
+        device = regs[0]
 
-        return device["registers"][0]
+        return device
 
     @classmethod
     async def get_dns_server(
@@ -334,19 +335,22 @@ class SuporteService:
     @classmethod
     async def patch_dados_wifi(
         cls,
-        # IDs NonNegativeInt, pois o IXC é quebrado
+        # IDs NonNegativeInt, because IXC
         id_login: NonNegativeInt,
         ssid: str | None = None,
         senha_ssid: str | None = None,
     ) -> None:
-        login = await cls._get_login(id_login=id_login)
-        if not (onu_mac := login.get("onu_mac")):
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="ONU inexistente"
-            )
-        serial_number = onu_mac.upper()  # It must be uppercased
+        # --- Get device ---
+        device = await cls._get_device(id_login=id_login)
+        serial_number = device["serialNumber"]
 
-        wifi = await clients.IxcAcsClient.get(endpoint=f"devices/{serial_number}/wifi")
+        # --- Get wifi ---
+        endpoint = f"devices/{device['serialNumber']}/wifi"
+        wifi = await clients.IxcAcsClient.get(endpoint=endpoint)
+        if wifi is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Wifi inexistente"
+            )
 
         interface_2g = next(i for i in wifi["2.4"] if i["enable"])
         interface_5g = next(i for i in wifi["5.8"] if i["enable"])
@@ -362,11 +366,11 @@ class SuporteService:
             payload_2g["password"] = senha_ssid
             payload_5g["password"] = senha_ssid
 
+        # --- Patch wifi ---
         await clients.IxcAcsClient.patch(
             endpoint=f"devices/{serial_number}/wifi/{interface_2g['id']}",
             payload=payload_2g,
         )
-
         await clients.IxcAcsClient.patch(
             endpoint=f"devices/{serial_number}/wifi/{interface_5g['id']}",
             payload=payload_5g,
