@@ -34,20 +34,36 @@ class SuporteService:
     ) -> schemas.DnsServerOut:
         # --- Get login ---
         login = await cls._get_login(id_login=id_login)
-        if not (onu_mac := login.get("onu_mac")):
+        if login is None:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="ONU inexistente"
+                status_code=status.HTTP_404_NOT_FOUND, detail="Login inexistente"
             )
-        serial_number = onu_mac.upper()  # It must be uppercased
 
-        # --- Get DNS server
-        endpoint = f"devices/{serial_number}/lan/network"
-        lan = await clients.IxcAcsClient.get(endpoint=endpoint)
-        if not (dns_server := lan.get("dnsServer")):
+        # --- Get client ---
+        client = await ClientService.get_cliente_ixc(id_cliente=login["id_cliente"])
+        if client is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Cliente inexistente"
+            )
+
+        # --- Get device ---
+        endpoint = f"devices/views/natural?search[column]=customer.cpfCnpj&search[search]={client['cnpj_cpf']}"
+        device = await clients.IxcAcsClient.get(endpoint=endpoint)
+        if device is None:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Dispositivo inexistente"
             )
-        return schemas.DnsServerOut(dns_server=dns_server)
+        serial_number = device["registers"][0]["serialNumber"]
+
+        # --- Get LAN ---
+        endpoint = f"devices/{serial_number}/lan/network"
+        lan = await clients.IxcAcsClient.get(endpoint=endpoint)
+        if lan is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="LAN inexistente"
+            )
+
+        return schemas.DnsServerOut(dns_server=lan["dnsServer"])
 
     @staticmethod
     async def get_contratos(
