@@ -152,11 +152,7 @@ async def patch_ip(
     )
 
 
-@suporte_router.patch(
-    path="/dados-wifi",
-    summary="Atualiza dados wifi de um cliente",
-    status_code=status.HTTP_204_NO_CONTENT,
-)
+@suporte_router.patch(path="/dados-wifi", summary="Atualiza dados wifi de um cliente")
 async def patch_dados_wifi(
     _: Annotated[bool, Depends(deps.get_creds)],
     id_login: IdLogin,
@@ -164,7 +160,7 @@ async def patch_dados_wifi(
     senha_ssid: Annotated[
         str | None, Body(description="Nova senha da rede wifi")
     ] = None,
-) -> None:
+) -> schemas.MensagemOutSchema:
     """
     Atualiza dados da rede wifi 2.5G e 5G de um cliente
     """

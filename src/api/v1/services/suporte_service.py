@@ -339,7 +339,7 @@ class SuporteService:
         id_login: NonNegativeInt,
         ssid: str | None = None,
         senha_ssid: str | None = None,
-    ) -> None:
+    ) -> schemas.MensagemOutSchema:
         # --- Get device ---
         device = await cls._get_device(id_login=id_login)
         serial_number = device["serialNumber"]
@@ -375,3 +375,5 @@ class SuporteService:
             endpoint=f"devices/{serial_number}/wifi/{interface_5g['id']}",
             payload=payload_5g,
         )
+
+        return schemas.MensagemOutSchema(mensagem="Atualização bem-sucedida")
