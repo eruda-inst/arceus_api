@@ -134,9 +134,8 @@ async def post_limpar_mac(
     return await services.SuporteService.post_limpar_mac(id_login=id_login)
 
 
-# Por razões de limitações na plataforma opa, o verbo deve ser put, ao invés de patch
-@suporte_router.put(path="/ip/{id_login}", summary="Atualiza IP e Radius de um login")
-async def put_ip(
+@suporte_router.patch(path="/ip/{id_login}", summary="Atualiza IP e Radius de um login")
+async def patch_ip(
     _: Annotated[bool, Depends(deps.get_creds)],
     # IDs NonNegativeInt, pois o IXC é quebrado
     id_login: Annotated[int, Path(ge=0, description="ID de login")],
@@ -148,7 +147,7 @@ async def put_ip(
     """
     Atualiza IP e Radius de um login, através do id de login
     """
-    return await services.SuporteService.put_ip(
+    return await services.SuporteService.patch_ip(
         id_login=id_login, ip=ip, pool_radius=pool_radius
     )
 

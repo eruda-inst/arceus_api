@@ -19,7 +19,7 @@ class TriagemService:
         return schemas.ContatoOutSchema(telefone_celular=cliente["telefone_celular"])
 
     @staticmethod
-    async def put_contato_cliente(
+    async def patch_contato_cliente(
         telefone_celular: str,
         protocolo: str | None = None,
         cnpj_cpf: str | None = None,

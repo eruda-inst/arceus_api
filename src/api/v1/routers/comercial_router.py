@@ -34,9 +34,8 @@ async def post_leads(
     return await services.ComercialService.post_leads(lead=lead)
 
 
-# Por razões de limitações na plataforma opa, o verbo deve ser put, ao invés de patch
-@comercial_router.put(path="/leads", summary="Atualiza lead parcialmente")
-async def put_lead(
+@comercial_router.patch(path="/leads", summary="Atualiza lead parcialmente")
+async def patch_lead(
     _: Annotated[bool, Depends(deps.get_creds)],
     cnpj_cpf: utils.CnpjCpf,
     lead: Annotated[schemas.LeadUpdateSchema, Body(description="Dados do lead")],
@@ -44,4 +43,4 @@ async def put_lead(
     """
     Atualiza lead parcialmente, através de dados do lead
     """
-    return await services.ComercialService.put_lead(cnpj_cpf=cnpj_cpf, lead=lead)
+    return await services.ComercialService.patch_lead(cnpj_cpf=cnpj_cpf, lead=lead)

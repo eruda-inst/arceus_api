@@ -105,12 +105,11 @@ async def post_desbloqueio_em_confianca(
     )
 
 
-# Por razões de limitações na plataforma opa, o verbo deve ser put, ao invés de patch
-@financeiro_router.put(
+@financeiro_router.patch(
     path="/credenciais/{id_cliente}",
     summary="Atualiza senha da central do assinante de um cliente",
 )
-async def put_credenciais(
+async def patch_creds(
     _: Annotated[bool, Depends(deps.get_creds)],
     # IDs NonNegativeInt, pois o IXC é quebrado
     id_cliente: Annotated[int, Path(ge=0, description="ID do cliente")],
@@ -119,6 +118,6 @@ async def put_credenciais(
     """
     Atualiza senha da central do assinante de um cliente, através do id do cliente
     """
-    return await services.FinanceiroService.put_credenciais(
+    return await services.FinanceiroService.patch_creds(
         id_cliente=id_cliente, senha=senha
     )

@@ -52,7 +52,7 @@ class ComercialService:
         return schemas.LeadOutSchema(**lead_criado)
 
     @staticmethod
-    async def put_lead(
+    async def patch_lead(
         cnpj_cpf: str, lead: schemas.LeadUpdateSchema
     ) -> schemas.LeadOutSchema:
         # --- Obtém lead atual ---

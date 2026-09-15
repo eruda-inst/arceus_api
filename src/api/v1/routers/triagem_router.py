@@ -23,9 +23,8 @@ async def get_contato_cliente(
     )
 
 
-# Por razões de limitações na plataforma opa, o verbo deve ser put, ao invés de patch
-@triagem_router.put(path="/contato-cliente", summary="Atualiza contato de um cliente")
-async def put_contato_cliente(
+@triagem_router.patch(path="/contato-cliente", summary="Atualiza contato de um cliente")
+async def patch_contato_cliente(
     _: Annotated[bool, Depends(deps.get_creds)],
     telefone_celular: Annotated[
         str, Body(embed=True, description="Novo telefone celular")
@@ -36,6 +35,6 @@ async def put_contato_cliente(
     """
     Atualiza contato de um cliente, através do protocolo de atendimento ou CPF/CNPJ
     """
-    return await services.TriagemService.put_contato_cliente(
+    return await services.TriagemService.patch_contato_cliente(
         protocolo=protocolo, cnpj_cpf=cnpj_cpf, telefone_celular=telefone_celular
     )

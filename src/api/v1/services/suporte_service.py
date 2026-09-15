@@ -259,7 +259,7 @@ class SuporteService:
         )
 
     @classmethod
-    async def put_ip(
+    async def patch_ip(
         cls,
         # IDs NonNegativeInt, pois o IXC é quebrado
         id_login: NonNegativeInt,

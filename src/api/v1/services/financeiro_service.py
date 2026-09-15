@@ -336,7 +336,7 @@ class FinanceiroService:
         )
 
     @staticmethod
-    async def put_credenciais(
+    async def patch_creds(
         # IDs NonNegativeInt, pois o IXC é quebrado
         id_cliente: NonNegativeInt,
         senha: str,
