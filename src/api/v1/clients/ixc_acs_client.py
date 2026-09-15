@@ -116,7 +116,7 @@ class IxcAcsClient:
 
     @classmethod
     async def aclose(cls) -> None:
-        "Close the shared AsyncClient and releases resources."
+        """Close the shared AsyncClient and releases resources."""
         await cls._async_client.aclose()
 
     @classmethod
@@ -126,7 +126,7 @@ class IxcAcsClient:
 
     @classmethod
     async def patch(cls, endpoint: str, payload: dict[str, Any]) -> dict[str, Any]:
-        """Add a comment here."""
+        """Perform an authenticated PATCH request to the given endpoint."""
         return await cls._make_request(
             endpoint=endpoint, payload=payload, method=HTTPMethod.PATCH
         )
