@@ -11,7 +11,7 @@ IdLogin = Annotated[int, Query(ge=0, description="ID de login do cliente")]
 GetCredsDeps = Annotated[bool, Depends(deps.get_creds)]
 
 
-@suporte_router.get(path="/dns-server", summary="Obtém servidor DNS de um cliente")
+@suporte_router.get(path="/servidor-dns", summary="Obtém servidor DNS de um cliente")
 async def get_dns_server(_: GetCredsDeps, id_login: IdLogin) -> schemas.DnsServerOut:
     """
     Obtém servidor DNS de um cliente, a partir do ID de login
