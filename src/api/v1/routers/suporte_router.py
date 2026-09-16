@@ -6,23 +6,30 @@ from .. import deps, schemas, services, utils
 
 suporte_router = APIRouter(prefix="/suporte", tags=["Suporte"])
 
-# IDs NonNegativeInt, pois o IXC é quebrado
+# IDs NonNegativeInt, because IXC
 IdLogin = Annotated[int, Query(ge=0, description="ID de login do cliente")]
+GetCredsDeps = Annotated[bool, Depends(deps.get_creds)]
 
 
 @suporte_router.get(path="/dns-server", summary="Obtém servidor DNS de um cliente")
-async def get_dns_server(
-    _: Annotated[bool, Depends(deps.get_creds)], id_login: IdLogin
-) -> schemas.DnsServerOut:
+async def get_dns_server(_: GetCredsDeps, id_login: IdLogin) -> schemas.DnsServerOut:
     """
     Obtém servidor DNS de um cliente, a partir do ID de login
     """
     return await services.SuporteService.get_dns_server(id_login=id_login)
 
 
+@suporte_router.get(path="/tem-ipv6", summary="Verifica se o cliente possui IPV6")
+async def get_has_ipv6(_: GetCredsDeps, id_login: IdLogin) -> dict[str, bool]:
+    """
+    Verifica se o cliente possui IPV6 ativo, a partir do ID de login
+    """
+    return await services.SuporteService.get_has_ipv6(id_login=id_login)
+
+
 @suporte_router.get(path="/contratos", summary="Obtém contratos de um cliente")
 async def get_contratos(
-    _: Annotated[bool, Depends(deps.get_creds)],
+    _: GetCredsDeps,
     protocolo: utils.Protocolo | None = None,
     cnpj_cpf: utils.CnpjCpf | None = None,
     pagina: utils.Pagina = 1,
@@ -43,7 +50,7 @@ async def get_contratos(
     path="/status-conexao", summary="Obtém status de conexão de um cliente"
 )
 async def get_status_conexao(
-    _: Annotated[bool, Depends(deps.get_creds)], id_login: IdLogin
+    _: GetCredsDeps, id_login: IdLogin
 ) -> schemas.StatusConexaoOutSchema:
     """
     Obtém status de conexão de um cliente, através do id de login
@@ -53,7 +60,7 @@ async def get_status_conexao(
 
 @suporte_router.get(path="/status-onu", summary="Obtém status de ONU de um cliente")
 async def get_status_onu(
-    _: Annotated[bool, Depends(deps.get_creds)],
+    _: GetCredsDeps,
     id_login: IdLogin | None = None,
     mac_onu: Annotated[
         str | None,
@@ -69,9 +76,7 @@ async def get_status_onu(
 
 
 @suporte_router.get(path="/dados-wifi", summary="Obtém dados do WiFi de um cliente")
-async def get_dados_wifi(
-    _: Annotated[bool, Depends(deps.get_creds)], id_login: IdLogin
-) -> schemas.WifiOutSchema:
+async def get_dados_wifi(_: GetCredsDeps, id_login: IdLogin) -> schemas.WifiOutSchema:
     """
     Obtém dados do WiFi de um cliente, através do ID de login
     """
@@ -82,7 +87,7 @@ async def get_dados_wifi(
     path="/atendimentos", summary="Obtém atendimentos abertos de um cliente"
 )
 async def get_atendimentos(
-    _: Annotated[bool, Depends(deps.get_creds)],
+    _: GetCredsDeps,
     id_login: IdLogin,
     pagina: utils.Pagina = 1,
     itens_por_pagina: utils.ItensPorPagina = 10,
@@ -101,7 +106,7 @@ async def get_atendimentos(
     summary="Abre um atendimento para um cliente",
 )
 async def post_atendimentos(
-    _: Annotated[bool, Depends(deps.get_creds)],
+    _: GetCredsDeps,
     atendimento: Annotated[
         schemas.AtendimentoInSchema, Body(description="Dados do atendimento")
     ],
@@ -116,7 +121,7 @@ async def post_atendimentos(
     path="/desconectar-cliente", summary="Envia sinal de desconexão para um cliente"
 )
 async def post_desconectar_cliente(
-    _: Annotated[bool, Depends(deps.get_creds)], id_login: IdLogin
+    _: GetCredsDeps, id_login: IdLogin
 ) -> schemas.MensagemOutSchema:
     """
     Envia sinal de desconexão para um cliente, através do id de login
@@ -126,7 +131,7 @@ async def post_desconectar_cliente(
 
 @suporte_router.post(path="/limpar-mac", summary="Limpa MAC Address")
 async def post_limpar_mac(
-    _: Annotated[bool, Depends(deps.get_creds)], id_login: IdLogin
+    _: GetCredsDeps, id_login: IdLogin
 ) -> schemas.MensagemOutSchema:
     """
     Limpa MAC Address, através do id de login
@@ -136,7 +141,7 @@ async def post_limpar_mac(
 
 @suporte_router.patch(path="/ip/{id_login}", summary="Atualiza IP e Radius de um login")
 async def patch_ip(
-    _: Annotated[bool, Depends(deps.get_creds)],
+    _: GetCredsDeps,
     # IDs NonNegativeInt, pois o IXC é quebrado
     id_login: Annotated[int, Path(ge=0, description="ID de login")],
     ip: Annotated[str | None, Body(description="IP do login a ser atualizado")] = None,
@@ -154,7 +159,7 @@ async def patch_ip(
 
 @suporte_router.patch(path="/dados-wifi", summary="Atualiza dados wifi de um cliente")
 async def patch_dados_wifi(
-    _: Annotated[bool, Depends(deps.get_creds)],
+    _: GetCredsDeps,
     id_login: IdLogin,
     ssid: Annotated[str | None, Body(description="Novo SSID da rede wifi")] = None,
     senha_ssid: Annotated[

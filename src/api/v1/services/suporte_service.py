@@ -35,15 +35,8 @@ class SuporteService:
         # --- Get login ---
         login = await cls._get_login(id_login=id_login)
 
-        # --- Get client ---
-        client = await ClientService.get_cliente_ixc(id_cliente=login["id_cliente"])
-        if client is None:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="Cliente inexistente"
-            )
-
         # --- Get device ---
-        endpoint = f"devices/views/natural?search[column]=customer.cpfCnpj&search[search]={client['cnpj_cpf']}"
+        endpoint = f"devices/views/natural?search[column]=connection.pppoeLogin&search[search]={login['login']}"
         res = await clients.IxcAcsClient.get(endpoint=endpoint)
         if not (regs := res.get("registers", [])):
             raise HTTPException(
@@ -62,15 +55,36 @@ class SuporteService:
         # --- Get device ---
         device = await cls._get_device(id_login=id_login)
 
-        # --- Get LAN ---
-        endpoint = f"devices/{device['serialNumber']}/lan/network"
-        lan = await clients.IxcAcsClient.get(endpoint=endpoint)
-        if lan is None:
+        # --- Get WAN ---
+        endpoint = f"devices/{device['serialNumber']}/ethernet/ppp"
+        ethernet = await clients.IxcAcsClient.get(endpoint=endpoint)
+        if ethernet is None or not len(ethernet):
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="LAN inexistente"
+                status_code=status.HTTP_404_NOT_FOUND, detail="WAN inexistente"
             )
 
-        return schemas.DnsServerOut(dns_server=lan["dnsServer"])
+        return schemas.DnsServerOut(dns_server=ethernet[0]["dnsServer"])
+
+    @classmethod
+    async def get_has_ipv6(
+        cls,
+        # IDs NonNegativeInt, because IXC
+        id_login: NonNegativeInt,
+    ) -> dict[str, bool]:
+        # --- Get device ---
+        device = await cls._get_device(id_login=id_login)
+        serial_number = device["serialNumber"]
+
+        # --- Get IPV6 ---
+        endpoint = f"devices/views/ipv6?search[column]=serialNumber&search[search]={serial_number}"
+        res = await clients.IxcAcsClient.get(endpoint=endpoint)
+        if not (regs := res.get("registers", [])):
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Not found"
+            )
+        info = regs[0]
+
+        return {"tem_ipv6": info["deviceInfo"]["ipv6"] != ""}
 
     @staticmethod
     async def get_contratos(

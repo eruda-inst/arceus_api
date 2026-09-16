@@ -120,7 +120,7 @@ class IxcAcsClient:
         await cls._async_client.aclose()
 
     @classmethod
-    async def get(cls, endpoint: str) -> dict[str, Any]:
+    async def get(cls, endpoint: str) -> dict[str, Any] | list[dict[str, Any]]:
         """Perform an authenticated GET request to the given endpoint."""
         return await cls._make_request(endpoint=endpoint)
 
