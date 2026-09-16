@@ -1,4 +1,4 @@
-from .acs_schema import DnsServerOut
+from .acs_schema import DnsServerOut, TemIPV6OutSchema, UptimeOutSchema
 from .atendimento_schema import AtendimentoInSchema, AtendimentoOutSchema
 from .auth_schema import AccessTokenOutSchema, RefreshTokenInSchema
 from .cliente_schema import ContatoOutSchema, CredencialOutSchema
@@ -78,6 +78,7 @@ __all__ = [
     "StatusInternetOutSchema",
     "StatusOnuOutSchema",
     "SuccessStatsSchema",
+    "TemIPV6OutSchema",
     "TodayAlwaysOutSchema",
     "TopClientNameSchema",
     "TopDepartmentSchema",
@@ -89,6 +90,7 @@ __all__ = [
     "TopStatusCodeSchema",
     "TopWeekdaySchema",
     "TopWorstEndpointSchema",
+    "UptimeOutSchema",
     "UserInSchema",
     "UserLoginSchema",
     "UserOutSchema",

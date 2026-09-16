@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, Any
 
 from fastapi import APIRouter, Body, Depends, Path, Query, status
 
@@ -20,11 +20,19 @@ async def get_dns_server(_: GetCredsDeps, id_login: IdLogin) -> schemas.DnsServe
 
 
 @suporte_router.get(path="/tem-ipv6", summary="Verifica se o cliente possui IPV6")
-async def get_has_ipv6(_: GetCredsDeps, id_login: IdLogin) -> dict[str, bool]:
+async def get_has_ipv6(_: GetCredsDeps, id_login: IdLogin) -> schemas.TemIPV6OutSchema:
     """
     Verifica se o cliente possui IPV6 ativo, a partir do ID de login
     """
     return await services.SuporteService.get_has_ipv6(id_login=id_login)
+
+
+@suporte_router.get(path="/uptime", summary="Obtém uptime de um dispositivo")
+async def get_uptime(_: GetCredsDeps, id_login: IdLogin) -> schemas.UptimeOutSchema:
+    """
+    Obtém uptime de um cliente, a partir do ID de login
+    """
+    return await services.SuporteService.get_uptime(id_login=id_login)
 
 
 @suporte_router.get(path="/contratos", summary="Obtém contratos de um cliente")

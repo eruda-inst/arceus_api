@@ -1,3 +1,4 @@
+import datetime as dt
 import re
 from typing import Any
 
@@ -70,7 +71,7 @@ class SuporteService:
         cls,
         # IDs NonNegativeInt, because IXC
         id_login: NonNegativeInt,
-    ) -> dict[str, bool]:
+    ) -> schemas.TemIPV6OutSchema:
         # --- Get device ---
         device = await cls._get_device(id_login=id_login)
         serial_number = device["serialNumber"]
@@ -84,7 +85,30 @@ class SuporteService:
             )
         info = regs[0]
 
-        return {"tem_ipv6": info["deviceInfo"]["ipv6"] != ""}
+        tem_ipv6 = info["deviceInfo"]["ipv6"] != ""
+
+        return schemas.TemIPV6OutSchema(tem_ipv6=tem_ipv6)
+
+    @classmethod
+    async def get_uptime(
+        cls,
+        # IDs NonNegativeInt, because IXC
+        id_login: NonNegativeInt,
+    ) -> schemas.UptimeOutSchema:
+        # --- Get device ---
+        device = await cls._get_device(id_login=id_login)
+
+        uptime_seconds = device["deviceInfo"]["uptime"]
+        uptime = dt.timedelta(seconds=uptime_seconds)
+
+        days = uptime.days
+        hours = uptime.seconds // 3600
+        minutes = (uptime.seconds // 60) % 60
+        seconds = uptime.seconds % 60
+
+        uptime_out = f"{days:02}D {hours:02}H {minutes:02}M {seconds:02}S"
+
+        return schemas.UptimeOutSchema(uptime=uptime_out)
 
     @staticmethod
     async def get_contratos(
