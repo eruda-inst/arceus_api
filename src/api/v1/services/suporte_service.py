@@ -110,6 +110,20 @@ class SuporteService:
 
         return schemas.UptimeOutSchema(uptime=uptime_out)
 
+    @classmethod
+    async def get_sinal_fibra(
+        cls,
+        # IDs NonNegativeInt, because IXC
+        id_login: NonNegativeInt,
+    ) -> schemas.SinalFibraOutSchema:
+        # --- Get device ---
+        device = await cls._get_device(id_login=id_login)
+
+        rx = device["deviceInfo"]["rx"]
+        tx = device["deviceInfo"]["tx"]
+
+        return schemas.SinalFibraOutSchema(rx=rx, tx=tx)
+
     @staticmethod
     async def get_contratos(
         protocolo: str | None,

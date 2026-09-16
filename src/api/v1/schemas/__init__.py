@@ -1,4 +1,9 @@
-from .acs_schema import DnsServerOut, TemIPV6OutSchema, UptimeOutSchema
+from .acs_schema import (
+    DnsServerOut,
+    SinalFibraOutSchema,
+    TemIPV6OutSchema,
+    UptimeOutSchema,
+)
 from .atendimento_schema import AtendimentoInSchema, AtendimentoOutSchema
 from .auth_schema import AccessTokenOutSchema, RefreshTokenInSchema
 from .cliente_schema import ContatoOutSchema, CredencialOutSchema
@@ -74,6 +79,7 @@ __all__ = [
     "RefreshTokenInSchema",
     "ResponseTimeStatsSchema",
     "RootOutSchema",
+    "SinalFibraOutSchema",
     "StatusConexaoOutSchema",
     "StatusInternetOutSchema",
     "StatusOnuOutSchema",

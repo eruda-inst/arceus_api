@@ -23,7 +23,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="Arceus",
     description="Integra com sistemas IXC, IXC ACS, Opa e 7AZ. Oferece autenticação, gestão de usuários e permissões, operações comerciais (contratos, leads), financeiras (faturas, cobrança), suporte (atendimentos, status de conexão), além de logs e métricas para monitoramento",
-    version="1.8.6",
+    version="1.8.7",
     routes=api_v1_router.routes,
     lifespan=lifespan,
 )

@@ -64,6 +64,16 @@ async def get_uptime(_: GetCredsDeps, id_login: IdLogin) -> schemas.UptimeOutSch
     return await services.SuporteService.get_uptime(id_login=id_login)
 
 
+@vila_router.get(path="/sinal-fibra", summary="Obtém RX e TX do sinal da fibra")
+async def get_sinal_fibra(
+    _: GetCredsDeps, id_login: IdLogin
+) -> schemas.SinalFibraOutSchema:
+    """
+    Obtém taxas de transmissão e de recepção do sinal da fibra, a partir do ID de login
+    """
+    return await services.SuporteService.get_sinal_fibra(id_login=id_login)
+
+
 @vila_router.get(
     path="/status-conexao", summary="Obtém status da conexão de um cliente"
 )

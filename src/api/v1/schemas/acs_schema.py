@@ -18,3 +18,10 @@ class UptimeOutSchema(BaseModel):
         description="Uptime do dispositivo em dias, horas, minutos e segundos",
         examples=["01D 02H 03M 04S"],
     )
+
+
+class SinalFibraOutSchema(BaseModel):
+    rx: float = Field(description="Taxa de recepção do sinal da fibra", examples=[1.23])
+    tx: float = Field(
+        description="Taxa de transmissão do sinal da fibra", examples=[4.56]
+    )
