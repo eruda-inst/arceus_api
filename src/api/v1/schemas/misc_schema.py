@@ -29,7 +29,7 @@ class TodayAlwaysOutSchema[T](BaseModel):
     sempre: T
 
 
-class MensagemOutSchema(BaseModel):
+class MessageOutSchema(BaseModel):
     mensagem: str = Field(
         description="Mensagem de retorno", examples=["Mensagem de retorno"]
     )

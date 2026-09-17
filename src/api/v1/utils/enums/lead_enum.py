@@ -1,13 +1,13 @@
 from enum import StrEnum
 
 
-class TipoPessoaCod(StrEnum):
-    FISICA = "F"
-    JURIDICA = "J"
-    ESTRANGEIRO = "E"
+class PersonTypeCode(StrEnum):
+    INDIVIDUAL = "F"
+    LEGAL_ENTITY = "J"
+    FOREIGN = "E"
 
 
-class TipoPessoaRot(StrEnum):
-    FISICA = "Física"
-    JURIDICA = "Jurídica"
-    ESTRANGEIRO = "Estrangeiro"
+class PersonTypeLabel(StrEnum):
+    INDIVIDUAL = "Física"
+    LEGAL_ENTITY = "Jurídica"
+    FOREIGN = "Estrangeiro"

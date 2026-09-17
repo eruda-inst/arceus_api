@@ -12,26 +12,26 @@ from .. import utils
 
 class LeadOutSchema(BaseModel):
     id: NonNegativeInt = Field(description="ID do lead", examples=[1])
-    ativo: utils.SimNaoCod = Field(
+    ativo: utils.YesNoCode = Field(
         description="Indica se o lead está ativo",
         min_length=1,  # S
         max_length=3,  # Sim
-        examples=[utils.SimNaoRot.SIM],
+        examples=[utils.YesNoLabel.NO],
     )
-    principal: utils.SimNaoCod = Field(
+    principal: utils.YesNoCode = Field(
         description="Indica se o lead é principal",
         min_length=1,  # S
         max_length=3,  # Sim
-        examples=[utils.SimNaoRot.SIM],
+        examples=[utils.YesNoLabel.NO],
     )
-    lead: utils.SimNaoCod = Field(
+    lead: utils.YesNoCode = Field(
         description="Indica se é lead",
         min_length=1,  # S
         max_length=3,  # Sim
-        examples=[utils.SimNaoRot.SIM],
+        examples=[utils.YesNoLabel.NO],
     )
-    tipo_pessoa: utils.TipoPessoaCod = Field(
-        description="Tipo de pessoa", examples=[utils.TipoPessoaRot.FISICA]
+    tipo_pessoa: utils.PersonTypeCode = Field(
+        description="Tipo de pessoa", examples=[utils.PersonTypeLabel.LEGAL_ENTITY]
     )
     nome: str = Field(description="Nome do cliente", examples=["João"])
     data_nascimento: str = Field(
@@ -91,30 +91,30 @@ class LeadOutSchema(BaseModel):
     obs: str = Field(description="Observação do lead", examples=["Observação do lead"])
 
     @field_serializer("ativo", "principal", "lead")
-    def serialize_ativo(self, v: utils.SimNaoCod) -> utils.SimNaoRot:
-        cod = utils.SimNaoCod
-        rot = utils.SimNaoRot
+    def serialize_ativo(self, v: utils.YesNoCode) -> utils.YesNoLabel:
+        cod = utils.YesNoCode
+        rot = utils.YesNoLabel
 
-        mapping = {cod.SIM: rot.SIM, cod.NAO: rot.NAO}
+        mapping = {cod.YES: rot.YES, cod.NO: rot.NO}
 
         return mapping[v]
 
     @field_serializer("tipo_pessoa")
-    def serialize_tipo_pessoa(self, v: utils.TipoPessoaCod) -> utils.TipoPessoaRot:
-        cod = utils.TipoPessoaCod
-        rot = utils.TipoPessoaRot
+    def serialize_tipo_pessoa(self, v: utils.PersonTypeCode) -> utils.PersonTypeLabel:
+        cod = utils.PersonTypeCode
+        rot = utils.PersonTypeLabel
 
         mapping = {
-            cod.FISICA: rot.FISICA,
-            cod.JURIDICA: rot.JURIDICA,
-            cod.ESTRANGEIRO: rot.ESTRANGEIRO,
+            cod.INDIVIDUAL: rot.INDIVIDUAL,
+            cod.LEGAL_ENTITY: rot.LEGAL_ENTITY,
+            cod.FOREIGN: rot.FOREIGN,
         }
 
         return mapping[v]
 
     @field_serializer("data_nascimento")
     def serialize_data_nascimento(self, v: str) -> str:
-        return utils.Formatter.data(data=v)
+        return utils.Formatter.date(date=v)
 
     @field_serializer("fone_celular", "fone_whatsapp")
     def serialize_fone_celular(self, v: str) -> str:
@@ -130,33 +130,33 @@ class LeadOutSchema(BaseModel):
 
 
 class LeadUpdateSchema(BaseModel):
-    ativo: utils.SimNaoCod | None = Field(
+    ativo: utils.YesNoCode | None = Field(
         default=None,
         min_length=1,  # S
         max_length=1,  # S
         description="Indica se o lead está ativo",
-        examples=[utils.SimNaoCod.SIM],
+        examples=[utils.YesNoCode.YES],
     )
-    principal: utils.SimNaoCod | None = Field(
+    principal: utils.YesNoCode | None = Field(
         default=None,
         min_length=1,  # S
         max_length=1,  # S
         description="Indica se o lead é principal",
-        examples=[utils.SimNaoCod.SIM],
+        examples=[utils.YesNoCode.YES],
     )
-    lead: utils.SimNaoCod | None = Field(
+    lead: utils.YesNoCode | None = Field(
         default=None,
         min_length=1,  # S
         max_length=1,  # S
         description="Indica se é lead",
-        examples=[utils.SimNaoCod.SIM],
+        examples=[utils.YesNoCode.YES],
     )
-    tipo_pessoa: utils.TipoPessoaCod | None = Field(
+    tipo_pessoa: utils.PersonTypeCode | None = Field(
         default=None,
         min_length=1,  # F
         max_length=1,  # F
         description="Tipo de pessoa",
-        examples=[utils.TipoPessoaCod.FISICA],
+        examples=[utils.PersonTypeCode.LEGAL_ENTITY],
     )
     nome: str | None = Field(
         default=None, description="Nome do cliente", examples=["Nome do Cliente"]
@@ -236,7 +236,7 @@ class LeadUpdateSchema(BaseModel):
 
     @field_serializer("data_nascimento")
     def serialize_data_nascimento(self, v: str) -> str:
-        return utils.Formatter.data(data=v)
+        return utils.Formatter.date(date=v)
 
     @field_serializer("fone_celular", "fone_whatsapp")
     def serialize_fone_celular(self, v: str) -> str:
@@ -252,32 +252,32 @@ class LeadUpdateSchema(BaseModel):
 
 
 class LeadInSchema(BaseModel):
-    ativo: utils.SimNaoCod | None = Field(
-        default=utils.SimNaoCod.SIM,
+    ativo: utils.YesNoCode | None = Field(
+        default=utils.YesNoCode.YES,
         min_length=1,  # S
         max_length=1,  # S
         description="Indica se o lead está ativo",
-        examples=[utils.SimNaoCod.SIM],
+        examples=[utils.YesNoCode.YES],
     )
-    principal: utils.SimNaoCod | None = Field(
-        default=utils.SimNaoCod.SIM,
+    principal: utils.YesNoCode | None = Field(
+        default=utils.YesNoCode.YES,
         min_length=1,  # S
         max_length=1,  # S
         description="Indica se o lead é principal",
-        examples=[utils.SimNaoCod.SIM],
+        examples=[utils.YesNoCode.YES],
     )
-    lead: utils.SimNaoCod | None = Field(
-        default=utils.SimNaoCod.SIM,
+    lead: utils.YesNoCode | None = Field(
+        default=utils.YesNoCode.YES,
         min_length=1,  # S
         max_length=1,  # S
         description="Indica se é lead",
-        examples=[utils.SimNaoCod.SIM],
+        examples=[utils.YesNoCode.YES],
     )
     tipo_pessoa: str | None = Field(
-        default=utils.TipoPessoaCod.FISICA,
+        default=utils.PersonTypeCode.LEGAL_ENTITY,
         min_length=1,  # F
         max_length=1,  # F
-        examples=[utils.TipoPessoaCod.FISICA],
+        examples=[utils.PersonTypeCode.LEGAL_ENTITY],
         description="Tipo de pessoa",
     )
     nome: str = Field(description="Nome do cliente", examples=["Nome do Cliente"])
@@ -369,7 +369,7 @@ class LeadInSchema(BaseModel):
 
     @field_serializer("data_nascimento")
     def serialize_data_nascimento(self, v: str) -> str:
-        return utils.Formatter.data(data=v)
+        return utils.Formatter.date(date=v)
 
 
 class LeadCreateSchema(BaseModel):

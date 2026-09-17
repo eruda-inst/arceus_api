@@ -1,23 +1,23 @@
 from .auth_service import AuthService
-from .client_service import ClientService
-from .cobranca_service import CobrancaService
-from .comercial_service import ComercialService
-from .financeiro_service import FinanceiroService
+from .billing_service import BillingService
+from .customer_service import CustomerService
+from .finance_service import FinanceService
 from .ixc_user_service import IXCUserService
-from .suporte_service import SuporteService
-from .triagem_service import TriagemService
+from .sales_service import SalesService
+from .support_service import SupportService
+from .triage_service import TriageService
 from .upgrade_service import UpgradeService
-from .vila_service import VilaService
+from .village_service import VillageService
 
 __all__ = [
     "AuthService",
-    "ClientService",
-    "CobrancaService",
-    "ComercialService",
-    "FinanceiroService",
+    "BillingService",
+    "CustomerService",
+    "FinanceService",
     "IXCUserService",
-    "SuporteService",
-    "TriagemService",
+    "SalesService",
+    "SupportService",
+    "TriageService",
     "UpgradeService",
-    "VilaService",
+    "VillageService",
 ]

@@ -67,6 +67,7 @@ class IxcAcsClient:
         endpoint: str,
         method: HTTPMethod = HTTPMethod.GET,
         payload: dict[str, Any] | None = None,
+        params: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         """
         Send an authenticated request to an API endpoint.
@@ -99,7 +100,11 @@ class IxcAcsClient:
             url = URL(f"{cls._base_api_url}/{endpoint}")
 
             res = await cls._async_client.request(
-                method=method, url=url, headers=cls._headers, json=payload
+                method=method,
+                url=url,
+                headers=cls._headers,
+                json=payload,
+                params=params,
             )
             res.raise_for_status()
             return res.json()
@@ -120,13 +125,20 @@ class IxcAcsClient:
         await cls._async_client.aclose()
 
     @classmethod
-    async def get(cls, endpoint: str) -> dict[str, Any] | list[dict[str, Any]]:
+    async def get(cls, endpoint: str, params: dict[str, Any] | None = None) -> Any:
         """Perform an authenticated GET request to the given endpoint."""
-        return await cls._make_request(endpoint=endpoint)
+        return await cls._make_request(endpoint=endpoint, params=params)
 
     @classmethod
     async def patch(cls, endpoint: str, payload: dict[str, Any]) -> dict[str, Any]:
         """Perform an authenticated PATCH request to the given endpoint."""
         return await cls._make_request(
             endpoint=endpoint, payload=payload, method=HTTPMethod.PATCH
+        )
+
+    @classmethod
+    async def post(cls, endpoint: str, payload: dict[str, Any]) -> dict[str, Any]:
+        """Perform an authenticated PATCH request to the given endpoint."""
+        return await cls._make_request(
+            endpoint=endpoint, payload=payload, method=HTTPMethod.POST
         )

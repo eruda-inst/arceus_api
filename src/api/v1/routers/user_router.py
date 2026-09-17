@@ -74,7 +74,7 @@ async def toggle_status_by_id(
 
 
 @user_router.patch(path="/mudar-senha/id/{id}", summary="Atualiza senha de um usuário")
-async def update_pwd_by_id(
+async def update_pass_by_id(
     db: DbDep,
     curr_user: CurrUserDep,
     perm: UpdatePermDep,
@@ -87,7 +87,7 @@ async def update_pwd_by_id(
     """
     Atualiza senha de um usuário
     """
-    updated_user = await cruds.UserCrud.update_pwd_by_id(
-        db=db, id=id, new_pwd=nova_senha
+    updated_user = await cruds.UserCrud.update_pass_by_id(
+        db=db, id=id, new_pass=nova_senha
     )
     return schemas.UserOutSchema.model_validate(updated_user)

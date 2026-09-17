@@ -25,13 +25,13 @@ class MetricCrud:
                 .select_from(models.LogModel)
                 .where(func.date(models.LogModel.criado_em) == today)
             )
-            hoje_count = (await db.execute(stmt_today)).scalar_one_or_none() or 0
+            today_count = (await db.execute(stmt_today)).scalar_one_or_none() or 0
 
             stmt_always = select(func.count()).select_from(models.LogModel)
             always_count = (await db.execute(stmt_always)).scalar_one_or_none() or 0
 
             return schemas.TodayAlwaysOutSchema[NonNegativeInt](
-                hoje=hoje_count, sempre=always_count
+                hoje=today_count, sempre=always_count
             )
         except SQLAlchemyError:
             raise HTTPException(
@@ -145,7 +145,7 @@ class MetricCrud:
                 .limit(10)
             )
             result_today = await db.execute(stmt_today)
-            hoje_list = [
+            today_list = [
                 schemas.TopEndpointSchema(
                     endpoint=row.endpoint, total_requisicoes=row.total_requisicoes
                 )
@@ -162,7 +162,7 @@ class MetricCrud:
                 .limit(10)
             )
             result_always = await db.execute(stmt_always)
-            sempre_list = [
+            always_list = [
                 schemas.TopEndpointSchema(
                     endpoint=row.endpoint, total_requisicoes=row.total_requisicoes
                 )
@@ -170,7 +170,7 @@ class MetricCrud:
             ]
 
             return schemas.TodayAlwaysOutSchema[list[schemas.TopEndpointSchema]](
-                hoje=hoje_list, sempre=sempre_list
+                hoje=today_list, sempre=always_list
             )
         except SQLAlchemyError:
             raise HTTPException(
@@ -197,7 +197,7 @@ class MetricCrud:
                 .limit(10)
             )
             result_today = await db.execute(stmt_today)
-            hoje_list = [
+            today_list = [
                 schemas.TopStatusCodeSchema(
                     status_code=row.status_code, total_respostas=row.total_respostas
                 )
@@ -214,7 +214,7 @@ class MetricCrud:
                 .limit(10)
             )
             result_always = await db.execute(stmt_always)
-            sempre_list = [
+            always_list = [
                 schemas.TopStatusCodeSchema(
                     status_code=row.status_code, total_respostas=row.total_respostas
                 )
@@ -222,7 +222,7 @@ class MetricCrud:
             ]
 
             return schemas.TodayAlwaysOutSchema[list[schemas.TopStatusCodeSchema]](
-                hoje=hoje_list, sempre=sempre_list
+                hoje=today_list, sempre=always_list
             )
         except SQLAlchemyError:
             raise HTTPException(
@@ -249,7 +249,7 @@ class MetricCrud:
                 .limit(10)
             )
             result_today = await db.execute(stmt_today)
-            hoje_list = [
+            today_list = [
                 schemas.TopHourSchema(
                     hora=int(row.hora), total_requisicoes=row.total_requisicoes
                 )
@@ -266,7 +266,7 @@ class MetricCrud:
                 .limit(10)
             )
             result_always = await db.execute(stmt_always)
-            sempre_list = [
+            always_list = [
                 schemas.TopHourSchema(
                     hora=int(row.hora), total_requisicoes=row.total_requisicoes
                 )
@@ -274,7 +274,7 @@ class MetricCrud:
             ]
 
             return schemas.TodayAlwaysOutSchema[list[schemas.TopHourSchema]](
-                hoje=hoje_list, sempre=sempre_list
+                hoje=today_list, sempre=always_list
             )
         except SQLAlchemyError:
             raise HTTPException(
@@ -316,7 +316,7 @@ class MetricCrud:
                 .order_by("dow")
             )
             result_today = await db.execute(stmt_today)
-            hoje_list = [
+            today_list = [
                 schemas.TopWeekdaySchema(
                     dia_semana=dow_map[int(row.dow)],
                     total_requisicoes=row.total_requisicoes,
@@ -333,7 +333,7 @@ class MetricCrud:
                 .order_by("dow")
             )
             result_always = await db.execute(stmt_always)
-            sempre_list = [
+            always_list = [
                 schemas.TopWeekdaySchema(
                     dia_semana=dow_map[int(row.dow)],
                     total_requisicoes=row.total_requisicoes,
@@ -342,7 +342,7 @@ class MetricCrud:
             ]
 
             return schemas.TodayAlwaysOutSchema[list[schemas.TopWeekdaySchema]](
-                hoje=hoje_list, sempre=sempre_list
+                hoje=today_list, sempre=always_list
             )
         except SQLAlchemyError:
             raise HTTPException(
@@ -377,7 +377,7 @@ class MetricCrud:
                 .limit(10)
             )
             result_today = await db.execute(stmt_today)
-            hoje_list = [
+            today_list = [
                 schemas.TopWorstEndpointSchema(
                     endpoint=row.endpoint, total_erros=row.total_erros
                 )
@@ -402,7 +402,7 @@ class MetricCrud:
                 .limit(10)
             )
             result_always = await db.execute(stmt_always)
-            sempre_list = [
+            always_list = [
                 schemas.TopWorstEndpointSchema(
                     endpoint=row.endpoint, total_erros=row.total_erros
                 )
@@ -410,7 +410,7 @@ class MetricCrud:
             ]
 
             return schemas.TodayAlwaysOutSchema[list[schemas.TopWorstEndpointSchema]](
-                hoje=hoje_list, sempre=sempre_list
+                hoje=today_list, sempre=always_list
             )
         except SQLAlchemyError:
             raise HTTPException(
@@ -440,7 +440,7 @@ class MetricCrud:
                 .limit(10)
             )
             result_today = await db.execute(stmt_today)
-            hoje_list = [
+            today_list = [
                 schemas.TopMonthDaySchema(
                     dia_mes=int(row.day), total_requisicoes=row.total_requisicoes
                 )
@@ -457,7 +457,7 @@ class MetricCrud:
                 .limit(10)
             )
             result_always = await db.execute(stmt_always)
-            sempre_list = [
+            always_list = [
                 schemas.TopMonthDaySchema(
                     dia_mes=int(row.day), total_requisicoes=row.total_requisicoes
                 )
@@ -465,7 +465,7 @@ class MetricCrud:
             ]
 
             return schemas.TodayAlwaysOutSchema[list[schemas.TopMonthDaySchema]](
-                hoje=hoje_list, sempre=sempre_list
+                hoje=today_list, sempre=always_list
             )
         except SQLAlchemyError:
             raise HTTPException(
@@ -495,14 +495,14 @@ class MetricCrud:
                 .limit(10)
             )
             result_today = await db.execute(stmt_today)
-            hoje_list: list[schemas.TopSlowestEndpointSchema] = []
+            today_list: list[schemas.TopSlowestEndpointSchema] = []
             for row in result_today.all():
                 avg = row.avg_duracao
                 if avg is None:
                     avg = 0.0
                 else:
                     avg = float(avg)
-                hoje_list.append(
+                today_list.append(
                     schemas.TopSlowestEndpointSchema(endpoint=row.endpoint, duracao=avg)
                 )
 
@@ -517,19 +517,19 @@ class MetricCrud:
                 .limit(10)
             )
             result_always = await db.execute(stmt_always)
-            sempre_list: list[schemas.TopSlowestEndpointSchema] = []
+            always_list: list[schemas.TopSlowestEndpointSchema] = []
             for row in result_always.all():
                 avg = row.avg_duracao
                 if avg is None:
                     avg = 0.0
                 else:
                     avg = float(avg)
-                sempre_list.append(
+                always_list.append(
                     schemas.TopSlowestEndpointSchema(endpoint=row.endpoint, duracao=avg)
                 )
 
             return schemas.TodayAlwaysOutSchema[list[schemas.TopSlowestEndpointSchema]](
-                hoje=hoje_list, sempre=sempre_list
+                hoje=today_list, sempre=always_list
             )
         except SQLAlchemyError:
             raise HTTPException(
@@ -556,7 +556,7 @@ class MetricCrud:
                 .limit(10)
             )
             result_today = await db.execute(stmt_today)
-            hoje_list = [
+            today_list = [
                 schemas.TopHttpMethodSchema(
                     metodo_http=row.metodo,
                     total_requisicoes=row.total_requisicoes,
@@ -574,7 +574,7 @@ class MetricCrud:
                 .limit(10)
             )
             result_always = await db.execute(stmt_always)
-            sempre_list = [
+            always_list = [
                 schemas.TopHttpMethodSchema(
                     metodo_http=row.metodo,
                     total_requisicoes=row.total_requisicoes,
@@ -583,7 +583,7 @@ class MetricCrud:
             ]
 
             return schemas.TodayAlwaysOutSchema[list[schemas.TopHttpMethodSchema]](
-                hoje=hoje_list, sempre=sempre_list
+                hoje=today_list, sempre=always_list
             )
         except SQLAlchemyError:
             raise HTTPException(
@@ -610,7 +610,7 @@ class MetricCrud:
                 .limit(10)
             )
             result_today = await db.execute(stmt_today)
-            hoje_list = [
+            today_list = [
                 schemas.TopDepartmentSchema(
                     setor=row.setor,
                     total_requisicoes=row.total_requisicoes,
@@ -628,7 +628,7 @@ class MetricCrud:
                 .limit(10)
             )
             result_always = await db.execute(stmt_always)
-            sempre_list = [
+            always_list = [
                 schemas.TopDepartmentSchema(
                     setor=row.setor,
                     total_requisicoes=row.total_requisicoes,
@@ -637,7 +637,7 @@ class MetricCrud:
             ]
 
             return schemas.TodayAlwaysOutSchema[list[schemas.TopDepartmentSchema]](
-                hoje=hoje_list, sempre=sempre_list
+                hoje=today_list, sempre=always_list
             )
         except SQLAlchemyError:
             raise HTTPException(
@@ -764,7 +764,7 @@ class MetricCrud:
                 .limit(10)  # mantido para consistência, mas usaremos só o top 1
             )
             result_today = await db.execute(stmt_today)
-            hoje_list = [
+            today_list = [
                 schemas.TopClientNameSchema(
                     nome_cliente=row.nome_cliente,
                     total_requisicoes=row.total_requisicoes,
@@ -784,7 +784,7 @@ class MetricCrud:
                 .limit(10)
             )
             result_always = await db.execute(stmt_always)
-            sempre_list = [
+            always_list = [
                 schemas.TopClientNameSchema(
                     nome_cliente=row.nome_cliente,
                     total_requisicoes=row.total_requisicoes,
@@ -793,8 +793,8 @@ class MetricCrud:
             ]
 
             return schemas.TodayAlwaysOutSchema[list[schemas.TopClientNameSchema]](
-                hoje=hoje_list,
-                sempre=sempre_list,
+                hoje=today_list,
+                sempre=always_list,
             )
         except SQLAlchemyError:
             raise HTTPException(

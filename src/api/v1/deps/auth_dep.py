@@ -32,9 +32,11 @@ async def get_curr_user(
     return user
 
 
-def get_creds(creds: Annotated[HTTPBasicCredentials, Depends(basic_security)]) -> bool:
-    cred_username = creds.username.encode()
-    cred_pass = creds.password.encode()
+def get_creds(
+    credentials: Annotated[HTTPBasicCredentials, Depends(basic_security)],
+) -> bool:
+    cred_username = credentials.username.encode()
+    cred_pass = credentials.password.encode()
 
     config_username = config.settings.bot_username.encode()
     config_pass = config.settings.bot_pass.get_secret_value().encode()

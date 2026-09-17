@@ -13,33 +13,33 @@ class LogCrud:
     @staticmethod
     async def create_log(
         db: AsyncSession,
-        metodo: str,
+        method: str,
         endpoint: str,
-        codigo: int,
-        duracao: float,
-        protocolo: str | None,
+        code: int,
+        duration: float,
+        protocol: str | None,
         payload: str | None,
-        resposta: str | None,
+        response: str | None,
         url: str,
-        setor: str | None,
-        nome_cliente: str | None,
+        sector: str | None,
+        customer_name: str | None,
     ) -> models.LogModel:
         # Build the log model instance with rounded duration to 4 decimal places
         log_entry = models.LogModel(
-            metodo=metodo,
+            metodo=method,
             endpoint=endpoint,
-            codigo=codigo,
-            duracao=round(duracao, 4),
-            protocolo=protocolo,
+            codigo=code,
+            duracao=round(duration, 4),
+            protocolo=protocol,
             payload=payload,
-            resposta=resposta,
+            resposta=response,
             url=url,
-            setor=setor,
-            nome_cliente=nome_cliente,
+            setor=sector,
+            nome_cliente=customer_name,
         )
         db.add(log_entry)
         await db.commit()
-        await db.refresh(log_entry)  # Load generated fields like id and timestamps
+        await db.refresh(log_entry)
         return log_entry
 
     @staticmethod
@@ -47,50 +47,50 @@ class LogCrud:
         db: AsyncSession,
         page: PositiveInt = 1,
         items_per_page: PositiveInt = 10,
-        metodo: str | None = None,
+        method: str | None = None,
         endpoint: str | None = None,
-        codigo: PositiveInt | None = None,
-        data_inicio: str | None = None,
-        data_fim: str | None = None,
-        hora_inicio: str | None = None,
-        hora_fim: str | None = None,
-        protocolo: str | None = None,
-        setor: str | None = None,
-        nome_cliente: str | None = None,
+        code: PositiveInt | None = None,
+        start_date: str | None = None,
+        end_date: str | None = None,
+        start_hour: str | None = None,
+        end_hour: str | None = None,
+        protocol: str | None = None,
+        department: str | None = None,
+        customer_name: str | None = None,
     ) -> tuple[NonNegativeInt, Sequence[models.LogModel]]:
         # Start with a base query selecting all log records
         stmt = select(models.LogModel)
 
         # Apply filters only if the corresponding parameter is provided
-        if metodo:
-            stmt = stmt.where(models.LogModel.metodo.ilike(f"%{metodo}%"))
+        if method:
+            stmt = stmt.where(models.LogModel.metodo.ilike(f"%{method}%"))
         if endpoint:
             stmt = stmt.where(models.LogModel.endpoint.ilike(f"%{endpoint}%"))
-        if codigo:
-            stmt = stmt.where(models.LogModel.codigo == codigo)
+        if code:
+            stmt = stmt.where(models.LogModel.codigo == code)
 
         # Date filters: use SQLite date function to compare date part of criado_em
-        if data_inicio:
-            data_inicio_obj = date.fromisoformat(data_inicio)
-            stmt = stmt.where(func.date(models.LogModel.criado_em) >= data_inicio_obj)
-        if data_fim:
-            data_fim_obj = date.fromisoformat(data_fim)
-            stmt = stmt.where(func.date(models.LogModel.criado_em) <= data_fim_obj)
+        if start_date:
+            start_date_obj = date.fromisoformat(start_date)
+            stmt = stmt.where(func.date(models.LogModel.criado_em) >= start_date_obj)
+        if end_date:
+            end_date_obj = date.fromisoformat(end_date)
+            stmt = stmt.where(func.date(models.LogModel.criado_em) <= end_date_obj)
 
         # Time filters: use SQLite time function to compare time part of criado_em
-        if hora_inicio:
-            hora_inicio_obj = time.fromisoformat(hora_inicio)
-            stmt = stmt.where(func.time(models.LogModel.criado_em) >= hora_inicio_obj)
-        if hora_fim:
-            hora_fim_obj = time.fromisoformat(hora_fim)
-            stmt = stmt.where(func.time(models.LogModel.criado_em) <= hora_fim_obj)
+        if start_hour:
+            start_hour_obj = time.fromisoformat(start_hour)
+            stmt = stmt.where(func.time(models.LogModel.criado_em) >= start_hour_obj)
+        if end_hour:
+            end_hour_obj = time.fromisoformat(end_hour)
+            stmt = stmt.where(func.time(models.LogModel.criado_em) <= end_hour_obj)
 
-        if protocolo:
-            stmt = stmt.where(models.LogModel.protocolo.ilike(f"%{protocolo}%"))
-        if setor:
-            stmt = stmt.where(models.LogModel.setor.ilike(f"%{setor}%"))
-        if nome_cliente:
-            stmt = stmt.where(models.LogModel.nome_cliente.ilike(f"%{nome_cliente}%"))
+        if protocol:
+            stmt = stmt.where(models.LogModel.protocolo.ilike(f"%{protocol}%"))
+        if department:
+            stmt = stmt.where(models.LogModel.setor.ilike(f"%{department}%"))
+        if customer_name:
+            stmt = stmt.where(models.LogModel.nome_cliente.ilike(f"%{customer_name}%"))
 
         # Build a separate query to count total matching rows (ignoring pagination)
         # Using subquery to count from the filtered statement

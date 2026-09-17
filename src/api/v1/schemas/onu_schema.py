@@ -3,23 +3,23 @@ from pydantic import BaseModel, Field, field_serializer
 from .. import utils
 
 
-class StatusOnuOutSchema(BaseModel):
+class OnuStatusOutSchema(BaseModel):
     status_onu: float = Field(
         description="Status da ONU",
-        examples=[utils.StatusOnuRot.EXCELENTE],
+        examples=[utils.OnuStatusLabel.EXCELLENT],
     )
 
     @field_serializer("status_onu")
-    def serialize_status_onu(self, v: float) -> utils.StatusOnuRot:
+    def serialize_status_onu(self, v: float) -> utils.OnuStatusLabel:
         if v >= -15:
-            return utils.StatusOnuRot.SATURADO
+            return utils.OnuStatusLabel.SATURATED
         elif v >= -21:
-            return utils.StatusOnuRot.EXCELENTE
+            return utils.OnuStatusLabel.EXCELLENT
         elif v >= -26:
-            return utils.StatusOnuRot.BOM
+            return utils.OnuStatusLabel.GOOD
         elif v >= -29:
-            return utils.StatusOnuRot.REGULAR
+            return utils.OnuStatusLabel.FAIR
         elif v >= -31:
-            return utils.StatusOnuRot.RUIM
+            return utils.OnuStatusLabel.POOR
         else:
-            return utils.StatusOnuRot.PESSIMO
+            return utils.OnuStatusLabel.VERY_POOR

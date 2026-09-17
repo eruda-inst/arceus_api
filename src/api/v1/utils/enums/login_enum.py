@@ -1,22 +1,22 @@
 from enum import StrEnum
 
 
-class StatusConexaoRot(StrEnum):
-    CONECTADO = "Conectado"
-    SEM_STATUS = "Sem status"
-    DESCONECTADO = "Desconectado"
+class ConnectionStatusCode(StrEnum):
+    CONNECTED = "S"
+    NO_STATUS = "SS"
+    DISCONNECTED = "N"
 
 
-class StatusConexaoCod(StrEnum):
-    CONECTADO = "S"
-    SEM_STATUS = "SS"
-    DESCONECTADO = "N"
+class ConnectionStatusLabel(StrEnum):
+    CONNECTED = "Conectado"
+    NO_STATUS = "Sem status"
+    DISCONNECTED = "Desconectado"
 
 
-class StatusOnuRot(StrEnum):
-    SATURADO = "Saturado"
-    EXCELENTE = "Excelente"
-    BOM = "Bom"
-    REGULAR = "Regular"
-    RUIM = "Ruim"
-    PESSIMO = "Péssimo"
+class OnuStatusLabel(StrEnum):
+    SATURATED = "Saturado"
+    EXCELLENT = "Excelente"
+    GOOD = "Bom"
+    FAIR = "Regular"
+    POOR = "Ruim"
+    VERY_POOR = "Péssimo"

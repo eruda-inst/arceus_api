@@ -192,8 +192,8 @@ class UserCrud:
         return user
 
     @staticmethod
-    async def update_pwd_by_id(
-        db: AsyncSession, id: PositiveInt, new_pwd: str
+    async def update_pass_by_id(
+        db: AsyncSession, id: PositiveInt, new_pass: str
     ) -> models.UserModel:
         # Retrieve the current user by id
         stmt = (
@@ -209,7 +209,7 @@ class UserCrud:
                 status_code=status.HTTP_404_NOT_FOUND, detail="Usuário inexistente"
             )
 
-        user.senha = ph.hash(password=new_pwd)  # type: ignore
+        user.senha = ph.hash(password=new_pass)  # type: ignore
 
         # Attempt to commit the change
         try:

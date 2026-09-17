@@ -6,25 +6,25 @@ from pydantic import NonNegativeInt
 from .. import clients, schemas, utils
 
 
-class ComercialService:
+class SalesService:
     @staticmethod
-    async def get_status_acesso(
+    async def get_access_status(
         # IDs NonNegativeInt, pois o IXC é quebrado
-        id_contrato: NonNegativeInt,
-    ) -> schemas.StatusInternetOutSchema:
+        contract_id: NonNegativeInt,
+    ) -> schemas.InternetStatusOutSchema:
         # --- Obtém contrato ---
         endpoint = "cliente_contrato"
-        grid_param = [utils.Param(TB="cliente_contrato.id", P=id_contrato)]
+        grid_param = [utils.Param(TB="cliente_contrato.id", P=contract_id)]
         res = await clients.IxcClient.get(endpoint=endpoint, grid_param=grid_param)
         if not (regs := res.get("registros", [])):
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Contrato inexistente",
             )
-        contrato = regs[0]
+        contract = regs[0]
 
-        return schemas.StatusInternetOutSchema(
-            status_acesso=contrato["status_internet"]
+        return schemas.InternetStatusOutSchema(
+            status_acesso=contract["status_internet"]
         )
 
     @staticmethod
@@ -47,9 +47,9 @@ class ComercialService:
         grid_param = [utils.Param(TB="contato.id", P=id)]
         res = await clients.IxcClient.get(endpoint=endpoint, grid_param=grid_param)
         regs = res.get("registros", [])
-        lead_criado = regs[0]
+        created_lead = regs[0]
 
-        return schemas.LeadOutSchema(**lead_criado)
+        return schemas.LeadOutSchema(**created_lead)
 
     @staticmethod
     async def patch_lead(
@@ -57,27 +57,27 @@ class ComercialService:
     ) -> schemas.LeadOutSchema:
         # --- Obtém lead atual ---
         endpoint = "contato"
-        cnpj_cpf_formatado = utils.Formatter.cnpj_cpf(cnpj_cpf)
-        grid_param = [utils.Param(TB="contato.cnpj_cpf", P=cnpj_cpf_formatado)]
+        formatted_cnpj_cpf = utils.Formatter.cnpj_cpf(cnpj_cpf)
+        grid_param = [utils.Param(TB="contato.cnpj_cpf", P=formatted_cnpj_cpf)]
         res = await clients.IxcClient.get(endpoint=endpoint, grid_param=grid_param)
         if not (regs := res.get("registros", [])):
             raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Lead inexistente")
-        lead_antigo = regs[0]
+        old_lead = regs[0]
 
         # Lead atualizado
         lead_in_data = lead.model_dump(exclude_none=True)
-        lead_atualizado: dict[str, Any] = {**lead_antigo, **lead_in_data}
-        del lead_atualizado["id"]
+        updated_lead: dict[str, Any] = {**old_lead, **lead_in_data}
+        del updated_lead["id"]
 
         # --- Atualiza lead ---
-        endpoint = "contato"
-        id = lead_antigo["id"]
-        payload = lead_atualizado
-        res = await clients.IxcClient.put(endpoint=endpoint, id=id, payload=payload)
+        id = old_lead["id"]
+        endpoint = f"contato/{id}"
+        payload = updated_lead
+        res = await clients.IxcClient.put(endpoint=endpoint, payload=payload)
         if res["type"] == "error":
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Atualização malsucedida",
             )
 
-        return schemas.LeadOutSchema(**lead_atualizado, id=id)
+        return schemas.LeadOutSchema(**updated_lead, id=id)

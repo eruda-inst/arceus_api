@@ -7,17 +7,17 @@ from .. import deps, models, schemas, services, utils
 ixc_user_router = APIRouter(prefix="/usuarios-ixc", tags=["Usuários IXC"])
 
 
-current_user_dep = Annotated[models.UserModel, Depends(deps.get_curr_user)]
+curr_user_dep = Annotated[models.UserModel, Depends(deps.get_curr_user)]
 
 
 @ixc_user_router.get(path="/", summary="Obtém informações de usuários")
 async def get_all(
-    # current_user: current_user_dep,
-    pagina: utils.Pagina = 1,
-    itens_por_pagina: utils.ItensPorPagina = 10,
+    # _: curr_user_dep,
+    pagina: utils.Page = 1,
+    itens_por_pagina: utils.ItemsPerPage = 10,
     nome: Annotated[str | None, Query(description="Filtro parcial por nome")] = None,
     email: Annotated[str | None, Query(description="Filtro parcial por e-mail")] = None,
-) -> schemas.ListOutSchema[schemas.IXCUsuarioOutSchema]:
+) -> schemas.ListOutSchema[schemas.IXCUserOutSchema]:
     """
     Obtém informações de usuários do IXC
     """

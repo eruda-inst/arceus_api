@@ -33,12 +33,12 @@ async def logout(
     """
     Invalida token de usuário autenticado
     """
-    curr_user.versao_token += 1
+    curr_user.versao_token += 1  # type: ignore
     await db.commit()
 
 
 @auth_router.post(path="/refresh-token", summary="Renova token")
-async def refresh_token(
+async def refresh(
     db: DbDep,
     refresh_token: Annotated[
         str, Body(embed=True, description="Token de atualização", examples=["eyJ..."])

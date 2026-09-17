@@ -12,7 +12,7 @@ class IXCUserService:
         items_per_page: PositiveInt,
         name: str | None = None,
         email: str | None = None,
-    ) -> schemas.ListOutSchema[schemas.IXCUsuarioOutSchema]:
+    ) -> schemas.ListOutSchema[schemas.IXCUserOutSchema]:
         endpoint = "usuarios"
         grid_param = [utils.Param(TB="usuarios.status", P="A")]
 
@@ -33,8 +33,8 @@ class IXCUserService:
         total_items = res.get("total", 0)
         total_items = int(total_items)
 
-        return schemas.ListOutSchema[schemas.IXCUsuarioOutSchema](
-            data=[schemas.IXCUsuarioOutSchema.model_validate(i) for i in ixc_users],
+        return schemas.ListOutSchema[schemas.IXCUserOutSchema](
+            data=[schemas.IXCUserOutSchema.model_validate(i) for i in ixc_users],
             meta=schemas.MetaOutSchema(
                 itens_por_pagina=items_per_page,
                 pagina_atual=page,
@@ -43,7 +43,7 @@ class IXCUserService:
         )
 
     @staticmethod
-    async def get_by_email(email: EmailStr) -> schemas.IXCUsuarioOutSchema:
+    async def get_by_email(email: EmailStr) -> schemas.IXCUserOutSchema:
         endpoint = "usuarios"
         grid_param = [
             utils.Param(TB="usuarios.status", P="A"),
@@ -56,4 +56,4 @@ class IXCUserService:
                 detail="Usuário IXC inexistente",
             )
         user = regs[0]
-        return schemas.IXCUsuarioOutSchema.model_validate(user)
+        return schemas.IXCUserOutSchema.model_validate(user)

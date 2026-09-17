@@ -6,18 +6,18 @@ from fastapi import HTTPException, status
 from pydantic import NonNegativeInt, PositiveInt
 
 from .. import clients, schemas, utils
-from .client_service import ClientService
+from .customer_service import CustomerService
 
 
-class SuporteService:
+class SupportService:
     @staticmethod
     async def _get_login(
         # IDs NonNegativeInt, because IXC
-        id_login: NonNegativeInt,
+        login_id: NonNegativeInt,
     ) -> dict[str, Any]:
         # --- Get login ---
         endpoint = "radusuarios"
-        grid_param = [utils.Param(TB="radusuarios.id", P=id_login)]
+        grid_param = [utils.Param(TB="radusuarios.id", P=login_id)]
         res = await clients.IxcClient.get(endpoint=endpoint, grid_param=grid_param)
         if not (regs := res.get("registros", [])):
             raise HTTPException(
@@ -31,14 +31,18 @@ class SuporteService:
     async def _get_device(
         cls,
         # IDs NonNegativeInt, because IXC
-        id_login: NonNegativeInt,
+        login_id: NonNegativeInt,
     ) -> dict[str, Any]:
         # --- Get login ---
-        login = await cls._get_login(id_login=id_login)
+        login = await cls._get_login(login_id=login_id)
 
         # --- Get device ---
-        endpoint = f"devices/views/natural?search[column]=connection.pppoeLogin&search[search]={login['login']}"
-        res = await clients.IxcAcsClient.get(endpoint=endpoint)
+        endpoint = "devices/views/natural"
+        params = {
+            "search[column]": "connection.pppoeLogin",
+            "search[search]": login["login"],
+        }
+        res = await clients.IxcAcsClient.get(endpoint=endpoint, params=params)
         if not (regs := res.get("registers", [])):
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Dispositivo inexistente"
@@ -51,10 +55,10 @@ class SuporteService:
     async def get_dns_server(
         cls,
         # IDs NonNegativeInt, because IXC
-        id_login: NonNegativeInt,
+        login_id: NonNegativeInt,
     ) -> schemas.DnsServerOut:
         # --- Get device ---
-        device = await cls._get_device(id_login=id_login)
+        device = await cls._get_device(login_id=login_id)
 
         # --- Get WAN ---
         endpoint = f"devices/{device['serialNumber']}/ethernet/ppp"
@@ -70,33 +74,36 @@ class SuporteService:
     async def get_has_ipv6(
         cls,
         # IDs NonNegativeInt, because IXC
-        id_login: NonNegativeInt,
-    ) -> schemas.TemIPV6OutSchema:
+        login_id: NonNegativeInt,
+    ) -> schemas.HasIPV6OutSchema:
         # --- Get device ---
-        device = await cls._get_device(id_login=id_login)
+        device = await cls._get_device(login_id=login_id)
         serial_number = device["serialNumber"]
 
         # --- Get IPV6 ---
-        endpoint = f"devices/views/ipv6?search[column]=serialNumber&search[search]={serial_number}"
-        res = await clients.IxcAcsClient.get(endpoint=endpoint)
+        endpoint = "devices/views/ipv6"
+        params = {"search[column]": "serialNumber", "search[search]": serial_number}
+        res = await clients.IxcAcsClient.get(endpoint=endpoint, params=params)
+
         if not (regs := res.get("registers", [])):
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="Not found"
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Dispositivos inexistentes",
             )
         info = regs[0]
 
         tem_ipv6 = info["deviceInfo"]["ipv6"] != ""
 
-        return schemas.TemIPV6OutSchema(tem_ipv6=tem_ipv6)
+        return schemas.HasIPV6OutSchema(tem_ipv6=tem_ipv6)
 
     @classmethod
     async def get_uptime(
         cls,
         # IDs NonNegativeInt, because IXC
-        id_login: NonNegativeInt,
+        login_id: NonNegativeInt,
     ) -> schemas.UptimeOutSchema:
         # --- Get device ---
-        device = await cls._get_device(id_login=id_login)
+        device = await cls._get_device(login_id=login_id)
 
         uptime_seconds = device["deviceInfo"]["uptime"]
         uptime = dt.timedelta(seconds=uptime_seconds)
@@ -111,70 +118,70 @@ class SuporteService:
         return schemas.UptimeOutSchema(uptime=uptime_out)
 
     @classmethod
-    async def get_sinal_fibra(
+    async def get_fiber_signal(
         cls,
         # IDs NonNegativeInt, because IXC
-        id_login: NonNegativeInt,
-    ) -> schemas.SinalFibraOutSchema:
+        login_id: NonNegativeInt,
+    ) -> schemas.FiberSignalOutSchema:
         # --- Get device ---
-        device = await cls._get_device(id_login=id_login)
+        device = await cls._get_device(login_id=login_id)
 
         rx = device["deviceInfo"]["rx"]
         tx = device["deviceInfo"]["tx"]
 
-        return schemas.SinalFibraOutSchema(rx=rx, tx=tx)
+        return schemas.FiberSignalOutSchema(rx=rx, tx=tx)
 
     @staticmethod
-    async def get_contratos(
-        protocolo: str | None,
+    async def get_contracts(
+        protocol: str | None,
         cnpj_cpf: str | None,
-        pagina: PositiveInt,
-        itens_por_pagina: PositiveInt,
-    ) -> schemas.ListOutSchema[schemas.ContratoOutSchema]:
+        page: PositiveInt,
+        items_per_page: PositiveInt,
+    ) -> schemas.ListOutSchema[schemas.ContractOutSchema]:
         # --- Obtém contratos ativos ---
-        contratos = await ClientService.get_contratos_ativos(
-            protocolo=protocolo,
+        contracts = await CustomerService.get_active_contracts(
+            protocol=protocol,
             cnpj_cpf=cnpj_cpf,
-            pagina=pagina,
-            itens_por_pagina=itens_por_pagina,
+            page=page,
+            items_per_page=items_per_page,
         )
 
-        return schemas.ListOutSchema[schemas.ContratoOutSchema](
-            data=[schemas.ContratoOutSchema(**c) for c in contratos],
+        return schemas.ListOutSchema[schemas.ContractOutSchema](
+            data=[schemas.ContractOutSchema(**c) for c in contracts],
             meta=schemas.MetaOutSchema(
-                total_itens=len(contratos),
-                pagina_atual=pagina,
-                itens_por_pagina=itens_por_pagina,
+                total_itens=len(contracts),
+                pagina_atual=page,
+                itens_por_pagina=items_per_page,
             ),
         )
 
     @classmethod
-    async def get_status_conexao(
+    async def get_connection_status(
         cls,
-        # IDs NonNegativeInt, pois o IXC é quebrado
-        id_login: NonNegativeInt,
-    ) -> schemas.StatusConexaoOutSchema:
+        # IDs NonNegativeInt, because IXC
+        login_id: NonNegativeInt,
+    ) -> schemas.ConnectionStatusOutSchema:
         # --- Obtém login ---
-        login = await cls._get_login(id_login=id_login)
+        login = await cls._get_login(login_id=login_id)
 
-        return schemas.StatusConexaoOutSchema(status_conexao=login["online"])
+        return schemas.ConnectionStatusOutSchema(status_conexao=login["online"])
 
     @classmethod
-    async def get_status_onu(
+    async def get_onu_status(
         cls,
-        # IDs NonNegativeInt, pois o IXC é quebrado
-        id_login: NonNegativeInt | None = None,
-        mac_onu: str | None = None,
-    ) -> schemas.StatusOnuOutSchema:
+        # IDs NonNegativeInt, because IXC
+        login_id: NonNegativeInt | None = None,
+        onu_mac: str | None = None,
+    ) -> schemas.OnuStatusOutSchema:
         # Justificativa desta abordagem: O IXC é quebrado
         query_value = None
 
         # Mac é prioridade, pois o custo computacional é menor (uma requisição a menos)
-        if mac_onu is not None and not re.match(pattern=r"{{\w+}}", string=mac_onu):
-            query_value = mac_onu
-        elif id_login is not None:
+        if onu_mac is not None and not re.match(pattern=r"{{\w+}}", string=onu_mac):
+            query_value = onu_mac
+        elif login_id is not None:
             # --- Obtém login ---
-            login = await cls._get_login(id_login=id_login)
+            login = await cls._get_login(login_id=login_id)
 
             query_value = login["onu_mac"]
         else:
@@ -194,21 +201,21 @@ class SuporteService:
         onu = regs[0]
 
         # Sinal rx
-        if not (sinal_rx := onu.get("sinal_rx")):
+        if not (rx_signal := onu.get("sinal_rx")):
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Sinal ONU inexistente",
             )
 
-        return schemas.StatusOnuOutSchema(status_onu=sinal_rx)
+        return schemas.OnuStatusOutSchema(status_onu=rx_signal)
 
     @staticmethod
-    async def post_desconectar_cliente(
-        # IDs NonNegativeInt, pois o IXC é quebrado
-        id_login: NonNegativeInt,
-    ) -> schemas.MensagemOutSchema:
+    async def post_disconnect_customer(
+        # IDs NonNegativeInt, because IXC
+        login_id: NonNegativeInt,
+    ) -> schemas.MessageOutSchema:
         # --- Realiza desconexão de cliente ---
-        payload = {"id": id_login}
+        payload = {"id": login_id}
         endpoint = "desconectar_clientes"
         res = await clients.IxcClient.post(endpoint=endpoint, payload=payload)
         type = res["msg"][0]["type"]
@@ -220,67 +227,67 @@ class SuporteService:
                 detail=utils.Formatter.sanitize(string=msg),
             )
 
-        return schemas.MensagemOutSchema(mensagem="Desconexão bem-sucedida")
+        return schemas.MessageOutSchema(mensagem="Desconexão bem-sucedida")
 
     @staticmethod
-    async def get_atendimentos(
-        # IDs NonNegativeInt, pois o IXC é quebrado
-        id_login: NonNegativeInt,
-        pagina: PositiveInt,
-        itens_por_pagina: PositiveInt,
-    ) -> schemas.ListOutSchema[schemas.AtendimentoOutSchema]:
+    async def get_tickets(
+        # IDs NonNegativeInt, because IXC
+        login_id: NonNegativeInt,
+        page: PositiveInt,
+        items_per_page: PositiveInt,
+    ) -> schemas.ListOutSchema[schemas.TicketOutSchema]:
         # --- Obtém atendimentos abertos ---
         endpoint = "su_ticket"
         grid_param = [
-            utils.Param(TB="su_ticket.id_login", P=id_login),
+            utils.Param(TB="su_ticket.id_login", P=login_id),
             utils.Param(TB="su_ticket.su_status", OP="!=", P="S"),
             utils.Param(TB="su_ticket.su_status", OP="!=", P="C"),
         ]
         res = await clients.IxcClient.get(
             endpoint=endpoint,
             grid_param=grid_param,
-            pagina=pagina,
-            itens_por_pagina=itens_por_pagina,
+            pagina=page,
+            itens_por_pagina=items_per_page,
         )
-        atendimentos = res.get("registros", [])
+        tickets = res.get("registros", [])
         total = res.get("total", 0)
 
-        atendimentos_parciais: list[schemas.AtendimentoOutSchema] = []
+        partial_tickets: list[schemas.TicketOutSchema] = []
 
-        # Iteração entre atendimentos
-        for atendimento in atendimentos:
+        # Iteração entre tickets
+        for ticket in tickets:
             # Data criação
-            datetime_criacao = atendimento["data_criacao"]
-            data_criacao = datetime_criacao.split(" ")[0]
+            creation_datetime = ticket["data_criacao"]
+            creation_date = creation_datetime.split(" ")[0]
 
             # Atendimentos parciais
-            atendimentos_parciais.append(
-                schemas.AtendimentoOutSchema(
-                    id=atendimento["id"],
-                    id_assunto=atendimento["id_assunto"],
-                    status=atendimento["su_status"],
-                    mensagem=atendimento["menssagem"],
-                    titulo=atendimento["titulo"],
-                    data_criacao=data_criacao,
+            partial_tickets.append(
+                schemas.TicketOutSchema(
+                    id=ticket["id"],
+                    id_assunto=ticket["id_assunto"],
+                    status=ticket["su_status"],
+                    mensagem=ticket["menssagem"],
+                    titulo=ticket["titulo"],
+                    data_criacao=creation_date,
                 )
             )
 
-        return schemas.ListOutSchema[schemas.AtendimentoOutSchema](
-            data=atendimentos_parciais,
+        return schemas.ListOutSchema[schemas.TicketOutSchema](
+            data=partial_tickets,
             meta=schemas.MetaOutSchema(
-                itens_por_pagina=itens_por_pagina,
-                pagina_atual=pagina,
+                itens_por_pagina=items_per_page,
+                pagina_atual=page,
                 total_itens=total,
             ),
         )
 
     @staticmethod
-    async def post_atendimentos(
-        atendimento: schemas.AtendimentoInSchema,
-    ) -> schemas.AtendimentoOutSchema:
+    async def post_tickets(
+        ticket: schemas.TicketInSchema,
+    ) -> schemas.TicketOutSchema:
         # --- Cria atendimento ---
         endpoint = "su_ticket"
-        payload = atendimento.model_dump()
+        payload = ticket.model_dump()
         menssagem = payload["mensagem"]
         del payload["mensagem"]
         payload["menssagem"] = menssagem
@@ -295,28 +302,28 @@ class SuporteService:
         grid_param = [utils.Param(TB="su_ticket.id", P=id)]
         res = await clients.IxcClient.get(endpoint=endpoint, grid_param=grid_param)
         regs = res.get("registros", [])
-        atendimento_criado = regs[0]
+        created_ticket = regs[0]
 
         # Data criação
-        datetime_criacao = atendimento_criado["data_criacao"]
-        data_criacao = datetime_criacao.split(" ")[0]
+        creation_datetime = created_ticket["data_criacao"]
+        creation_date = creation_datetime.split(" ")[0]
 
-        return schemas.AtendimentoOutSchema(
-            id=atendimento_criado["id"],
-            data_criacao=data_criacao,
-            id_assunto=atendimento_criado["id_assunto"],
-            status=atendimento_criado["su_status"],
-            mensagem=atendimento_criado["menssagem"],
-            titulo=atendimento_criado["titulo"],
+        return schemas.TicketOutSchema(
+            id=created_ticket["id"],
+            data_criacao=creation_date,
+            id_assunto=created_ticket["id_assunto"],
+            status=created_ticket["su_status"],
+            mensagem=created_ticket["menssagem"],
+            titulo=created_ticket["titulo"],
         )
 
     @classmethod
     async def patch_ip(
         cls,
-        # IDs NonNegativeInt, pois o IXC é quebrado
-        id_login: NonNegativeInt,
-        ip: str | None,
-        pool_radius: str | None,
+        # IDs NonNegativeInt, because IXC
+        login_id: NonNegativeInt,
+        ip: str | None = None,
+        pool_radius: str | None = None,
     ) -> schemas.IpOutSchema:
         if ip is None and pool_radius is None:
             raise HTTPException(
@@ -325,22 +332,22 @@ class SuporteService:
             )
 
         # --- Obtém login atual ---
-        login_antigo = await cls._get_login(id_login=id_login)
+        old_login = await cls._get_login(login_id=login_id)
 
         # Login atualizado
-        novo_ip = ip if ip else login_antigo["ip"]
-        novo_radius = pool_radius if pool_radius else login_antigo["pool_radius"]
-        login_atualizado: Any = {
-            **login_antigo,
-            "ip": novo_ip or "",
-            "pool_radius": novo_radius or "",
+        new_ip = ip if ip else old_login["ip"]
+        new_radius = pool_radius if pool_radius else old_login["pool_radius"]
+        updated_login: Any = {
+            **old_login,
+            "ip": new_ip or "",
+            "pool_radius": new_radius or "",
         }
-        del login_atualizado["id"]
+        del updated_login["id"]
 
         # --- Atualiza login ---
         endpoint = "radusuarios"
         res = await clients.IxcClient.put(
-            endpoint=f"{endpoint}/{id_login}", payload=login_atualizado
+            endpoint=f"{endpoint}/{login_id}", payload=updated_login
         )
         if res["type"] == "error":
             raise HTTPException(
@@ -348,16 +355,16 @@ class SuporteService:
                 detail="Atualização malsucedida",
             )
 
-        return schemas.IpOutSchema(ip=novo_ip, pool_radius=int(novo_radius))
+        return schemas.IpOutSchema(ip=new_ip, pool_radius=int(new_radius))
 
     @staticmethod
-    async def post_limpar_mac(
-        # IDs NonNegativeInt, pois o IXC é quebrado
-        id_login: NonNegativeInt,
-    ) -> schemas.MensagemOutSchema:
+    async def post_clear_mac(
+        # IDs NonNegativeInt, because IXC
+        login_id: NonNegativeInt,
+    ) -> schemas.MessageOutSchema:
         # --- Realiza limpeza de MAC ---
         endpoint = "radusuarios_25452"
-        payload = {"get_id": id_login}
+        payload = {"get_id": login_id}
         res = await clients.IxcClient.post(endpoint=endpoint, payload=payload)
         if res["type"] == "error":
             msg = res.get("message", "Limpeza malsucedida")
@@ -366,16 +373,16 @@ class SuporteService:
                 detail=utils.Formatter.sanitize(string=msg),
             )
 
-        return schemas.MensagemOutSchema(mensagem="Limpeza bem-sucedida")
+        return schemas.MessageOutSchema(mensagem="Limpeza bem-sucedida")
 
     @classmethod
-    async def get_dados_wifi(
+    async def get_wifi_data(
         cls,
-        # IDs NonNegativeInt, pois o IXC é quebrado
-        id_login: NonNegativeInt,
+        # IDs NonNegativeInt, because IXC
+        login_id: NonNegativeInt,
     ) -> schemas.WifiOutSchema:
         # --- Obtém login ---
-        login = await cls._get_login(id_login=id_login)
+        login = await cls._get_login(login_id=login_id)
 
         return schemas.WifiOutSchema(
             ssid_wifi_2g=login["ssid_router_wifi"] or None,
@@ -385,15 +392,15 @@ class SuporteService:
         )
 
     @classmethod
-    async def patch_dados_wifi(
+    async def patch_wifi_data(
         cls,
         # IDs NonNegativeInt, because IXC
-        id_login: NonNegativeInt,
+        login_id: NonNegativeInt,
         ssid: str | None = None,
-        senha_ssid: str | None = None,
-    ) -> schemas.MensagemOutSchema:
+        ssid_pass: str | None = None,
+    ) -> schemas.MessageOutSchema:
         # --- Get device ---
-        device = await cls._get_device(id_login=id_login)
+        device = await cls._get_device(login_id=login_id)
         serial_number = device["serialNumber"]
 
         # --- Get wifi ---
@@ -414,18 +421,20 @@ class SuporteService:
             payload_2g["ssid"] = ssid
             payload_5g["ssid"] = f"{ssid}_5G"
 
-        if senha_ssid is not None:
-            payload_2g["password"] = senha_ssid
-            payload_5g["password"] = senha_ssid
+        if ssid_pass is not None:
+            payload_2g["password"] = ssid_pass
+            payload_5g["password"] = ssid_pass
 
-        # --- Patch wifi ---
+        # --- Patch wifi 2.4 G ---
         await clients.IxcAcsClient.patch(
             endpoint=f"devices/{serial_number}/wifi/{interface_2g['id']}",
             payload=payload_2g,
         )
+
+        # --- Patch wifi 5.8 G ---
         await clients.IxcAcsClient.patch(
             endpoint=f"devices/{serial_number}/wifi/{interface_5g['id']}",
             payload=payload_5g,
         )
 
-        return schemas.MensagemOutSchema(mensagem="Atualização bem-sucedida")
+        return schemas.MessageOutSchema(mensagem="Atualização bem-sucedida")

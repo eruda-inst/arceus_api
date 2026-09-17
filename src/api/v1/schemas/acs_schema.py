@@ -7,7 +7,7 @@ class DnsServerOut(BaseModel):
     )
 
 
-class TemIPV6OutSchema(BaseModel):
+class HasIPV6OutSchema(BaseModel):
     tem_ipv6: bool = Field(
         description="Representa se o cliente tem IPV6 ou não", examples=[True]
     )
@@ -20,7 +20,7 @@ class UptimeOutSchema(BaseModel):
     )
 
 
-class SinalFibraOutSchema(BaseModel):
+class FiberSignalOutSchema(BaseModel):
     rx: float = Field(description="Taxa de recepção do sinal da fibra", examples=[1.23])
     tx: float = Field(
         description="Taxa de transmissão do sinal da fibra", examples=[4.56]

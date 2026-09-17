@@ -1,11 +1,11 @@
 from enum import StrEnum
 
 
-class SimNaoCod(StrEnum):
-    SIM = "S"
-    NAO = "N"
+class YesNoCode(StrEnum):
+    YES = "S"
+    NO = "N"
 
 
-class SimNaoRot(StrEnum):
-    SIM = "Sim"
-    NAO = "Não"
+class YesNoLabel(StrEnum):
+    YES = "Sim"
+    NO = "Não"

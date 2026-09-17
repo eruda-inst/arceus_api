@@ -1,54 +1,54 @@
-from .atendimento_enum import (
-    OrigemEnderecoCod,
-    PrioridadeCod,
-    SuStatusCod,
-    SuStatusRot,
-    TipoAtendimentoCod,
-)
-from .contrato_enum import (
-    StatusContratoCod,
-    StatusContratoRot,
-    StatusInternetCod,
-    StatusInternetRot,
+from .contract_enum import (
+    ContractStatusCode,
+    ContractStatusLabel,
+    InternetStatusCode,
+    InternetStatusLabel,
 )
 from .default_enum import Default
-from .department_enum import Departments
+from .department_enum import Department
 from .group_enum import GroupNames
 from .ixc_user_enum import (
-    IXCUserAccessTypeCod,
+    IXCUserAccessTypeCode,
     IXCUserAccessTypeLabel,
-    IXCUserStatusCod,
+    IXCUserStatusCode,
     IXCUserStatusLabel,
 )
-from .lead_enum import TipoPessoaCod, TipoPessoaRot
-from .login_enum import StatusConexaoCod, StatusConexaoRot, StatusOnuRot
-from .misc_enum import SimNaoCod, SimNaoRot
+from .lead_enum import PersonTypeCode, PersonTypeLabel
+from .login_enum import ConnectionStatusCode, ConnectionStatusLabel, OnuStatusLabel
+from .misc_enum import YesNoCode, YesNoLabel
 from .perm_enum import PermCodes, PermNames
+from .ticket_enum import (
+    AddressOriginCode,
+    PriorityCode,
+    SupportStatusCode,
+    SupportStatusLabel,
+    TicketTypeCode,
+)
 
 __all__ = [
+    "AddressOriginCode",
+    "ConnectionStatusCode",
+    "ConnectionStatusLabel",
+    "ContractStatusCode",
+    "ContractStatusLabel",
     "Default",
-    "Departments",
+    "Department",
     "GroupNames",
-    "IXCUserAccessTypeCod",
+    "IXCUserAccessTypeCode",
     "IXCUserAccessTypeLabel",
-    "IXCUserStatusCod",
+    "IXCUserStatusCode",
     "IXCUserStatusLabel",
-    "OrigemEnderecoCod",
+    "InternetStatusCode",
+    "InternetStatusLabel",
+    "OnuStatusLabel",
     "PermCodes",
     "PermNames",
-    "PrioridadeCod",
-    "SimNaoCod",
-    "SimNaoRot",
-    "StatusConexaoCod",
-    "StatusConexaoRot",
-    "StatusContratoCod",
-    "StatusContratoRot",
-    "StatusInternetCod",
-    "StatusInternetRot",
-    "StatusOnuRot",
-    "SuStatusCod",
-    "SuStatusRot",
-    "TipoAtendimentoCod",
-    "TipoPessoaCod",
-    "TipoPessoaRot",
+    "PersonTypeCode",
+    "PersonTypeLabel",
+    "PriorityCode",
+    "SupportStatusCode",
+    "SupportStatusLabel",
+    "TicketTypeCode",
+    "YesNoCode",
+    "YesNoLabel",
 ]

@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field, computed_field
 
 
-class PlanoSugeridoOutSchema(BaseModel):
+class SuggestedPlanOutSchema(BaseModel):
     nome_plano_atual: str = Field(
         description="Nome do plano antigo",
         examples=["Nome do plano antigo"],

@@ -15,19 +15,19 @@ class PermCrud:
     async def get_by(
         db: AsyncSession,
         id: PositiveInt | None = None,
-        nome: str | None = None,
-        codigo: str | None = None,
-        load_grupos: bool = False,
+        name: str | None = None,
+        code: str | None = None,
+        load_groups: bool = False,
     ):
         # If id is provided, filter by it
         if id is not None:
             stmt = select(models.PermModel).where(models.PermModel.id == id)
         # If nome is provided, filter by it
-        elif nome is not None:
-            stmt = select(models.PermModel).where(models.PermModel.nome == nome)
+        elif name is not None:
+            stmt = select(models.PermModel).where(models.PermModel.nome == name)
         # If codigo is provided, filter by it
-        elif codigo is not None:
-            stmt = select(models.PermModel).where(models.PermModel.codigo == codigo)
+        elif code is not None:
+            stmt = select(models.PermModel).where(models.PermModel.codigo == code)
         # Raise bad request if no param is provided
         else:
             raise HTTPException(
@@ -35,8 +35,8 @@ class PermCrud:
                 detail="Forneça id, nome ou codigo",
             )
 
-        # If load_grupos is True, the perm's groups are loaded
-        if load_grupos:
+        # If load_groups is True, the perm's groups are loaded
+        if load_groups:
             stmt = stmt.options(selectinload(models.PermModel.grupos))
 
         perm = (await db.execute(stmt)).scalar_one_or_none()
@@ -52,31 +52,31 @@ class PermCrud:
     @staticmethod
     async def get_all_by(
         db: AsyncSession,
-        id_grupo: PositiveInt | None = None,
-        id_usuario: PositiveInt | None = None,
+        group_id: PositiveInt | None = None,
+        user_id: PositiveInt | None = None,
     ) -> tuple[NonNegativeInt, Sequence[models.PermModel]]:
         stmt = select(models.PermModel)
         count_stmt = select(func.count(models.PermModel.id))
 
-        # If id_grupo is provided, filter by it
-        if id_grupo is not None:
+        # If group_id is provided, filter by it
+        if group_id is not None:
             stmt = stmt.join(models.PermModel.grupos).where(
-                models.GroupModel.id == id_grupo
+                models.GroupModel.id == group_id
             )
             count_stmt = count_stmt.join(models.PermModel.grupos).where(
-                models.GroupModel.id == id_grupo
+                models.GroupModel.id == group_id
             )
-        # If id_usuario is provided, filter by it
-        elif id_usuario is not None:
+        # If user_id is provided, filter by it
+        elif user_id is not None:
             stmt = (
                 stmt.join(models.PermModel.grupos)
                 .join(models.GroupModel.usuarios)
-                .where(models.UserModel.id == id_usuario)
+                .where(models.UserModel.id == user_id)
             )
             count_stmt = (
                 count_stmt.join(models.PermModel.grupos)
                 .join(models.GroupModel.usuarios)
-                .where(models.UserModel.id == id_usuario)
+                .where(models.UserModel.id == user_id)
             )
         # Raise bad request if no param is provided
         else:

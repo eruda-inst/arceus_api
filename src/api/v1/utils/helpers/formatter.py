@@ -106,16 +106,16 @@ class Formatter:
 
     @staticmethod
     # YYYY-MM-DD -> DD/MM/AAAA
-    def data(data: str) -> str:
+    def date(date: str) -> str:
         FORMATO_BR = r"(\d{2})\/(\d{2})\/(\d{4})"
         FORMATO_ISO = r"(\d{4})-(\d{2})-(\d{2})"
 
         # Se já está no formato desejado, não faz nada
-        if re.match(FORMATO_BR, data):
-            return data
+        if re.match(FORMATO_BR, date):
+            return date
 
         # Se não estiver, converte
-        return re.sub(FORMATO_ISO, r"\3/\2/\1", data)
+        return re.sub(FORMATO_ISO, r"\3/\2/\1", date)
 
     # " str  \ning\\ " -> "String."
     @staticmethod

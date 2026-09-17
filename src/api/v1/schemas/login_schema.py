@@ -10,20 +10,21 @@ class IpOutSchema(BaseModel):
     )
 
 
-class StatusConexaoOutSchema(BaseModel):
-    status_conexao: utils.StatusConexaoCod = Field(
-        description="Status da conexão", examples=[utils.StatusConexaoRot.CONECTADO]
+class ConnectionStatusOutSchema(BaseModel):
+    status_conexao: utils.ConnectionStatusCode = Field(
+        description="Status da conexão",
+        examples=[utils.ConnectionStatusLabel.CONNECTED],
     )
 
     @field_serializer("status_conexao")
-    def serialize_status_conexao(self, v: utils.StatusConexaoCod):
-        Cod = utils.StatusConexaoCod
-        Rot = utils.StatusConexaoRot
+    def serialize_status_conexao(self, v: utils.ConnectionStatusCode):
+        Cod = utils.ConnectionStatusCode
+        Rot = utils.ConnectionStatusLabel
 
         mapping = {
-            Cod.CONECTADO: Rot.CONECTADO,
-            Cod.DESCONECTADO: Rot.DESCONECTADO,
-            Cod.SEM_STATUS: Rot.SEM_STATUS,
+            Cod.CONNECTED: Rot.CONNECTED,
+            Cod.DISCONNECTED: Rot.DISCONNECTED,
+            Cod.NO_STATUS: Rot.NO_STATUS,
         }
 
         return mapping[v]

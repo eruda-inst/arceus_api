@@ -3,7 +3,7 @@ from pydantic import BaseModel, Field, NonNegativeInt, field_serializer
 from .. import utils
 
 
-class AtendimentoInSchema(BaseModel):
+class TicketInSchema(BaseModel):
     # IDs NonNegativeInt, pois o IXC é quebrado
     id_login: NonNegativeInt = Field(description="ID de login", examples=[1])
     id_assunto: NonNegativeInt = Field(description="ID do assunto", examples=[12])
@@ -11,28 +11,28 @@ class AtendimentoInSchema(BaseModel):
     mensagem: str = Field(
         description="Mensagem do atendimento", examples=["Mensagem do atendimento"]
     )
-    origem_endereco: utils.OrigemEnderecoCod | None = Field(
-        default=utils.OrigemEnderecoCod.LOGIN,
+    origem_endereco: utils.AddressOriginCode | None = Field(
+        default=utils.AddressOriginCode.LOGIN,
         description="Origem do endereço",
-        examples=[utils.OrigemEnderecoCod.LOGIN],
+        examples=[utils.AddressOriginCode.LOGIN],
     )
-    tipo: utils.TipoAtendimentoCod | None = Field(
-        default=utils.TipoAtendimentoCod.CLIENTE,
+    tipo: utils.TicketTypeCode | None = Field(
+        default=utils.TicketTypeCode.CUSTOMER,
         description="Tipo do atendimento",
-        examples=[utils.TipoAtendimentoCod.CLIENTE],
+        examples=[utils.TicketTypeCode.CUSTOMER],
     )
     titulo: str = Field(
         description="Título do atendimento", examples=["Título do atendimento"]
     )
-    prioridade: utils.PrioridadeCod | None = Field(
-        default=utils.PrioridadeCod.NORMAL,
+    prioridade: utils.PriorityCode | None = Field(
+        default=utils.PriorityCode.NORMAL,
         description="Pioridade do atendimento",
-        examples=[utils.PrioridadeCod.NORMAL],
+        examples=[utils.PriorityCode.NORMAL],
     )
-    su_status: utils.SuStatusCod | None = Field(
-        default=utils.SuStatusCod.NOVO,
+    su_status: utils.SupportStatusCode | None = Field(
+        default=utils.SupportStatusCode.NEW,
         description="Status do atendimento",
-        examples=[utils.SuStatusCod.NOVO],
+        examples=[utils.SupportStatusCode.NEW],
     )
     id_ticket_setor: NonNegativeInt | None = Field(
         default=utils.Default.ID_TICKET_SETOR,
@@ -47,12 +47,12 @@ class AtendimentoInSchema(BaseModel):
     )
 
 
-class AtendimentoOutSchema(BaseModel):
+class TicketOutSchema(BaseModel):
     # IDs NonNegativeInt, pois o IXC é quebrado
     id: NonNegativeInt = Field(description="ID do atendimento", examples=[1])
     id_assunto: NonNegativeInt = Field(description="ID do assunto", examples=[12])
-    status: utils.SuStatusCod = Field(
-        description="Status do atendimento", examples=[utils.SuStatusRot.NOVO]
+    status: utils.SupportStatusCode = Field(
+        description="Status do atendimento", examples=[utils.SupportStatusLabel.NEW]
     )
     mensagem: str = Field(
         description="Mensagem do atendimento", examples=["Mensagem do atendimento"]
@@ -69,20 +69,20 @@ class AtendimentoOutSchema(BaseModel):
     )
 
     @field_serializer("status")
-    def serialize_status(self, v: utils.SuStatusCod) -> utils.SuStatusRot:
-        cod = utils.SuStatusCod
-        rot = utils.SuStatusRot
+    def serialize_status(self, v: utils.SupportStatusCode) -> utils.SupportStatusLabel:
+        cod = utils.SupportStatusCode
+        rot = utils.SupportStatusLabel
 
         mapping = {
-            cod.NOVO: rot.NOVO,
-            cod.PENDENTE: rot.PENDENTE,
-            cod.EM_PROGRESSO: rot.EM_PROGRESSO,
-            cod.SOLUCIONADO: rot.SOLUCIONADO,
-            cod.CANCELADO: rot.CANCELADO,
+            cod.NEW: rot.NEW,
+            cod.PENDING: rot.PENDING,
+            cod.IN_PROGRESS: rot.IN_PROGRESS,
+            cod.SOLVED: rot.SOLVED,
+            cod.CANCELED: rot.CANCELED,
         }
 
         return mapping[v]
 
     @field_serializer("data_criacao")
     def serialize_data_criacao(self, v: str) -> str:
-        return utils.Formatter.data(data=v)
+        return utils.Formatter.date(date=v)

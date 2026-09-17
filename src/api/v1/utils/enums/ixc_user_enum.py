@@ -1,23 +1,23 @@
 from enum import StrEnum
 
 
-class IXCUserStatusCod(StrEnum):
-    ATIVO = "A"
-    INATIVO = "I"
+class IXCUserStatusCode(StrEnum):
+    ACTIVE = "A"
+    INACTIVE = "I"
 
 
 class IXCUserStatusLabel(StrEnum):
-    ATIVO = "Ativo"
-    INATIVO = "Inativo"
+    ACTIVE = "Ativo"
+    INACTIVE = "Inativo"
 
 
-class IXCUserAccessTypeCod(StrEnum):
-    AMBOS = "A"
+class IXCUserAccessTypeCode(StrEnum):
+    BOTH = "A"
     WEB = "W"
     MOBILE = "M"
 
 
 class IXCUserAccessTypeLabel(StrEnum):
-    AMBOS = "Ambos"
+    BOTH = "Ambos"
     WEB = "Web"
     MOBILE = "Mobile"

@@ -26,7 +26,7 @@ async def get_by_id(
 
 
 @perm_router.get(path="/nome/{nome}", summary="Obtém permissão por nome")
-async def get_by_nome(
+async def get_by_name(
     db: DbDep,
     _: CurrUserDep,
     nome: Annotated[str, Path(description="Nome da permissão")],
@@ -34,12 +34,12 @@ async def get_by_nome(
     """
     Obtém informações de grupo por nome
     """
-    perm = await cruds.PermCrud.get_by(db=db, nome=nome)
+    perm = await cruds.PermCrud.get_by(db=db, name=nome)
     return schemas.PermOutSchema.model_validate(perm)
 
 
 @perm_router.get(path="/codigo/{codigo}", summary="Obtém permissão por código")
-async def get_by_codigo(
+async def get_by_code(
     db: DbDep,
     _: CurrUserDep,
     codigo: Annotated[str, Path(description="Código da permissão")],
@@ -47,12 +47,12 @@ async def get_by_codigo(
     """
     Obtém informações de grupo por código
     """
-    perm = await cruds.PermCrud.get_by(db=db, codigo=codigo)
+    perm = await cruds.PermCrud.get_by(db=db, code=codigo)
     return schemas.PermOutSchema.model_validate(perm)
 
 
 @perm_router.get(path="/grupo/id/{id}", summary="Obtém permissão por ID do grupo")
-async def get_by_id_grupo(
+async def get_by_group_id(
     db: DbDep,
     _: CurrUserDep,
     id: Annotated[PositiveInt, Path(description="ID do grupo")],
@@ -60,7 +60,7 @@ async def get_by_id_grupo(
     """
     Obtém informações de grupos por ID do grupo
     """
-    total_items, perms = await cruds.PermCrud.get_all_by(db=db, id_grupo=id)
+    total_items, perms = await cruds.PermCrud.get_all_by(db=db, group_id=id)
 
     return schemas.ListOutSchema[schemas.PermOutSchema](
         data=[schemas.PermOutSchema.model_validate(p) for p in perms],
@@ -71,7 +71,7 @@ async def get_by_id_grupo(
 
 
 @perm_router.get(path="/usuario/id/{id}", summary="Obtém permissões por ID do usuário")
-async def get_by_id_usuario(
+async def get_by_user_id(
     db: DbDep,
     # _: CurrUserDep,
     id: Annotated[PositiveInt, Path(description="ID do usuário")],
@@ -79,7 +79,7 @@ async def get_by_id_usuario(
     """
     Obtém informações de grupos por id do usuário
     """
-    total_items, perms = await cruds.PermCrud.get_all_by(db=db, id_usuario=id)
+    total_items, perms = await cruds.PermCrud.get_all_by(db=db, user_id=id)
 
     return schemas.ListOutSchema[schemas.PermOutSchema](
         data=[schemas.PermOutSchema.model_validate(p) for p in perms],

@@ -14,24 +14,24 @@ class GroupCrud:
     async def get_by(
         db: AsyncSession,
         id: PositiveInt | None = None,
-        nome: str | None = None,
-        id_usuario: PositiveInt | None = None,
-        load_permissoes: bool = False,
+        name: str | None = None,
+        user_id: PositiveInt | None = None,
+        load_perms: bool = False,
     ) -> models.GroupModel:
         # If id is provided, filter by it
         if id is not None:
             stmt = select(models.GroupModel).where(models.GroupModel.id == id)
-        # If nome is provided, filter by it
-        elif nome is not None:
-            stmt = select(models.GroupModel).where(models.GroupModel.nome == nome)
-        # If id_usuario is provided, filter by it
-        elif id_usuario is not None:
+        # If name is provided, filter by it
+        elif name is not None:
+            stmt = select(models.GroupModel).where(models.GroupModel.nome == name)
+        # If user_id is provided, filter by it
+        elif user_id is not None:
             stmt = (
                 select(models.GroupModel)
                 .join(
                     models.UserModel, models.UserModel.id_grupo == models.GroupModel.id
                 )
-                .where(models.UserModel.id == id_usuario)
+                .where(models.UserModel.id == user_id)
             )
         # Raise a bad request if no param is provided
         else:
@@ -40,8 +40,8 @@ class GroupCrud:
                 detail="Forneça id, nome ou id_usuario",
             )
 
-        # If load_permissoes is True, load the group's perms
-        if load_permissoes:
+        # If load_perms is True, load the group's perms
+        if load_perms:
             stmt = stmt.options(selectinload(models.GroupModel.permissoes))
 
         group = (await db.execute(stmt)).scalar_one_or_none()

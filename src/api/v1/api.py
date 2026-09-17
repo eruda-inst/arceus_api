@@ -4,21 +4,23 @@ from . import routers, websockets
 
 api_v1_router = APIRouter(prefix="/api/v1")
 
-# HTTP
-api_v1_router.include_router(router=routers.suporte_router)
-api_v1_router.include_router(router=routers.comercial_router)
-api_v1_router.include_router(router=routers.financeiro_router)
-api_v1_router.include_router(router=routers.triagem_router)
-api_v1_router.include_router(router=routers.cobranca_router)
+# HTTP department routers
+api_v1_router.include_router(router=routers.billing_router)
+api_v1_router.include_router(router=routers.finance_router)
+api_v1_router.include_router(router=routers.sales_router)
+api_v1_router.include_router(router=routers.support_router)
+api_v1_router.include_router(router=routers.triage_router)
 api_v1_router.include_router(router=routers.upgrade_router)
-api_v1_router.include_router(router=routers.vila_router)
+api_v1_router.include_router(router=routers.village_router)
+
+# HTTP routers
 api_v1_router.include_router(router=routers.auth_router)
 api_v1_router.include_router(router=routers.group_router)
+api_v1_router.include_router(router=routers.ixc_user_router)
 api_v1_router.include_router(router=routers.perm_router)
 api_v1_router.include_router(router=routers.user_router)
-api_v1_router.include_router(router=routers.ixc_user_router)
 
-# WebSockets
-api_v1_router.include_router(router=websockets.metric_ws_router)
+# WebSockets routers
 api_v1_router.include_router(router=websockets.log_ws_router)
+api_v1_router.include_router(router=websockets.metric_ws_router)
 api_v1_router.include_router(router=websockets.user_ws_router)

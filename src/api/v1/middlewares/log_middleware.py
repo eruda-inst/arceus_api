@@ -79,23 +79,23 @@ class LogMiddleware(BaseHTTPMiddleware):
         # --- Cliente IXC ---
         nome_cliente = None
         if protocol:
-            cliente = await services.ClientService.get_cliente_ixc(protocolo=protocol)
+            cliente = await services.CustomerService.get_ixc_customer(protocol=protocol)
             if cliente:
                 nome_cliente = cliente["razao"]
 
         async with db.AsyncSessionLocal() as session:
             await cruds.LogCrud.create_log(
                 db=session,
-                metodo=http_method,
+                method=http_method,
                 endpoint=endpoint,
-                codigo=status_code,
-                duracao=duration,
-                protocolo=protocol,
+                code=status_code,
+                duration=duration,
+                protocol=protocol,
                 payload=payload,
-                resposta=response_body.decode(),
+                response=response_body.decode(),
                 url=str(request.url),
-                setor=setor,
-                nome_cliente=nome_cliente,
+                sector=setor,
+                customer_name=nome_cliente,
             )
 
         asyncio.create_task(websockets.metric_manager.broadcast())

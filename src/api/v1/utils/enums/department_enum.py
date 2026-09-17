@@ -1,9 +1,9 @@
 from enum import StrEnum
 
 
-class Departments(StrEnum):
+class Department(StrEnum):
     SUPPORT = "Suporte"
-    COMMERCIAL = "Comercial"
+    SALES = "Comercial"
     FINANCE = "Financeiro"
-    SCREENING = "Triagem"
-    COLLECTION = "Cobrança"
+    TRIAGE = "Triagem"
+    BILLING = "Cobrança"

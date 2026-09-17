@@ -3,7 +3,7 @@ from pydantic import BaseModel, Field, NonNegativeInt, field_serializer
 from .. import utils
 
 
-class LinhaDigitavelOutSchema(BaseModel):
+class DigitableLineOutSchema(BaseModel):
     linha_digitavel: str = Field(
         min_length=47,
         max_length=47,
@@ -12,7 +12,7 @@ class LinhaDigitavelOutSchema(BaseModel):
     )
 
 
-class FaturaOutSchema(BaseModel):
+class InvoiceOutSchema(BaseModel):
     id: NonNegativeInt = Field(description="ID da fatura", examples=[1])
     data_vencimento: str = Field(
         description="Data de vencimento da fatura",
@@ -27,4 +27,4 @@ class FaturaOutSchema(BaseModel):
 
     @field_serializer("data_vencimento")
     def serialize_data_vencimento(self, v: str) -> str:
-        return utils.Formatter.data(data=v)
+        return utils.Formatter.date(date=v)

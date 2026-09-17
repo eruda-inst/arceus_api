@@ -14,8 +14,8 @@ CurrUserDep = Annotated[models.UserModel, Depends(dependency=deps.get_curr_user)
 
 @group_router.get(path="/", summary="Obtém grupos")
 async def get_all(
-    db: DbDep,
     # _: CurrUserDep
+    db: DbDep,
 ) -> schemas.ListOutSchema[schemas.GroupOutSchema]:
     """
     Obtém informações de grupos
@@ -34,8 +34,8 @@ async def get_all(
 
 @group_router.get(path="/id/{id}", summary="Obtém grupo por ID")
 async def get_by_id(
-    db: DbDep,
     # _: CurrUserDep,
+    db: DbDep,
     id: Annotated[PositiveInt, Path(description="ID do grupo")],
 ) -> schemas.GroupOutSchema:
     """
@@ -47,25 +47,25 @@ async def get_by_id(
 
 @group_router.get(path="/nome/{nome}", summary="Obtém grupo por nome")
 async def get_by_name(
-    db: DbDep,
     _: CurrUserDep,
+    db: DbDep,
     nome: Annotated[str, Path(description="Nome do grupo")],
 ) -> schemas.GroupOutSchema:
     """
     Obtém informações de grupo por nome
     """
-    group = await cruds.GroupCrud.get_by(db=db, nome=nome)
+    group = await cruds.GroupCrud.get_by(db=db, name=nome)
     return schemas.GroupOutSchema.model_validate(group)
 
 
 @group_router.get(path="/usuario/id/{id}", summary="Obtém grupo por ID do usuário")
 async def get_by_user_id(
-    db: DbDep,
     _: CurrUserDep,
+    db: DbDep,
     id: Annotated[PositiveInt, Path(description="ID do usuário")],
 ) -> schemas.GroupOutSchema:
     """
     Obtém informações de grupo por id do usuário
     """
-    group = await cruds.GroupCrud.get_by(db=db, id_usuario=id)
+    group = await cruds.GroupCrud.get_by(db=db, user_id=id)
     return schemas.GroupOutSchema.model_validate(group)
