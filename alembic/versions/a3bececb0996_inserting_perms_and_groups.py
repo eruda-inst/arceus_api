@@ -45,7 +45,7 @@ DEL_USER_NAME = PermNames.DEL_USER.value
 
 def upgrade() -> None:
     # ------------------------------------------------------------------
-    # 1. Grupo "Administrador"
+    # 1. Group "Administrador"
     # ------------------------------------------------------------------
     op.execute(
         sa.text("""
@@ -59,7 +59,7 @@ def upgrade() -> None:
         ),
     )
     # ------------------------------------------------------------------
-    # 2. Grupo "Analista"
+    # 2. Group "Analista"
     # ------------------------------------------------------------------
     op.execute(
         sa.text("""
@@ -73,8 +73,8 @@ def upgrade() -> None:
         ),
     )
     # ------------------------------------------------------------------
-    # 3. Permissões de métricas
-    # Operações: ver
+    # 3. Metric perms
+    # Operations: read
     # ------------------------------------------------------------------
     op.execute(
         sa.text("""
@@ -89,8 +89,8 @@ def upgrade() -> None:
         )
     )
     # ------------------------------------------------------------------
-    # 4. Permissões de logs
-    # Operações: ver
+    # 4. Log perms
+    # Operations: read
     # ------------------------------------------------------------------
     op.execute(
         sa.text("""
@@ -105,8 +105,8 @@ def upgrade() -> None:
         )
     )
     # ------------------------------------------------------------------
-    # 5. Permissões de usuários
-    # Operações: criar, ver, alterar, remover
+    # 5. User perms
+    # Operations: create, read, update and delete
     # ------------------------------------------------------------------
     op.execute(
         sa.text("""
@@ -160,7 +160,7 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     # ------------------------------------------------------------------
-    # 1. Removendo grupos "Administrador", "Analista"
+    # 1. Delete groups "Administrador" and "Analista"
     # ------------------------------------------------------------------
     op.execute(
         sa.text("""
@@ -174,7 +174,7 @@ def downgrade() -> None:
         )
     )
     # ------------------------------------------------------------------
-    # 2. Removendo permissões para métricas, logs, usuários
+    # 2. Delete metric, log and user perms
     # ------------------------------------------------------------------
     op.execute(
         sa.text("""

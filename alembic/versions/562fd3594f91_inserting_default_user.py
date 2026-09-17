@@ -24,7 +24,7 @@ depends_on: str | Sequence[str] | None = None
 
 ph = PasswordHasher()
 
-# Dados do usuário padrão
+# Default user data
 ADMIN_NOME = settings.dflt_user_name
 ADMIN_EMAIL = settings.dflt_user_email
 ADMIN_SENHA = settings.dflt_user_pass.get_secret_value()
@@ -32,10 +32,10 @@ GRUPO_ADMIN_NOME = GroupNames.ADMIN.value
 
 
 def upgrade() -> None:
-    # Gera o hash da senha
+    # Generate a hash for the password
     hashed_password = ph.hash(password=ADMIN_SENHA)  # type: ignore
 
-    # Insere o usuário apenas se não existir (baseado no email único)
+    # Add the user just if they don't exist (based on unique e-mail)
     op.execute(
         sa.text("""
             INSERT INTO usuarios (nome, email, senha, ativo, id_grupo)
@@ -55,7 +55,7 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    # Remove o usuário administrador padrão
+    # Delete default user
     op.execute(
         sa.text("""
             DELETE FROM usuarios

@@ -1,7 +1,15 @@
+"""
+Pydantic schemas for plan suggestions.
+"""
+
 from pydantic import BaseModel, Field, computed_field
 
 
 class SuggestedPlanOutSchema(BaseModel):
+    """
+    Response schema for a suggested plan upgrade.
+    """
+
     nome_plano_atual: str = Field(
         description="Nome do plano antigo",
         examples=["Nome do plano antigo"],

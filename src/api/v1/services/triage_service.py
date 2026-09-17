@@ -1,3 +1,7 @@
+"""
+Service for triage operations (customer contact info).
+"""
+
 from typing import Any
 
 from fastapi import HTTPException, status
@@ -7,11 +11,25 @@ from . import CustomerService
 
 
 class TriageService:
+    """
+    Provides static methods for triage operations.
+    """
+
     @staticmethod
     async def get_customer_contact(
         protocol: str | None, cnpj_cpf: str | None
     ) -> schemas.ContactOutSchema:
-        # --- Obtém cliente ---
+        """
+        Retrieve the contact information for a customer.
+
+        Args:
+            protocol: OPA protocol.
+            cnpj_cpf: Customer document.
+
+        Returns:
+            ContactOutSchema with the customer's cellphone number.
+        """
+        # --- Get customer ---
         customer = await CustomerService.get_ixc_customer(
             protocol=protocol, cnpj_cpf=cnpj_cpf
         )
@@ -24,19 +42,32 @@ class TriageService:
         protocol: str | None = None,
         cnpj_cpf: str | None = None,
     ) -> schemas.ContactOutSchema:
-        # --- Obtém cliente atual ---
+        """
+        Update the contact phone number for a customer.
+
+        Args:
+            phone_number: New phone number.
+            protocol: OPA protocol.
+            cnpj_cpf: Customer document.
+
+        Returns:
+            ContactOutSchema with the updated phone number.
+
+        Raises:
+            HTTPException: 500 if the update fails.
+        """
+        # --- Get customer ---
         old_customer = await CustomerService.get_ixc_customer(
             protocol=protocol, cnpj_cpf=cnpj_cpf
         )
 
-        # Cliente atualizado
         updated_customer: dict[str, Any] = {
             **old_customer,
             "telefone_celular": utils.Formatter.cell(cell=phone_number),
         }
         del updated_customer["id"]
 
-        # --- Atualiza cliente ---
+        # --- Put customer ---
         endpoint = f"cliente/{old_customer['id']}"
         res = await clients.IxcClient.put(endpoint=endpoint, payload=updated_customer)
         if res["type"] == "error":

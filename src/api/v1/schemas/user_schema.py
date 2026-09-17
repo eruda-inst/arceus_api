@@ -1,3 +1,7 @@
+"""
+Pydantic schemas for user-related requests and responses.
+"""
+
 from datetime import datetime
 
 from argon2 import PasswordHasher
@@ -5,8 +9,7 @@ from pydantic import BaseModel, ConfigDict, EmailStr, Field, PositiveInt, Secret
 
 ph = PasswordHasher()
 
-# Common field definitions (reusable Field objects)
-# Required
+# Common field definitions
 EmailField = Field(description="E-mail do usuário", examples=["exemplo@exemplo.com"])
 SenhaField = Field(min_length=8, description="Senha do usuário", examples=["12345678"])
 NomeField = Field(description="Nome do usuário", examples=["Nome do usuário"])
@@ -22,7 +25,6 @@ AtualizadoEmField = Field(
     description="Data de atualização do usuário",
     examples=["AAAA-MM-DD HH:MM:SS"],
 )
-# Optionals
 OptNomeField = Field(
     default=None, description="Nome do usuário", examples=["Nome do usuário"]
 )
@@ -37,6 +39,10 @@ OptIdGrupoField = Field(default=None, ge=1, description="ID do grupo", examples=
 
 
 class UserLoginSchema(BaseModel):
+    """
+    Input schema for user login.
+    """
+
     email: EmailStr = EmailField
     senha: SecretStr = SenhaField
 
@@ -46,6 +52,10 @@ class UserLoginSchema(BaseModel):
 
 
 class UserInSchema(BaseModel):
+    """
+    Input schema for creating a new user.
+    """
+
     nome: str = NomeField
     senha: SecretStr = SenhaField
     email: EmailStr = EmailField
@@ -63,6 +73,10 @@ class UserInSchema(BaseModel):
 
 
 class UserUpdateSchema(BaseModel):
+    """
+    Input schema for updating a user.
+    """
+
     nome: str | None = OptNomeField
     ativo: bool | None = OptAtivoField
     email: EmailStr | None = OptEmailField
@@ -76,6 +90,10 @@ class UserUpdateSchema(BaseModel):
 
 
 class UserOutSchema(BaseModel):
+    """
+    Response schema for user details.
+    """
+
     model_config = ConfigDict(from_attributes=True)
 
     id: PositiveInt = IdField

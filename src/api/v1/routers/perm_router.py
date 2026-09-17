@@ -1,3 +1,7 @@
+"""
+Router for permission-related endpoints.
+"""
+
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Path
@@ -8,6 +12,7 @@ from .. import cruds, db, deps, models, schemas
 
 perm_router = APIRouter(prefix="/permissoes", tags=["Permissões"])
 
+# Dependency aliases
 DbDep = Annotated[AsyncSession, Depends(db.get_db)]
 CurrUserDep = Annotated[models.UserModel, Depends(deps.get_curr_user)]
 

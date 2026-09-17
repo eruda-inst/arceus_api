@@ -1,3 +1,7 @@
+"""
+Router for IXC user-related endpoints.
+"""
+
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Query
@@ -7,6 +11,7 @@ from .. import deps, models, schemas, services, utils
 ixc_user_router = APIRouter(prefix="/usuarios-ixc", tags=["Usuários IXC"])
 
 
+# Dependency alias for the current user
 curr_user_dep = Annotated[models.UserModel, Depends(deps.get_curr_user)]
 
 

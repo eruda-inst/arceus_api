@@ -1,3 +1,7 @@
+"""
+Router for support endpoints.
+"""
+
 from typing import Annotated
 
 from fastapi import APIRouter, Body, Depends, Path, Query, status

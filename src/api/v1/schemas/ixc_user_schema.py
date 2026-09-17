@@ -1,9 +1,17 @@
+"""
+Pydantic schemas for IXC user-related responses.
+"""
+
 from pydantic import BaseModel, EmailStr, Field, PositiveInt, field_serializer
 
 from .. import utils
 
 
 class IXCUserOutSchema(BaseModel):
+    """
+    Response schema for IXC user details.
+    """
+
     id: PositiveInt = Field(description="ID do usuário", examples=[1])
     nome: str = Field(description="Nome do usuário", examples=["Nome do usuário"])
     email: EmailStr = Field(

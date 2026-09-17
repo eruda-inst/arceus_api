@@ -1,3 +1,7 @@
+"""
+Router for group-related endpoints.
+"""
+
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Path
@@ -8,6 +12,7 @@ from .. import cruds, db, deps, models, schemas
 
 group_router = APIRouter(prefix="/grupos", tags=["Grupos"])
 
+# Dependency aliases
 DbDep = Annotated[AsyncSession, Depends(dependency=db.get_db)]
 CurrUserDep = Annotated[models.UserModel, Depends(dependency=deps.get_curr_user)]
 

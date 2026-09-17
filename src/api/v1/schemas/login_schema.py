@@ -1,9 +1,17 @@
+"""
+Pydantic schemas for login and network-related responses.
+"""
+
 from pydantic import BaseModel, Field, PositiveInt, field_serializer
 
 from .. import utils
 
 
 class IpOutSchema(BaseModel):
+    """
+    Response schema for login IP and radius pool.
+    """
+
     ip: str = Field(description="IP do login", examples=["123.456.7.890"])
     pool_radius: PositiveInt = Field(
         ge=1, description="Pool Radius do login", examples=[1]
@@ -11,6 +19,10 @@ class IpOutSchema(BaseModel):
 
 
 class ConnectionStatusOutSchema(BaseModel):
+    """
+    Response schema for connection status.
+    """
+
     status_conexao: utils.ConnectionStatusCode = Field(
         description="Status da conexão",
         examples=[utils.ConnectionStatusLabel.CONNECTED],
@@ -31,6 +43,10 @@ class ConnectionStatusOutSchema(BaseModel):
 
 
 class WifiOutSchema(BaseModel):
+    """
+    Response schema for WiFi configuration (2G and 5G).
+    """
+
     ssid_wifi_2g: str | None = Field(
         default=None, description="Nome da rede WiFi 2G", examples=["Rede 2G"]
     )

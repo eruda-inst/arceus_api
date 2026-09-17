@@ -1,3 +1,10 @@
+"""
+WebSocket router for streaming metric data.
+
+Clients can enroll/unenroll in one or more metrics and receive updates
+either on demand (unicast) or via broadcasts triggered by the system.
+"""
+
 from typing import Annotated, Literal
 
 from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect, status
@@ -9,8 +16,10 @@ from .. import cruds, db
 metric_ws_router = APIRouter(prefix="/metricas-ws", tags=["Métricas WS"])
 
 
+# Supported actions for incoming messages
 Action = Literal["enroll", "unenroll"]
 
+# Supported metric names
 MetricNames = Literal[
     "erros",
     "sucessos",
@@ -31,6 +40,14 @@ MetricNames = Literal[
 
 
 class MessageInSchema(BaseModel):
+    """
+    Input schema for metric WebSocket messages.
+
+    Attributes:
+        action: Either "enroll" (subscribe) or "unenroll" (unsubscribe).
+        metric_names: A specific list of metrics or "all".
+    """
+
     action: Action | None = Field(default="enroll", description="Ação a ser executada")
     metric_names: list[MetricNames] | Literal["all"] = Field(
         description="Métricas desejadas"
@@ -39,13 +56,11 @@ class MessageInSchema(BaseModel):
 
 class ConnectionManager:
     """
-    Gerencia as conexões WebSocket ativas, organizando-as por tipo de métrica.
-    Permite inscrever/desinscrever um cliente em uma ou várias métricas,
-    e enviar mensagens (broadcast) para todos os clientes inscritos em determinadas métricas
+    Manages WebSocket subscriptions grouped by metric name.
     """
 
     def __init__(self) -> None:
-        # Inicializa um dicionário com uma lista vazia para cada nome de métrica
+        # Map each supported metric to the list of subscribed WebSockets
         self.active_connections: dict[MetricNames, list[WebSocket]] = {
             "erros": [],
             "sucessos": [],
@@ -68,8 +83,11 @@ class ConnectionManager:
         self, ws: WebSocket, metric_names: list[MetricNames] | Literal["all"]
     ) -> None:
         """
-        Inscreve um cliente WebSocket em uma ou várias métricas.
-        Se metric_names for "all", inscreve em todas as métricas disponíveis
+        Subscribe a WebSocket to the given metrics (or all).
+
+        Args:
+            ws: The WebSocket instance.
+            metric_names: Metrics to subscribe to, or "all".
         """
         if metric_names == "all":
             for name in self.active_connections:
@@ -87,8 +105,11 @@ class ConnectionManager:
         self, ws: WebSocket, metric_names: list[MetricNames] | Literal["all"]
     ) -> None:
         """
-        Desinscreve um cliente WebSocket de uma ou várias métricas.
-        Se metric_names for "all", desinscreve de todas as métricas
+        Unsubscribe a WebSocket from the given metrics (or all).
+
+        Args:
+            ws: The WebSocket instance.
+            metric_names: Metrics to unsubscribe from, or "all".
         """
         if metric_names == "all":
             for name in self.active_connections:
@@ -109,15 +130,15 @@ class ConnectionManager:
         metric_names: list[MetricNames] | Literal["all"],
     ) -> None:
         """
-        Busca os dados atualizados das métricas solicitadas e os envia
-        unicamente para o WebSocket especificado (não faz broadcast).
-        A mensagem final é um dicionário cujas chaves são os nomes das métricas
-        e os valores são os resultados obtidos via CRUD
+        Send the current values for the requested metrics to a single WebSocket.
+
+        Args:
+            db: Async database session.
+            ws: The WebSocket instance.
+            metric_names: Metrics to include, or "all".
         """
         message = {}
 
-        # Para cada métrica, verifica se está na lista ou se foi solicitado "all",
-        # então consulta o respectivo método do CRUD e adiciona ao dicionário
         if "erros" in metric_names or metric_names == "all":
             res = await cruds.MetricCrud.get_error_stats(db=db)
             message["erros"] = res.model_dump()
@@ -168,25 +189,11 @@ class ConnectionManager:
 
     async def broadcast(self) -> None:
         """
-        Envia, em broadcast, os dados atualizados de todas as métricas para todos os
-        clientes WebSocket inscritos em cada uma delas.
+        Send updated values to all connections subscribed to each metric.
 
-        Para cada tipo de métrica (ex: "erros", "sucessos", etc.), verifica se há
-        conexões ativas na lista correspondente. Em caso afirmativo, consulta o
-        CRUD para obter os dados mais recentes e envia uma mensagem JSON contendo
-        apenas aquela métrica para cada conexão inscrita.
-
-        Nota: Utiliza uma única sessão assíncrona do banco de dados para todas as
-        consultas, garantindo consistência e evitando múltiplas aberturas de
-        sessão. Este método é tipicamente invocado por um agendador ou middleware
-        para propagar atualizações periódicas a todos os clientes.
+        Only metrics with at least one subscriber trigger a database query.
         """
-        # Cria uma sessão assíncrona para todas as operações de banco desta rodada
         async with db.AsyncSessionLocal() as session:
-            # Para cada métrica, repete o mesmo padrão:
-            # 1. Verifica se há ouvintes na lista self.active_connections[metric]
-            # 2. Se houver, consulta o CRUD correspondente
-            # 3. Para cada conexão, envia um JSON com a chave = nome da métrica e valor = dados serializados
             if self.active_connections["erros"]:
                 erros = await cruds.MetricCrud.get_error_stats(db=session)
                 for connection in self.active_connections["erros"]:
@@ -293,30 +300,18 @@ async def get_metric(
     db: Annotated[AsyncSession, Depends(db.get_db)], ws: WebSocket
 ) -> None:
     """
-    Endpoint WebSocket para receber inscrições/desinscrições em métricas
-    e retornar os dados atualizados.
+    WebSocket endpoint for streaming metrics.
 
-    Fluxo esperado:
-    1. O cliente conecta e deve enviar uma primeira mensagem JSON com
-       `action` (opcional, padrão "enroll") e `metric_names` (lista ou "all").
-    2. O servidor aceita a conexão, processa a inscrição inicial e envia
-       os dados atuais das métricas solicitadas.
-    3. Em seguida, fica em loop aguardando novas mensagens do cliente.
-       Cada nova mensagem pode conter `action` ("enroll" ou "unenroll") e
-       `metric_names` para alterar a inscrição.
-    4. Após cada ação, o servidor reenvia os dados atualizados para o cliente.
-    5. Em caso de erro de validação, notifica o cliente e continua o loop.
-    6. Em caso de desconexão, remove o cliente de todas as listas.
+    Clients send an initial payload specifying which metrics to enroll in,
+    receive an initial snapshot, and can then send additional payloads to
+    enroll/unenroll in other metrics. Invalid payloads receive a validation error.
     """
     await ws.accept()
 
     try:
-        # Mensagem inicial fora do loop
         raw = await ws.receive_json()
         initial_message = MessageInSchema(**raw)
         metric_manager.enroll(ws=ws, metric_names=initial_message.metric_names)
-        # O cliente recebe apenas dados atualizados do que ele pedir, o middleware
-        # dá conta de atualizações subsequentes contínuas
         await metric_manager.unicast(
             db=db, ws=ws, metric_names=initial_message.metric_names
         )
@@ -331,11 +326,10 @@ async def get_metric(
         await ws.close()
         return
     except WebSocketDisconnect:
-        # Cliente desconectou antes de enviar a mensagem inicial
         metric_manager.unenroll(ws=ws, metric_names="all")
         return
 
-    # Loop principal para receber mensagens subsequentes
+    # Main loop: process enroll/unenroll actions
     while True:
         try:
             raw = await ws.receive_json()
@@ -343,16 +337,13 @@ async def get_metric(
 
             if message.action == "enroll":
                 metric_manager.enroll(ws=ws, metric_names=message.metric_names)
-            else:  # "unenroll"
+            else:
                 metric_manager.unenroll(ws=ws, metric_names=message.metric_names)
 
-            # O cliente recebe apenas dados atualizados do que ele pedir, o middleware
-            # dá conta de atualizações subsequentes contínuas
             await metric_manager.unicast(
                 db=db, ws=ws, metric_names=message.metric_names
             )
         except ValidationError as e:
-            # Erro de validação: notifica o cliente e continua o loop
             await ws.send_json(
                 {
                     "type": "error",
@@ -361,6 +352,5 @@ async def get_metric(
                 }
             )
         except WebSocketDisconnect:
-            # Desconexão detectada: limpa as listas e encerra o loop
             metric_manager.unenroll(ws=ws, metric_names="all")
             break

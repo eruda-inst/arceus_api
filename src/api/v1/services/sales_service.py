@@ -1,3 +1,7 @@
+"""
+Service for sales/commercial operations (access status, leads).
+"""
+
 from typing import Any
 
 from fastapi import HTTPException, status
@@ -7,12 +11,28 @@ from .. import clients, schemas, utils
 
 
 class SalesService:
+    """
+    Provides static methods for commercial operations.
+    """
+
     @staticmethod
     async def get_access_status(
-        # IDs NonNegativeInt, pois o IXC é quebrado
+        # IDs NonNegativeInt, because IXC
         contract_id: NonNegativeInt,
     ) -> schemas.InternetStatusOutSchema:
-        # --- Obtém contrato ---
+        """
+        Retrieve the internet access status of a contract.
+
+        Args:
+            contract_id: Contract ID in IXC.
+
+        Returns:
+            InternetStatusOutSchema with the access status.
+
+        Raises:
+            HTTPException: 404 if the contract does not exist.
+        """
+        # --- Get contract ---
         endpoint = "cliente_contrato"
         grid_param = [utils.Param(TB="cliente_contrato.id", P=contract_id)]
         res = await clients.IxcClient.get(endpoint=endpoint, grid_param=grid_param)
@@ -29,7 +49,19 @@ class SalesService:
 
     @staticmethod
     async def post_leads(lead: schemas.LeadInSchema) -> schemas.LeadOutSchema:
-        # --- Cria lead ---
+        """
+        Create a new lead in IXC.
+
+        Args:
+            lead: Lead input data.
+
+        Returns:
+            LeadOutSchema with the created lead.
+
+        Raises:
+            HTTPException: 500 if creation fails.
+        """
+        # --- Post lead ---
         endpoint = "contato"
         payload = lead.model_dump()
         """
@@ -43,7 +75,7 @@ class SalesService:
                 detail="Cadastro malsucedido",
             )
 
-        # --- Obtém lead criado ---
+        # --- Get lead ---
         grid_param = [utils.Param(TB="contato.id", P=id)]
         res = await clients.IxcClient.get(endpoint=endpoint, grid_param=grid_param)
         regs = res.get("registros", [])
@@ -55,7 +87,21 @@ class SalesService:
     async def patch_lead(
         cnpj_cpf: str, lead: schemas.LeadUpdateSchema
     ) -> schemas.LeadOutSchema:
-        # --- Obtém lead atual ---
+        """
+        Partially update a lead identified by CNPJ/CPF.
+
+        Args:
+            cnpj_cpf: Document that identifies the lead.
+            lead: Partial lead data to update.
+
+        Returns:
+            LeadOutSchema with the updated lead.
+
+        Raises:
+            HTTPException: 404 if the lead does not exist.
+            HTTPException: 500 if the update fails.
+        """
+        # --- Get lead ---
         endpoint = "contato"
         formatted_cnpj_cpf = utils.Formatter.cnpj_cpf(cnpj_cpf)
         grid_param = [utils.Param(TB="contato.cnpj_cpf", P=formatted_cnpj_cpf)]
@@ -64,12 +110,11 @@ class SalesService:
             raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Lead inexistente")
         old_lead = regs[0]
 
-        # Lead atualizado
         lead_in_data = lead.model_dump(exclude_none=True)
         updated_lead: dict[str, Any] = {**old_lead, **lead_in_data}
         del updated_lead["id"]
 
-        # --- Atualiza lead ---
+        # --- Put lead ---
         id = old_lead["id"]
         endpoint = f"contato/{id}"
         payload = updated_lead

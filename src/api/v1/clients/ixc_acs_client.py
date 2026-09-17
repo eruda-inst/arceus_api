@@ -1,3 +1,10 @@
+"""
+Client for interacting with the IXC ACS API.
+
+Provides an asynchronous HTTP client with OAuth2 authentication and
+automatic token refresh.
+"""
+
 import datetime as dt
 from http import HTTPMethod
 from typing import Any, ClassVar
@@ -19,34 +26,31 @@ from .. import config
 
 
 class IxcAcsClient:
-    """Client for interacting with the IXC ACS API."""
+    """
+    Async HTTP client for the IXC ACS API.
 
-    # Base URL used for all API requests.
+    Handles OAuth2 authentication, token caching, and automatic refresh
+    before each request.
+    """
+
     _base_api_url: ClassVar[URL] = URL(config.settings.ixc_acs_base_api_url)
-
-    # Timeout configuration applied to the shared HTTP client.
     _timeout: ClassVar[Timeout] = Timeout(connect=5.0, read=30.0, write=10.0, pool=1.0)
-
-    # Transport with automatic retries for transient network failures.
     _transport: ClassVar[AsyncHTTPTransport] = AsyncHTTPTransport(retries=3)
-
-    # Shared AsyncClient instance. Reusing it enables connection pooling.
     _async_client: ClassVar[AsyncClient] = AsyncClient(
         timeout=_timeout, transport=_transport
     )
-
-    # Default headers sent with every request.
     _headers: ClassVar[Headers] = Headers({"Content-Type": "application/json"})
-
-    # Cached OAuth token payload. None until the first authentication.
     _auth: ClassVar[dict[str, Any] | None] = None
-
-    # Timezone used when comparing OAuth token expiration times.
     _tz: ClassVar[ZoneInfo] = ZoneInfo(config.settings.timezone)
 
     @classmethod
     async def _post_auth(cls) -> dict[str, Any]:
-        """Request a new OAuth token from the IXC ACS API."""
+        """
+        Request a new OAuth2 token from the IXC ACS token endpoint.
+
+        Returns:
+            The JSON response containing the access token and expiry.
+        """
         auth_url = URL(f"{cls._base_api_url}/token/oauth")
 
         payload = {
@@ -54,7 +58,6 @@ class IxcAcsClient:
             "client_secret": config.settings.ixc_acs_client_secret.get_secret_value(),
         }
 
-        # Send credentials and raise for non-2xx responses.
         res = await cls._async_client.post(
             url=auth_url, headers=cls._headers, json=payload
         )
@@ -70,32 +73,40 @@ class IxcAcsClient:
         params: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         """
-        Send an authenticated request to an API endpoint.
+        Send an authenticated request to an IXC ACS API endpoint.
 
-        Fetches an OAuth token if none is cached, or refreshes it when expired.
+        Automatically obtains or refreshes the OAuth2 token if needed.
+
+        Args:
+            endpoint: API endpoint path (relative to base URL).
+            method: HTTP method to use.
+            payload: JSON body for the request.
+            params: Query parameters.
+
+        Returns:
+            Parsed JSON response as a dictionary.
+
+        Raises:
+            HTTPError: For HTTP-related errors.
+            InvalidURL: If the URL is invalid.
+            CookieConflict: If a cookie conflict occurs.
+            StreamError: For stream-related errors.
         """
-        # Authenticate on first use.
+        # If no token exists, obtain one
         if cls._auth is None:
             cls._auth = await cls._post_auth()
         else:
-            # A cached token exists; parse its expiration timestamp from ISO format.
+            # Check if the token is about to expire (1 minute buffer)
             expires_at = dt.datetime.fromisoformat(cls._auth["expires_at"])
-
-            # Refresh one minute early to avoid using a token that expires mid-request.
             expires_at += dt.timedelta(minutes=-1)
-
-            # Convert the expiration time to the API's local timezone.
             expires_at = expires_at.astimezone(tz=cls._tz)
-
-            # Get the current time in the same timezone for an accurate comparison.
             now = dt.datetime.now(tz=cls._tz)
 
-            # If the token is expired or within the 1-minute buffer, request a new one.
             if now >= expires_at:
                 cls._auth = await cls._post_auth()
 
         try:
-            # Attach the current bearer token and perform the request.
+            # Attach the bearer token to the headers
             cls._headers["Authorization"] = f"Bearer {cls._auth['access_token']}"
             url = URL(f"{cls._base_api_url}/{endpoint}")
 
@@ -109,7 +120,6 @@ class IxcAcsClient:
             res.raise_for_status()
             return res.json()
 
-        # Normalize low-level httpx errors with clearer context.
         except HTTPError as exc:
             raise HTTPError(message=f"HTTPError: {exc}")
         except InvalidURL as exc:
@@ -121,24 +131,51 @@ class IxcAcsClient:
 
     @classmethod
     async def aclose(cls) -> None:
-        """Close the shared AsyncClient and releases resources."""
+        """Close the underlying HTTP client session."""
         await cls._async_client.aclose()
 
     @classmethod
     async def get(cls, endpoint: str, params: dict[str, Any] | None = None) -> Any:
-        """Perform an authenticated GET request to the given endpoint."""
+        """
+        Send a GET request to the IXC ACS API.
+
+        Args:
+            endpoint: API endpoint path.
+            params: Optional query parameters.
+
+        Returns:
+            Parsed JSON response.
+        """
         return await cls._make_request(endpoint=endpoint, params=params)
 
     @classmethod
     async def patch(cls, endpoint: str, payload: dict[str, Any]) -> dict[str, Any]:
-        """Perform an authenticated PATCH request to the given endpoint."""
+        """
+        Send a PATCH request to the IXC ACS API.
+
+        Args:
+            endpoint: API endpoint path.
+            payload: JSON body for the request.
+
+        Returns:
+            Parsed JSON response.
+        """
         return await cls._make_request(
             endpoint=endpoint, payload=payload, method=HTTPMethod.PATCH
         )
 
     @classmethod
     async def post(cls, endpoint: str, payload: dict[str, Any]) -> dict[str, Any]:
-        """Perform an authenticated PATCH request to the given endpoint."""
+        """
+        Send a POST request to the IXC ACS API.
+
+        Args:
+            endpoint: API endpoint path.
+            payload: JSON body for the request.
+
+        Returns:
+            Parsed JSON response.
+        """
         return await cls._make_request(
             endpoint=endpoint, payload=payload, method=HTTPMethod.POST
         )

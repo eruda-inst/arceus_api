@@ -1,21 +1,28 @@
+"""
+SQLAlchemy model for the Group (Grupo) table.
+"""
+
 from sqlalchemy import TIMESTAMP, Column, Integer, String, func
 from sqlalchemy.orm import relationship
 
 from .. import db
 from .group_perm_model import group_perm
 
-# Default value for unique: False
-# Default value for index: False
-# Default value for nullable: True
-
-# Primary keys have: nullable=False
-# Primary keys have: unique=True
-# Primary keys index: index=True
-
 # Columns used for filtering are indexed (i.e., index=True)
 
 
 class GroupModel(db.Base):
+    """
+    Represents a group of users.
+
+    Attributes:
+        id: Primary key.
+        nome: Unique group name.
+        criado_em: Timestamp when the group was created.
+        usuarios: Relationship to UserModel (one-to-many).
+        permissoes: Relationship to PermModel (many-to-many via group_perm).
+    """
+
     __tablename__ = "grupos"
 
     id = Column(type_=Integer, primary_key=True, autoincrement=True)
@@ -25,7 +32,9 @@ class GroupModel(db.Base):
         server_default=func.timezone("America/Bahia", func.now()),
         nullable=False,
     )
+    # Relationship to users belonging to this group
     usuarios = relationship(argument="UserModel", back_populates="grupo")
+    # Many-to-many relationship with permissions
     permissoes = relationship(
         argument="PermModel", secondary=group_perm, back_populates="grupos"
     )

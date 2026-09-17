@@ -1,9 +1,17 @@
+"""
+Pydantic schemas for log entries.
+"""
+
 from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, Field, PositiveInt
 
 
 class LogOutSchema(BaseModel):
+    """
+    Response schema for a log entry.
+    """
+
     model_config = ConfigDict(from_attributes=True)
 
     id: PositiveInt = Field(description="ID do log", examples=[1])

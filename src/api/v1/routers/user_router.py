@@ -1,3 +1,7 @@
+"""
+Router for user management endpoints.
+"""
+
 from typing import Annotated
 
 from fastapi import APIRouter, Body, Depends, status
@@ -9,6 +13,7 @@ from .. import cruds, db, deps, models, schemas, services, utils
 user_router = APIRouter(prefix="/usuarios", tags=["Usuários"])
 
 
+# Dependency aliases
 DbDep = Annotated[AsyncSession, Depends(db.get_db)]
 CurrUserDep = Annotated[models.UserModel, Depends(deps.get_curr_user)]
 CreatePermDep = Annotated[

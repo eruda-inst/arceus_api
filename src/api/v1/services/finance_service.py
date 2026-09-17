@@ -1,3 +1,7 @@
+"""
+Service for financial operations (invoices, Pix, credentials, unlock).
+"""
+
 import statistics
 from datetime import date, datetime
 from typing import Any
@@ -12,12 +16,28 @@ from . import CustomerService
 
 
 class FinanceService:
+    """
+    Provides static/class methods for financial operations.
+    """
+
     @staticmethod
     async def _get_last_paid_invoice(
-        # IDs NonNegativeInt, pois o IXC é quebrado
+        # IDs NonNegativeInt, because IXC
         contract_id: NonNegativeInt,
     ) -> dict[str, Any] | None:
-        # --- Obtém faturas pagas ---
+        """
+        Retrieve the last paid invoice (as reference) for a contract.
+
+        Uses the mode of the last 3 paid invoices to determine the most likely
+        value and due day.
+
+        Args:
+            contract_id: Contract ID in IXC.
+
+        Returns:
+            A dict with invoice reference data, or None if no paid invoices exist.
+        """
+        # --- Get paid invoices ---
         endpoint = "fn_areceber"
         grid_param = [
             utils.Param(TB="fn_areceber.id_contrato", P=contract_id),
@@ -31,15 +51,13 @@ class FinanceService:
         if not (faturas_pagas := res.get("registros", [])):
             return None
 
-        # Ultima fatura paga
         last_paid_invoices = faturas_pagas[:3]
         last_paid_invoice = last_paid_invoices[0]
 
-        # Valor da fatura
+        # Compute mode of values and due days from the last 3 invoices
         values = [float(u["valor"]) for u in last_paid_invoices]
         value = statistics.mode(values)
 
-        # Dia de vencimento da fatura
         due_dates = [u["data_vencimento"] for u in last_paid_invoices]
         due_days = [d.split("-")[2] for d in due_dates]
         due_day = statistics.mode(due_days)
@@ -53,10 +71,22 @@ class FinanceService:
 
     @staticmethod
     async def _get_next_open_invoice(
-        # IDs NonNegativeInt, pois o IXC é quebrado
+        # IDs NonNegativeInt, because IXC
         contract_id: NonNegativeInt,
     ) -> dict[str, Any] | None:
-        # --- Obtém faturas abertas ---
+        """
+        Retrieve the next open invoice (as reference) for a contract.
+
+        Uses the mode of the first 3 open invoices to determine the most likely
+        value and due day.
+
+        Args:
+            contract_id: Contract ID in IXC.
+
+        Returns:
+            A dict with invoice reference data, or None if no open invoices exist.
+        """
+        # --- Get open invoices ---
         endpoint = "fn_areceber"
         grid_param = [
             utils.Param(TB="fn_areceber.id_contrato", P=contract_id),
@@ -67,15 +97,12 @@ class FinanceService:
         if not (faturas_abertas := res.get("registros", [])):
             return None
 
-        # Proxima fatura aberta
         next_open_invoices = faturas_abertas[:3]
         next_open_invoice = next_open_invoices[0]
 
-        # Valor da fatura
         values = [float(p["valor"]) for p in next_open_invoices]
         value = statistics.mode(values)
 
-        # Dia de vencimento da fatura
         due_dates = [p["data_vencimento"] for p in next_open_invoices]
         due_days = [d.split("-")[2] for d in due_dates]
         due_day = statistics.mode(due_days)
@@ -90,9 +117,20 @@ class FinanceService:
     @classmethod
     async def get_invoice_reference(
         cls,
-        # IDs NonNegativeInt, pois o IXC é quebrado
+        # IDs NonNegativeInt, because IXC
         contract_id: NonNegativeInt,
     ) -> dict[str, Any] | None:
+        """
+        Get an invoice reference for a contract.
+
+        Prefers the next open invoice, falling back to the last paid invoice.
+
+        Args:
+            contract_id: Contract ID in IXC.
+
+        Returns:
+            The reference invoice dict, or None if no invoices exist.
+        """
         next_open_invoice = await cls._get_next_open_invoice(contract_id=contract_id)
 
         if next_open_invoice:
@@ -104,12 +142,26 @@ class FinanceService:
 
     @staticmethod
     async def get_open_invoices(
-        # IDs NonNegativeInt, pois o IXC é quebrado
+        # IDs NonNegativeInt, because IXC
         contract_id: NonNegativeInt,
         page: PositiveInt,
         items_per_page: PositiveInt,
     ) -> schemas.ListOutSchema[schemas.InvoiceOutSchema]:
-        # --- Obtém contrato ---
+        """
+        Retrieve all open invoices for a contract.
+
+        Args:
+            contract_id: Contract ID in IXC.
+            page: Page number for pagination.
+            items_per_page: Items per page.
+
+        Returns:
+            A paginated list of InvoiceOutSchema.
+
+        Raises:
+            HTTPException: 404 if the contract does not exist.
+        """
+        # --- Get contract ---
         endpoint = "cliente_contrato"
         grid_param = [utils.Param(TB="cliente_contrato.id", P=contract_id)]
         res = await clients.IxcClient.get(endpoint=endpoint, grid_param=grid_param)
@@ -119,7 +171,7 @@ class FinanceService:
             )
         contract = regs[0]
 
-        # --- Obtém faturas Abertas ---
+        # --- Get open invoices ---
         endpoint = "fn_areceber"
         grid_param = [
             utils.Param(TB="fn_areceber.id_contrato", P=contract_id),
@@ -136,9 +188,7 @@ class FinanceService:
 
         partial_open_invoices: list[schemas.InvoiceOutSchema] = []
 
-        # Iteração entre faturas abertas
         for open_invoice in open_invoices:
-            # Faturas abertas parciais
             partial_open_invoices.append(
                 schemas.InvoiceOutSchema(
                     id=open_invoice["id"],
@@ -160,12 +210,31 @@ class FinanceService:
 
     @staticmethod
     async def get_3_open_invoices(
-        # IDs NonNegativeInt, pois o IXC é quebrado
+        # IDs NonNegativeInt, because IXC
         contract_id: NonNegativeInt,
         page: PositiveInt,
         items_per_page: PositiveInt,
     ) -> schemas.ListOutSchema[schemas.InvoiceOutSchema]:
-        # --- Obtém contrato ---
+        """
+        Retrieve a smart selection of up to 3 open invoices for a contract.
+
+        The selection depends on how many overdue invoices exist:
+        - 0 overdue: return the first 3 open invoices.
+        - 1 overdue: return up to 3 invoices.
+        - >1 overdue: return invoices up to (and including) the current month.
+
+        Args:
+            contract_id: Contract ID in IXC.
+            page: Page number for pagination.
+            items_per_page: Items per page.
+
+        Returns:
+            A ListOutSchema with the selected InvoiceOutSchema items.
+
+        Raises:
+            HTTPException: 404 if the contract does not exist.
+        """
+        # --- Get contract ---
         endpoint = "cliente_contrato"
         grid_param = [utils.Param(TB="cliente_contrato.id", P=contract_id)]
         res = await clients.IxcClient.get(endpoint=endpoint, grid_param=grid_param)
@@ -175,7 +244,7 @@ class FinanceService:
             )
         contract = regs[0]
 
-        # --- Obtém faturas Abertas ---
+        # --- Get open invoices ---
         endpoint = "fn_areceber"
         grid_param = [
             utils.Param(TB="fn_areceber.id_contrato", P=contract_id),
@@ -196,8 +265,9 @@ class FinanceService:
         now = datetime.now(ZoneInfo("America/Bahia"))
         actual_date = now.date()
         actual_iso_date = actual_date.isoformat()  # AAAA-MM-DD
-        actual_month = str(actual_date.month).zfill(2)  # 01, ao invés de 1, por exemplo
+        actual_month = str(actual_date.month).zfill(2)  # 01, instead of 1, for example
 
+        # Count overdue invoices (excluding the current month)
         for open_invoice in open_invoices:
             due_date = date.fromisoformat(open_invoice["data_vencimento"])
             due_month = str(due_date.month).zfill(2)
@@ -244,6 +314,7 @@ class FinanceService:
                 )
                 due_date = date.fromisoformat(open_invoice["data_vencimento"])
                 due_month = str(due_date.month).zfill(2)
+                # Stop once we reach the current month's invoice
                 if actual_month == due_month:
                     break
 
@@ -258,10 +329,22 @@ class FinanceService:
 
     @staticmethod
     async def post_trusted_unlock(
-        # IDs NonNegativeInt, pois o IXC é quebrado
+        # IDs NonNegativeInt, because IXC
         contract_id: NonNegativeInt,
     ) -> schemas.MessageOutSchema:
-        # --- Realiza desbloqueio de confiança ---
+        """
+        Perform a trusted unlock for a contract in IXC.
+
+        Args:
+            contract_id: Contract ID in IXC.
+
+        Returns:
+            A MessageOutSchema indicating success.
+
+        Raises:
+            HTTPException: 500 if the unlock fails.
+        """
+        # --- Post trusted unlock ---
         endpoint = "desbloqueio_confianca"
         payload = {"id": contract_id}
         res = await clients.IxcClient.post(endpoint=endpoint, payload=payload)
@@ -276,10 +359,22 @@ class FinanceService:
 
     @staticmethod
     async def get_digitable_line(
-        # IDs NonNegativeInt, pois o IXC é quebrado
+        # IDs NonNegativeInt, because IXC
         invoice_id: NonNegativeInt,
     ) -> schemas.DigitableLineOutSchema:
-        # --- Obtém fatura ---
+        """
+        Retrieve the digitable line (barcode) for an invoice.
+
+        Args:
+            invoice_id: Invoice ID in IXC.
+
+        Returns:
+            DigitableLineOutSchema containing the digitable line.
+
+        Raises:
+            HTTPException: 404 if the invoice or digitable line does not exist.
+        """
+        # --- Get invoice ---
         endpoint = "fn_areceber"
         grid_param = [utils.Param(TB="fn_areceber.id", P=invoice_id)]
         res = await clients.IxcClient.get(endpoint=endpoint, grid_param=grid_param)
@@ -289,7 +384,6 @@ class FinanceService:
             )
         invoice = regs[0]
 
-        # Linha digitável
         if not (digitable_line := invoice.get("linha_digitavel")):
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -300,10 +394,22 @@ class FinanceService:
 
     @staticmethod
     async def get_pix_key(
-        # IDs NonNegativeInt, pois o IXC é quebrado
+        # IDs NonNegativeInt, because IXC
         invoice_id: NonNegativeInt,
     ) -> schemas.PixKeyOutSchema:
-        # --- Obtém fatura ---
+        """
+        Retrieve the Pix key for an invoice from SevenAZ.
+
+        Args:
+            invoice_id: Invoice ID.
+
+        Returns:
+            PixKeyOutSchema containing the Pix key.
+
+        Raises:
+            HTTPException: 404 if the invoice or Pix key does not exist.
+        """
+        # --- Get invoice ---
         endpoint = f"invoices/{invoice_id}/payment-data"
         res = await clients.SevenAZClient.get(endpoint=endpoint)
 
@@ -312,7 +418,6 @@ class FinanceService:
                 status_code=status.HTTP_404_NOT_FOUND, detail="Fatura inexistente"
             )
 
-        # Chave pix
         if not (pix_key := res.get("pixCode")):
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -323,10 +428,19 @@ class FinanceService:
 
     @staticmethod
     async def get_credentials(
-        # IDs NonNegativeInt, pois o IXC é quebrado
+        # IDs NonNegativeInt, because IXC
         customer_id: NonNegativeInt,
     ) -> schemas.CredentialOutSchema:
-        # --- Obtém cliente ---
+        """
+        Retrieve subscriber central credentials for a customer.
+
+        Args:
+            customer_id: Customer ID in IXC.
+
+        Returns:
+            CredentialOutSchema with username and password.
+        """
+        # --- Get customer ---
         customer = await CustomerService.get_ixc_customer(customer_id=customer_id)
 
         return schemas.CredentialOutSchema(
@@ -335,20 +449,32 @@ class FinanceService:
 
     @staticmethod
     async def patch_credentials(
-        # IDs NonNegativeInt, pois o IXC é quebrado
+        # IDs NonNegativeInt, because IXC
         customer_id: NonNegativeInt,
         password: str,
     ) -> schemas.CredentialOutSchema:
-        # --- Obtém cliente atual ---
+        """
+        Update subscriber central password for a customer.
+
+        Args:
+            customer_id: Customer ID in IXC.
+            password: New plaintext password.
+
+        Returns:
+            CredentialOutSchema with the updated credentials.
+
+        Raises:
+            HTTPException: 500 if the update fails.
+        """
+        # --- Get customer ---
         old_customer = await services.CustomerService.get_ixc_customer(
             customer_id=customer_id
         )
 
-        # Cliente atualizado
         updated_customer: dict[str, Any] = {**old_customer, "senha": password}
         del updated_customer["id"]
 
-        # --- Atualiza cliente ---
+        # --- Put customer ---
         id = old_customer["id"]
         endpoint = f"cliente/{id}"
         res = await clients.IxcClient.put(endpoint=endpoint, payload=updated_customer)

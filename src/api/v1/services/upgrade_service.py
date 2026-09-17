@@ -1,3 +1,7 @@
+"""
+Service for upgrade operations (suggested plans).
+"""
+
 from typing import Any
 
 from fastapi import HTTPException, status
@@ -7,11 +11,22 @@ from .. import clients, schemas, services, utils
 
 
 class UpgradeService:
+    """
+    Provides class methods for suggesting plan upgrades.
+    """
+
+    # IDs of the plans currently "in usage" for comparison purposes
     _plans_in_usage_id = (277, 278, 279, 280, 281)
 
     @classmethod
     async def _get_plans_in_usage(cls) -> list[dict[str, Any]]:
-        # --- Obtém planos em uso ---
+        """
+        Retrieve the list of "in usage" plans from IXC, sorted by price.
+
+        Returns:
+            A list of dicts with id, name, and value for each plan.
+        """
+        # --- Get plans ---
         str_ids = (str(id) for id in cls._plans_in_usage_id)
         treated_str_ids = ",".join(str_ids)
         endpoint = "vd_contratos"
@@ -30,7 +45,7 @@ class UpgradeService:
                 }
             )
 
-        # Ordena planos em ordem crescente por valor
+        # Sort plans by value for consistent comparisons
         partial_plans_in_usage = sorted(
             partial_plans_in_usage, key=lambda p: p["valor"]
         )
@@ -40,17 +55,31 @@ class UpgradeService:
     @classmethod
     async def get_suggested_plans(
         cls,
-        # IDs NonNegativeInt, pois o IXC é quebrado
+        # IDs NonNegativeInt, because IXC
         customer_id: NonNegativeInt,
         page: PositiveInt,
         items_per_page: PositiveInt,
     ) -> schemas.ListOutSchema[schemas.SuggestedPlanOutSchema]:
-        # --- Obtém contratos ativos ---
+        """
+        Suggest official plans to replace outdated customer plans.
+
+        Args:
+            customer_id: Customer ID in IXC.
+            page: Page number.
+            items_per_page: Items per page.
+
+        Returns:
+            A ListOutSchema of SuggestedPlanOutSchema.
+
+        Raises:
+            HTTPException: 404 if a plan is not found.
+        """
+        # --- Get contracts ---
         contracts = await services.CustomerService.get_active_contracts(
             customer_id=customer_id, page=page, items_per_page=items_per_page
         )
 
-        # IDs de planos
+        # Plans to skip when suggesting upgrades
         plans_id_to_ignore = (
             267,
             272,
@@ -70,20 +99,18 @@ class UpgradeService:
             244,
         )
 
-        # --- Obtém planos para checar ---
+        # --- Get plans ---
         plans_to_check = await cls._get_plans_in_usage()
 
         suggested_plans: list[schemas.SuggestedPlanOutSchema] = []
 
-        # Iteração entre contratos
         for contract in contracts:
             plan_id = contract["id_plano"]
 
-            # Se o plano do cliente estiver na lista de planos para ignorar
             if plan_id in plans_id_to_ignore:
                 continue
 
-            # --- Obtém plano atual do cliente ---
+            # --- Get plan ---
             endpoint = "vd_contratos"
             grid_param = [utils.Param(TB="vd_contratos.id", P=plan_id)]
             res = await clients.IxcClient.get(
@@ -98,38 +125,32 @@ class UpgradeService:
                     detail="Plano inexistente",
                 )
             customer_plan = regs[0]
-            # Converte valor do plano do cliente para float
             customer_plan: dict[str, Any] = {
                 **customer_plan,
                 "valor_contrato": float(customer_plan["valor_contrato"]),
             }
 
-            # --- Obtém fatura referência ---
+            # --- Get invoice reference ---
             invoice_reference = await services.FinanceService.get_invoice_reference(
                 contract_id=contract["id"]
             )
 
-            # O valor que o cliente realmente paga vem de invoice_reference
             if invoice_reference:
                 customer_plan = {
                     **customer_plan,
                     "valor_contrato": invoice_reference["valor"],
                 }
 
-            # Se o plano do cliente estiver na lista de planos para checar
             if int(customer_plan["id"]) in cls._plans_in_usage_id:
-                # Plano referência, i.e., mesmo plano do cliente, mas com valor sem descontos/acréscimos
+                # Customer is on an "in usage" plan: suggest a more expensive one
                 plans_reference: list[dict[str, Any]] = [
                     p for p in plans_to_check if p["id"] == customer_plan["id"]
                 ]
                 plan_reference = plans_reference[0]
                 plan_reference_value = float(plan_reference["valor"])
 
-                # Se o cliente paga mais do que deveria
                 if customer_plan["valor_contrato"] > plan_reference_value:
-                    # Iteração entre planos para checar
                     for plan_to_check in plans_to_check:
-                        # Se o valor do plano sugerido for maior que o do plano do cliente
                         if plan_to_check["valor"] > customer_plan["valor_contrato"]:
                             suggested_plans.append(
                                 schemas.SuggestedPlanOutSchema(
@@ -140,11 +161,10 @@ class UpgradeService:
                                 )
                             )
                             break
-            # Se o plano do cliente não estiver na lista de planos para checar
             else:
+                # Customer is on an arbitrary plan: find closest plan
                 best_plan = plans_to_check[-1]
 
-                # Se o cliente pagar igual ou mais que o melhor plano
                 if customer_plan["valor_contrato"] >= best_plan["valor"]:
                     suggested_plans.append(
                         schemas.SuggestedPlanOutSchema(
@@ -156,9 +176,7 @@ class UpgradeService:
                     )
                     continue
 
-                # Iteração entre planos para checar
                 for plan_to_check in plans_to_check:
-                    # Se o valor do plano para checar for maior ou igual ao do plano do cliente
                     if plan_to_check["valor"] >= customer_plan["valor_contrato"]:
                         suggested_plans.append(
                             schemas.SuggestedPlanOutSchema(

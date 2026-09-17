@@ -1,7 +1,15 @@
+"""
+Enumerations for contract and internet status codes and labels.
+"""
+
 from enum import StrEnum
 
 
 class ContractStatusCode(StrEnum):
+    """
+    Status codes for contracts in IXC.
+    """
+
     PRE_CONTRACT = "P"
     ACTIVE = "A"
     INACTIVE = "I"
@@ -10,6 +18,10 @@ class ContractStatusCode(StrEnum):
 
 
 class ContractStatusLabel(StrEnum):
+    """
+    Human-readable labels for contract status codes.
+    """
+
     PRE_CONTRACT = "Pré-contrato"
     ACTIVE = "Ativo"
     INACTIVE = "Inativo"
@@ -18,6 +30,10 @@ class ContractStatusLabel(StrEnum):
 
 
 class InternetStatusLabel(StrEnum):
+    """
+    Human-readable labels for internet access status.
+    """
+
     ACTIVE = "Ativo"
     DEACTIVATED = "Desativado"
     MANUAL_BLOCK = "Bloqueio Manual"
@@ -27,6 +43,10 @@ class InternetStatusLabel(StrEnum):
 
 
 class InternetStatusCode(StrEnum):
+    """
+    Status codes for internet access in IXC.
+    """
+
     ACTIVE = "A"
     DEACTIVATED = "D"
     MANUAL_BLOCK = "CM"

@@ -1,7 +1,15 @@
+"""
+Default IDs used across various IXC API requests.
+"""
+
 from enum import IntEnum
 
 
 class Default(IntEnum):
+    """
+    Default ID values for common entities in IXC.
+    """
+
     ID_RESPONSAVEL_ARCEUS = 14336
     ID_CIDADE_JAC = 2033
     ID_VD_CONTRATO = 276

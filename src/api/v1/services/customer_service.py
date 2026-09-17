@@ -1,3 +1,9 @@
+"""
+Service for customer-related operations.
+
+Provides methods to look up customers in IXC and OPA systems.
+"""
+
 import re
 from typing import Any
 
@@ -8,6 +14,10 @@ from .. import clients, services, utils
 
 
 class CustomerService:
+    """
+    Provides static/class methods for customer retrieval.
+    """
+
     @staticmethod
     async def get_ixc_customer(
         # IDs NonNegativeInt, because IXC
@@ -15,10 +25,25 @@ class CustomerService:
         protocol: str | None = None,
         cnpj_cpf: str | None = None,
     ) -> dict[str, Any]:
+        """
+        Retrieve an IXC customer by ID, CNPJ/CPF, or OPA protocol.
+
+        Args:
+            customer_id: Customer ID in IXC.
+            protocol: OPA service protocol.
+            cnpj_cpf: Customer document (CNPJ or CPF).
+
+        Returns:
+            The IXC customer record as a dictionary.
+
+        Raises:
+            HTTPException: 400 if no valid search parameter is provided.
+            HTTPException: 404 if the customer is not found.
+        """
         ixc_customer_endpoint = "cliente"
 
         if customer_id is not None:
-            # --- Cliente IXC por id ---
+            # --- IXC customer by ID ---
             grid_param = [utils.Param(TB="cliente.id", P=customer_id)]
             res = await clients.IxcClient.get(
                 endpoint=ixc_customer_endpoint, grid_param=grid_param
@@ -31,7 +56,7 @@ class CustomerService:
             ixc_customer = regs[0]
             return ixc_customer
         elif cnpj_cpf is not None and not re.match(pattern=r"{{\w+}}", string=cnpj_cpf):
-            # --- Cliente IXC por cnpj_cpf ---
+            # --- IXC customer by cnpj_cpf ---
             formatted_cnpj_cpf = utils.Formatter.cnpj_cpf(cnpj_cpf=cnpj_cpf)
             grid_param = [utils.Param(TB="cliente.cnpj_cpf", P=formatted_cnpj_cpf)]
             res = await clients.IxcClient.get(
@@ -45,7 +70,7 @@ class CustomerService:
             ixc_customer = regs[0]
             return ixc_customer
         elif protocol is not None and not re.match(pattern=r"{{\w+}}", string=protocol):
-            # --- Cliente Opa por protocolo ---
+            # --- Opa client by protocol ---
             endpoint = "atendimento"
             filter = {"protocolo": protocol}
             res = await clients.OpaClient.get(endpoint=endpoint, filter=filter)
@@ -56,7 +81,7 @@ class CustomerService:
                 )
             opa_customer = data[0]
 
-            # --- Cliente Opa por id ---
+            # --- Opa customer by ID ---
             endpoint = "cliente"
             filter = {"_id": opa_customer["id_cliente"]}
             res = await clients.OpaClient.get(endpoint=endpoint, filter=filter)
@@ -67,7 +92,7 @@ class CustomerService:
                 )
             opa_customer = data[0]
 
-            # --- Cliente IXC por id ---
+            # --- IXC customer by ID ---
             grid_param = [utils.Param(TB="cliente.id", P=opa_customer["id"])]
             res = await clients.IxcClient.get(
                 endpoint=ixc_customer_endpoint, grid_param=grid_param
@@ -95,12 +120,25 @@ class CustomerService:
         page: PositiveInt | None = None,
         items_per_page: PositiveInt | None = None,
     ) -> list[dict[str, Any]]:
-        # --- Obtém cliente ---
+        """
+        Retrieve contracts (with extra details) for a customer.
+
+        Args:
+            customer_id: Customer ID in IXC.
+            protocol: OPA service protocol.
+            cnpj_cpf: Customer document (CNPJ or CPF).
+            page: Page number for pagination.
+            items_per_page: Items per page.
+
+        Returns:
+            A list of dictionaries with enriched contract information.
+        """
+        # --- Get customer ---
         customer = await cls.get_ixc_customer(
             customer_id=customer_id, protocol=protocol, cnpj_cpf=cnpj_cpf
         )
 
-        # --- Obtém contratos ---
+        # --- Get contracts ---
         endpoint = "cliente_contrato"
         grid_param = [utils.Param(TB="cliente_contrato.id_cliente", P=customer["id"])]
         res = await clients.IxcClient.get(
@@ -113,30 +151,27 @@ class CustomerService:
 
         partial_contracts: list[dict[str, Any]] = []
 
-        # Iteração entre contratos
         for contract in contracts:
             contract_id = contract["id"]
 
-            # --- Obtém login ---
+            # --- Get login ---
             endpoint = "radusuarios"
             grid_param = [utils.Param(TB="radusuarios.id_contrato", P=contract_id)]
             res = await clients.IxcClient.get(endpoint=endpoint, grid_param=grid_param)
             regs = res.get("registros", [])
             login = regs[0] if len(regs) > 0 else {}
 
-            # Nome do cliente
             nome = customer.get("nome")
             razao = customer.get("razao")
             customer_name = str(nome if nome else razao)
 
-            # Fatura referência
+            # --- Get invoice reference ---
             invoice_reference: (
                 dict[str, Any] | None
             ) = await services.FinanceService.get_invoice_reference(
                 contract_id=contract_id
             )
 
-            # Dados fatura
             partial_invoice = {"valor_fatura": None, "dia_vencimento_fatura": None}
 
             if invoice_reference:
@@ -145,7 +180,6 @@ class CustomerService:
                     "dia_vencimento_fatura"
                 ]
 
-            # Contrato parcial
             partial_contracts.append(
                 {
                     "id": contract_id,
@@ -174,12 +208,28 @@ class CustomerService:
         page: PositiveInt | None = None,
         items_per_page: PositiveInt | None = None,
     ) -> list[dict[str, Any]]:
-        # --- Cliente ---
+        """
+        Retrieve active contracts (non-inactive, non-negative, non-withdrawn) for a customer.
+
+        Args:
+            customer_id: Customer ID in IXC.
+            protocol: OPA service protocol.
+            cnpj_cpf: Customer document (CNPJ or CPF).
+            page: Page number for pagination.
+            items_per_page: Items per page.
+
+        Returns:
+            A list of dictionaries with enriched active contract information.
+
+        Raises:
+            HTTPException: 404 if a login is missing for a contract.
+        """
+        # --- Get customer ---
         customer = await cls.get_ixc_customer(
             customer_id=customer_id, protocol=protocol, cnpj_cpf=cnpj_cpf
         )
 
-        # --- Contratos ---
+        # --- Get contracts ---
         endpoint = "cliente_contrato"
         grid_param = [
             utils.Param(TB="cliente_contrato.id_cliente", P=customer["id"]),
@@ -197,11 +247,10 @@ class CustomerService:
 
         partial_contracts: list[dict[str, Any]] = []
 
-        # --- Iteração entre contratos ---
         for contract in contracts:
             contract_id = contract["id"]
 
-            # --- Login ---
+            # --- Get login ---
             endpoint = "radusuarios"
             grid_param = [utils.Param(TB="radusuarios.id_contrato", P=contract_id)]
             res = await clients.IxcClient.get(endpoint=endpoint, grid_param=grid_param)
@@ -211,19 +260,17 @@ class CustomerService:
                 )
             login = regs[0]
 
-            # --- Nome do cliente ---
             nome = customer.get("nome")
             razao = customer.get("razao")
             customer_name = str(nome if nome else razao)
 
-            # --- Fatura referência ---
+            # --- Get invoice reference ---
             invoice_reference: (
                 dict[str, Any] | None
             ) = await services.FinanceService.get_invoice_reference(
                 contract_id=contract_id
             )
 
-            # --- Dados fatura ---
             partial_invoice = {"valor_fatura": None, "dia_vencimento_fatura": None}
 
             if invoice_reference:
@@ -232,7 +279,6 @@ class CustomerService:
                     "dia_vencimento_fatura"
                 ]
 
-            # --- Contrato parcial ---
             partial_contracts.append(
                 {
                     "id": contract_id,

@@ -1,25 +1,50 @@
+"""
+Utility class for formatting and sanitizing strings (CPF, CNPJ, phone, CEP, dates).
+"""
+
 import re
 from typing import ClassVar
 
 
 class Formatter:
-    _cnpj_pattern: ClassVar[str] = (
-        r"^\d{2}\.\d{3}\.\d{3}\/\d{4}\-\d{2}$"  # 11.111.111/1111-11
-    )
-    _cpf_pattern: ClassVar[str] = r"^\d{3}\.\d{3}\.\d{3}\-\d{2}$"  # 111.111.111-11
-    _cell_pattern: ClassVar[str] = (
-        r"^\(\d{2}\) \d{4,5}-\d{4}$"  # (11) 1111-1111 or (11) 11111-1111
-    )
-    _cep_pattern: ClassVar[str] = r"^\d{5}-\d{3}$"  # 11111-111
+    """
+    Provides static/class methods to format and sanitize common Brazilian
+    documents and data (CPF, CNPJ, cellphone, CEP, dates) and to sanitize
+    arbitrary strings.
+    """
 
-    # 111.111.111-11 -> 11111111111
+    _cnpj_pattern: ClassVar[str] = r"^\d{2}\.\d{3}\.\d{3}\/\d{4}\-\d{2}$"
+    _cpf_pattern: ClassVar[str] = r"^\d{3}\.\d{3}\.\d{3}\-\d{2}$"
+    _cell_pattern: ClassVar[str] = r"^\(\d{2}\) \d{4,5}-\d{4}$"
+    _cep_pattern: ClassVar[str] = r"^\d{5}-\d{3}$"
+
     @staticmethod
     def _only_digits(string: str) -> str:
+        """
+        Remove all non-digit characters from a string.
+
+        Args:
+            string: Input string.
+
+        Returns:
+            String containing only digits.
+        """
         return re.sub(r"\D", "", string)
 
-    # 11111111111 -> 111.111.111-11
     @classmethod
     def cpf(cls, cpf: str) -> str:
+        """
+        Format a CPF string to the standard pattern (XXX.XXX.XXX-XX).
+
+        Args:
+            cpf: CPF string, with or without formatting.
+
+        Returns:
+            Formatted CPF string.
+
+        Raises:
+            ValueError: If the CPF does not have exactly 11 digits.
+        """
         if re.fullmatch(cls._cpf_pattern, cpf):
             return cpf
 
@@ -32,9 +57,20 @@ class Formatter:
         )
         return cpf_formatado
 
-    # 11111111111111 -> 11.111.111/1111-11
     @classmethod
     def cnpj(cls, cnpj: str) -> str:
+        """
+        Format a CNPJ string to the standard pattern (XX.XXX.XXX/XXXX-XX).
+
+        Args:
+            cnpj: CNPJ string, with or without formatting.
+
+        Returns:
+            Formatted CNPJ string.
+
+        Raises:
+            ValueError: If the CNPJ does not have exactly 14 digits.
+        """
         if re.fullmatch(cls._cnpj_pattern, cnpj):
             return cnpj
 
@@ -45,10 +81,21 @@ class Formatter:
         cnpj_formatado = f"{cnpj_limpo[:2]}.{cnpj_limpo[2:5]}.{cnpj_limpo[5:8]}/{cnpj_limpo[8:12]}-{cnpj_limpo[12:]}"
         return cnpj_formatado
 
-    # 11111111111 -> 111.111.111-11
-    # 11111111111111 -> 11.111.111/1111-11
     @classmethod
     def cnpj_cpf(cls, cnpj_cpf: str) -> str:
+        """
+        Format a CNPJ or CPF string based on its length.
+
+        Args:
+            cnpj_cpf: CNPJ or CPF string, with or without formatting.
+
+        Returns:
+            Formatted CNPJ or CPF string.
+
+        Raises:
+            ValueError: If the string is neither a valid CPF (11 digits) nor
+                a valid CNPJ (14 digits).
+        """
         cnpj_cpf_limpo = cls._only_digits(string=cnpj_cpf)
 
         tamanho = len(cnpj_cpf_limpo)
@@ -66,10 +113,22 @@ class Formatter:
                 "CNPJ/CPF inválido. Deve ter 11 (CPF) ou 14 (CNPJ) dígitos"
             )
 
-    # 1111111111 -> (11) 1111-1111
-    # 1111111111 -> (11) 11111-1111
     @classmethod
     def cell(cls, cell: str) -> str:
+        """
+        Format a cellphone number to the standard pattern ((XX) XXXXX-XXXX).
+
+        Accepts 10 or 11 digits (with or without the ninth digit).
+
+        Args:
+            cell: Cellphone number string.
+
+        Returns:
+            Formatted cellphone string.
+
+        Raises:
+            ValueError: If the number does not have 10 or 11 digits.
+        """
         cell_limpo = cls._only_digits(string=cell)
 
         if re.fullmatch(cls._cell_pattern, cell):
@@ -91,9 +150,20 @@ class Formatter:
             parte2 = numero[5:]
             return f"({ddd}) {parte1}-{parte2}"
 
-    # 11111111 -> 11111-11
     @classmethod
     def cep(cls, cep: str) -> str:
+        """
+        Format a CEP (postal code) to the standard pattern (XXXXX-XXX).
+
+        Args:
+            cep: CEP string, with or without formatting.
+
+        Returns:
+            Formatted CEP string.
+
+        Raises:
+            ValueError: If the CEP does not have exactly 8 digits.
+        """
         if re.fullmatch(cls._cep_pattern, cep):
             return cep
 
@@ -105,31 +175,43 @@ class Formatter:
         return cep_formatado
 
     @staticmethod
-    # YYYY-MM-DD -> DD/MM/AAAA
     def date(date: str) -> str:
+        """
+        Convert a date string from ISO format (YYYY-MM-DD) to Brazilian format (DD/MM/YYYY).
+
+        If the input is already in Brazilian format, it is returned unchanged.
+
+        Args:
+            date: Date string in ISO or Brazilian format.
+
+        Returns:
+            Date string in Brazilian format (DD/MM/YYYY).
+        """
         FORMATO_BR = r"(\d{2})\/(\d{2})\/(\d{4})"
         FORMATO_ISO = r"(\d{4})-(\d{2})-(\d{2})"
 
-        # Se já está no formato desejado, não faz nada
         if re.match(FORMATO_BR, date):
             return date
 
-        # Se não estiver, converte
         return re.sub(FORMATO_ISO, r"\3/\2/\1", date)
 
-    # " str  \ning\\ " -> "String."
     @staticmethod
     def sanitize(string: str) -> str:
-        # Remove espaços do início e fim
+        """
+        Sanitize a string by trimming, removing backslashes and newlines,
+        collapsing multiple spaces, ensuring it ends with a period, and
+        capitalizing the first letter.
+
+        Args:
+            string: The string to sanitize.
+
+        Returns:
+            The sanitized string.
+        """
         l1 = string.strip()
-        # Remove barras invertidas
         l2 = l1.replace("\\", "")
-        # Remove quebras de linha
         l3 = l2.replace("\n", "")
-        # Substítui dois ou mais espaços do meio por um
         l4 = re.sub(pattern=r"\s{2,}", repl=" ", string=l3)
-        # Adiciona ponto no fim
         l5 = l4 + "." if not l4.endswith(".") else l4
-        # Capitaliza
         l6 = l5.capitalize()
         return l6

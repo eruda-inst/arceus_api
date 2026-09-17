@@ -1,21 +1,37 @@
+"""
+SQLAlchemy model for the Log table.
+
+Stores API request/response logs including timing, status, and client info.
+"""
+
 from typing import Any
 
 from sqlalchemy import TIMESTAMP, Column, Integer, Numeric, String, func
 
 from .. import db
 
-# Default value for unique: False
-# Default value for index: False
-# Default value for nullable: True
-
-# Primary keys have: nullable=False
-# Primary keys have: unique=True
-# Primary keys index: index=True
-
 # Columns used for filtering are indexed (i.e., index=True)
 
 
 class LogModel(db.base_db.Base):
+    """
+    Represents a log entry for an API request.
+
+    Attributes:
+        id: Primary key.
+        metodo: HTTP method used.
+        endpoint: API endpoint path.
+        codigo: HTTP status code returned.
+        duracao: Request duration in seconds.
+        protocolo: Protocol identifier (e.g., NWT...).
+        payload: Request body.
+        resposta: Response body.
+        url: Full request URL.
+        setor: Department or sector derived from the endpoint.
+        nome_cliente: Customer name fetched from IXC, if available.
+        criado_em: Timestamp when the log was created.
+    """
+
     __tablename__ = "logs"
 
     id = Column(type_=Integer, primary_key=True, autoincrement=True)
@@ -38,7 +54,12 @@ class LogModel(db.base_db.Base):
     )
 
     def to_dict(self) -> dict[str, Any]:
-        """Converte o objeto em um dicionário com tipos Python nativos."""
+        """
+        Convert the model instance to a dictionary.
+
+        Returns:
+            A dictionary containing all column values.
+        """
         return {
             "id": self.id,
             "metodo": self.metodo,

@@ -1,9 +1,17 @@
+"""
+Pydantic schemas for group-related responses.
+"""
+
 from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, Field, PositiveInt
 
 
 class GroupOutSchema(BaseModel):
+    """
+    Response schema for group details.
+    """
+
     model_config = ConfigDict(from_attributes=True)
 
     id: PositiveInt = Field(ge=1, description="ID do grupo", examples=[1])

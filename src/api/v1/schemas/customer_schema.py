@@ -1,9 +1,17 @@
+"""
+Pydantic schemas for customer-related responses.
+"""
+
 from pydantic import BaseModel, Field, field_serializer
 
 from .. import utils
 
 
 class ContactOutSchema(BaseModel):
+    """
+    Response schema for customer contact information.
+    """
+
     telefone_celular: str = Field(
         description="Celular do cliente",
         min_length=11,  # 12934567890
@@ -17,6 +25,10 @@ class ContactOutSchema(BaseModel):
 
 
 class CredentialOutSchema(BaseModel):
+    """
+    Response schema for subscriber central credentials.
+    """
+
     senha: str = Field(
         description="Senha da central do assinante", examples=["12345678"]
     )

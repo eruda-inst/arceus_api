@@ -1,3 +1,12 @@
+"""
+Authentication and authorization dependencies for FastAPI endpoints.
+
+Provides dependencies for:
+- Retrieving the current user from a Bearer token.
+- Validating Basic Auth credentials for bot access.
+- Checking if a user has a required permission.
+"""
+
 import secrets
 from typing import Annotated
 
@@ -12,6 +21,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from .. import config, cruds, db, models, services, utils
 
+# Security schemes
 basic_security = HTTPBasic()
 bearer_security = HTTPBearer()
 
@@ -20,7 +30,21 @@ async def get_curr_user(
     db: Annotated[AsyncSession, Depends(db.get_db)],
     credentials: Annotated[HTTPAuthorizationCredentials, Depends(bearer_security)],
 ) -> models.UserModel:
+    """
+    Dependency to retrieve the currently authenticated user from a Bearer token.
+
+    Args:
+        db: Database session.
+        credentials: Bearer token credentials extracted from the Authorization header.
+
+    Returns:
+        The authenticated UserModel instance.
+
+    Raises:
+        HTTPException: 401 if the token is invalid or the user does not exist.
+    """
     access_token = credentials.credentials
+    # Verify the access token and fetch the associated user
     user = await services.AuthService.verify_access_token(
         db=db, access_token=access_token
     )
@@ -35,12 +59,30 @@ async def get_curr_user(
 def get_creds(
     credentials: Annotated[HTTPBasicCredentials, Depends(basic_security)],
 ) -> bool:
+    """
+    Dependency to validate Basic Auth credentials for bot access.
+
+    Compares the provided username and password against the configured bot
+    credentials using constant-time comparison to prevent timing attacks.
+
+    Args:
+        credentials: Basic Auth credentials extracted from the Authorization header.
+
+    Returns:
+        True if credentials are valid.
+
+    Raises:
+        HTTPException: 401 if credentials are invalid.
+    """
+    # Encode provided credentials
     cred_username = credentials.username.encode()
     cred_pass = credentials.password.encode()
 
+    # Encode configured bot credentials
     config_username = config.settings.bot_username.encode()
     config_pass = config.settings.bot_pass.get_secret_value().encode()
 
+    # Use constant-time comparison to avoid timing attacks
     valid_username = secrets.compare_digest(cred_username, config_username)
     valid_password = secrets.compare_digest(cred_pass, config_pass)
 
@@ -54,15 +96,43 @@ def get_creds(
 
 
 def has_perm(req_perm: utils.PermCodes):
+    """
+    Dependency factory to check if the current user has a required permission.
+
+    Args:
+        req_perm: The permission code required to access the endpoint.
+
+    Returns:
+        A dependency function that returns the current user if they have the permission.
+
+    Raises:
+        HTTPException: 403 if the user does not have the required permission.
+    """
+
     async def dep(
         db: Annotated[AsyncSession, Depends(db.get_db)],
         current_user: Annotated[models.UserModel, Depends(get_curr_user)],
     ) -> models.UserModel:
+        """
+        Inner dependency that performs the permission check.
+
+        Args:
+            db: Database session.
+            current_user: The currently authenticated user.
+
+        Returns:
+            The current user if they have the required permission.
+
+        Raises:
+            HTTPException: 403 if permission is missing.
+        """
+        # Fetch all permissions for the current user
         _, user_perms = await cruds.PermCrud.get_all_by(
             db=db,
             id_usuario=current_user.id,  # type: ignore
         )
 
+        # Extract permission codes
         perm_codes = [p.codigo for p in user_perms]
         if req_perm not in perm_codes:
             raise HTTPException(

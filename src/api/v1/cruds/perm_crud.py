@@ -1,3 +1,7 @@
+"""
+CRUD operations for Permission (Perm) model.
+"""
+
 from collections.abc import Sequence
 
 from fastapi import HTTPException, status
@@ -11,6 +15,10 @@ from .. import models
 
 
 class PermCrud:
+    """
+    Provides static methods for permission-related database operations.
+    """
+
     @staticmethod
     async def get_by(
         db: AsyncSession,
@@ -19,29 +27,40 @@ class PermCrud:
         code: str | None = None,
         load_groups: bool = False,
     ):
-        # If id is provided, filter by it
+        """
+        Retrieve a single permission by id, name, or code.
+
+        Args:
+            db: Async database session.
+            id: Permission ID.
+            name: Permission name.
+            code: Permission code.
+            load_groups: If True, eagerly load the permission's groups.
+
+        Returns:
+            The found PermModel instance.
+
+        Raises:
+            HTTPException: 400 if no search parameter is provided.
+            HTTPException: 404 if the permission does not exist.
+        """
         if id is not None:
             stmt = select(models.PermModel).where(models.PermModel.id == id)
-        # If nome is provided, filter by it
         elif name is not None:
             stmt = select(models.PermModel).where(models.PermModel.nome == name)
-        # If codigo is provided, filter by it
         elif code is not None:
             stmt = select(models.PermModel).where(models.PermModel.codigo == code)
-        # Raise bad request if no param is provided
         else:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Forneça id, nome ou codigo",
             )
 
-        # If load_groups is True, the perm's groups are loaded
         if load_groups:
             stmt = stmt.options(selectinload(models.PermModel.grupos))
 
         perm = (await db.execute(stmt)).scalar_one_or_none()
 
-        # Raise not found if no perm is found
         if perm is None:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Permissão inexistente"
@@ -55,10 +74,23 @@ class PermCrud:
         group_id: PositiveInt | None = None,
         user_id: PositiveInt | None = None,
     ) -> tuple[NonNegativeInt, Sequence[models.PermModel]]:
+        """
+        Retrieve permissions filtered by group or user.
+
+        Args:
+            db: Async database session.
+            group_id: Filter permissions belonging to this group ID.
+            user_id: Filter permissions belonging to this user ID.
+
+        Returns:
+            A tuple with total count and sequence of PermModel instances.
+
+        Raises:
+            HTTPException: 400 if neither group_id nor user_id is provided.
+        """
         stmt = select(models.PermModel)
         count_stmt = select(func.count(models.PermModel.id))
 
-        # If group_id is provided, filter by it
         if group_id is not None:
             stmt = stmt.join(models.PermModel.grupos).where(
                 models.GroupModel.id == group_id
@@ -66,7 +98,6 @@ class PermCrud:
             count_stmt = count_stmt.join(models.PermModel.grupos).where(
                 models.GroupModel.id == group_id
             )
-        # If user_id is provided, filter by it
         elif user_id is not None:
             stmt = (
                 stmt.join(models.PermModel.grupos)
@@ -78,20 +109,16 @@ class PermCrud:
                 .join(models.GroupModel.usuarios)
                 .where(models.UserModel.id == user_id)
             )
-        # Raise bad request if no param is provided
         else:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Forneça id_grupo ou id_usuario",
             )
 
-        # Ordering
-        # Asc is default, but it's good to be explicit
         stmt = stmt.order_by(models.PermModel.id.asc())
 
         users = (await db.execute(stmt)).scalars().all()
 
-        # Count items
         total_items = (await db.execute(count_stmt)).scalar()
         total_items = total_items if total_items is not None else 0
 

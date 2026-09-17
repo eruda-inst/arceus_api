@@ -1,3 +1,7 @@
+"""
+CRUD operations for Log model.
+"""
+
 from collections.abc import Sequence
 from datetime import date, time
 
@@ -10,6 +14,10 @@ from .. import models
 
 
 class LogCrud:
+    """
+    Provides static methods for log-related database operations.
+    """
+
     @staticmethod
     async def create_log(
         db: AsyncSession,
@@ -24,7 +32,25 @@ class LogCrud:
         sector: str | None,
         customer_name: str | None,
     ) -> models.LogModel:
-        # Build the log model instance with rounded duration to 4 decimal places
+        """
+        Create a new log entry.
+
+        Args:
+            db: Async database session.
+            method: HTTP method.
+            endpoint: Request endpoint.
+            code: HTTP status code.
+            duration: Request duration in seconds.
+            protocol: Protocol identifier.
+            payload: Request payload.
+            response: Response body.
+            url: Full request URL.
+            sector: Department or sector.
+            customer_name: Customer name.
+
+        Returns:
+            The newly created LogModel instance.
+        """
         log_entry = models.LogModel(
             metodo=method,
             endpoint=endpoint,
@@ -58,10 +84,29 @@ class LogCrud:
         department: str | None = None,
         customer_name: str | None = None,
     ) -> tuple[NonNegativeInt, Sequence[models.LogModel]]:
-        # Start with a base query selecting all log records
+        """
+        Retrieve logs with optional filters and pagination.
+
+        Args:
+            db: Async database session.
+            page: Page number (1-based).
+            items_per_page: Number of items per page.
+            method: Filter by HTTP method (partial match).
+            endpoint: Filter by endpoint (partial match).
+            code: Filter by HTTP status code.
+            start_date: Filter logs from this date (inclusive, ISO format).
+            end_date: Filter logs up to this date (inclusive, ISO format).
+            start_hour: Filter logs from this time (inclusive, ISO format).
+            end_hour: Filter logs up to this time (inclusive, ISO format).
+            protocol: Filter by protocol (partial match).
+            department: Filter by department (partial match).
+            customer_name: Filter by customer name (partial match).
+
+        Returns:
+            A tuple with total number of matching logs and the paginated sequence.
+        """
         stmt = select(models.LogModel)
 
-        # Apply filters only if the corresponding parameter is provided
         if method:
             stmt = stmt.where(models.LogModel.metodo.ilike(f"%{method}%"))
         if endpoint:
@@ -69,7 +114,6 @@ class LogCrud:
         if code:
             stmt = stmt.where(models.LogModel.codigo == code)
 
-        # Date filters: use SQLite date function to compare date part of criado_em
         if start_date:
             start_date_obj = date.fromisoformat(start_date)
             stmt = stmt.where(func.date(models.LogModel.criado_em) >= start_date_obj)
@@ -77,7 +121,6 @@ class LogCrud:
             end_date_obj = date.fromisoformat(end_date)
             stmt = stmt.where(func.date(models.LogModel.criado_em) <= end_date_obj)
 
-        # Time filters: use SQLite time function to compare time part of criado_em
         if start_hour:
             start_hour_obj = time.fromisoformat(start_hour)
             stmt = stmt.where(func.time(models.LogModel.criado_em) >= start_hour_obj)
@@ -92,19 +135,15 @@ class LogCrud:
         if customer_name:
             stmt = stmt.where(models.LogModel.nome_cliente.ilike(f"%{customer_name}%"))
 
-        # Build a separate query to count total matching rows (ignoring pagination)
-        # Using subquery to count from the filtered statement
+        # Count total matching rows using a subquery
         count_stmt = select(func.count()).select_from(stmt.subquery())
         total_items = (await db.execute(count_stmt)).scalar_one()
 
-        # Order by newest first (most recent logs appear first)
         stmt = stmt.order_by(models.LogModel.id.desc())
 
-        # Apply pagination (offset and limit)
         offset = (page - 1) * items_per_page
         paginated_stmt = stmt.offset(offset).limit(items_per_page)
 
-        # Execute the paginated query and collect results
         result = await db.execute(paginated_stmt)
         logs = result.scalars().all()
 

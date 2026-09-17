@@ -1,3 +1,10 @@
+"""
+Application entry point for the Arceus API.
+
+Configures FastAPI, registers routers, middleware, CORS, and manages
+lifespan events (startup/shutdown).
+"""
+
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
@@ -10,6 +17,15 @@ from .api.v1 import clients, middlewares, schemas
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    """
+    Manage application lifespan events.
+
+    On startup, no specific initialization is required.
+    On shutdown, gracefully close all HTTP clients used by the application.
+
+    Args:
+        app: The FastAPI application instance.
+    """
     # Startup logic (runs before the app starts receiving requests)
     # You can add any initialization code here if needed.
     yield
@@ -28,6 +44,7 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+# Enable CORS for all origins (adjust in production as needed)
 app.add_middleware(
     middleware_class=CORSMiddleware,
     allow_origins=["*"],
@@ -36,13 +53,20 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Custom middleware to log requests/responses for specified endpoints
 app.add_middleware(middlewares.LogMiddleware)
 
 
 @app.get(path="/", summary="Endpoint raíz da API")
 def root(request: Request) -> schemas.RootOutSchema:
     """
-    Retorna informações sobre a API
+    Return general information about the API.
+
+    Args:
+        request: The incoming HTTP request.
+
+    Returns:
+        RootOutSchema containing the API title, description, and documentation URLs.
     """
     title = app.title
     description = app.description

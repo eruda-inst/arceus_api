@@ -1,3 +1,7 @@
+"""
+Service for IXC user-related operations.
+"""
+
 from fastapi import HTTPException, status
 from pydantic import EmailStr, PositiveInt
 
@@ -5,6 +9,10 @@ from .. import clients, schemas, utils
 
 
 class IXCUserService:
+    """
+    Provides class/static methods for IXC user operations.
+    """
+
     @classmethod
     async def get_all(
         cls,
@@ -13,13 +21,23 @@ class IXCUserService:
         name: str | None = None,
         email: str | None = None,
     ) -> schemas.ListOutSchema[schemas.IXCUserOutSchema]:
+        """
+        Retrieve a paginated list of active IXC users.
+
+        Args:
+            page: Page number.
+            items_per_page: Items per page.
+            name: Optional partial name filter.
+            email: Optional partial email filter.
+
+        Returns:
+            A ListOutSchema of IXCUserOutSchema.
+        """
         endpoint = "usuarios"
         grid_param = [utils.Param(TB="usuarios.status", P="A")]
 
-        # Filter by name if it's provided
         if name is not None:
             grid_param.append(utils.Param(TB="usuarios.nome", OP="L", P=name))
-        # Filter by e-mail if it's provided
         if email is not None:
             grid_param.append(utils.Param(TB="usuarios.email", OP="L", P=email))
 
@@ -44,6 +62,18 @@ class IXCUserService:
 
     @staticmethod
     async def get_by_email(email: EmailStr) -> schemas.IXCUserOutSchema:
+        """
+        Retrieve an active IXC user by email.
+
+        Args:
+            email: User email.
+
+        Returns:
+            The matching IXCUserOutSchema.
+
+        Raises:
+            HTTPException: 404 if no active user is found with the given email.
+        """
         endpoint = "usuarios"
         grid_param = [
             utils.Param(TB="usuarios.status", P="A"),

@@ -1,3 +1,7 @@
+"""
+SQLAlchemy model for the User (Usuário) table.
+"""
+
 from typing import Any
 
 from sqlalchemy import TIMESTAMP, Boolean, Column, ForeignKey, Integer, String, func
@@ -5,18 +9,26 @@ from sqlalchemy.orm import relationship
 
 from .. import db
 
-# Default value for unique: False
-# Default value for index: False
-# Default value for nullable: True
-
-# Primary keys have: nullable=False
-# Primary keys have: unique=True
-# Primary keys index: index=True
-
 # Columns used for filtering are indexed (i.e., index=True)
 
 
 class UserModel(db.Base):
+    """
+    Represents a system user.
+
+    Attributes:
+        id: Primary key.
+        nome: Unique user name.
+        email: Unique email address.
+        senha: Hashed password.
+        ativo: Whether the user account is active.
+        versao_token: Token version for invalidation.
+        criado_em: Timestamp when the user was created.
+        atualizado_em: Timestamp when the user was last updated.
+        id_grupo: Foreign key to the group the user belongs to.
+        grupo: Relationship to GroupModel.
+    """
+
     __tablename__ = "usuarios"
 
     id = Column(type_=Integer, primary_key=True, autoincrement=True)
@@ -42,18 +54,25 @@ class UserModel(db.Base):
         index=False,
     )
 
+    # Relationship to the user's group
     grupo = relationship("GroupModel", back_populates="usuarios")
 
     @property
     def nome_grupo(self) -> str | None:
         """
-        Return the associated group name
+        Get the name of the user's group.
+
+        Returns:
+            The group name, or None if no group is associated.
         """
         return self.grupo.nome
 
     def to_dict(self) -> dict[str, Any]:
         """
-        Turn an object into a dict with built-in Python types
+        Convert the model instance to a dictionary.
+
+        Returns:
+            A dictionary containing selected column values.
         """
         return {
             "id": self.id,

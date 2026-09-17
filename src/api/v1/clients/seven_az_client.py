@@ -1,3 +1,9 @@
+"""
+Client for the SevenAZ API using API key authentication.
+
+Provides an asynchronous HTTP client for making requests to SevenAZ endpoints.
+"""
+
 from http import HTTPMethod
 from typing import Any, ClassVar
 
@@ -17,26 +23,19 @@ from .. import config
 
 
 class SevenAZClient:
-    """Client for interacting with the SevenAZ API."""
+    """
+    Async HTTP client for the SevenAZ API.
 
-    # Base URL used for all API requests.
+    Uses an API key passed via the X-API-Key header.
+    """
+
     _base_api_url: ClassVar[URL] = URL(config.settings.seven_az_base_api_url)
-
-    # API key loaded from settings.
     _api_key: ClassVar[str] = config.settings.seven_az_api_key.get_secret_value()
-
-    # Timeout configuration applied to the shared HTTP client.
     _timeout: ClassVar[Timeout] = Timeout(connect=5.0, read=30.0, write=10.0, pool=1.0)
-
-    # Transport with automatic retries for transient network failures.
     _transport: ClassVar[AsyncHTTPTransport] = AsyncHTTPTransport(retries=3)
-
-    # Shared AsyncClient instance. Reusing it enables connection pooling.
     _async_client: ClassVar[AsyncClient] = AsyncClient(
         timeout=_timeout, transport=_transport
     )
-
-    # Default headers sent with every request, including API-key authentication.
     _headers: ClassVar[Headers] = Headers(
         {"Content-Type": "application/json", "X-API-Key": _api_key}
     )
@@ -48,9 +47,24 @@ class SevenAZClient:
         method: HTTPMethod = HTTPMethod.GET,
         payload: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
-        """Send an authenticated request to an API endpoint."""
+        """
+        Send an authenticated request to a SevenAZ API endpoint.
+
+        Args:
+            endpoint: API endpoint path.
+            method: HTTP method to use.
+            payload: JSON body for the request.
+
+        Returns:
+            Parsed JSON response as a dictionary.
+
+        Raises:
+            HTTPError: For HTTP-related errors.
+            InvalidURL: If the URL is invalid.
+            CookieConflict: If a cookie conflict occurs.
+            StreamError: For stream-related errors.
+        """
         try:
-            # Build the full endpoint URL and perform the request.
             url = URL(f"{cls._base_api_url}/{endpoint}")
             res = await cls._async_client.request(
                 method=method, url=url, headers=cls._headers, json=payload
@@ -58,7 +72,6 @@ class SevenAZClient:
             res.raise_for_status()
             return res.json()
 
-        # Normalize low-level httpx errors with clearer context.
         except HTTPError as exc:
             raise HTTPError(message=f"HTTPError: {exc}")
         except InvalidURL as exc:
@@ -70,10 +83,18 @@ class SevenAZClient:
 
     @classmethod
     async def aclose(cls) -> None:
-        """Close the shared AsyncClient and release resources."""
+        """Close the underlying HTTP client session."""
         await cls._async_client.aclose()
 
     @classmethod
     async def get(cls, endpoint: str) -> dict[str, Any]:
-        """Perform an authenticated GET request to the given endpoint."""
+        """
+        Send a GET request to the SevenAZ API.
+
+        Args:
+            endpoint: API endpoint path.
+
+        Returns:
+            Parsed JSON response.
+        """
         return await cls._make_request(endpoint=endpoint)

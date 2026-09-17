@@ -1,3 +1,7 @@
+"""
+Service for village (Vila) operations.
+"""
+
 import re
 from typing import Any
 
@@ -9,13 +13,35 @@ from .. import clients, schemas, utils
 
 
 class VillageService:
+    """
+    Provides static/class methods for village operations.
+    """
+
     @staticmethod
     async def _get_login(
-        # IDs NonNegativeInt, pois o IXC é quebrado
+        # IDs NonNegativeInt, because IXC
         login_id: NonNegativeInt | None = None,
         residence_number: PositiveInt | None = None,
         pppoe: str | None = None,
     ) -> dict[str, Any]:
+        """
+        Resolve a login (radusuarios) from the village system.
+
+        Can search by login ID, residence number (as "res<number>"), or PPPoE.
+        Only active logins are considered.
+
+        Args:
+            login_id: Login ID in IXC.
+            residence_number: Residence number.
+            pppoe: PPPoE username.
+
+        Returns:
+            A normalized dict with relevant login fields.
+
+        Raises:
+            HTTPException: 400 if no valid search parameter is provided.
+            HTTPException: 404 if the login is not found.
+        """
         search_key = None
         search_value = None
 
@@ -24,6 +50,7 @@ class VillageService:
             search_value = login_id
         elif residence_number is not None:
             search_key = "login"
+            # Village residences follow the pattern "res<number>"
             search_value = f"res{residence_number}"
         elif pppoe is not None and not re.match(pattern=r"{{\w+}}", string=pppoe):
             search_key = "login"
@@ -34,7 +61,7 @@ class VillageService:
                 detail="Forneça numero_residencia ou ppppoe",
             )
 
-        # --- Obtém login ---
+        # --- Get login ---
         endpoint = "radusuarios"
         grid_param = [
             utils.Param(
@@ -66,10 +93,23 @@ class VillageService:
     async def get_contract(
         cls, residence_number: PositiveInt | None = None, pppoe: str | None = None
     ) -> schemas.VillageContractOutSchema:
-        # --- Obtém login ---
+        """
+        Retrieve the contract associated with a village residence or PPPoE.
+
+        Args:
+            residence_number: Residence number.
+            pppoe: PPPoE username.
+
+        Returns:
+            VillageContractOutSchema with contract, login, and client IDs.
+
+        Raises:
+            HTTPException: 404 if the contract does not exist.
+        """
+        # --- Get login ---
         login = await cls._get_login(residence_number=residence_number, pppoe=pppoe)
 
-        # --- Obtém contrato ---
+        # --- Get contract ---
         endpoint = "cliente_contrato"
         grid_param = [
             utils.Param(TB="cliente_contrato.id_cliente", P=login["id_cliente"])

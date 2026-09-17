@@ -1,10 +1,18 @@
+"""
+Pydantic schemas for support tickets.
+"""
+
 from pydantic import BaseModel, Field, NonNegativeInt, field_serializer
 
 from .. import utils
 
 
 class TicketInSchema(BaseModel):
-    # IDs NonNegativeInt, pois o IXC é quebrado
+    """
+    Input schema for creating a new support ticket.
+    """
+
+    # IDs NonNegativeInt, because IXC
     id_login: NonNegativeInt = Field(description="ID de login", examples=[1])
     id_assunto: NonNegativeInt = Field(description="ID do assunto", examples=[12])
     id_cliente: NonNegativeInt = Field(description="ID do cliente", examples=[123])
@@ -48,6 +56,10 @@ class TicketInSchema(BaseModel):
 
 
 class TicketOutSchema(BaseModel):
+    """
+    Response schema for a support ticket.
+    """
+
     # IDs NonNegativeInt, pois o IXC é quebrado
     id: NonNegativeInt = Field(description="ID do atendimento", examples=[1])
     id_assunto: NonNegativeInt = Field(description="ID do assunto", examples=[12])
@@ -62,7 +74,7 @@ class TicketOutSchema(BaseModel):
     )
     data_criacao: str = Field(
         description="Data de criação do atendimento",
-        # Não pode haver isto, pois o IXC é quebrado
+        # We can't put this, because IXC
         # min_length=10,  # DD/MM/AAAA
         # max_length=10,  # DD/MM/AAAA
         examples=["DD/MM/AAAA"],

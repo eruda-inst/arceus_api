@@ -1,3 +1,7 @@
+"""
+CRUD operations for aggregated metrics based on Log model.
+"""
+
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
@@ -12,14 +16,25 @@ from .. import models, schemas
 
 
 class MetricCrud:
+    """
+    Provides static methods for computing metrics from logs.
+    """
+
     @staticmethod
     async def get_total_reqs(
         db: AsyncSession,
     ) -> schemas.TodayAlwaysOutSchema[NonNegativeInt]:
+        """
+        Get total number of requests for today and for all time.
+
+        Returns:
+            A TodayAlwaysOutSchema with counts for 'hoje' (today) and 'sempre' (always).
+        """
         try:
             timezone = ZoneInfo("America/Bahia")
             today = datetime.now(tz=timezone).date()
 
+            # Count requests made today
             stmt_today = (
                 select(func.count())
                 .select_from(models.LogModel)
@@ -27,6 +42,7 @@ class MetricCrud:
             )
             today_count = (await db.execute(stmt_today)).scalar_one_or_none() or 0
 
+            # Count all requests ever
             stmt_always = select(func.count()).select_from(models.LogModel)
             always_count = (await db.execute(stmt_always)).scalar_one_or_none() or 0
 
@@ -43,12 +59,20 @@ class MetricCrud:
     async def get_res_time(
         db: AsyncSession,
     ) -> schemas.TodayAlwaysOutSchema[schemas.ResponseTimeStatsSchema]:
+        """
+        Get response time statistics (min, avg, max) for successful requests (2xx)
+        for today and all time.
+
+        Returns:
+            A TodayAlwaysOutSchema with ResponseTimeStatsSchema for 'hoje' and 'sempre'.
+        """
         try:
             timezone = ZoneInfo("America/Bahia")
             today = datetime.now(tz=timezone).date()
 
             success_filter = models.LogModel.codigo.between(200, 299)
 
+            # Stats for today
             stmt_today = select(
                 func.min(models.LogModel.duracao).label("min"),
                 func.avg(models.LogModel.duracao).label("avg"),
@@ -64,6 +88,7 @@ class MetricCrud:
             avg_today = float(row_today.avg) if row_today.avg is not None else 0.0
             max_today = float(row_today.max) if row_today.max is not None else 0.0
 
+            # Stats for all time
             stmt_always = select(
                 func.min(models.LogModel.duracao).label("min"),
                 func.avg(models.LogModel.duracao).label("avg"),
@@ -94,10 +119,17 @@ class MetricCrud:
     async def get_total_services(
         db: AsyncSession,
     ) -> schemas.TodayAlwaysOutSchema[NonNegativeInt]:
+        """
+        Get total number of distinct services (by protocol) for today and all time.
+
+        Returns:
+            A TodayAlwaysOutSchema with counts for 'hoje' and 'sempre'.
+        """
         try:
             timezone = ZoneInfo("America/Bahia")
             today = datetime.now(tz=timezone).date()
 
+            # Distinct protocols today
             stmt_today = (
                 select(func.count(func.distinct(models.LogModel.protocolo)))
                 .select_from(models.LogModel)
@@ -109,6 +141,7 @@ class MetricCrud:
             result_today = await db.execute(stmt_today)
             today_count = result_today.scalar_one_or_none() or 0
 
+            # Distinct protocols all time
             stmt_always = (
                 select(func.count(func.distinct(models.LogModel.protocolo)))
                 .select_from(models.LogModel)
@@ -130,10 +163,17 @@ class MetricCrud:
     async def get_top_endpoints(
         db: AsyncSession,
     ) -> schemas.TodayAlwaysOutSchema[list[schemas.TopEndpointSchema]]:
+        """
+        Get top 10 most requested endpoints for today and all time.
+
+        Returns:
+            A TodayAlwaysOutSchema with lists of TopEndpointSchema.
+        """
         try:
             timezone = ZoneInfo("America/Bahia")
             today = datetime.now(tz=timezone).date()
 
+            # Top endpoints today
             stmt_today = (
                 select(
                     models.LogModel.endpoint,
@@ -152,6 +192,7 @@ class MetricCrud:
                 for row in result_today.all()
             ]
 
+            # Top endpoints all time
             stmt_always = (
                 select(
                     models.LogModel.endpoint,
@@ -182,10 +223,17 @@ class MetricCrud:
     async def get_top_status_codes(
         db: AsyncSession,
     ) -> schemas.TodayAlwaysOutSchema[list[schemas.TopStatusCodeSchema]]:
+        """
+        Get top 10 most frequent HTTP status codes for today and all time.
+
+        Returns:
+            A TodayAlwaysOutSchema with lists of TopStatusCodeSchema.
+        """
         try:
             timezone = ZoneInfo("America/Bahia")
             today = datetime.now(tz=timezone).date()
 
+            # Top status codes today
             stmt_today = (
                 select(
                     models.LogModel.codigo.label("status_code"),
@@ -204,6 +252,7 @@ class MetricCrud:
                 for row in result_today.all()
             ]
 
+            # Top status codes all time
             stmt_always = (
                 select(
                     models.LogModel.codigo.label("status_code"),
@@ -234,10 +283,17 @@ class MetricCrud:
     async def get_top_hours(
         db: AsyncSession,
     ) -> schemas.TodayAlwaysOutSchema[list[schemas.TopHourSchema]]:
+        """
+        Get top 10 hours with most requests for today and all time.
+
+        Returns:
+            A TodayAlwaysOutSchema with lists of TopHourSchema.
+        """
         try:
             timezone = ZoneInfo("America/Bahia")
             today = datetime.now(tz=timezone).date()
 
+            # Top hours today
             stmt_today = (
                 select(
                     func.extract("hour", models.LogModel.criado_em).label("hora"),
@@ -256,6 +312,7 @@ class MetricCrud:
                 for row in result_today.all()
             ]
 
+            # Top hours all time
             stmt_always = (
                 select(
                     func.extract("hour", models.LogModel.criado_em).label("hora"),
@@ -286,6 +343,12 @@ class MetricCrud:
     async def get_top_weekdays(
         db: AsyncSession,
     ) -> schemas.TodayAlwaysOutSchema[list[schemas.TopWeekdaySchema]]:
+        """
+        Get request counts per weekday for the current week and all time.
+
+        Returns:
+            A TodayAlwaysOutSchema with lists of TopWeekdaySchema.
+        """
         try:
             timezone = ZoneInfo("America/Bahia")
             today = datetime.now(tz=timezone).date()
@@ -299,10 +362,12 @@ class MetricCrud:
                 6: "Sáb",
             }
 
+            # Calculate the start and end of the current week (Sunday to Saturday)
             days_since_sunday = (today.weekday() + 1) % 7
             start_of_week = today - timedelta(days=days_since_sunday)
             end_of_week = start_of_week + timedelta(days=6)
 
+            # Weekday counts for current week
             stmt_today = (
                 select(
                     func.extract("dow", models.LogModel.criado_em).label("dow"),
@@ -324,6 +389,7 @@ class MetricCrud:
                 for row in result_today.all()
             ]
 
+            # Weekday counts all time
             stmt_always = (
                 select(
                     func.extract("dow", models.LogModel.criado_em).label("dow"),
@@ -354,10 +420,17 @@ class MetricCrud:
     async def get_worst_endpoints(
         db: AsyncSession,
     ) -> schemas.TodayAlwaysOutSchema[list[schemas.TopWorstEndpointSchema]]:
+        """
+        Get top 10 endpoints with most errors (4xx and 5xx) for today and all time.
+
+        Returns:
+            A TodayAlwaysOutSchema with lists of TopWorstEndpointSchema.
+        """
         try:
             timezone = ZoneInfo("America/Bahia")
             today = datetime.now(tz=timezone).date()
 
+            # Worst endpoints today
             stmt_today = (
                 select(
                     models.LogModel.endpoint,
@@ -384,6 +457,7 @@ class MetricCrud:
                 for row in result_today.all()
             ]
 
+            # Worst endpoints all time
             stmt_always = (
                 select(
                     models.LogModel.endpoint,
@@ -422,10 +496,17 @@ class MetricCrud:
     async def get_top_month_days(
         db: AsyncSession,
     ) -> schemas.TodayAlwaysOutSchema[list[schemas.TopMonthDaySchema]]:
+        """
+        Get top 10 days of the month with most requests for the current month and all time.
+
+        Returns:
+            A TodayAlwaysOutSchema with lists of TopMonthDaySchema.
+        """
         try:
             timezone = ZoneInfo("America/Bahia")
             today = datetime.now(tz=timezone).date()
 
+            # Top days of current month
             stmt_today = (
                 select(
                     func.extract("day", models.LogModel.criado_em).label("day"),
@@ -447,6 +528,7 @@ class MetricCrud:
                 for row in result_today.all()
             ]
 
+            # Top days all time
             stmt_always = (
                 select(
                     func.extract("day", models.LogModel.criado_em).label("day"),
@@ -477,10 +559,18 @@ class MetricCrud:
     async def get_top_slowest_endpoints(
         db: AsyncSession,
     ) -> schemas.TodayAlwaysOutSchema[list[schemas.TopSlowestEndpointSchema]]:
+        """
+        Get top 10 slowest endpoints by average duration for successful requests (2xx)
+        for today and all time.
+
+        Returns:
+            A TodayAlwaysOutSchema with lists of TopSlowestEndpointSchema.
+        """
         try:
             timezone = ZoneInfo("America/Bahia")
             today = datetime.now(tz=timezone).date()
 
+            # Slowest endpoints today
             stmt_today = (
                 select(
                     models.LogModel.endpoint,
@@ -506,6 +596,7 @@ class MetricCrud:
                     schemas.TopSlowestEndpointSchema(endpoint=row.endpoint, duracao=avg)
                 )
 
+            # Slowest endpoints all time
             stmt_always = (
                 select(
                     models.LogModel.endpoint,
@@ -541,10 +632,17 @@ class MetricCrud:
     async def get_top_http_methods(
         db: AsyncSession,
     ) -> schemas.TodayAlwaysOutSchema[list[schemas.TopHttpMethodSchema]]:
+        """
+        Get top 10 HTTP methods by request count for today and all time.
+
+        Returns:
+            A TodayAlwaysOutSchema with lists of TopHttpMethodSchema.
+        """
         try:
             timezone = ZoneInfo("America/Bahia")
             today = datetime.now(tz=timezone).date()
 
+            # Top methods today
             stmt_today = (
                 select(
                     models.LogModel.metodo,
@@ -564,6 +662,7 @@ class MetricCrud:
                 for row in result_today.all()
             ]
 
+            # Top methods all time
             stmt_always = (
                 select(
                     models.LogModel.metodo,
@@ -595,10 +694,17 @@ class MetricCrud:
     async def get_top_departments(
         db: AsyncSession,
     ) -> schemas.TodayAlwaysOutSchema[list[schemas.TopDepartmentSchema]]:
+        """
+        Get top 10 departments (setor) by request count for today and all time.
+
+        Returns:
+            A TodayAlwaysOutSchema with lists of TopDepartmentSchema.
+        """
         try:
             timezone = ZoneInfo("America/Bahia")
             today = datetime.now(tz=timezone).date()
 
+            # Top departments today
             stmt_today = (
                 select(
                     models.LogModel.setor,
@@ -618,6 +724,7 @@ class MetricCrud:
                 for row in result_today.all()
             ]
 
+            # Top departments all time
             stmt_always = (
                 select(
                     models.LogModel.setor,
@@ -649,10 +756,18 @@ class MetricCrud:
     async def get_success_stats(
         db: AsyncSession,
     ) -> schemas.TodayAlwaysOutSchema[schemas.SuccessStatsSchema]:
+        """
+        Get success statistics (total count and percentage) for today and all time.
+        Success is defined as status codes between 200 and 299.
+
+        Returns:
+            A TodayAlwaysOutSchema with SuccessStatsSchema for 'hoje' and 'sempre'.
+        """
         try:
             timezone = ZoneInfo("America/Bahia")
             today = datetime.now(tz=timezone).date()
 
+            # Success stats today
             stmt_today = select(
                 func.count().label("total"),
                 func.sum(
@@ -665,6 +780,7 @@ class MetricCrud:
             success_today = row_today.sucessos or 0
             perc_today = (success_today / total_today * 100) if total_today > 0 else 0.0
 
+            # Success stats all time
             stmt_always = select(
                 func.count().label("total"),
                 func.sum(
@@ -697,6 +813,13 @@ class MetricCrud:
     async def get_error_stats(
         db: AsyncSession,
     ) -> schemas.TodayAlwaysOutSchema[schemas.ErrorStatsSchema]:
+        """
+        Get error statistics (total count and percentage) for today and all time.
+        Errors are defined as 4xx or 5xx status codes.
+
+        Returns:
+            A TodayAlwaysOutSchema with ErrorStatsSchema for 'hoje' and 'sempre'.
+        """
         try:
             timezone = ZoneInfo("America/Bahia")
             today = datetime.now(tz=timezone).date()
@@ -707,6 +830,7 @@ class MetricCrud:
                 )
             )
 
+            # Error stats today
             stmt_today = select(
                 func.count().label("total"),
                 func.sum(case((error_condition, 1), else_=0)).label("erros"),
@@ -717,6 +841,7 @@ class MetricCrud:
             error_today = row_today.erros or 0
             perc_today = (error_today / total_today * 100) if total_today > 0 else 0.0
 
+            # Error stats all time
             stmt_always = select(
                 func.count().label("total"),
                 func.sum(case((error_condition, 1), else_=0)).label("erros"),
@@ -745,11 +870,17 @@ class MetricCrud:
     async def get_top_clients(
         db: AsyncSession,
     ) -> schemas.TodayAlwaysOutSchema[list[schemas.TopClientNameSchema]]:
+        """
+        Get top 10 client names by request count for today and all time.
+
+        Returns:
+            A TodayAlwaysOutSchema with lists of TopClientNameSchema.
+        """
         try:
             timezone = ZoneInfo("America/Bahia")
             today = datetime.now(tz=timezone).date()
 
-            # Top clientes de hoje (limitado a 10, mas pegamos só o primeiro)
+            # Top clients today
             stmt_today = (
                 select(
                     models.LogModel.nome_cliente,
@@ -761,7 +892,7 @@ class MetricCrud:
                 )
                 .group_by(models.LogModel.nome_cliente)
                 .order_by(func.count(models.LogModel.id).desc())
-                .limit(10)  # mantido para consistência, mas usaremos só o top 1
+                .limit(10)
             )
             result_today = await db.execute(stmt_today)
             today_list = [
@@ -772,7 +903,7 @@ class MetricCrud:
                 for row in result_today.all()
             ]
 
-            # Top clientes de todo o histórico
+            # Top clients all time
             stmt_always = (
                 select(
                     models.LogModel.nome_cliente,

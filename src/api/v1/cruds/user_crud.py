@@ -1,3 +1,7 @@
+"""
+CRUD operations for User model.
+"""
+
 from collections.abc import Sequence
 
 from argon2 import PasswordHasher
@@ -15,21 +19,34 @@ ph = PasswordHasher()
 
 
 class UserCrud:
+    """
+    Provides static methods for user-related database operations.
+    """
+
     @staticmethod
     async def create(db: AsyncSession, data: schemas.UserInSchema) -> models.UserModel:
-        # Update user password to a hash password
+        """
+        Create a new user.
+
+        Args:
+            db: Async database session.
+            data: User input schema containing user details.
+
+        Returns:
+            The newly created UserModel instance.
+
+        Raises:
+            HTTPException: 409 if the user already exists (integrity error).
+        """
         user_data = data.model_dump()
         user_data["senha"] = data.get_hash()
         new_user = models.UserModel(**user_data)
 
-        # Add new user to database
         db.add(new_user)
 
-        # Try to commit it
         try:
             await db.commit()
         except IntegrityError:
-            # If user already exists, the operation is reverted
             await db.rollback()
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT, detail="Usuário já existe"
@@ -44,13 +61,25 @@ class UserCrud:
     async def get_by(
         db: AsyncSession, id: PositiveInt | None = None, email: EmailStr | None = None
     ) -> models.UserModel | None:
-        # If id is provided, it's used in the query
+        """
+        Retrieve a user by ID or email.
+
+        Args:
+            db: Async database session.
+            id: User ID.
+            email: User email.
+
+        Returns:
+            The found UserModel instance, with group eagerly loaded.
+
+        Raises:
+            HTTPException: 400 if neither id nor email is provided.
+            HTTPException: 404 if the user does not exist.
+        """
         if id is not None:
             stmt = select(models.UserModel).where(models.UserModel.id == id)
-        # If email is provided, it's used in the query
         elif email is not None:
             stmt = select(models.UserModel).where(models.UserModel.email == email)
-        # If neither is provided, it's raised bad request
         else:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST, detail="Forneça id ou email"
@@ -60,7 +89,6 @@ class UserCrud:
 
         user = (await db.execute(stmt)).scalar_one_or_none()
 
-        # Raise a not found if no user is found
         if user is None:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Usuário inexistente"
@@ -79,26 +107,37 @@ class UserCrud:
         group_id: PositiveInt | None = None,
         group_name: str | None = None,
     ) -> tuple[NonNegativeInt, Sequence[models.UserModel]]:
+        """
+        Retrieve users with optional filters and pagination.
+
+        Args:
+            db: Async database session.
+            page: Page number (1-based).
+            items_per_page: Number of items per page.
+            name: Filter by user name (partial match).
+            email: Filter by email (partial match).
+            active: Filter by active status.
+            group_id: Filter by group ID.
+            group_name: Filter by group name (partial match).
+
+        Returns:
+            A tuple with total number of matching users and the paginated sequence.
+        """
         stmt = select(models.UserModel)
         count_stmt = select(func.count(models.UserModel.id))
 
-        # Filter and count by name
         if name is not None:
             stmt = stmt.where(models.UserModel.nome.ilike(f"%{name}%"))
             count_stmt = count_stmt.where(models.UserModel.nome.ilike(f"%{name}%"))
-        # Filter and count by e-mail
         if email is not None:
             stmt = stmt.where(models.UserModel.email.ilike(f"%{email}%"))
             count_stmt = count_stmt.where(models.UserModel.email.ilike(f"%{email}%"))
-        # Filter and count by status
         if active is not None:
             stmt = stmt.where(models.UserModel.ativo == active)
             count_stmt = count_stmt.where(models.UserModel.ativo == active)
-        # Filter and count by id
         if group_id is not None:
             stmt = stmt.where(models.UserModel.id_grupo == group_id)
             count_stmt = count_stmt.where(models.UserModel.id_grupo == group_id)
-        # Filter and count by group name
         if group_name is not None:
             stmt = stmt.join(models.UserModel.grupo).where(
                 models.GroupModel.nome.ilike(f"%{group_name}%")
@@ -109,43 +148,43 @@ class UserCrud:
 
         stmt = stmt.options(selectinload(models.UserModel.grupo))
 
-        # Total items for meta info
         total_items = (await db.execute(count_stmt)).scalar()
         total_items = total_items if total_items is not None else 0
 
-        # Ordering
-        # Ordering should be before pagination
-        # Asc is default, but it's good to be explicit
         stmt = stmt.order_by(models.UserModel.id.asc())
 
-        # Pagination
         offset = (page - 1) * items_per_page
         stmt = stmt.offset(offset).limit(items_per_page)
 
-        # Users
         users = (await db.execute(stmt)).scalars().all()
         return total_items, users
 
     @staticmethod
     async def del_by_id(db: AsyncSession, id: PositiveInt) -> None:
-        # Retrieve the current user by id
+        """
+        Delete a user by ID.
+
+        Args:
+            db: Async database session.
+            id: User ID.
+
+        Raises:
+            HTTPException: 404 if the user does not exist.
+            HTTPException: 500 if a database error occurs.
+        """
         stmt = select(models.UserModel).where(models.UserModel.id == id)
         user = (await db.execute(stmt)).scalar_one_or_none()
 
-        # Raise not found if no user exists with the given id
         if user is None:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Usuário inexistente"
             )
 
-        # Delete the user instance (marked for deletion, not yet committed)
         await db.delete(user)
 
-        # Attempt to commit the deletion
         try:
             await db.commit()
         except SQLAlchemyError:
-            # Rollback to leave the session in a clean state
             await db.rollback()
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -158,7 +197,20 @@ class UserCrud:
     async def toggle_status_by_id(
         db: AsyncSession, id: PositiveInt
     ) -> models.UserModel | None:
-        # Retrieve the current user by id
+        """
+        Toggle the active status of a user by ID.
+
+        Args:
+            db: Async database session.
+            id: User ID.
+
+        Returns:
+            The updated UserModel instance.
+
+        Raises:
+            HTTPException: 404 if the user does not exist.
+            HTTPException: 500 if a database error occurs.
+        """
         stmt = (
             select(models.UserModel)
             .where(models.UserModel.id == id)
@@ -166,7 +218,6 @@ class UserCrud:
         )
         user = (await db.execute(stmt)).scalar_one_or_none()
 
-        # Raise not found if no user exists with the given id
         if user is None:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Usuário inexistente"
@@ -174,18 +225,15 @@ class UserCrud:
 
         user.ativo = not bool(user.ativo)  # type: ignore
 
-        # Attempt to commit the change
         try:
             await db.commit()
         except SQLAlchemyError:
-            # Rollback to leave the session in a clean state
             await db.rollback()
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Erro desconhecido no banco de dados",
             )
 
-        # Refresh the instance to load any database-generated defaults or updates
         await db.refresh(user)
         await websockets.user_manager.broadcast()
 
@@ -195,7 +243,21 @@ class UserCrud:
     async def update_pass_by_id(
         db: AsyncSession, id: PositiveInt, new_pass: str
     ) -> models.UserModel:
-        # Retrieve the current user by id
+        """
+        Update a user's password by ID.
+
+        Args:
+            db: Async database session.
+            id: User ID.
+            new_pass: New plaintext password.
+
+        Returns:
+            The updated UserModel instance.
+
+        Raises:
+            HTTPException: 404 if the user does not exist.
+            HTTPException: 500 if a database error occurs.
+        """
         stmt = (
             select(models.UserModel)
             .where(models.UserModel.id == id)
@@ -203,7 +265,6 @@ class UserCrud:
         )
         user = (await db.execute(stmt)).scalar_one_or_none()
 
-        # Raise not found if no user exists with the given id
         if user is None:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Usuário inexistente"
@@ -211,18 +272,15 @@ class UserCrud:
 
         user.senha = ph.hash(password=new_pass)  # type: ignore
 
-        # Attempt to commit the change
         try:
             await db.commit()
         except SQLAlchemyError:
-            # Rollback to leave the session in a clean state
             await db.rollback()
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Erro desconhecido no banco de dados",
             )
 
-        # Refresh the instance to load any database-generated defaults or updates
         await db.refresh(user)
 
         return user

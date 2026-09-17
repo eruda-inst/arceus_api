@@ -1,9 +1,17 @@
+"""
+Pydantic schemas for contract-related responses.
+"""
+
 from pydantic import BaseModel, Field, NonNegativeInt, PositiveInt, field_serializer
 
 from .. import utils
 
 
 class InternetStatusOutSchema(BaseModel):
+    """
+    Response schema for internet access status.
+    """
+
     status_acesso: utils.InternetStatusCode = Field(
         description="Status de acesso", examples=[utils.InternetStatusLabel.ACTIVE]
     )
@@ -28,7 +36,11 @@ class InternetStatusOutSchema(BaseModel):
 
 
 class ContractOutSchema(BaseModel):
-    # IDs NonNegativeInt, pois o IXC é quebrado
+    """
+    Response schema for contract details.
+    """
+
+    # IDs NonNegativeInt, because IXC
     id: NonNegativeInt = Field(description="ID do contrato", examples=[1])
     id_login: NonNegativeInt | None = Field(description="ID do login", examples=[12])
     id_cliente: NonNegativeInt = Field(description="ID do cliente", examples=[123])
@@ -94,7 +106,11 @@ class ContractOutSchema(BaseModel):
 
 
 class VillageContractOutSchema(BaseModel):
-    # IDs NonNegativeInt, pois o IXC é quebrado
+    """
+    Response schema for village contract details (subset).
+    """
+
+    # IDs NonNegativeInt, because IXC
     id: NonNegativeInt = Field(description="ID do contrato", examples=[1])
     id_login: NonNegativeInt = Field(description="ID do login", examples=[12])
     id_cliente: NonNegativeInt = Field(description="ID do cliente", examples=[123])

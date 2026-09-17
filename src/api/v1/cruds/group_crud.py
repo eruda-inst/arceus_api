@@ -1,3 +1,7 @@
+"""
+CRUD operations for Group model.
+"""
+
 from collections.abc import Sequence
 
 from fastapi import HTTPException, status
@@ -10,6 +14,10 @@ from .. import models
 
 
 class GroupCrud:
+    """
+    Provides static methods for group-related database operations.
+    """
+
     @staticmethod
     async def get_by(
         db: AsyncSession,
@@ -18,13 +26,27 @@ class GroupCrud:
         user_id: PositiveInt | None = None,
         load_perms: bool = False,
     ) -> models.GroupModel:
-        # If id is provided, filter by it
+        """
+        Retrieve a single group by id, name, or user id.
+
+        Args:
+            db: Async database session.
+            id: Group ID to search for.
+            name: Group name to search for.
+            user_id: User ID to find the associated group.
+            load_perms: If True, eagerly load the group's permissions.
+
+        Returns:
+            The found GroupModel instance.
+
+        Raises:
+            HTTPException: 400 if no search parameter is provided.
+            HTTPException: 404 if the group does not exist.
+        """
         if id is not None:
             stmt = select(models.GroupModel).where(models.GroupModel.id == id)
-        # If name is provided, filter by it
         elif name is not None:
             stmt = select(models.GroupModel).where(models.GroupModel.nome == name)
-        # If user_id is provided, filter by it
         elif user_id is not None:
             stmt = (
                 select(models.GroupModel)
@@ -33,20 +55,17 @@ class GroupCrud:
                 )
                 .where(models.UserModel.id == user_id)
             )
-        # Raise a bad request if no param is provided
         else:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Forneça id, nome ou id_usuario",
             )
 
-        # If load_perms is True, load the group's perms
         if load_perms:
             stmt = stmt.options(selectinload(models.GroupModel.permissoes))
 
         group = (await db.execute(stmt)).scalar_one_or_none()
 
-        # Raise a not found if no group is found
         if group is None:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Grupo inexistente"
@@ -58,7 +77,15 @@ class GroupCrud:
     async def get_all(
         db: AsyncSession,
     ) -> tuple[NonNegativeInt, Sequence[models.GroupModel]]:
-        # Asc is default, but it's good to be explicit
+        """
+        Retrieve all groups ordered by ID.
+
+        Args:
+            db: Async database session.
+
+        Returns:
+            A tuple containing the total count of groups and a sequence of GroupModel instances.
+        """
         stmt = select(models.GroupModel).order_by(models.GroupModel.id.asc())
         groups = (await db.execute(stmt)).scalars().all()
 

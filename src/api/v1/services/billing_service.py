@@ -1,3 +1,7 @@
+"""
+Service for billing-related operations (overdue invoices).
+"""
+
 import datetime as dt
 from zoneinfo import ZoneInfo
 
@@ -8,14 +12,34 @@ from .. import clients, schemas, utils
 
 
 class BillingService:
+    """
+    Provides static methods for billing operations.
+    """
+
     @staticmethod
     async def get_overdue_invoices(
-        # IDs NonNegativeInt, pois o IXC é quebrado
+        # IDs NonNegativeInt, because IXC
         contract_id: NonNegativeInt,
         page: PositiveInt,
         items_per_page: PositiveInt,
     ) -> schemas.ListOutSchema[schemas.InvoiceOutSchema]:
-        # --- Obtém contrato ---
+        """
+        Retrieve overdue invoices for a given contract.
+
+        Overdue means the invoice's due date is before today's date.
+
+        Args:
+            contract_id: Contract ID in IXC.
+            page: Page number for pagination.
+            items_per_page: Items per page.
+
+        Returns:
+            A ListOutSchema of InvoiceOutSchema containing only overdue invoices.
+
+        Raises:
+            HTTPException: 404 if the contract does not exist.
+        """
+        # --- Get contract ---
         endpoint = "cliente_contrato"
         grid_param = [utils.Param(TB="cliente_contrato.id", P=contract_id)]
         res = await clients.IxcClient.get(endpoint=endpoint, grid_param=grid_param)
@@ -25,7 +49,7 @@ class BillingService:
             )
         contract = regs[0]
 
-        # --- Obtém faturas Abertas ---
+        # --- Get open invoices ---
         endpoint = "fn_areceber"
         grid_param = [
             utils.Param(TB="fn_areceber.id_contrato", P=contract_id),
@@ -42,22 +66,19 @@ class BillingService:
 
         partial_overdue_invoices: list[schemas.InvoiceOutSchema] = []
 
-        # Data de hoje
         timezone = ZoneInfo("America/Bahia")
         now = dt.datetime.now(tz=timezone)
         today_date = now.date()
         iso_today_date = today_date.isoformat()  # YYYY-MM-DD
 
-        # Iteração entre faturas abertas
         for open_invoice in open_invoices:
             data_vencimento_iso = open_invoice["data_vencimento"]  # YYYY-MM-DD
 
-            # Pula faturas não vencidas
-            # Datas em formato ISO podem ser comparadas como comparações convencionais entre strings
+            # Skip invoices that are not yet overdue
             if iso_today_date <= data_vencimento_iso:
                 continue
 
-            # --- Obtém contrato ---
+            # --- Get contract ---
             endpoint = "cliente_contrato"
             id_contrato = open_invoice["id_contrato"]
             grid_param = [utils.Param(TB="cliente_contrato.id", P=id_contrato)]
@@ -69,7 +90,6 @@ class BillingService:
                 )
             contract = regs[0]
 
-            # Faturas vencidas parciais
             partial_overdue_invoices.append(
                 schemas.InvoiceOutSchema(
                     id=open_invoice["id"],

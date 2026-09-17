@@ -1,3 +1,9 @@
+"""
+Router for authentication endpoints.
+
+Provides login, logout, token refresh, and current user retrieval.
+"""
+
 from typing import Annotated
 
 from fastapi import APIRouter, Body, Depends, status
@@ -7,6 +13,7 @@ from .. import db, deps, models, schemas, services
 
 auth_router = APIRouter(prefix="/autenticacao", tags=["Autenticação"])
 
+# Dependency aliases
 DbDep = Annotated[AsyncSession, Depends(dependency=db.get_db)]
 CurrUserDep = Annotated[models.UserModel, Depends(dependency=deps.get_curr_user)]
 
@@ -33,6 +40,7 @@ async def logout(
     """
     Invalida token de usuário autenticado
     """
+    # Increment the token version to invalidate all existing tokens for this user
     curr_user.versao_token += 1  # type: ignore
     await db.commit()
 

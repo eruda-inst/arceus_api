@@ -1,7 +1,14 @@
+"""
+API v1 router aggregator.
+
+Mounts all HTTP routers and WebSocket routers under the `/api/v1` prefix.
+"""
+
 from fastapi import APIRouter
 
 from . import routers, websockets
 
+# Main API v1 router with the versioned prefix
 api_v1_router = APIRouter(prefix="/api/v1")
 
 # HTTP department routers

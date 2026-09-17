@@ -1,3 +1,9 @@
+"""
+Service for authentication-related operations.
+
+Handles JWT token verification, refresh, and login.
+"""
+
 from datetime import datetime, timedelta
 from typing import Any
 from zoneinfo import ZoneInfo
@@ -11,6 +17,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from .. import cruds, models, schemas
 from ..config import settings
 
+# JWT configuration constants
 ALGORITHM = "HS256"
 SECRET_KEY = settings.secret_key.get_secret_value()
 TOKEN_EXPIRE_MINUTES = settings.token_expire_minutes
@@ -19,10 +26,32 @@ TOKEN_EXPIRE_SECONDS = settings.token_expire_seconds
 
 
 class AuthService:
+    """
+    Provides static/class methods for authentication operations.
+    """
+
     @staticmethod
     async def verify_access_token(
         db: AsyncSession, access_token: str
     ) -> models.UserModel:
+        """
+        Verify an access token and return the associated user.
+
+        Checks the token signature, expiration, subject (email), token version,
+        and whether the user is active.
+
+        Args:
+            db: Async database session.
+            access_token: The JWT access token to verify.
+
+        Returns:
+            The authenticated UserModel instance.
+
+        Raises:
+            HTTPException: 401 for invalid/expired tokens or revoked versions.
+            HTTPException: 403 if the user is inactive.
+            HTTPException: 500 on database errors.
+        """
         try:
             payload = jwt.decode(
                 token=access_token, key=SECRET_KEY, algorithms=[ALGORITHM]
@@ -43,6 +72,7 @@ class AuthService:
             if not user:
                 raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Usuário inexistente")
 
+            # Ensure the token version matches the current user version
             if user.versao_token != version_from_token:
                 raise HTTPException(
                     status.HTTP_401_UNAUTHORIZED, "Token revogado (logout realizado)"
@@ -64,6 +94,20 @@ class AuthService:
     async def refresh_token(
         cls, refresh_token: str, db: AsyncSession
     ) -> schemas.AccessTokenOutSchema:
+        """
+        Refresh an access token using a valid refresh token.
+
+        Args:
+            refresh_token: The JWT refresh token.
+            db: Async database session.
+
+        Returns:
+            A new AccessTokenOutSchema with a fresh access and refresh token.
+
+        Raises:
+            HTTPException: 401 for invalid/expired/revoked refresh tokens.
+            HTTPException: 403 if the user is inactive.
+        """
         try:
             payload = jwt.decode(
                 token=refresh_token, key=SECRET_KEY, algorithms=[ALGORITHM]
@@ -99,6 +143,7 @@ class AuthService:
             raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Refresh token inválido")
 
         data = {"sub": email}
+        # Issue a new pair of access and refresh tokens
         new_access_token = cls._create_token(
             data=data,
             expires_delta=timedelta(minutes=TOKEN_EXPIRE_MINUTES),
@@ -119,6 +164,22 @@ class AuthService:
     async def login(
         cls, db: AsyncSession, user: schemas.UserLoginSchema
     ) -> schemas.AccessTokenOutSchema:
+        """
+        Authenticate a user and return access/refresh tokens.
+
+        Args:
+            db: Async database session.
+            user: Login credentials (email and password).
+
+        Returns:
+            AccessTokenOutSchema containing the tokens and expiry.
+
+        Raises:
+            HTTPException: 401 for wrong credentials.
+            HTTPException: 403 if the user is inactive.
+            HTTPException: 422 for validation errors.
+            HTTPException: 500 on database errors.
+        """
         try:
             email = user.email
             plain = user.senha.get_secret_value()
@@ -169,6 +230,17 @@ class AuthService:
     def _create_token(
         data: dict[str, Any], expires_delta: timedelta, version: int
     ) -> str:
+        """
+        Create a signed JWT token.
+
+        Args:
+            data: Base claims to include in the token (e.g., subject).
+            expires_delta: Time delta until the token expires.
+            version: Token version to embed for revocation checks.
+
+        Returns:
+            The encoded JWT string.
+        """
         to_encode = data.copy()
         to_encode["ver"] = version
         expire = datetime.now(ZoneInfo("America/Bahia")) + expires_delta

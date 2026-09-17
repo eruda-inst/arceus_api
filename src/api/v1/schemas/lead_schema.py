@@ -1,3 +1,7 @@
+"""
+Pydantic schemas for lead-related requests and responses.
+"""
+
 from pydantic import (
     BaseModel,
     EmailStr,
@@ -11,6 +15,10 @@ from .. import utils
 
 
 class LeadOutSchema(BaseModel):
+    """
+    Response schema for a lead.
+    """
+
     id: NonNegativeInt = Field(description="ID do lead", examples=[1])
     ativo: utils.YesNoCode = Field(
         description="Indica se o lead está ativo",
@@ -36,7 +44,7 @@ class LeadOutSchema(BaseModel):
     nome: str = Field(description="Nome do cliente", examples=["João"])
     data_nascimento: str = Field(
         description="Data de nascimento do cliente",
-        # Não pode haver isto, pois o IXC é quebrado
+        # We can't put this, because IXC
         # min_length=10,  # DD/MM/AAAA
         # max_length=10,  # DD/MM/AAAA
         examples=["DD/MM/AAAA"],
@@ -130,6 +138,10 @@ class LeadOutSchema(BaseModel):
 
 
 class LeadUpdateSchema(BaseModel):
+    """
+    Input schema for partially updating a lead.
+    """
+
     ativo: utils.YesNoCode | None = Field(
         default=None,
         min_length=1,  # S
@@ -252,6 +264,10 @@ class LeadUpdateSchema(BaseModel):
 
 
 class LeadInSchema(BaseModel):
+    """
+    Input schema for creating a new lead.
+    """
+
     ativo: utils.YesNoCode | None = Field(
         default=utils.YesNoCode.YES,
         min_length=1,  # S
@@ -283,7 +299,7 @@ class LeadInSchema(BaseModel):
     nome: str = Field(description="Nome do cliente", examples=["Nome do Cliente"])
     data_nascimento: str = Field(
         description="Data de nascimento",
-        # Não pode haver isto, pois o IXC é quebrado
+        # We can't put this, because IXC
         # min_length=10,  # DD/MM/AAAA
         # max_length=10,  # DD/MM/AAAA
         examples=["DD/MM/AAAA"],
@@ -373,4 +389,8 @@ class LeadInSchema(BaseModel):
 
 
 class LeadCreateSchema(BaseModel):
+    """
+    Response schema for a newly created lead.
+    """
+
     id: NonNegativeInt = Field(description="ID do lead criado", examples=[42])

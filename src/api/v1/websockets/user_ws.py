@@ -1,3 +1,10 @@
+"""
+WebSocket router for streaming user data.
+
+Provides a WebSocket endpoint that allows clients to subscribe to user list
+updates with optional filters and pagination.
+"""
+
 from dataclasses import dataclass
 from typing import Annotated, Any
 
@@ -13,12 +20,14 @@ user_ws_router = APIRouter(prefix="/usuarios-ws", tags=["Usuários WS"])
 
 
 class Params(BaseModel):
-    # Pagination
+    """
+    Input schema for user stream filters and pagination.
+    """
+
     pagina: PositiveInt | None = Field(default=1, ge=1, description="Número da página")
     itens_por_pagina: PositiveInt | None = Field(
         default=10, ge=1, description="Itens por página"
     )
-    # Filters
     nome: str | None = Field(
         default=None, description="Filtro parcial por nome do usuário"
     )
@@ -33,33 +42,69 @@ class Params(BaseModel):
 
 @dataclass
 class Connection:
+    """
+    Represents a single active WebSocket connection with its current filter params.
+    """
+
     socket: WebSocket
     params: Params
 
 
 class ConnectionManager:
+    """
+    Manages active WebSocket connections for the user stream, supporting
+    unicast (initial/per-connection updates) and broadcast (fan-out updates).
+    """
+
     def __init__(self) -> None:
         self.active_connections: list[Connection] = []
 
     def connect(self, ws: WebSocket, params: Params) -> None:
+        """
+        Register a new WebSocket connection with its initial parameters.
+
+        Args:
+            ws: The WebSocket instance.
+            params: Initial filter/pagination parameters.
+        """
         instance = Connection(socket=ws, params=params)
 
         if instance not in self.active_connections:
             self.active_connections.append(instance)
 
     def disconnect(self, ws: WebSocket) -> None:
+        """
+        Remove a WebSocket connection from the active list.
+
+        Args:
+            ws: The WebSocket instance to remove.
+        """
         for active_connection in self.active_connections:
             if active_connection.socket == ws:
                 self.active_connections.remove(active_connection)
                 break
 
     def change_params(self, ws: WebSocket, params: Params) -> None:
+        """
+        Update the filter/pagination parameters for a given connection.
+
+        Args:
+            ws: The WebSocket instance.
+            params: New parameters to apply.
+        """
         for active_connection in self.active_connections:
             if active_connection.socket is ws:
                 active_connection.params = params
                 break
 
     async def unicast(self, db: AsyncSession, ws: WebSocket) -> None:
+        """
+        Send a filtered, paginated user list to a single connection.
+
+        Args:
+            db: Async database session.
+            ws: The WebSocket instance to send data to.
+        """
         for a_c in self.active_connections:
             socket, params = a_c.socket, a_c.params
 
@@ -90,7 +135,14 @@ class ConnectionManager:
                 break
 
     async def broadcast(self) -> None:
+        """
+        Recompute and send filtered/paginated users to every active connection.
+
+        Filtering is applied in-memory after loading all users (for simplicity
+        and to support many simultaneous filter combinations).
+        """
         async with db.AsyncSessionLocal() as session:
+            # Eagerly load groups to avoid lazy-loading issues
             stmt = select(models.UserModel).options(joinedload(models.UserModel.grupo))
             result = await session.execute(stmt)
             users = result.unique().scalars().all()
@@ -105,6 +157,7 @@ class ConnectionManager:
                 params = a_c.params
                 filtered = all_dicts[:]
 
+                # Apply text filters (case-insensitive, partial match)
                 if params.nome:
                     search = params.nome.lower()
                     filtered = [d for d in filtered if search in d["nome"].lower()]
@@ -119,6 +172,7 @@ class ConnectionManager:
                         d for d in filtered if search in d["nome_grupo"].lower()
                     ]
 
+                # Paginate the filtered results
                 page = params.pagina or 1
                 items_per_page = params.itens_por_pagina or 10
                 total_items = len(filtered)
@@ -146,6 +200,13 @@ user_manager = ConnectionManager()
 
 @user_ws_router.websocket(path="/")
 async def get(db: Annotated[AsyncSession, Depends(db.get_db)], ws: WebSocket) -> None:
+    """
+    WebSocket endpoint for streaming users.
+
+    The client sends an initial JSON payload with filter/pagination parameters,
+    receives an initial snapshot, and can send further payloads to update
+    the filters. Any invalid payload receives a validation error.
+    """
     await ws.accept()
 
     try:
@@ -167,6 +228,7 @@ async def get(db: Annotated[AsyncSession, Depends(db.get_db)], ws: WebSocket) ->
         user_manager.disconnect(ws=ws)
         return
 
+    # Main loop: receive new parameters and re-send the filtered snapshot
     while True:
         try:
             raw = await ws.receive_json()

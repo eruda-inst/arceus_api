@@ -1,7 +1,15 @@
+"""
+Enumerations for permission names and codes.
+"""
+
 from enum import StrEnum
 
 
 class PermNames(StrEnum):
+    """
+    Human-readable permission names.
+    """
+
     READ_METRIC = "Ver métricas"
     READ_LOG = "Ver logs"
     CREATE_USER = "Criar usuários"
@@ -11,6 +19,10 @@ class PermNames(StrEnum):
 
 
 class PermCodes(StrEnum):
+    """
+    Permission codes used for authorization checks.
+    """
+
     READ_METRIC = "ver:metricas"
     READ_LOG = "ver:logs"
     CREATE_USER = "criar:usuarios"

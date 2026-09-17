@@ -1,3 +1,7 @@
+"""
+Router for triage endpoints.
+"""
+
 from typing import Annotated
 
 from fastapi import APIRouter, Body, Depends

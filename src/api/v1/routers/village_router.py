@@ -1,3 +1,7 @@
+"""
+Router for village (Vila) endpoints.
+"""
+
 from typing import Annotated
 
 from fastapi import APIRouter, Body, Depends, Path, Query
@@ -8,6 +12,7 @@ from .. import deps, schemas, services
 village_router = APIRouter(prefix="/vila", tags=["Vila"])
 
 
+# Query parameter aliases
 NumeroResidencia = Annotated[int, Query(ge=1, description="Número da residência")]
 Pppoe = Annotated[str, Query(description="PPPOE associado ao cliente")]
 # IDs NonNegativeInt, because IXC

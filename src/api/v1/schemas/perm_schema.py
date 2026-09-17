@@ -1,9 +1,17 @@
+"""
+Pydantic schemas for permission-related responses.
+"""
+
 from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, Field, PositiveInt
 
 
 class PermOutSchema(BaseModel):
+    """
+    Response schema for a permission.
+    """
+
     model_config = ConfigDict(from_attributes=True)
 
     id: PositiveInt = Field(ge=1, description="ID da permissão", examples=[1])

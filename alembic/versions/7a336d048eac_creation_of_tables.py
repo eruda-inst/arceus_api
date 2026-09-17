@@ -20,7 +20,7 @@ depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:
-    # Grupos
+    # Groups
     op.create_table(
         "grupos",
         sa.Column(
@@ -43,7 +43,7 @@ def upgrade() -> None:
         ),
         if_not_exists=True,
     )
-    # Permissões
+    # Perms
     op.create_table(
         "permissoes",
         sa.Column(
@@ -67,7 +67,7 @@ def upgrade() -> None:
         ),
         if_not_exists=True,
     )
-    # Grupos permissões
+    # Groups and perms
     op.create_table(
         "grupos_permissoes",
         sa.Column("group_id", sa.Integer(), nullable=True, index=False, unique=False),
@@ -76,7 +76,7 @@ def upgrade() -> None:
         ),
         if_not_exists=True,
     )
-    # Usuários
+    # Users
     op.create_table(
         "usuarios",
         sa.Column(

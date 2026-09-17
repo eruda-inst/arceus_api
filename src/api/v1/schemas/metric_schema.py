@@ -1,3 +1,7 @@
+"""
+Pydantic schemas for metric-related responses.
+"""
+
 from typing import Annotated
 
 from pydantic import BaseModel, Field, NonNegativeInt, PlainSerializer
@@ -11,6 +15,10 @@ Round2Schema = Annotated[
 
 
 class TopEndpointSchema(BaseModel):
+    """
+    Schema for top endpoints by request count.
+    """
+
     endpoint: str = Field(
         description="Endpoint da requisição", examples=["/suporte/status_conexao"]
     )
@@ -20,6 +28,10 @@ class TopEndpointSchema(BaseModel):
 
 
 class TopStatusCodeSchema(BaseModel):
+    """
+    Schema for top HTTP status codes by response count.
+    """
+
     status_code: NonNegativeInt = Field(
         description="Código HTTP da resposta", examples=[200], ge=0
     )
@@ -29,6 +41,10 @@ class TopStatusCodeSchema(BaseModel):
 
 
 class TopHourSchema(BaseModel):
+    """
+    Schema for top hours by request count.
+    """
+
     hora: NonNegativeInt = Field(description="Hora da requisição", examples=[13], ge=0)
     total_requisicoes: NonNegativeInt = Field(
         description="Quantidade de requisições", ge=0, examples=[12]
@@ -36,6 +52,10 @@ class TopHourSchema(BaseModel):
 
 
 class TopWeekdaySchema(BaseModel):
+    """
+    Schema for top weekdays by request count.
+    """
+
     dia_semana: str = Field(description="Dia da semana da requisição", examples=["Sáb"])
     total_requisicoes: NonNegativeInt = Field(
         description="Quantidade de requisições", ge=0, examples=[12]
@@ -43,6 +63,10 @@ class TopWeekdaySchema(BaseModel):
 
 
 class TopWorstEndpointSchema(BaseModel):
+    """
+    Schema for endpoints with the most errors.
+    """
+
     endpoint: str = Field(
         description="Endpoint da requisição", examples=["/suporte/status_conexao"]
     )
@@ -52,6 +76,10 @@ class TopWorstEndpointSchema(BaseModel):
 
 
 class TopMonthDaySchema(BaseModel):
+    """
+    Schema for top days of the month by request count.
+    """
+
     dia_mes: NonNegativeInt = Field(
         description="Dia do mês (1-31)", examples=[15], ge=1, le=31
     )
@@ -61,6 +89,10 @@ class TopMonthDaySchema(BaseModel):
 
 
 class TopSlowestEndpointSchema(BaseModel):
+    """
+    Schema for slowest endpoints by average duration.
+    """
+
     endpoint: str = Field(
         description="Endpoint da requisição", examples=["/suporte/status_conexao"]
     )
@@ -71,6 +103,10 @@ class TopSlowestEndpointSchema(BaseModel):
 
 
 class TopHttpMethodSchema(BaseModel):
+    """
+    Schema for top HTTP methods by request count.
+    """
+
     metodo_http: str = Field(description="Método HTTP", examples=["GET"])
     total_requisicoes: NonNegativeInt = Field(
         description="Quantidade de requisições", ge=0, examples=[120]
@@ -78,6 +114,10 @@ class TopHttpMethodSchema(BaseModel):
 
 
 class TopDepartmentSchema(BaseModel):
+    """
+    Schema for top departments by request count.
+    """
+
     setor: str = Field(
         description="Setor/departamento responsável pela requisição",
         examples=["Financeiro", "Suporte"],
@@ -88,6 +128,10 @@ class TopDepartmentSchema(BaseModel):
 
 
 class SuccessStatsSchema(BaseModel):
+    """
+    Schema for success statistics.
+    """
+
     total: NonNegativeInt = Field(description="Total de requisições bem-sucedidas")
     percentual: Round2Schema = Field(
         description="Percentual de sucesso (0 a 100)", ge=0, le=100
@@ -95,6 +139,10 @@ class SuccessStatsSchema(BaseModel):
 
 
 class ErrorStatsSchema(BaseModel):
+    """
+    Schema for error statistics.
+    """
+
     total: NonNegativeInt = Field(description="Total de requisições malsucedidas")
     percentual: Round2Schema = Field(
         description="Percentual de erro (0 a 100)", ge=0, le=100
@@ -102,6 +150,10 @@ class ErrorStatsSchema(BaseModel):
 
 
 class ResponseTimeStatsSchema(BaseModel):
+    """
+    Schema for response time statistics (min, avg, max).
+    """
+
     min: Round3Schema = Field(
         description="Menor duração (em segundos)", examples=[0.045]
     )
@@ -114,6 +166,10 @@ class ResponseTimeStatsSchema(BaseModel):
 
 
 class TopClientNameSchema(BaseModel):
+    """
+    Schema for top client names by request count.
+    """
+
     nome_cliente: str | None = Field(
         default=None, description="Nome completo do cliente", examples=["John Doe"]
     )

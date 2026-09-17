@@ -35,8 +35,8 @@ DEL_USER_CODE = PermCodes.DEL_USER.value
 
 def upgrade() -> None:
     # ------------------------------------------------------------------
-    # 1. ANALISTA
-    # Regra: Ver métricas + ver logs
+    # 1. ANALIST
+    # Rule: read metrics + read logs
     # ------------------------------------------------------------------
     op.execute(
         sa.text("""
@@ -71,8 +71,8 @@ def upgrade() -> None:
         )
     )
     # ------------------------------------------------------------------
-    # 2. ADMINISTRADOR
-    # Regra: Ver métricas + Ver logs + CRUD usuários
+    # 2. ADMIN
+    # Rule: read metrics + read logs + CRUD users
     # ------------------------------------------------------------------
     op.execute(
         sa.text("""

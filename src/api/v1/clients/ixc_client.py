@@ -1,3 +1,9 @@
+"""
+Client for the IXC API using Basic Authentication.
+
+Provides an asynchronous HTTP client for making requests to IXC endpoints.
+"""
+
 import base64
 import json
 from http import HTTPMethod
@@ -20,31 +26,22 @@ from .. import config, utils
 
 
 class IxcClient:
-    """Client for interacting with the IXC API."""
+    """
+    Async HTTP client for the IXC API.
 
-    # Timeout configuration applied to the shared HTTP client.
+    Uses Basic Authentication with a pre-encoded token.
+    """
+
     _timeout: ClassVar[Timeout] = Timeout(connect=5.0, read=30.0, write=10.0, pool=1.0)
-
-    # Transport with automatic retries for transient network failures.
     _transport: ClassVar[AsyncHTTPTransport] = AsyncHTTPTransport(retries=3)
-
-    # Shared AsyncClient instance. Reusing it enables connection pooling.
     _async_client: ClassVar[AsyncClient] = AsyncClient(
         timeout=_timeout, transport=_transport
     )
-
-    # API access token loaded from settings.
     _token: ClassVar[str] = config.settings.ixc_access_token.get_secret_value()
-
-    # Base64-encoded token used for HTTP Basic authentication.
     _token_encoded: ClassVar[str] = base64.b64encode(_token.encode("utf-8")).decode(
         "utf-8"
     )
-
-    # Base URL used for all API requests.
     _base_api_url: ClassVar[str] = config.settings.ixc_base_api_url
-
-    # Default headers sent with every request, including basic authentication.
     _headers: ClassVar[Headers] = Headers(
         {"Content-Type": "application/json", "Authorization": f"Basic {_token_encoded}"}
     )
@@ -57,16 +54,31 @@ class IxcClient:
         payload: dict[str, Any] | None = None,
         include_ixcsoft: bool = False,
     ) -> dict[str, Any]:
-        """Send an authenticated request to an API endpoint."""
+        """
+        Send an authenticated request to an IXC API endpoint.
+
+        Args:
+            endpoint: API endpoint path.
+            method: HTTP method to use.
+            payload: JSON body for the request.
+            include_ixcsoft: If True, adds the 'ixcsoft: listar' header.
+
+        Returns:
+            Parsed JSON response as a dictionary.
+
+        Raises:
+            HTTPError: For HTTP-related errors.
+            InvalidURL: If the URL is invalid.
+            CookieConflict: If a cookie conflict occurs.
+            StreamError: For stream-related errors.
+        """
         try:
-            # Copy the default headers so per-request modifications don't mutate them.
             headers = cls._headers.copy()
 
-            # The IXC API requires the "ixcsoft: listar" header for list endpoints.
+            # Add the special header required for listing endpoints
             if include_ixcsoft:
                 headers["ixcsoft"] = "listar"
 
-            # Build the full endpoint URL and perform the request.
             url = URL(f"{cls._base_api_url}/{endpoint}")
 
             res = await cls._async_client.request(
@@ -75,7 +87,6 @@ class IxcClient:
             res.raise_for_status()
             return res.json()
 
-        # Normalize low-level httpx errors with clearer context.
         except HTTPError as exc:
             raise HTTPError(message=f"HTTPError: {exc}")
         except InvalidURL as exc:
@@ -87,17 +98,35 @@ class IxcClient:
 
     @classmethod
     async def aclose(cls) -> None:
-        """Close the shared AsyncClient and releases resources."""
+        """Close the underlying HTTP client session."""
         await cls._async_client.aclose()
 
     @classmethod
     async def post(cls, endpoint: str, payload: dict[str, Any]) -> dict[str, Any]:
-        """Perform an authenticated POST request to the given endpoint."""
+        """
+        Send a POST request to the IXC API.
+
+        Args:
+            endpoint: API endpoint path.
+            payload: JSON body for the request.
+
+        Returns:
+            Parsed JSON response.
+        """
         return await cls._make_request(endpoint=endpoint, payload=payload)
 
     @classmethod
     async def put(cls, endpoint: str, payload: dict[str, Any]) -> dict[str, Any]:
-        """Perform an authenticated PUT request to the given endpoint."""
+        """
+        Send a PUT request to the IXC API.
+
+        Args:
+            endpoint: API endpoint path.
+            payload: JSON body for the request.
+
+        Returns:
+            Parsed JSON response.
+        """
         return await cls._make_request(
             endpoint=endpoint, payload=payload, method=HTTPMethod.PUT
         )
@@ -111,11 +140,21 @@ class IxcClient:
         itens_por_pagina: PositiveInt | None = 10,
         sort_order: utils.SortOrder | None = utils.SortOrder.ASC,
     ) -> Any:
-        """Perform an authenticated GET request to the given list endpoint."""
-        # Serialize the grid parameters into the format expected by the IXC API.
+        """
+        Send a GET request to the IXC API with pagination and filtering.
+
+        Args:
+            endpoint: API endpoint path.
+            grid_param: List of filter parameters.
+            pagina: Page number (1-based).
+            itens_por_pagina: Number of items per page.
+            sort_order: Sort order (ASC or DESC).
+
+        Returns:
+            Parsed JSON response.
+        """
         grid_param_dict = [gp.model_dump() for gp in grid_param]
 
-        # Assemble the paginated list payload required by IXC "listar" endpoints.
         payload = {
             "grid_param": json.dumps(grid_param_dict),
             "page": str(pagina),
