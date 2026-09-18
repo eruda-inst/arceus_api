@@ -68,7 +68,7 @@ async def get_onu_status(
     id_login: IdLogin | None = None,
     mac_onu: Annotated[
         str | None,
-        Query(min_length=12, max_length=12, description="MAC Address da ONU."),
+        Query(description="MAC Address da ONU."),
     ] = None,
 ) -> schemas.OnuStatusOutSchema:
     """Obtém status de ONU de um cliente, através do ID de login ou MAC Address"""
