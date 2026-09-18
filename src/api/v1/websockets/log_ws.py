@@ -5,8 +5,8 @@ Provides a WebSocket endpoint that allows clients to subscribe to log updates
 with optional filters and pagination.
 """
 
+import datetime as dt
 from dataclasses import dataclass
-from datetime import date, time
 from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect, status
@@ -201,23 +201,23 @@ class ConnectionManager:
 
                 # Apply date range filters
                 if params.data_inicio:
-                    start_date = date.fromisoformat(params.data_inicio)
+                    start_date = dt.date.fromisoformat(params.data_inicio)
                     filtered = [
                         d for d in filtered if d["criado_em"].date() >= start_date
                     ]
                 if params.data_fim:
-                    end_date = date.fromisoformat(params.data_fim)
+                    end_date = dt.date.fromisoformat(params.data_fim)
                     filtered = [
                         d for d in filtered if d["criado_em"].date() <= end_date
                     ]
                 # Apply time range filters
                 if params.hora_inicio:
-                    start_time = time.fromisoformat(params.hora_inicio)
+                    start_time = dt.time.fromisoformat(params.hora_inicio)
                     filtered = [
                         d for d in filtered if d["criado_em"].time() >= start_time
                     ]
                 if params.hora_fim:
-                    end_time = time.fromisoformat(params.hora_fim)
+                    end_time = dt.time.fromisoformat(params.hora_fim)
                     filtered = [
                         d for d in filtered if d["criado_em"].time() <= end_time
                     ]

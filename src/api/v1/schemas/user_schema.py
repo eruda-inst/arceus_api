@@ -2,7 +2,7 @@
 Pydantic schemas for user-related requests and responses.
 """
 
-from datetime import datetime
+import datetime as dt
 
 from argon2 import PasswordHasher
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, PositiveInt, SecretStr
@@ -100,7 +100,7 @@ class UserOutSchema(BaseModel):
     nome: str = NomeField
     email: EmailStr = EmailField
     ativo: bool | None = AtivoField
-    criado_em: datetime = CriadoEmField
-    atualizado_em: datetime | None = AtualizadoEmField
+    criado_em: dt.datetime = CriadoEmField
+    atualizado_em: dt.datetime | None = AtualizadoEmField
     id_grupo: PositiveInt = IdGrupoField
     nome_grupo: str = NomeGrupoField

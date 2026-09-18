@@ -2,7 +2,7 @@
 Pydantic schemas for permission-related responses.
 """
 
-from datetime import datetime
+import datetime as dt
 
 from pydantic import BaseModel, ConfigDict, Field, PositiveInt
 
@@ -19,7 +19,7 @@ class PermOutSchema(BaseModel):
     codigo: str = Field(
         description="Código da permissão", examples=["codigo:permissao"]
     )
-    criado_em: datetime = Field(
+    criado_em: dt.datetime = Field(
         description="Data de criação da permissão",
         examples=["AAAA-MM-DD HH:MM:SS"],
     )

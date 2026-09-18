@@ -2,7 +2,7 @@
 Pydantic schemas for log entries.
 """
 
-from datetime import datetime
+import datetime as dt
 
 from pydantic import BaseModel, ConfigDict, Field, PositiveInt
 
@@ -41,6 +41,6 @@ class LogOutSchema(BaseModel):
     nome_cliente: str | None = Field(
         default=None, description="Nome do cliente", examples=["Nome do cliente"]
     )
-    criado_em: datetime = Field(
+    criado_em: dt.datetime = Field(
         description="Data de criação do grupo", examples=["AAAA-MM-DD HH:MM:SS"]
     )

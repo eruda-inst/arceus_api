@@ -2,8 +2,8 @@
 Service for financial operations (invoices, Pix, credentials, unlock).
 """
 
+import datetime as dt
 import statistics
-from datetime import date, datetime
 from typing import Any
 from zoneinfo import ZoneInfo
 

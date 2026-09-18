@@ -39,12 +39,12 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="Arceus",
     description="Integra com sistemas IXC, IXC ACS, Opa e 7AZ. Oferece autenticação, gestão de usuários e permissões, operações comerciais (contratos, leads), financeiras (faturas, cobrança), suporte (atendimentos, status de conexão), além de logs e métricas para monitoramento",
-    version="1.9.0",
+    version="1.9.1",
     routes=api_v1_router.routes,
     lifespan=lifespan,
 )
 
-# Enable CORS for all origins (adjust in production as needed)
+# Enable CORS for all origins
 app.add_middleware(
     middleware_class=CORSMiddleware,
     allow_origins=["*"],

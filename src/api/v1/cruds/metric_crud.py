@@ -2,7 +2,7 @@
 CRUD operations for aggregated metrics based on Log model.
 """
 
-from datetime import datetime, timedelta
+import datetime as dt
 from zoneinfo import ZoneInfo
 
 from fastapi import HTTPException, status
@@ -32,7 +32,7 @@ class MetricCrud:
         """
         try:
             timezone = ZoneInfo("America/Bahia")
-            today = datetime.now(tz=timezone).date()
+            today = dt.datetime.now(tz=timezone).date()
 
             # Count requests made today
             stmt_today = (
@@ -68,7 +68,7 @@ class MetricCrud:
         """
         try:
             timezone = ZoneInfo("America/Bahia")
-            today = datetime.now(tz=timezone).date()
+            today = dt.datetime.now(tz=timezone).date()
 
             success_filter = models.LogModel.codigo.between(200, 299)
 
@@ -127,7 +127,7 @@ class MetricCrud:
         """
         try:
             timezone = ZoneInfo("America/Bahia")
-            today = datetime.now(tz=timezone).date()
+            today = dt.datetime.now(tz=timezone).date()
 
             # Distinct protocols today
             stmt_today = (
@@ -171,7 +171,7 @@ class MetricCrud:
         """
         try:
             timezone = ZoneInfo("America/Bahia")
-            today = datetime.now(tz=timezone).date()
+            today = dt.datetime.now(tz=timezone).date()
 
             # Top endpoints today
             stmt_today = (
@@ -231,7 +231,7 @@ class MetricCrud:
         """
         try:
             timezone = ZoneInfo("America/Bahia")
-            today = datetime.now(tz=timezone).date()
+            today = dt.datetime.now(tz=timezone).date()
 
             # Top status codes today
             stmt_today = (
@@ -291,7 +291,7 @@ class MetricCrud:
         """
         try:
             timezone = ZoneInfo("America/Bahia")
-            today = datetime.now(tz=timezone).date()
+            today = dt.datetime.now(tz=timezone).date()
 
             # Top hours today
             stmt_today = (
@@ -351,7 +351,7 @@ class MetricCrud:
         """
         try:
             timezone = ZoneInfo("America/Bahia")
-            today = datetime.now(tz=timezone).date()
+            today = dt.datetime.now(tz=timezone).date()
             dow_map = {
                 0: "Dom",
                 1: "Seg",
@@ -364,8 +364,8 @@ class MetricCrud:
 
             # Calculate the start and end of the current week (Sunday to Saturday)
             days_since_sunday = (today.weekday() + 1) % 7
-            start_of_week = today - timedelta(days=days_since_sunday)
-            end_of_week = start_of_week + timedelta(days=6)
+            start_of_week = today - dt.timedelta(days=days_since_sunday)
+            end_of_week = start_of_week + dt.timedelta(days=6)
 
             # Weekday counts for current week
             stmt_today = (
@@ -428,7 +428,7 @@ class MetricCrud:
         """
         try:
             timezone = ZoneInfo("America/Bahia")
-            today = datetime.now(tz=timezone).date()
+            today = dt.datetime.now(tz=timezone).date()
 
             # Worst endpoints today
             stmt_today = (
@@ -504,7 +504,7 @@ class MetricCrud:
         """
         try:
             timezone = ZoneInfo("America/Bahia")
-            today = datetime.now(tz=timezone).date()
+            today = dt.datetime.now(tz=timezone).date()
 
             # Top days of current month
             stmt_today = (
@@ -568,7 +568,7 @@ class MetricCrud:
         """
         try:
             timezone = ZoneInfo("America/Bahia")
-            today = datetime.now(tz=timezone).date()
+            today = dt.datetime.now(tz=timezone).date()
 
             # Slowest endpoints today
             stmt_today = (
@@ -640,7 +640,7 @@ class MetricCrud:
         """
         try:
             timezone = ZoneInfo("America/Bahia")
-            today = datetime.now(tz=timezone).date()
+            today = dt.datetime.now(tz=timezone).date()
 
             # Top methods today
             stmt_today = (
@@ -702,7 +702,7 @@ class MetricCrud:
         """
         try:
             timezone = ZoneInfo("America/Bahia")
-            today = datetime.now(tz=timezone).date()
+            today = dt.datetime.now(tz=timezone).date()
 
             # Top departments today
             stmt_today = (
@@ -765,7 +765,7 @@ class MetricCrud:
         """
         try:
             timezone = ZoneInfo("America/Bahia")
-            today = datetime.now(tz=timezone).date()
+            today = dt.datetime.now(tz=timezone).date()
 
             # Success stats today
             stmt_today = select(
@@ -822,7 +822,7 @@ class MetricCrud:
         """
         try:
             timezone = ZoneInfo("America/Bahia")
-            today = datetime.now(tz=timezone).date()
+            today = dt.datetime.now(tz=timezone).date()
 
             error_condition = (models.LogModel.codigo.between(400, 499)) | (
                 models.LogModel.codigo.between(
@@ -878,7 +878,7 @@ class MetricCrud:
         """
         try:
             timezone = ZoneInfo("America/Bahia")
-            today = datetime.now(tz=timezone).date()
+            today = dt.datetime.now(tz=timezone).date()
 
             # Top clients today
             stmt_today = (

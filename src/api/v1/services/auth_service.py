@@ -4,7 +4,7 @@ Service for authentication-related operations.
 Handles JWT token verification, refresh, and login.
 """
 
-from datetime import datetime, timedelta
+import datetime as dt
 from typing import Any
 from zoneinfo import ZoneInfo
 
@@ -146,12 +146,12 @@ class AuthService:
         # Issue a new pair of access and refresh tokens
         new_access_token = cls._create_token(
             data=data,
-            expires_delta=timedelta(minutes=TOKEN_EXPIRE_MINUTES),
+            expires_delta=dt.timedelta(minutes=TOKEN_EXPIRE_MINUTES),
             version=user_db.versao_token,  # type: ignore
         )
         new_refresh_token = cls._create_token(
             data=data,
-            expires_delta=timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS),
+            expires_delta=dt.timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS),
             version=user_db.versao_token,  # type: ignore
         )
         return schemas.AccessTokenOutSchema(
@@ -200,12 +200,12 @@ class AuthService:
             data = {"sub": email}
             access_token = cls._create_token(
                 data=data,
-                expires_delta=timedelta(minutes=TOKEN_EXPIRE_MINUTES),
+                expires_delta=dt.timedelta(minutes=TOKEN_EXPIRE_MINUTES),
                 version=user_db.versao_token,  # type: ignore
             )
             refresh_token = cls._create_token(
                 data=data,
-                expires_delta=timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS),
+                expires_delta=dt.timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS),
                 version=user_db.versao_token,  # type: ignore
             )
             return schemas.AccessTokenOutSchema(
@@ -228,7 +228,7 @@ class AuthService:
 
     @staticmethod
     def _create_token(
-        data: dict[str, Any], expires_delta: timedelta, version: int
+        data: dict[str, Any], expires_delta: dt.timedelta, version: int
     ) -> str:
         """
         Create a signed JWT token.
@@ -243,6 +243,6 @@ class AuthService:
         """
         to_encode = data.copy()
         to_encode["ver"] = version
-        expire = datetime.now(ZoneInfo("America/Bahia")) + expires_delta
+        expire = dt.datetime.now(ZoneInfo("America/Bahia")) + expires_delta
         to_encode.update({"exp": expire})
         return jwt.encode(claims=to_encode, key=SECRET_KEY, algorithm=ALGORITHM)

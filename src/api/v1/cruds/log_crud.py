@@ -2,8 +2,8 @@
 CRUD operations for Log model.
 """
 
+import datetime as dt
 from collections.abc import Sequence
-from datetime import date, time
 
 from pydantic import NonNegativeInt, PositiveInt
 from sqlalchemy import func
@@ -115,17 +115,17 @@ class LogCrud:
             stmt = stmt.where(models.LogModel.codigo == code)
 
         if start_date:
-            start_date_obj = date.fromisoformat(start_date)
+            start_date_obj = dt.date.fromisoformat(start_date)
             stmt = stmt.where(func.date(models.LogModel.criado_em) >= start_date_obj)
         if end_date:
-            end_date_obj = date.fromisoformat(end_date)
+            end_date_obj = dt.date.fromisoformat(end_date)
             stmt = stmt.where(func.date(models.LogModel.criado_em) <= end_date_obj)
 
         if start_hour:
-            start_hour_obj = time.fromisoformat(start_hour)
+            start_hour_obj = dt.time.fromisoformat(start_hour)
             stmt = stmt.where(func.time(models.LogModel.criado_em) >= start_hour_obj)
         if end_hour:
-            end_hour_obj = time.fromisoformat(end_hour)
+            end_hour_obj = dt.time.fromisoformat(end_hour)
             stmt = stmt.where(func.time(models.LogModel.criado_em) <= end_hour_obj)
 
         if protocol:
