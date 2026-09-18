@@ -18,6 +18,7 @@ from httpx import (
     Headers,
     HTTPError,
     InvalidURL,
+    QueryParams,
     StreamError,
     Timeout,
 )
@@ -70,7 +71,7 @@ class IxcAcsClient:
         endpoint: str,
         method: HTTPMethod = HTTPMethod.GET,
         payload: dict[str, Any] | None = None,
-        params: dict[str, Any] | None = None,
+        query_params: QueryParams | None = None,
     ) -> dict[str, Any]:
         """
         Send an authenticated request to an IXC ACS API endpoint.
@@ -81,7 +82,7 @@ class IxcAcsClient:
             endpoint: API endpoint path (relative to base URL).
             method: HTTP method to use.
             payload: JSON body for the request.
-            params: Query parameters.
+            query_params: Query parameters.
 
         Returns:
             Parsed JSON response as a dictionary.
@@ -115,7 +116,7 @@ class IxcAcsClient:
                 url=url,
                 headers=cls._headers,
                 json=payload,
-                params=params,
+                params=query_params,
             )
             res.raise_for_status()
             return res.json()
@@ -135,18 +136,18 @@ class IxcAcsClient:
         await cls._async_client.aclose()
 
     @classmethod
-    async def get(cls, endpoint: str, params: dict[str, Any] | None = None) -> Any:
+    async def get(cls, endpoint: str, query_params: QueryParams | None = None) -> Any:
         """
         Send a GET request to the IXC ACS API.
 
         Args:
             endpoint: API endpoint path.
-            params: Optional query parameters.
+            query_params: Optional query parameters.
 
         Returns:
             Parsed JSON response.
         """
-        return await cls._make_request(endpoint=endpoint, params=params)
+        return await cls._make_request(endpoint=endpoint, query_params=query_params)
 
     @classmethod
     async def patch(cls, endpoint: str, payload: dict[str, Any]) -> dict[str, Any]:

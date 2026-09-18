@@ -7,6 +7,7 @@ import re
 from typing import Any
 
 from fastapi import HTTPException, status
+from httpx import QueryParams
 from pydantic import NonNegativeInt, PositiveInt
 
 from .. import clients, schemas, utils
@@ -70,11 +71,15 @@ class SupportService:
 
         # --- Get device ---
         endpoint = "devices/views/natural"
-        params = {
-            "search[column]": "connection.pppoeLogin",
-            "search[search]": login["login"],
-        }
-        res = await clients.IxcAcsClient.get(endpoint=endpoint, params=params)
+        query_params = QueryParams(
+            {
+                "search[column]": "connection.pppoeLogin",
+                "search[search]": login["login"],
+            }
+        )
+        res = await clients.IxcAcsClient.get(
+            endpoint=endpoint, query_params=query_params
+        )
         if not (regs := res.get("registers", [])):
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Dispositivo inexistente"
@@ -138,8 +143,12 @@ class SupportService:
 
         # --- Get IPV6 ---
         endpoint = "devices/views/ipv6"
-        params = {"search[column]": "serialNumber", "search[search]": serial_number}
-        res = await clients.IxcAcsClient.get(endpoint=endpoint, params=params)
+        query_params = QueryParams(
+            {"search[column]": "serialNumber", "search[search]": serial_number}
+        )
+        res = await clients.IxcAcsClient.get(
+            endpoint=endpoint, query_params=query_params
+        )
 
         if not (regs := res.get("registers", [])):
             raise HTTPException(
