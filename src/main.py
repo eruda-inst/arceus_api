@@ -39,8 +39,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="Arceus",
     description="Integra com sistemas IXC, IXC ACS, Opa e 7AZ. Oferece autenticação, gestão de usuários e permissões, operações comerciais (contratos, leads), financeiras (faturas, cobrança), suporte (atendimentos, status de conexão), além de logs e métricas para monitoramento",
-    version="1.9.6",
-    routes=api_v1_router.routes,
+    version="1.9.7",
     lifespan=lifespan,
 )
 
@@ -52,6 +51,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Mount the aggregated API v1 router, including all HTTP and WebSocket endpoints
+app.include_router(router=api_v1_router)
 
 # Custom middleware to log requests/responses for specified endpoints
 app.add_middleware(middlewares.LogMiddleware)
