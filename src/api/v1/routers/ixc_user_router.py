@@ -4,20 +4,15 @@ Router for IXC user-related endpoints.
 
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Query
 
-from .. import deps, models, schemas, services, utils
+from .. import schemas, services, utils
 
 ixc_user_router = APIRouter(prefix="/usuarios-ixc", tags=["Usuários IXC"])
 
 
-# Dependency alias for the current user
-curr_user_dep = Annotated[models.UserModel, Depends(deps.get_curr_user)]
-
-
 @ixc_user_router.get(path="/", summary="Obtém informações de usuários")
 async def get_all(
-    _: curr_user_dep,
     pagina: utils.Page = 1,
     itens_por_pagina: utils.ItemsPerPage = 10,
     nome: Annotated[str | None, Query(description="Filtro parcial por nome")] = None,

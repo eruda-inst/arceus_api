@@ -6,32 +6,28 @@ from typing import Annotated
 
 from fastapi import APIRouter, Body, Depends, status
 from pydantic import PositiveInt
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from .. import cruds, db, deps, models, schemas, services, utils
+from .. import cruds, deps, models, schemas, services, utils
 
 user_router = APIRouter(prefix="/usuarios", tags=["Usuários"])
 
 
 # Dependency aliases
-DbDep = Annotated[AsyncSession, Depends(db.get_db)]
-CreatePermDep = Annotated[
+CreateDep = Annotated[
     models.UserModel, Depends(deps.has_perm(utils.PermCodes.CREATE_USER))
 ]
-UpdatePermDep = Annotated[
+UpdateDep = Annotated[
     models.UserModel, Depends(deps.has_perm(utils.PermCodes.UPDATE_USER))
 ]
-DelPermDep = Annotated[
-    models.UserModel, Depends(deps.has_perm(utils.PermCodes.DEL_USER))
-]
+DelDep = Annotated[models.UserModel, Depends(deps.has_perm(utils.PermCodes.DEL_USER))]
 
 
 @user_router.post(
     path="/", status_code=status.HTTP_201_CREATED, summary="Cadastra um novo usuário"
 )
 async def create(
-    db: DbDep,
-    perm: CreatePermDep,
+    db: utils.DbDep,
+    perm: CreateDep,
     dados: Annotated[schemas.UserInSchema, Body(description="Dados do novo usuário")],
 ) -> schemas.UserOutSchema:
     """
@@ -40,7 +36,7 @@ async def create(
     # Only users that exist in the external IXC system are allowed to be created locally.
     # If get_by_email() does not find the user, it raises a "not found" exception,
     # which prevents the local user from being created.
-    _ = await services.IXCUserService.get_by_email(email=dados.email)
+    await services.IXCUserService.get_by_email(email=dados.email)
     created_user = await cruds.UserCrud.create(db=db, data=dados)
     return schemas.UserOutSchema.model_validate(created_user)
 
@@ -48,11 +44,7 @@ async def create(
 @user_router.delete(
     path="/{id}", status_code=status.HTTP_204_NO_CONTENT, summary="Remove um usuário"
 )
-async def del_by_id(
-    db: DbDep,
-    perm: DelPermDep,
-    id: PositiveInt,
-) -> None:
+async def del_by_id(db: utils.DbDep, perm: DelDep, id: PositiveInt) -> None:
     """
     Remove um usuário pelo ID
     """
@@ -63,9 +55,7 @@ async def del_by_id(
     path="/{id}/alternar-status", summary="Alterna o status de um usuário"
 )
 async def toggle_status_by_id(
-    db: DbDep,
-    perm: UpdatePermDep,
-    id: PositiveInt,
+    db: utils.DbDep, perm: UpdateDep, id: PositiveInt
 ) -> schemas.UserOutSchema:
     """
     Alterna o status do usuário, i.e., se estiver ativo, fica inativo, e vice-versa
@@ -76,8 +66,8 @@ async def toggle_status_by_id(
 
 @user_router.patch(path="/mudar-senha/id/{id}", summary="Atualiza senha de um usuário")
 async def update_pass_by_id(
-    db: DbDep,
-    perm: UpdatePermDep,
+    db: utils.DbDep,
+    perm: UpdateDep,
     id: PositiveInt,
     nova_senha: Annotated[
         str,

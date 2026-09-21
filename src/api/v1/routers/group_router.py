@@ -4,20 +4,16 @@ Router for group-related endpoints.
 
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Path
+from fastapi import APIRouter, Path
 from pydantic import PositiveInt
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from .. import cruds, db, schemas
+from .. import cruds, schemas, utils
 
 group_router = APIRouter(prefix="/grupos", tags=["Grupos"])
 
-# Dependency aliases
-DbDep = Annotated[AsyncSession, Depends(dependency=db.get_db)]
-
 
 @group_router.get(path="/", summary="Obtém grupos")
-async def get_all(db: DbDep) -> schemas.ListOutSchema[schemas.GroupOutSchema]:
+async def get_all(db: utils.DbDep) -> schemas.ListOutSchema[schemas.GroupOutSchema]:
     """
     Obtém informações de grupos
     """
@@ -35,7 +31,7 @@ async def get_all(db: DbDep) -> schemas.ListOutSchema[schemas.GroupOutSchema]:
 
 @group_router.get(path="/id/{id}", summary="Obtém grupo por ID")
 async def get_by_id(
-    db: DbDep,
+    db: utils.DbDep,
     id: Annotated[PositiveInt, Path(description="ID do grupo")],
 ) -> schemas.GroupOutSchema:
     """
@@ -47,7 +43,7 @@ async def get_by_id(
 
 @group_router.get(path="/nome/{nome}", summary="Obtém grupo por nome")
 async def get_by_name(
-    db: DbDep,
+    db: utils.DbDep,
     nome: Annotated[str, Path(description="Nome do grupo")],
 ) -> schemas.GroupOutSchema:
     """
@@ -59,7 +55,7 @@ async def get_by_name(
 
 @group_router.get(path="/usuario/id/{id}", summary="Obtém grupo por ID do usuário")
 async def get_by_user_id(
-    db: DbDep,
+    db: utils.DbDep,
     id: Annotated[PositiveInt, Path(description="ID do usuário")],
 ) -> schemas.GroupOutSchema:
     """

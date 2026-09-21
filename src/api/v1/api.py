@@ -28,7 +28,7 @@ api_v1_router.include_router(router=routers.village_router, dependencies=[CredsD
 # HTTP routers
 api_v1_router.include_router(router=routers.auth_router)
 api_v1_router.include_router(router=routers.group_router, dependencies=[CurrUserDep])
-api_v1_router.include_router(router=routers.perm_router, dependencies=[CurrUserDep])
+api_v1_router.include_router(router=routers.perm_router)
 api_v1_router.include_router(router=routers.user_router, dependencies=[CurrUserDep])
 api_v1_router.include_router(router=routers.ixc_user_router, dependencies=[CurrUserDep])
 

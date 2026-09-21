@@ -28,14 +28,14 @@ bearer_security = HTTPBearer()
 
 async def get_curr_user(
     db: Annotated[AsyncSession, Depends(db.get_db)],
-    credentials: Annotated[HTTPAuthorizationCredentials, Depends(bearer_security)],
+    creds: Annotated[HTTPAuthorizationCredentials, Depends(bearer_security)],
 ) -> models.UserModel:
     """
     Dependency to retrieve the currently authenticated user from a Bearer token.
 
     Args:
         db: Database session.
-        credentials: Bearer token credentials extracted from the Authorization header.
+        creds: Bearer token credentials extracted from the Authorization header.
 
     Returns:
         The authenticated UserModel instance.
@@ -43,7 +43,7 @@ async def get_curr_user(
     Raises:
         HTTPException: 401 if the token is invalid or the user does not exist.
     """
-    access_token = credentials.credentials
+    access_token = creds.credentials
     # Verify the access token and fetch the associated user
     user = await services.AuthService.verify_access_token(
         db=db, access_token=access_token
@@ -57,7 +57,7 @@ async def get_curr_user(
 
 
 def get_creds(
-    credentials: Annotated[HTTPBasicCredentials, Depends(basic_security)],
+    creds: Annotated[HTTPBasicCredentials, Depends(basic_security)],
 ) -> bool:
     """
     Dependency to validate Basic Auth credentials for bot access.
@@ -66,7 +66,7 @@ def get_creds(
     credentials using constant-time comparison to prevent timing attacks.
 
     Args:
-        credentials: Basic Auth credentials extracted from the Authorization header.
+        creds: Basic Auth credentials extracted from the Authorization header.
 
     Returns:
         True if credentials are valid.
@@ -75,8 +75,8 @@ def get_creds(
         HTTPException: 401 if credentials are invalid.
     """
     # Encode provided credentials
-    cred_username = credentials.username.encode()
-    cred_pass = credentials.password.encode()
+    cred_username = creds.username.encode()
+    cred_pass = creds.password.encode()
 
     # Encode configured bot credentials
     config_username = config.settings.bot_username.encode()
@@ -111,14 +111,14 @@ def has_perm(req_perm: utils.PermCodes):
 
     async def dep(
         db: Annotated[AsyncSession, Depends(db.get_db)],
-        current_user: Annotated[models.UserModel, Depends(get_curr_user)],
+        curr_user: Annotated[models.UserModel, Depends(get_curr_user)],
     ) -> models.UserModel:
         """
         Inner dependency that performs the permission check.
 
         Args:
             db: Database session.
-            current_user: The currently authenticated user.
+            curr_user: The currently authenticated user.
 
         Returns:
             The current user if they have the required permission.
@@ -127,10 +127,7 @@ def has_perm(req_perm: utils.PermCodes):
             HTTPException: 403 if permission is missing.
         """
         # Fetch all permissions for the current user
-        _, user_perms = await cruds.PermCrud.get_all_by(
-            db=db,
-            id_usuario=current_user.id,  # type: ignore
-        )
+        _, user_perms = await cruds.PermCrud.get_all_by(db=db, id_usuario=curr_user.id)  # type: ignore
 
         # Extract permission codes
         perm_codes = [p.codigo for p in user_perms]
@@ -139,6 +136,6 @@ def has_perm(req_perm: utils.PermCodes):
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail=f"Permissão necessária: {req_perm}",
             )
-        return current_user
+        return curr_user
 
     return dep

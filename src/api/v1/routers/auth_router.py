@@ -7,20 +7,18 @@ Provides login, logout, token refresh, and current user retrieval.
 from typing import Annotated
 
 from fastapi import APIRouter, Body, Depends, status
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from .. import db, deps, models, schemas, services
+from .. import deps, models, schemas, services, utils
 
 auth_router = APIRouter(prefix="/autenticacao", tags=["Autenticação"])
 
 # Dependency aliases
-DbDep = Annotated[AsyncSession, Depends(dependency=db.get_db)]
 CurrUserDep = Annotated[models.UserModel, Depends(dependency=deps.get_curr_user)]
 
 
 @auth_router.post(path="/login", summary="Autenticação de usuário")
 async def login(
-    db: DbDep,
+    db: utils.DbDep,
     user: Annotated[schemas.UserLoginSchema, Body(description="Credenciais de login")],
 ) -> schemas.AccessTokenOutSchema:
     """
@@ -34,7 +32,7 @@ async def login(
     status_code=status.HTTP_204_NO_CONTENT,
     summary="Realiza logout do usuário",
 )
-async def logout(curr_user: CurrUserDep, db: DbDep) -> None:
+async def logout(db: utils.DbDep, curr_user: CurrUserDep) -> None:
     """
     Invalida token de usuário autenticado
     """
@@ -45,7 +43,7 @@ async def logout(curr_user: CurrUserDep, db: DbDep) -> None:
 
 @auth_router.post(path="/refresh-token", summary="Renova token")
 async def refresh(
-    db: DbDep,
+    db: utils.DbDep,
     refresh_token: Annotated[
         str, Body(embed=True, description="Token de atualização", examples=["eyJ..."])
     ],
@@ -57,7 +55,7 @@ async def refresh(
 
 
 @auth_router.get(path="/me", summary="Usuário atual")
-async def me(_: DbDep, curr_user: CurrUserDep) -> schemas.UserOutSchema:
+async def me(_: utils.DbDep, curr_user: CurrUserDep) -> schemas.UserOutSchema:
     """
     Usuário atual logado
     """
