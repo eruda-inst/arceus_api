@@ -262,14 +262,14 @@ class FinanceService:
         partial_open_invoices: list[schemas.InvoiceOutSchema] = []
 
         total_overdue_invoices = 0
-        now = datetime.now(ZoneInfo("America/Bahia"))
+        now = dt.datetime.now(ZoneInfo("America/Bahia"))
         actual_date = now.date()
         actual_iso_date = actual_date.isoformat()  # AAAA-MM-DD
         actual_month = str(actual_date.month).zfill(2)  # 01, instead of 1, for example
 
         # Count overdue invoices (excluding the current month)
         for open_invoice in open_invoices:
-            due_date = date.fromisoformat(open_invoice["data_vencimento"])
+            due_date = dt.date.fromisoformat(open_invoice["data_vencimento"])
             due_month = str(due_date.month).zfill(2)
             if actual_month == due_month:
                 continue
@@ -312,7 +312,7 @@ class FinanceService:
                         preco=open_invoice["valor"],
                     )
                 )
-                due_date = date.fromisoformat(open_invoice["data_vencimento"])
+                due_date = dt.date.fromisoformat(open_invoice["data_vencimento"])
                 due_month = str(due_date.month).zfill(2)
                 # Stop once we reach the current month's invoice
                 if actual_month == due_month:
