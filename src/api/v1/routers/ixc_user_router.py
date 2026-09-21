@@ -17,7 +17,7 @@ curr_user_dep = Annotated[models.UserModel, Depends(deps.get_curr_user)]
 
 @ixc_user_router.get(path="/", summary="Obtém informações de usuários")
 async def get_all(
-    # _: curr_user_dep,
+    _: curr_user_dep,
     pagina: utils.Page = 1,
     itens_por_pagina: utils.ItemsPerPage = 10,
     nome: Annotated[str | None, Query(description="Filtro parcial por nome")] = None,

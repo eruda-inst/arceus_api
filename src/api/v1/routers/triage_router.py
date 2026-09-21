@@ -4,9 +4,9 @@ Router for triage endpoints.
 
 from typing import Annotated
 
-from fastapi import APIRouter, Body, Depends
+from fastapi import APIRouter, Body
 
-from .. import deps, schemas, services, utils
+from .. import schemas, services, utils
 
 triage_router = APIRouter(prefix="/triagem", tags=["Triagem"])
 
@@ -15,7 +15,6 @@ triage_router = APIRouter(prefix="/triagem", tags=["Triagem"])
     path="/contato-cliente", summary="Obtém dados de contato de um cliente"
 )
 async def get_customer_contact(
-    _: Annotated[bool, Depends(deps.get_creds)],
     protocolo: utils.Protocol | None = None,
     cnpj_cpf: utils.CnpjCpf | None = None,
 ) -> schemas.ContactOutSchema:
@@ -29,7 +28,6 @@ async def get_customer_contact(
 
 @triage_router.patch(path="/contato-cliente", summary="Atualiza contato de um cliente")
 async def patch_customer_contact(
-    _: Annotated[bool, Depends(deps.get_creds)],
     telefone_celular: Annotated[
         str, Body(embed=True, description="Novo telefone celular")
     ],

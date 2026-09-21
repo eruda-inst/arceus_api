@@ -8,19 +8,17 @@ from fastapi import APIRouter, Depends, Path
 from pydantic import PositiveInt
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from .. import cruds, db, deps, models, schemas
+from .. import cruds, db, schemas
 
 perm_router = APIRouter(prefix="/permissoes", tags=["Permissões"])
 
 # Dependency aliases
 DbDep = Annotated[AsyncSession, Depends(db.get_db)]
-CurrUserDep = Annotated[models.UserModel, Depends(deps.get_curr_user)]
 
 
 @perm_router.get(path="/id/{id}", summary="Obtém permissão por ID")
 async def get_by_id(
     db: DbDep,
-    _: CurrUserDep,
     id: Annotated[PositiveInt, Path(description="ID da permissão")],
 ) -> schemas.PermOutSchema:
     """
@@ -33,7 +31,6 @@ async def get_by_id(
 @perm_router.get(path="/nome/{nome}", summary="Obtém permissão por nome")
 async def get_by_name(
     db: DbDep,
-    _: CurrUserDep,
     nome: Annotated[str, Path(description="Nome da permissão")],
 ) -> schemas.PermOutSchema:
     """
@@ -46,7 +43,6 @@ async def get_by_name(
 @perm_router.get(path="/codigo/{codigo}", summary="Obtém permissão por código")
 async def get_by_code(
     db: DbDep,
-    _: CurrUserDep,
     codigo: Annotated[str, Path(description="Código da permissão")],
 ) -> schemas.PermOutSchema:
     """
@@ -59,7 +55,6 @@ async def get_by_code(
 @perm_router.get(path="/grupo/id/{id}", summary="Obtém permissão por ID do grupo")
 async def get_by_group_id(
     db: DbDep,
-    _: CurrUserDep,
     id: Annotated[PositiveInt, Path(description="ID do grupo")],
 ) -> schemas.ListOutSchema[schemas.PermOutSchema]:
     """
@@ -78,7 +73,6 @@ async def get_by_group_id(
 @perm_router.get(path="/usuario/id/{id}", summary="Obtém permissões por ID do usuário")
 async def get_by_user_id(
     db: DbDep,
-    # _: CurrUserDep,
     id: Annotated[PositiveInt, Path(description="ID do usuário")],
 ) -> schemas.ListOutSchema[schemas.PermOutSchema]:
     """

@@ -4,9 +4,9 @@ Router for upgrade-related endpoints.
 
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Query
 
-from .. import deps, schemas, services, utils
+from .. import schemas, services, utils
 
 upgrade_router = APIRouter(prefix="/upgrade", tags=["Upgrade"])
 
@@ -16,7 +16,6 @@ upgrade_router = APIRouter(prefix="/upgrade", tags=["Upgrade"])
     summary="Sugere planos oficiais de acordo com planos desatualizados",
 )
 async def get_suggested_plans(
-    _: Annotated[bool, Depends(deps.get_creds)],
     # IDs NonNegativeInt, pois o IXC é quebrado
     id_cliente: Annotated[int, Query(get=0, description="ID do cliente no IXC")],
     pagina: utils.Page = 1,

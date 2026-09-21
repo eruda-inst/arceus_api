@@ -4,9 +4,9 @@ Router for billing-related endpoints.
 
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Query
 
-from .. import deps, schemas, services, utils
+from .. import schemas, services, utils
 
 billing_router = APIRouter(prefix="/cobranca", tags=["Cobrança"])
 
@@ -15,7 +15,6 @@ billing_router = APIRouter(prefix="/cobranca", tags=["Cobrança"])
     path="/faturas-abertas", summary="Obtém faturas abertas de um cliente"
 )
 async def get_open_invoices(
-    _: Annotated[bool, Depends(deps.get_creds)],
     # IDs NonNegativeInt, because IXC
     id_contrato: Annotated[int, Query(ge=0, description="ID do contrato")],
     pagina: utils.Page = 1,
@@ -35,7 +34,6 @@ async def get_open_invoices(
     path="/faturas-vencidas", summary="Obtém faturas vencidas de um cliente"
 )
 async def get_overdue_invoices(
-    _: Annotated[bool, Depends(deps.get_creds)],
     # IDs NonNegativeInt, because IXC
     id_contrato: Annotated[int, Query(ge=0, description="ID do contrato")],
     pagina: utils.Page = 1,

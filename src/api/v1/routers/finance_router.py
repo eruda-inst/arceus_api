@@ -4,16 +4,15 @@ Router for financial endpoints.
 
 from typing import Annotated
 
-from fastapi import APIRouter, Body, Depends, Path, Query
+from fastapi import APIRouter, Body, Path, Query
 
-from .. import deps, schemas, services, utils
+from .. import schemas, services, utils
 
 finance_router = APIRouter(prefix="/financeiro", tags=["Financeiro"])
 
 
 @finance_router.get(path="/chave-pix", summary="Obtém chave pix de uma fatura")
 async def get_pix_key(
-    _: Annotated[bool, Depends(deps.get_creds)],
     # IDs NonNegativeInt, pois o IXC é quebrado
     id_fatura: Annotated[int, Query(ge=0, description="ID da fatura")],
 ) -> schemas.PixKeyOutSchema:
@@ -28,7 +27,6 @@ async def get_pix_key(
     summary="Obtém credenciais da central do assinante de um cliente",
 )
 async def get_credentials(
-    _: Annotated[bool, Depends(deps.get_creds)],
     # IDs NonNegativeInt, pois o IXC é quebrado
     id_cliente: Annotated[int, Path(description="ID do cliente")],
 ) -> schemas.CredentialOutSchema:
@@ -43,7 +41,6 @@ async def get_credentials(
     summary="Atualiza senha da central do assinante de um cliente",
 )
 async def patch_credentials(
-    _: Annotated[bool, Depends(deps.get_creds)],
     # IDs NonNegativeInt, pois o IXC é quebrado
     id_cliente: Annotated[int, Path(ge=0, description="ID do cliente")],
     senha: Annotated[str, Body(embed=True, description="Nova senha")],
@@ -61,7 +58,6 @@ async def patch_credentials(
     summary="Realiza desbloqueio em confiança de um cliente",
 )
 async def post_trusted_unlock(
-    _: Annotated[bool, Depends(deps.get_creds)],
     # IDs NonNegativeInt, pois o IXC é quebrado
     id_contrato: Annotated[int, Query(ge=0, description="ID do contrato")],
 ) -> schemas.MessageOutSchema:
@@ -77,7 +73,6 @@ async def post_trusted_unlock(
     path="/faturas-abertas", summary="Obtém faturas abertas de um cliente"
 )
 async def get_open_invoices(
-    _: Annotated[bool, Depends(deps.get_creds)],
     # IDs NonNegativeInt, pois o IXC é quebrado
     id_contrato: Annotated[int, Query(ge=0, description="ID do contrato")],
     pagina: utils.Page = 1,
@@ -97,7 +92,6 @@ async def get_open_invoices(
     path="/linha-digitavel/{id_fatura}", summary="Obtém linha digitável de uma fatura"
 )
 async def get_digitable_line(
-    _: Annotated[bool, Depends(deps.get_creds)],
     # IDs NonNegativeInt, pois o IXC é quebrado
     id_fatura: Annotated[int, Path(ge=0, description="ID da fatura")],
 ) -> schemas.DigitableLineOutSchema:
@@ -111,7 +105,6 @@ async def get_digitable_line(
     path="/tres-faturas-abertas", summary="Obtém 3 faturas abertas de um cliente"
 )
 async def get_3_open_invoices(
-    _: Annotated[bool, Depends(deps.get_creds)],
     # IDs NonNegativeInt, pois o IXC é quebrado
     id_contrato: Annotated[int, Query(ge=0, description="ID do contrato")],
     pagina: utils.Page = 1,

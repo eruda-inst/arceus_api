@@ -34,9 +34,7 @@ async def login(
     status_code=status.HTTP_204_NO_CONTENT,
     summary="Realiza logout do usuário",
 )
-async def logout(
-    curr_user: Annotated[models.UserModel, Depends(deps.get_curr_user)], db: DbDep
-) -> None:
+async def logout(curr_user: CurrUserDep, db: DbDep) -> None:
     """
     Invalida token de usuário autenticado
     """

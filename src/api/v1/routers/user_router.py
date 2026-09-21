@@ -15,7 +15,6 @@ user_router = APIRouter(prefix="/usuarios", tags=["Usuários"])
 
 # Dependency aliases
 DbDep = Annotated[AsyncSession, Depends(db.get_db)]
-CurrUserDep = Annotated[models.UserModel, Depends(deps.get_curr_user)]
 CreatePermDep = Annotated[
     models.UserModel, Depends(deps.has_perm(utils.PermCodes.CREATE_USER))
 ]
@@ -32,7 +31,6 @@ DelPermDep = Annotated[
 )
 async def create(
     db: DbDep,
-    curr_user: CurrUserDep,
     perm: CreatePermDep,
     dados: Annotated[schemas.UserInSchema, Body(description="Dados do novo usuário")],
 ) -> schemas.UserOutSchema:
@@ -52,7 +50,6 @@ async def create(
 )
 async def del_by_id(
     db: DbDep,
-    curr_user: CurrUserDep,
     perm: DelPermDep,
     id: PositiveInt,
 ) -> None:
@@ -67,7 +64,6 @@ async def del_by_id(
 )
 async def toggle_status_by_id(
     db: DbDep,
-    curr_user: CurrUserDep,
     perm: UpdatePermDep,
     id: PositiveInt,
 ) -> schemas.UserOutSchema:
@@ -81,7 +77,6 @@ async def toggle_status_by_id(
 @user_router.patch(path="/mudar-senha/id/{id}", summary="Atualiza senha de um usuário")
 async def update_pass_by_id(
     db: DbDep,
-    curr_user: CurrUserDep,
     perm: UpdatePermDep,
     id: PositiveInt,
     nova_senha: Annotated[

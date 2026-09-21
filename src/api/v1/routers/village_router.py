@@ -4,10 +4,10 @@ Router for village (Vila) endpoints.
 
 from typing import Annotated
 
-from fastapi import APIRouter, Body, Depends, Path, Query
+from fastapi import APIRouter, Body, Path, Query
 from pydantic import NonNegativeInt
 
-from .. import deps, schemas, services
+from .. import schemas, services
 
 village_router = APIRouter(prefix="/vila", tags=["Vila"])
 
@@ -17,14 +17,12 @@ NumeroResidencia = Annotated[int, Query(ge=1, description="Número da residênci
 Pppoe = Annotated[str, Query(description="PPPOE associado ao cliente")]
 # IDs NonNegativeInt, because IXC
 IdLogin = Annotated[NonNegativeInt, Query(description="ID login associado ao cliente")]
-GetCredsDeps = Annotated[bool, Depends(deps.get_creds)]
 
 
 @village_router.get(
     path="/atendimentos", summary="Obtém atendimentos abertos de um cliente"
 )
 async def get_tickets(
-    _: GetCredsDeps,
     id_login: IdLogin,
     pagina: Annotated[int, Query(ge=1, description="Número da página")] = 1,
     itens_por_pagina: Annotated[int, Query(ge=1, description="Itens por página")] = 10,
@@ -43,7 +41,6 @@ async def get_tickets(
     path="/atendimentos", summary="Obtém atendimentos abertos de um cliente"
 )
 async def post_tickets(
-    _: GetCredsDeps,
     atendimento: Annotated[
         schemas.TicketInSchema, Body(description="Dados do atendimento")
     ],
@@ -59,7 +56,6 @@ async def post_tickets(
     summary="Obtém contrato de um cliente",
 )
 async def get_contract_by_residence_number(
-    _: GetCredsDeps,
     numero_residencia: Annotated[int, Path(ge=1, description="Número da residência")],
 ) -> schemas.VillageContractOutSchema:
     """
@@ -74,7 +70,6 @@ async def get_contract_by_residence_number(
     path="/contrato/pppoe/{pppoe}", summary="Obtém contrato de um cliente"
 )
 async def get_contract_by_pppoe(
-    _: GetCredsDeps,
     pppoe: Annotated[str, Path(description="PPPOE do login")],
 ) -> schemas.VillageContractOutSchema:
     """
@@ -85,7 +80,6 @@ async def get_contract_by_pppoe(
 
 @village_router.patch(path="/dados-wifi", summary="Atualiza dados wifi de um cliente")
 async def patch_wifi_data(
-    _: GetCredsDeps,
     id_login: IdLogin,
     ssid: Annotated[str | None, Body(description="Novo SSID da rede wifi")] = None,
     senha_ssid: Annotated[
@@ -101,9 +95,7 @@ async def patch_wifi_data(
 
 
 @village_router.post(path="/desconectar-cliente", summary="Desconecta um cliente")
-async def post_disconnect_customer(
-    _: GetCredsDeps, id_login: IdLogin
-) -> schemas.MessageOutSchema:
+async def post_disconnect_customer(id_login: IdLogin) -> schemas.MessageOutSchema:
     """
     Desconecta um cliente, através do ID de login
     """
@@ -111,9 +103,7 @@ async def post_disconnect_customer(
 
 
 @village_router.post(path="/limpar-mac", summary="Limpa MAC Address de um cliente")
-async def post_clear_mac(
-    _: GetCredsDeps, id_login: IdLogin
-) -> schemas.MessageOutSchema:
+async def post_clear_mac(id_login: IdLogin) -> schemas.MessageOutSchema:
     """
     Limpa MAC Address de um cliente, através do ID de login
     """
@@ -121,7 +111,7 @@ async def post_clear_mac(
 
 
 @village_router.get(path="/servidor-dns", summary="Obtém servidor DNS de um cliente")
-async def get_dns_server(_: GetCredsDeps, id_login: IdLogin) -> schemas.DnsServerOut:
+async def get_dns_server(id_login: IdLogin) -> schemas.DnsServerOut:
     """
     Obtém servidor DNS de um cliente, a partir do ID de login
     """
@@ -129,9 +119,7 @@ async def get_dns_server(_: GetCredsDeps, id_login: IdLogin) -> schemas.DnsServe
 
 
 @village_router.get(path="/sinal-fibra", summary="Obtém RX e TX do sinal da fibra")
-async def get_fiber_signal(
-    _: GetCredsDeps, id_login: IdLogin
-) -> schemas.FiberSignalOutSchema:
+async def get_fiber_signal(id_login: IdLogin) -> schemas.FiberSignalOutSchema:
     """
     Obtém taxas de transmissão e de recepção do sinal da fibra, a partir do ID de login
     """
@@ -141,9 +129,7 @@ async def get_fiber_signal(
 @village_router.get(
     path="/status-conexao", summary="Obtém status da conexão de um cliente"
 )
-async def get_connection_status(
-    _: GetCredsDeps, id_login: IdLogin
-) -> schemas.ConnectionStatusOutSchema:
+async def get_connection_status(id_login: IdLogin) -> schemas.ConnectionStatusOutSchema:
     """
     Obtém status da conexão de um cliente, através do ID de login
     """
@@ -151,9 +137,7 @@ async def get_connection_status(
 
 
 @village_router.get(path="/status-onu", summary="Obtém status da ONU de um cliente")
-async def get_onu_status(
-    _: GetCredsDeps, id_login: IdLogin
-) -> schemas.OnuStatusOutSchema:
+async def get_onu_status(id_login: IdLogin) -> schemas.OnuStatusOutSchema:
     """
     Obtém status da ONU de um cliente, através do ID de login
     """
@@ -161,7 +145,7 @@ async def get_onu_status(
 
 
 @village_router.get(path="/tem-ipv6", summary="Verifica se o cliente possui IPV6")
-async def get_has_ipv6(_: GetCredsDeps, id_login: IdLogin) -> schemas.HasIPV6OutSchema:
+async def get_has_ipv6(id_login: IdLogin) -> schemas.HasIPV6OutSchema:
     """
     Verifica se o cliente possui IPV6 ativo, a partir do ID de login
     """
@@ -169,7 +153,7 @@ async def get_has_ipv6(_: GetCredsDeps, id_login: IdLogin) -> schemas.HasIPV6Out
 
 
 @village_router.get(path="/uptime", summary="Obtém uptime de um dispositivo")
-async def get_uptime(_: GetCredsDeps, id_login: IdLogin) -> schemas.UptimeOutSchema:
+async def get_uptime(id_login: IdLogin) -> schemas.UptimeOutSchema:
     """
     Obtém uptime de um cliente, a partir do ID de login
     """
