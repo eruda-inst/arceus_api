@@ -11,6 +11,7 @@ from collections.abc import Sequence
 import sqlalchemy as sa
 
 from alembic import op
+from src.api.v1.config import settings
 
 # revision identifiers, used by Alembic.
 revision: str = "7a336d048eac"
@@ -36,7 +37,7 @@ def upgrade() -> None:
         sa.Column(
             "criado_em",
             sa.TIMESTAMP(timezone=True),
-            server_default=sa.func.timezone("America/Bahia", sa.func.now()),
+            server_default=sa.func.timezone(settings.timezone, sa.func.now()),
             nullable=False,
             index=False,
             unique=False,
@@ -60,7 +61,7 @@ def upgrade() -> None:
         sa.Column(
             "criado_em",
             sa.TIMESTAMP(timezone=True),
-            server_default=sa.func.timezone("America/Bahia", sa.func.now()),
+            server_default=sa.func.timezone(settings.timezone, sa.func.now()),
             nullable=False,
             index=False,
             unique=False,
@@ -102,7 +103,7 @@ def upgrade() -> None:
         sa.Column(
             "criado_em",
             sa.TIMESTAMP(timezone=True),
-            server_default=sa.func.timezone("America/Bahia", sa.func.now()),
+            server_default=sa.func.timezone(settings.timezone, sa.func.now()),
             nullable=False,
             unique=False,
             index=False,
@@ -110,7 +111,7 @@ def upgrade() -> None:
         sa.Column(
             "atualizado_em",
             sa.TIMESTAMP(timezone=True),
-            onupdate=sa.func.timezone("America/Bahia", sa.func.now()),
+            onupdate=sa.func.timezone(settings.timezone, sa.func.now()),
             nullable=True,
             unique=False,
             index=False,

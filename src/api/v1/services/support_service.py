@@ -11,7 +11,7 @@ from httpx import QueryParams
 from pydantic import NonNegativeInt, PositiveInt
 
 from .. import clients, schemas, utils
-from .customer_service import CustomerService
+from . import CustomerService
 
 
 class SupportService:

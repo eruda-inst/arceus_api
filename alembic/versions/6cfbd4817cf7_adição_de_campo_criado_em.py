@@ -11,6 +11,7 @@ from collections.abc import Sequence
 import sqlalchemy as sa
 
 from alembic import op
+from src.api.v1.config import settings
 
 # revision identifiers, used by Alembic.
 revision: str = "6cfbd4817cf7"
@@ -25,7 +26,7 @@ def upgrade() -> None:
         sa.Column(
             "criado_em",
             sa.TIMESTAMP(timezone=True),
-            server_default=sa.func.timezone("America/Bahia", sa.func.now()),
+            server_default=sa.func.timezone(settings.timezone, sa.func.now()),
             nullable=False,
         ),
         if_not_exists=True,

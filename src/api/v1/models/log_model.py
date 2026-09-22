@@ -8,7 +8,7 @@ from typing import Any
 
 from sqlalchemy import TIMESTAMP, Column, Integer, Numeric, String, func
 
-from .. import db
+from .. import config, db
 
 # Columns used for filtering are indexed (i.e., index=True)
 
@@ -48,7 +48,7 @@ class LogModel(db.base_db.Base):
 
     criado_em = Column(
         type_=TIMESTAMP(timezone=True),
-        server_default=func.timezone("America/Bahia", func.now()),
+        server_default=func.timezone(config.settings.timezone, func.now()),
         nullable=False,
         index=True,
     )

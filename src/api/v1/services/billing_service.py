@@ -8,7 +8,7 @@ from zoneinfo import ZoneInfo
 from fastapi import HTTPException, status
 from pydantic import NonNegativeInt, PositiveInt
 
-from .. import clients, schemas, utils
+from .. import clients, config, schemas, utils
 
 
 class BillingService:
@@ -66,7 +66,7 @@ class BillingService:
 
         partial_overdue_invoices: list[schemas.InvoiceOutSchema] = []
 
-        timezone = ZoneInfo("America/Bahia")
+        timezone = ZoneInfo(config.settings.timezone)
         now = dt.datetime.now(tz=timezone)
         today_date = now.date()
         iso_today_date = today_date.isoformat()  # YYYY-MM-DD

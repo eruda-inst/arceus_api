@@ -7,12 +7,11 @@ from zoneinfo import ZoneInfo
 
 from fastapi import HTTPException, status
 from pydantic import NonNegativeInt
-from sqlalchemy import case, func
+from sqlalchemy import case, func, select
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
 
-from .. import models, schemas
+from .. import config, models, schemas
 
 
 class MetricCrud:
@@ -31,7 +30,7 @@ class MetricCrud:
             A TodayAlwaysOutSchema with counts for 'hoje' (today) and 'sempre' (always).
         """
         try:
-            timezone = ZoneInfo("America/Bahia")
+            timezone = ZoneInfo(config.settings.timezone)
             today = dt.datetime.now(tz=timezone).date()
 
             # Count requests made today
@@ -67,7 +66,7 @@ class MetricCrud:
             A TodayAlwaysOutSchema with ResponseTimeStatsSchema for 'hoje' and 'sempre'.
         """
         try:
-            timezone = ZoneInfo("America/Bahia")
+            timezone = ZoneInfo(config.settings.timezone)
             today = dt.datetime.now(tz=timezone).date()
 
             success_filter = models.LogModel.codigo.between(200, 299)
@@ -126,7 +125,7 @@ class MetricCrud:
             A TodayAlwaysOutSchema with counts for 'hoje' and 'sempre'.
         """
         try:
-            timezone = ZoneInfo("America/Bahia")
+            timezone = ZoneInfo(config.settings.timezone)
             today = dt.datetime.now(tz=timezone).date()
 
             # Distinct protocols today
@@ -170,7 +169,7 @@ class MetricCrud:
             A TodayAlwaysOutSchema with lists of TopEndpointSchema.
         """
         try:
-            timezone = ZoneInfo("America/Bahia")
+            timezone = ZoneInfo(config.settings.timezone)
             today = dt.datetime.now(tz=timezone).date()
 
             # Top endpoints today
@@ -230,7 +229,7 @@ class MetricCrud:
             A TodayAlwaysOutSchema with lists of TopStatusCodeSchema.
         """
         try:
-            timezone = ZoneInfo("America/Bahia")
+            timezone = ZoneInfo(config.settings.timezone)
             today = dt.datetime.now(tz=timezone).date()
 
             # Top status codes today
@@ -290,7 +289,7 @@ class MetricCrud:
             A TodayAlwaysOutSchema with lists of TopHourSchema.
         """
         try:
-            timezone = ZoneInfo("America/Bahia")
+            timezone = ZoneInfo(config.settings.timezone)
             today = dt.datetime.now(tz=timezone).date()
 
             # Top hours today
@@ -350,7 +349,7 @@ class MetricCrud:
             A TodayAlwaysOutSchema with lists of TopWeekdaySchema.
         """
         try:
-            timezone = ZoneInfo("America/Bahia")
+            timezone = ZoneInfo(config.settings.timezone)
             today = dt.datetime.now(tz=timezone).date()
             dow_map = {
                 0: "Dom",
@@ -427,7 +426,7 @@ class MetricCrud:
             A TodayAlwaysOutSchema with lists of TopWorstEndpointSchema.
         """
         try:
-            timezone = ZoneInfo("America/Bahia")
+            timezone = ZoneInfo(config.settings.timezone)
             today = dt.datetime.now(tz=timezone).date()
 
             # Worst endpoints today
@@ -503,7 +502,7 @@ class MetricCrud:
             A TodayAlwaysOutSchema with lists of TopMonthDaySchema.
         """
         try:
-            timezone = ZoneInfo("America/Bahia")
+            timezone = ZoneInfo(config.settings.timezone)
             today = dt.datetime.now(tz=timezone).date()
 
             # Top days of current month
@@ -567,7 +566,7 @@ class MetricCrud:
             A TodayAlwaysOutSchema with lists of TopSlowestEndpointSchema.
         """
         try:
-            timezone = ZoneInfo("America/Bahia")
+            timezone = ZoneInfo(config.settings.timezone)
             today = dt.datetime.now(tz=timezone).date()
 
             # Slowest endpoints today
@@ -639,7 +638,7 @@ class MetricCrud:
             A TodayAlwaysOutSchema with lists of TopHttpMethodSchema.
         """
         try:
-            timezone = ZoneInfo("America/Bahia")
+            timezone = ZoneInfo(config.settings.timezone)
             today = dt.datetime.now(tz=timezone).date()
 
             # Top methods today
@@ -701,7 +700,7 @@ class MetricCrud:
             A TodayAlwaysOutSchema with lists of TopDepartmentSchema.
         """
         try:
-            timezone = ZoneInfo("America/Bahia")
+            timezone = ZoneInfo(config.settings.timezone)
             today = dt.datetime.now(tz=timezone).date()
 
             # Top departments today
@@ -764,7 +763,7 @@ class MetricCrud:
             A TodayAlwaysOutSchema with SuccessStatsSchema for 'hoje' and 'sempre'.
         """
         try:
-            timezone = ZoneInfo("America/Bahia")
+            timezone = ZoneInfo(config.settings.timezone)
             today = dt.datetime.now(tz=timezone).date()
 
             # Success stats today
@@ -821,7 +820,7 @@ class MetricCrud:
             A TodayAlwaysOutSchema with ErrorStatsSchema for 'hoje' and 'sempre'.
         """
         try:
-            timezone = ZoneInfo("America/Bahia")
+            timezone = ZoneInfo(config.settings.timezone)
             today = dt.datetime.now(tz=timezone).date()
 
             error_condition = (models.LogModel.codigo.between(400, 499)) | (
@@ -877,7 +876,7 @@ class MetricCrud:
             A TodayAlwaysOutSchema with lists of TopClientNameSchema.
         """
         try:
-            timezone = ZoneInfo("America/Bahia")
+            timezone = ZoneInfo(config.settings.timezone)
             today = dt.datetime.now(tz=timezone).date()
 
             # Top clients today

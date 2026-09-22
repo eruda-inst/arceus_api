@@ -14,15 +14,14 @@ from jose import ExpiredSignatureError, JWTError, jwt
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from .. import cruds, models, schemas
-from ..config import settings
+from .. import config, cruds, models, schemas
 
 # JWT configuration constants
 ALGORITHM = "HS256"
-SECRET_KEY = settings.secret_key.get_secret_value()
-TOKEN_EXPIRE_MINUTES = settings.token_expire_minutes
-REFRESH_TOKEN_EXPIRE_DAYS = settings.refresh_token_expire_days
-TOKEN_EXPIRE_SECONDS = settings.token_expire_seconds
+SECRET_KEY = config.settings.secret_key.get_secret_value()
+TOKEN_EXPIRE_MINUTES = config.settings.token_expire_minutes
+REFRESH_TOKEN_EXPIRE_DAYS = config.settings.refresh_token_expire_days
+TOKEN_EXPIRE_SECONDS = config.settings.token_expire_seconds
 
 
 class AuthService:
@@ -243,6 +242,6 @@ class AuthService:
         """
         to_encode = data.copy()
         to_encode["ver"] = version
-        expire = dt.datetime.now(ZoneInfo("America/Bahia")) + expires_delta
+        expire = dt.datetime.now(ZoneInfo(config.settings.timezone)) + expires_delta
         to_encode.update({"exp": expire})
         return jwt.encode(claims=to_encode, key=SECRET_KEY, algorithm=ALGORITHM)

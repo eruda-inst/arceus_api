@@ -5,7 +5,7 @@ SQLAlchemy model for the Permission (Permissão) table.
 from sqlalchemy import TIMESTAMP, Column, Integer, String, func
 from sqlalchemy.orm import relationship
 
-from .. import db
+from .. import config, db
 
 
 class PermModel(db.Base):
@@ -27,7 +27,7 @@ class PermModel(db.Base):
     codigo = Column(type_=String, nullable=False, unique=True)
     criado_em = Column(
         type_=TIMESTAMP(timezone=True),
-        server_default=func.timezone("America/Bahia", func.now()),
+        server_default=func.timezone(config.settings.timezone, func.now()),
         nullable=False,
     )
     # Many-to-many relationship with groups

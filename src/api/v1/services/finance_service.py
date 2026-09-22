@@ -11,7 +11,7 @@ from fastapi import HTTPException, status
 from pydantic import NonNegativeInt, PositiveInt
 from starlette.status import HTTP_404_NOT_FOUND
 
-from .. import clients, schemas, services, utils
+from .. import clients, config, schemas, services, utils
 from . import CustomerService
 
 
@@ -262,7 +262,7 @@ class FinanceService:
         partial_open_invoices: list[schemas.InvoiceOutSchema] = []
 
         total_overdue_invoices = 0
-        now = dt.datetime.now(ZoneInfo("America/Bahia"))
+        now = dt.datetime.now(ZoneInfo(config.settings.timezone))
         actual_date = now.date()
         actual_iso_date = actual_date.isoformat()  # AAAA-MM-DD
         actual_month = str(actual_date.month).zfill(2)  # 01, instead of 1, for example

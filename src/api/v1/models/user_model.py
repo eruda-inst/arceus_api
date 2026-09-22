@@ -7,7 +7,7 @@ from typing import Any
 from sqlalchemy import TIMESTAMP, Boolean, Column, ForeignKey, Integer, String, func
 from sqlalchemy.orm import relationship
 
-from .. import db
+from .. import config, db
 
 # Columns used for filtering are indexed (i.e., index=True)
 
@@ -39,12 +39,12 @@ class UserModel(db.Base):
     versao_token = Column(type_=Integer, default=0, server_default="0", nullable=False)
     criado_em = Column(
         type_=TIMESTAMP(timezone=True),
-        server_default=func.timezone("America/Bahia", func.now()),
+        server_default=func.timezone(config.settings.timezone, func.now()),
         nullable=False,
     )
     atualizado_em = Column(
         type_=TIMESTAMP(timezone=True),
-        onupdate=func.timezone("America/Bahia", func.now()),
+        onupdate=func.timezone(config.settings.timezone, func.now()),
     )
     id_grupo = Column(
         Integer,
