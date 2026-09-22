@@ -146,26 +146,58 @@ async def get_curr_user_ws(
     ws: WebSocket,
     session: Annotated[AsyncSession, Depends(db.get_db)],
 ) -> models.UserModel:
-    auth = ws.headers.get("authorization") or ""
-    scheme, _, token = auth.partition(" ")
-    if scheme.lower() != "bearer" or not token:
-        raise WebSocketException(
-            code=status.WS_1008_POLICY_VIOLATION,
-            reason="Cabeçalho de autorização faltando ou malformado",
-        )
+    """
+    Dependency to retrieve the currently authenticated user from a WebSocket connection.
+
+    The token can be provided either as a `token` query parameter or in the
+    `Authorization: Bearer <token>` header. The query parameter takes precedence.
+
+    Args:
+        ws: The active WebSocket connection.
+        session: Database session.
+
+    Returns:
+        The authenticated UserModel instance.
+
+    Raises:
+        WebSocketException: 1008 if the token is missing, malformed, invalid,
+            or the user does not exist.
+    """
+    # Prefer the token from the query string, e.g. ws://...?token=...
+    token = ws.query_params.get("token")
+
+    # Fall back to the Authorization header if no query token was provided
+    if not token:
+        auth = ws.headers.get("authorization") or ""
+        scheme, _, header_token = auth.partition(" ")
+        if scheme.lower() != "bearer" or not header_token:
+            raise WebSocketException(
+                code=status.WS_1008_POLICY_VIOLATION,
+                reason="Cabeçalho de autorização faltando ou malformado",
+            )
+        token = header_token
+
     try:
+        # Decode and validate the JWT using the configured secret
         payload = jwt.decode(
-            token, config.settings.secret_key.get_secret_value(), algorithms=["HS256"]
+            token=token,
+            key=config.settings.secret_key.get_secret_value(),
+            algorithms=["HS256"],
         )
+
+        # The subject (`sub`) is expected to contain the user's email
         user = await cruds.UserCrud.get_by(db=session, email=payload["sub"])
     except (JWTError, KeyError):
         raise WebSocketException(
             code=status.WS_1008_POLICY_VIOLATION,
             reason="Token inválido",
         )
+
+    # Ensure the token refers to an existing user
     if user is None:
         raise WebSocketException(
             code=status.WS_1008_POLICY_VIOLATION,
             reason="Usuário inexistente",
         )
+
     return user
