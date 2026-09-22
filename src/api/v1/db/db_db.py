@@ -7,11 +7,11 @@ from typing import Any
 
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
-from ..config import settings
+from .. import config
 
 # Create the asynchronous database engine
 engine = create_async_engine(
-    url=settings.db_url_async,
+    url=config.settings.db_url_async,
     future=True,
     echo=False,
     pool_pre_ping=True,  # Verify connections before using them

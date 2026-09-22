@@ -15,7 +15,7 @@ from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.types import ASGIApp
 
-from .. import cruds, db, services, websockets
+from .. import cruds, db, services, ws
 
 
 class LogMiddleware(BaseHTTPMiddleware):
@@ -144,8 +144,8 @@ class LogMiddleware(BaseHTTPMiddleware):
             )
 
         # Broadcast metric and log updates via WebSocket (fire-and-forget)
-        asyncio.create_task(websockets.metric_manager.broadcast())
-        asyncio.create_task(websockets.log_manager.broadcast())
+        asyncio.create_task(ws.metric_manager.broadcast())
+        asyncio.create_task(ws.log_manager.broadcast())
 
         # Return the response with the original body and headers
         return Response(

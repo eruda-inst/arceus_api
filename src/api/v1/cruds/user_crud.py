@@ -13,7 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
 
-from .. import models, schemas, websockets
+from .. import models, schemas, ws
 
 ph = PasswordHasher()
 
@@ -53,7 +53,7 @@ class UserCrud:
             )
 
         await db.refresh(new_user)
-        await websockets.user_manager.broadcast()
+        await ws.user_manager.broadcast()
 
         return new_user
 
@@ -191,7 +191,7 @@ class UserCrud:
                 detail="Erro desconhecido no banco de dados",
             )
 
-        await websockets.user_manager.broadcast()
+        await ws.user_manager.broadcast()
 
     @staticmethod
     async def toggle_status_by_id(
@@ -235,7 +235,7 @@ class UserCrud:
             )
 
         await db.refresh(user)
-        await websockets.user_manager.broadcast()
+        await ws.user_manager.broadcast()
 
         return user
 

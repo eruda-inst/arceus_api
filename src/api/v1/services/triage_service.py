@@ -6,8 +6,7 @@ from typing import Any
 
 from fastapi import HTTPException, status
 
-from .. import clients, schemas, utils
-from . import CustomerService
+from .. import clients, schemas, services, utils
 
 
 class TriageService:
@@ -30,7 +29,7 @@ class TriageService:
             ContactOutSchema with the customer's cellphone number.
         """
         # --- Get customer ---
-        customer = await CustomerService.get_ixc_customer(
+        customer = await services.CustomerService.get_ixc_customer(
             protocol=protocol, cnpj_cpf=cnpj_cpf
         )
 
@@ -57,7 +56,7 @@ class TriageService:
             HTTPException: 500 if the update fails.
         """
         # --- Get customer ---
-        old_customer = await CustomerService.get_ixc_customer(
+        old_customer = await services.CustomerService.get_ixc_customer(
             protocol=protocol, cnpj_cpf=cnpj_cpf
         )
 

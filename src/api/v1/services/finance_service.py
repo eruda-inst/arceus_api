@@ -12,7 +12,6 @@ from pydantic import NonNegativeInt, PositiveInt
 from starlette.status import HTTP_404_NOT_FOUND
 
 from .. import clients, config, schemas, services, utils
-from . import CustomerService
 
 
 class FinanceService:
@@ -441,7 +440,9 @@ class FinanceService:
             CredentialOutSchema with username and password.
         """
         # --- Get customer ---
-        customer = await CustomerService.get_ixc_customer(customer_id=customer_id)
+        customer = await services.CustomerService.get_ixc_customer(
+            customer_id=customer_id
+        )
 
         return schemas.CredentialOutSchema(
             usuario=customer["hotsite_email"], senha=customer["senha"]

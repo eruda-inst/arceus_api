@@ -10,13 +10,14 @@ Provides dependencies for:
 import secrets
 from typing import Annotated
 
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, WebSocket, WebSocketException, status
 from fastapi.security import (
     HTTPAuthorizationCredentials,
     HTTPBasic,
     HTTPBasicCredentials,
     HTTPBearer,
 )
+from jose import JWTError, jwt  # whatever you use
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from .. import config, cruds, db, models, services, utils
@@ -139,3 +140,32 @@ def has_perm(req_perm: utils.PermCodes):
         return curr_user
 
     return dep
+
+
+async def get_curr_user_ws(
+    ws: WebSocket,
+    session: Annotated[AsyncSession, Depends(db.get_db)],
+) -> models.UserModel:
+    auth = ws.headers.get("authorization") or ""
+    scheme, _, token = auth.partition(" ")
+    if scheme.lower() != "bearer" or not token:
+        raise WebSocketException(
+            code=status.WS_1008_POLICY_VIOLATION,
+            reason="Cabeçalho de autorização faltando ou malformado",
+        )
+    try:
+        payload = jwt.decode(
+            token, config.settings.secret_key.get_secret_value(), algorithms=["HS256"]
+        )
+        user = await cruds.UserCrud.get_by(db=session, email=payload["sub"])
+    except (JWTError, KeyError):
+        raise WebSocketException(
+            code=status.WS_1008_POLICY_VIOLATION,
+            reason="Token inválido",
+        )
+    if user is None:
+        raise WebSocketException(
+            code=status.WS_1008_POLICY_VIOLATION,
+            reason="Usuário inexistente",
+        )
+    return user

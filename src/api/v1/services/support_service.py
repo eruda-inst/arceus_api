@@ -10,8 +10,7 @@ from fastapi import HTTPException, status
 from httpx import QueryParams
 from pydantic import NonNegativeInt, PositiveInt
 
-from .. import clients, schemas, utils
-from . import CustomerService
+from .. import clients, schemas, services, utils
 
 
 class SupportService:
@@ -234,7 +233,7 @@ class SupportService:
             A ListOutSchema of ContractOutSchema.
         """
         # --- Get active contracts ---
-        contracts = await CustomerService.get_active_contracts(
+        contracts = await services.CustomerService.get_active_contracts(
             protocol=protocol,
             cnpj_cpf=cnpj_cpf,
             page=page,
