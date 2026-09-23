@@ -165,7 +165,7 @@ class ConnectionManager:
         and to support many simultaneous filter combinations).
         """
         async with db.AsyncSessionLocal() as session:
-            _, all_logs = await cruds.LogCrud.get_all(db=session)
+            all_logs = await cruds.LogCrud.get_all_unpaginated(db=session)
             all_dicts: list[dict[str, Any]] = [log.to_dict() for log in all_logs]
 
             for a_c in self.active_connections:

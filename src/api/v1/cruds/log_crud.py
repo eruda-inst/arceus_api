@@ -69,6 +69,25 @@ class LogCrud:
         return log_entry
 
     @staticmethod
+    async def get_all_unpaginated(db: AsyncSession) -> Sequence[models.LogModel]:
+        """
+        Retrieve all log entries without filtering or pagination.
+
+        Intended for consumers that need the full dataset in memory (e.g. the
+        WebSocket broadcast routine, which applies filters and pagination in
+        Python across many simultaneous filter combinations).
+
+        Args:
+            db: Async database session.
+
+        Returns:
+            All log entries, ordered by id descending.
+        """
+        stmt = select(models.LogModel).order_by(models.LogModel.id.desc())
+        result = await db.execute(stmt)
+        return result.scalars().all()
+
+    @staticmethod
     async def get_all(
         db: AsyncSession,
         page: PositiveInt = 1,

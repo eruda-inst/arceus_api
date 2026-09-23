@@ -181,7 +181,7 @@ async def get_curr_user_ws(
         # Decode and validate the JWT using the configured secret
         payload = jwt.decode(
             token=token,
-            key=config.settings.secret_key.get_secret_value(),
+            key=config.settings.jwt_secret_key.get_secret_value(),
             algorithms=["HS256"],
         )
 
