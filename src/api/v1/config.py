@@ -57,12 +57,11 @@ class Settings(BaseSettings):
     bot_pass: SecretStr = Field(default=SecretStr("bot_pass"))
     bot_username: str = Field(default="bot_username")
 
-    # JWT token lifetimes
-    token_expire_minutes: NonNegativeInt = Field(default=0)
-    refresh_token_expire_days: NonNegativeInt = Field(default=0)
-
-    # JWT signing secret
-    secret_key: SecretStr = Field(default=SecretStr("secret_key"))
+    # JWT token settings
+    jwt_access_token_expire_minutes: NonNegativeInt = Field(default=0)
+    jwt_algorithm: str = Field(default="jwt_algorithm")
+    jwt_refresh_token_expire_days: NonNegativeInt = Field(default=0)
+    jwt_secret_key: SecretStr = Field(default=SecretStr("jwt_secret_key"))
 
     # Flag controlling whether migrations should run at startup
     run_migrations: str = Field(default="run_migrations")
@@ -72,7 +71,7 @@ class Settings(BaseSettings):
 
     @computed_field
     @property
-    def token_expire_seconds(self) -> NonNegativeInt:
+    def jwt_token_expire_seconds(self) -> NonNegativeInt:
         """
         Access token lifetime expressed in seconds.
 
@@ -81,7 +80,7 @@ class Settings(BaseSettings):
         Returns:
             Token expiry in seconds.
         """
-        return self.token_expire_minutes * 60
+        return self.jwt_access_token_expire_minutes * 60
 
 
 settings = Settings()

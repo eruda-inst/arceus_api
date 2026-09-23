@@ -5,23 +5,30 @@ Handles JWT token verification, refresh, and login.
 """
 
 import datetime as dt
-from typing import Any
+from typing import Any, Final
 from zoneinfo import ZoneInfo
 
 from fastapi import HTTPException, status
 from fastapi.exceptions import ValidationException
 from jose import ExpiredSignatureError, JWTError, jwt
+from pydantic import NonNegativeInt
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from .. import config, cruds, models, schemas
 
 # JWT configuration constants
-ALGORITHM = "HS256"
-SECRET_KEY = config.settings.secret_key.get_secret_value()
-TOKEN_EXPIRE_MINUTES = config.settings.token_expire_minutes
-REFRESH_TOKEN_EXPIRE_DAYS = config.settings.refresh_token_expire_days
-TOKEN_EXPIRE_SECONDS = config.settings.token_expire_seconds
+JWT_ACCESS_TOKEN_EXPIRE_MINUTES: Final[NonNegativeInt] = (
+    config.settings.jwt_refresh_token_expire_days
+)
+JWT_ALGORITHM: Final[str] = config.settings.jwt_algorithm
+JWT_REFRESH_TOKEN_EXPIRE_DAYS: Final[NonNegativeInt] = (
+    config.settings.jwt_refresh_token_expire_days
+)
+JWT_SECRET_KEY: Final[str] = config.settings.jwt_secret_key.get_secret_value()
+JWT_TOKEN_EXPIRE_SECONDS: Final[NonNegativeInt] = (
+    config.settings.jwt_token_expire_seconds
+)
 
 
 class AuthService:
@@ -53,7 +60,7 @@ class AuthService:
         """
         try:
             payload = jwt.decode(
-                token=access_token, key=SECRET_KEY, algorithms=[ALGORITHM]
+                token=access_token, key=JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM]
             )
             email = payload.get("sub")
             if not email:
@@ -109,7 +116,7 @@ class AuthService:
         """
         try:
             payload = jwt.decode(
-                token=refresh_token, key=SECRET_KEY, algorithms=[ALGORITHM]
+                token=refresh_token, key=JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM]
             )
             email = payload.get("sub")
             if not email:
@@ -145,18 +152,18 @@ class AuthService:
         # Issue a new pair of access and refresh tokens
         new_access_token = cls._create_token(
             data=data,
-            expires_delta=dt.timedelta(minutes=TOKEN_EXPIRE_MINUTES),
+            expires_delta=dt.timedelta(minutes=JWT_ACCESS_TOKEN_EXPIRE_MINUTES),
             version=user_db.versao_token,  # type: ignore
         )
         new_refresh_token = cls._create_token(
             data=data,
-            expires_delta=dt.timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS),
+            expires_delta=dt.timedelta(days=JWT_REFRESH_TOKEN_EXPIRE_DAYS),
             version=user_db.versao_token,  # type: ignore
         )
         return schemas.AccessTokenOutSchema(
             access_token=new_access_token,
             refresh_token=new_refresh_token,
-            expires_in=TOKEN_EXPIRE_SECONDS,
+            expires_in=JWT_TOKEN_EXPIRE_SECONDS,
         )
 
     @classmethod
@@ -199,18 +206,18 @@ class AuthService:
             data = {"sub": email}
             access_token = cls._create_token(
                 data=data,
-                expires_delta=dt.timedelta(minutes=TOKEN_EXPIRE_MINUTES),
+                expires_delta=dt.timedelta(minutes=JWT_ACCESS_TOKEN_EXPIRE_MINUTES),
                 version=user_db.versao_token,  # type: ignore
             )
             refresh_token = cls._create_token(
                 data=data,
-                expires_delta=dt.timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS),
+                expires_delta=dt.timedelta(days=JWT_REFRESH_TOKEN_EXPIRE_DAYS),
                 version=user_db.versao_token,  # type: ignore
             )
             return schemas.AccessTokenOutSchema(
                 access_token=access_token,
                 refresh_token=refresh_token,
-                expires_in=TOKEN_EXPIRE_SECONDS,
+                expires_in=JWT_TOKEN_EXPIRE_SECONDS,
             )
 
         except ValidationException:
@@ -244,4 +251,4 @@ class AuthService:
         to_encode["ver"] = version
         expire = dt.datetime.now(ZoneInfo(config.settings.timezone)) + expires_delta
         to_encode.update({"exp": expire})
-        return jwt.encode(claims=to_encode, key=SECRET_KEY, algorithm=ALGORITHM)
+        return jwt.encode(claims=to_encode, key=JWT_SECRET_KEY, algorithm=JWT_ALGORITHM)
