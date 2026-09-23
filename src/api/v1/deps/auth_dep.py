@@ -128,7 +128,7 @@ def has_perm(req_perm: utils.PermCodes):
             HTTPException: 403 if permission is missing.
         """
         # Fetch all permissions for the current user
-        _, user_perms = await cruds.PermCrud.get_all_by(db=db, id_usuario=curr_user.id)  # type: ignore
+        _, user_perms = await cruds.PermCrud.get_all_by(db=db, user_id=curr_user.id)  # type: ignore
 
         # Extract permission codes
         perm_codes = [p.codigo for p in user_perms]
