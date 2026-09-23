@@ -9,7 +9,7 @@ import json
 from http import HTTPMethod
 from typing import Any, ClassVar
 
-from httpx import (
+from httpx2 import (
     URL,
     AsyncClient,
     AsyncHTTPTransport,

@@ -7,7 +7,7 @@ import re
 from typing import Any
 
 from fastapi import HTTPException, status
-from httpx import QueryParams
+from httpx2 import QueryParams
 from pydantic import NonNegativeInt, PositiveInt
 
 from .. import clients, schemas, services, utils

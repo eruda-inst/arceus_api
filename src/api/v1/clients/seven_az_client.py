@@ -7,7 +7,7 @@ Provides an asynchronous HTTP client for making requests to SevenAZ endpoints.
 from http import HTTPMethod
 from typing import Any, ClassVar
 
-from httpx import (
+from httpx2 import (
     URL,
     AsyncClient,
     AsyncHTTPTransport,
