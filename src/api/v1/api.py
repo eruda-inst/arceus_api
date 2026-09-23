@@ -34,7 +34,6 @@ api_v1_router.include_router(router=routers.user_router, dependencies=[CurrUserD
 api_v1_router.include_router(router=routers.ixc_user_router, dependencies=[CurrUserDep])
 
 # WebSockets routers
-api_v1_router.include_router(router=ws.log_ws_router)
-# api_v1_router.include_router(router=ws.log_ws_router, dependencies=[CurrUserWsDep])
+api_v1_router.include_router(router=ws.log_ws_router, dependencies=[CurrUserWsDep])
 api_v1_router.include_router(router=ws.metric_ws_router, dependencies=[CurrUserWsDep])
 api_v1_router.include_router(router=ws.user_ws_router, dependencies=[CurrUserWsDep])
