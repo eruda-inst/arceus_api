@@ -19,7 +19,7 @@ from .. import config, cruds, models, schemas
 
 # JWT configuration constants
 JWT_ACCESS_TOKEN_EXPIRE_MINUTES: Final[NonNegativeInt] = (
-    config.settings.jwt_refresh_token_expire_days
+    config.settings.jwt_access_token_expire_minutes
 )
 JWT_ALGORITHM: Final[str] = config.settings.jwt_algorithm
 JWT_REFRESH_TOKEN_EXPIRE_DAYS: Final[NonNegativeInt] = (
@@ -150,20 +150,25 @@ class AuthService:
 
         data = {"sub": email}
         # Issue a new pair of access and refresh tokens
+        access_token_timedelta = dt.timedelta(minutes=JWT_ACCESS_TOKEN_EXPIRE_MINUTES)
         new_access_token = cls._create_token(
             data=data,
-            expires_delta=dt.timedelta(minutes=JWT_ACCESS_TOKEN_EXPIRE_MINUTES),
+            expires_delta=access_token_timedelta,
             version=user_db.versao_token,  # type: ignore
         )
+        refresh_token_timedelta = dt.timedelta(days=JWT_REFRESH_TOKEN_EXPIRE_DAYS)
         new_refresh_token = cls._create_token(
             data=data,
-            expires_delta=dt.timedelta(days=JWT_REFRESH_TOKEN_EXPIRE_DAYS),
+            expires_delta=refresh_token_timedelta,
             version=user_db.versao_token,  # type: ignore
         )
+        now = dt.datetime.now(tz=ZoneInfo(config.settings.timezone))
+        expires_at = now + access_token_timedelta
         return schemas.AccessTokenOutSchema(
+            expires_at=expires_at,
+            expires_in=JWT_TOKEN_EXPIRE_SECONDS,
             access_token=new_access_token,
             refresh_token=new_refresh_token,
-            expires_in=JWT_TOKEN_EXPIRE_SECONDS,
         )
 
     @classmethod
@@ -204,20 +209,27 @@ class AuthService:
                 raise HTTPException(status.HTTP_403_FORBIDDEN, "Usuário inativo")
 
             data = {"sub": email}
+            access_token_timedelta = dt.timedelta(
+                minutes=JWT_ACCESS_TOKEN_EXPIRE_MINUTES
+            )
             access_token = cls._create_token(
                 data=data,
-                expires_delta=dt.timedelta(minutes=JWT_ACCESS_TOKEN_EXPIRE_MINUTES),
+                expires_delta=access_token_timedelta,
                 version=user_db.versao_token,  # type: ignore
             )
+            refresh_token_timedelta = dt.timedelta(days=JWT_REFRESH_TOKEN_EXPIRE_DAYS)
             refresh_token = cls._create_token(
                 data=data,
-                expires_delta=dt.timedelta(days=JWT_REFRESH_TOKEN_EXPIRE_DAYS),
+                expires_delta=refresh_token_timedelta,
                 version=user_db.versao_token,  # type: ignore
             )
+            now = dt.datetime.now(tz=ZoneInfo(config.settings.timezone))
+            expires_at = now + access_token_timedelta
             return schemas.AccessTokenOutSchema(
+                expires_in=JWT_TOKEN_EXPIRE_SECONDS,
+                expires_at=expires_at,
                 access_token=access_token,
                 refresh_token=refresh_token,
-                expires_in=JWT_TOKEN_EXPIRE_SECONDS,
             )
 
         except ValidationException:
