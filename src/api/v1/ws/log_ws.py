@@ -6,8 +6,7 @@ with optional filters and pagination.
 """
 
 import datetime as dt
-from dataclasses import dataclass
-from typing import Annotated, Any
+from typing import Annotated, Any, TypedDict
 
 from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect, status
 from pydantic import BaseModel, Field, PositiveInt, ValidationError
@@ -57,8 +56,7 @@ class ParamsInSchema(BaseModel):
     )
 
 
-@dataclass
-class Connection:
+class Connection(TypedDict):
     """
     Represents a single active WebSocket connection with its current filter params.
     """
@@ -97,7 +95,7 @@ class ConnectionManager:
             ws: The WebSocket instance to remove.
         """
         for active_connection in self.active_connections:
-            if active_connection.socket == ws:
+            if active_connection["socket"] == ws:
                 self.active_connections.remove(active_connection)
                 break
 
@@ -110,8 +108,8 @@ class ConnectionManager:
             params: New parameters to apply.
         """
         for active_connection in self.active_connections:
-            if active_connection.socket is ws:
-                active_connection.params = params
+            if active_connection["socket"] is ws:
+                active_connection["params"] = params
                 break
 
     async def unicast(self, db: AsyncSession, ws: WebSocket) -> None:
@@ -123,7 +121,7 @@ class ConnectionManager:
             ws: The WebSocket instance to send data to.
         """
         for a_c in self.active_connections:
-            socket, params = a_c.socket, a_c.params
+            socket, params = a_c["socket"], a_c["params"]
 
             if socket == ws:
                 pagina = params.pagina or 1
@@ -169,7 +167,7 @@ class ConnectionManager:
             all_dicts: list[dict[str, Any]] = [log.to_dict() for log in all_logs]
 
             for a_c in self.active_connections:
-                params = a_c.params
+                params = a_c["params"]
                 filtered = all_dicts[:]
 
                 # Apply text filters (case-insensitive, partial match)
@@ -242,7 +240,7 @@ class ConnectionManager:
                     ),
                 )
 
-                await a_c.socket.send_json(res.model_dump(mode="json"))
+                await a_c["socket"].send_json(res.model_dump(mode="json"))
 
 
 log_manager = ConnectionManager()

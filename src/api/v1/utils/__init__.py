@@ -27,7 +27,7 @@ from .enums import (
 )
 from .helpers import Formatter
 from .ixc_types import Param, SortOrder
-from .params import CnpjCpf, DbDep, IdLogin, ItemsPerPage, Page, Protocol
+from .params import CnpjCpf, DbDep, ItemsPerPage, LoginID, Page, Protocol
 
 __all__ = [
     "AddressOriginCode",
@@ -45,7 +45,7 @@ __all__ = [
     "IXCUserAccessTypeLabel",
     "IXCUserStatusCode",
     "IXCUserStatusLabel",
-    "IdLogin",
+    "LoginID",
     "InternetStatusCode",
     "InternetStatusLabel",
     "ItemsPerPage",

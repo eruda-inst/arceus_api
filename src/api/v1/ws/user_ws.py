@@ -5,8 +5,7 @@ Provides a WebSocket endpoint that allows clients to subscribe to user list
 updates with optional filters and pagination.
 """
 
-from dataclasses import dataclass
-from typing import Annotated, Any
+from typing import Annotated, Any, TypedDict
 
 from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect, status
 from pydantic import BaseModel, Field, PositiveInt, ValidationError
@@ -19,7 +18,7 @@ from .. import cruds, db, models, schemas
 user_ws_router = APIRouter(prefix="/usuarios-ws", tags=["Usuários WS"])
 
 
-class Params(BaseModel):
+class ParamsInSchema(BaseModel):
     """
     Input schema for user stream filters and pagination.
     """
@@ -40,14 +39,13 @@ class Params(BaseModel):
     )
 
 
-@dataclass
-class Connection:
+class Connection(TypedDict):
     """
     Represents a single active WebSocket connection with its current filter params.
     """
 
     socket: WebSocket
-    params: Params
+    params: ParamsInSchema
 
 
 class ConnectionManager:
@@ -59,7 +57,7 @@ class ConnectionManager:
     def __init__(self) -> None:
         self.active_connections: list[Connection] = []
 
-    def connect(self, ws: WebSocket, params: Params) -> None:
+    def connect(self, ws: WebSocket, params: ParamsInSchema) -> None:
         """
         Register a new WebSocket connection with its initial parameters.
 
@@ -80,11 +78,11 @@ class ConnectionManager:
             ws: The WebSocket instance to remove.
         """
         for active_connection in self.active_connections:
-            if active_connection.socket == ws:
+            if active_connection["socket"] == ws:
                 self.active_connections.remove(active_connection)
                 break
 
-    def change_params(self, ws: WebSocket, params: Params) -> None:
+    def change_params(self, ws: WebSocket, params: ParamsInSchema) -> None:
         """
         Update the filter/pagination parameters for a given connection.
 
@@ -93,8 +91,8 @@ class ConnectionManager:
             params: New parameters to apply.
         """
         for active_connection in self.active_connections:
-            if active_connection.socket is ws:
-                active_connection.params = params
+            if active_connection["socket"] is ws:
+                active_connection["params"] = params
                 break
 
     async def unicast(self, db: AsyncSession, ws: WebSocket) -> None:
@@ -106,7 +104,7 @@ class ConnectionManager:
             ws: The WebSocket instance to send data to.
         """
         for a_c in self.active_connections:
-            socket, params = a_c.socket, a_c.params
+            socket, params = a_c["socket"], a_c["params"]
 
             if socket == ws:
                 pagina = params.pagina or 1
@@ -154,7 +152,7 @@ class ConnectionManager:
                 all_dicts.append(d)
 
             for a_c in self.active_connections:
-                params = a_c.params
+                params = a_c["params"]
                 filtered = all_dicts[:]
 
                 # Apply text filters (case-insensitive, partial match)
@@ -192,7 +190,7 @@ class ConnectionManager:
                     ),
                 )
 
-                await a_c.socket.send_json(res.model_dump(mode="json"))
+                await a_c["socket"].send_json(res.model_dump(mode="json"))
 
 
 user_manager = ConnectionManager()
@@ -211,7 +209,7 @@ async def get(db: Annotated[AsyncSession, Depends(db.get_db)], ws: WebSocket) ->
 
     try:
         raw = await ws.receive_json()
-        initial_params = Params(**raw)
+        initial_params = ParamsInSchema(**raw)
         user_manager.connect(ws=ws, params=initial_params)
         await user_manager.unicast(db=db, ws=ws)
     except ValidationError as e:
@@ -232,7 +230,7 @@ async def get(db: Annotated[AsyncSession, Depends(db.get_db)], ws: WebSocket) ->
     while True:
         try:
             raw = await ws.receive_json()
-            params = Params(**raw)
+            params = ParamsInSchema(**raw)
             user_manager.change_params(ws=ws, params=params)
             await user_manager.unicast(db=db, ws=ws)
         except ValidationError as e:

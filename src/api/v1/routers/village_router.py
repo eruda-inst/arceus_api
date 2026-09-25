@@ -15,7 +15,7 @@ village_router = APIRouter(prefix="/vila", tags=["Vila"])
     path="/atendimentos", summary="Obtém atendimentos abertos de um cliente"
 )
 async def get_tickets(
-    id_login: utils.IdLogin,
+    id_login: utils.LoginID,
     pagina: utils.Page = 1,
     itens_por_pagina: utils.ItemsPerPage = 10,
 ) -> schemas.ListOutSchema[schemas.TicketOutSchema]:
@@ -72,7 +72,7 @@ async def get_contract_by_pppoe(
 
 @village_router.patch(path="/dados-wifi", summary="Atualiza dados wifi de um cliente")
 async def patch_wifi_data(
-    id_login: utils.IdLogin,
+    id_login: utils.LoginID,
     ssid: Annotated[str | None, Body(description="Novo SSID da rede wifi")] = None,
     senha_ssid: Annotated[
         str | None, Body(description="Nova senha da rede wifi")
@@ -87,7 +87,7 @@ async def patch_wifi_data(
 
 
 @village_router.post(path="/desconectar-cliente", summary="Desconecta um cliente")
-async def post_disconnect_customer(id_login: utils.IdLogin) -> schemas.MessageOutSchema:
+async def post_disconnect_customer(id_login: utils.LoginID) -> schemas.MessageOutSchema:
     """
     Desconecta um cliente, através do ID de login
     """
@@ -95,7 +95,7 @@ async def post_disconnect_customer(id_login: utils.IdLogin) -> schemas.MessageOu
 
 
 @village_router.post(path="/limpar-mac", summary="Limpa MAC Address de um cliente")
-async def post_clear_mac(id_login: utils.IdLogin) -> schemas.MessageOutSchema:
+async def post_clear_mac(id_login: utils.LoginID) -> schemas.MessageOutSchema:
     """
     Limpa MAC Address de um cliente, através do ID de login
     """
@@ -103,7 +103,7 @@ async def post_clear_mac(id_login: utils.IdLogin) -> schemas.MessageOutSchema:
 
 
 @village_router.get(path="/servidor-dns", summary="Obtém servidor DNS de um cliente")
-async def get_dns_server(id_login: utils.IdLogin) -> schemas.DnsServerOut:
+async def get_dns_server(id_login: utils.LoginID) -> schemas.DnsServerOut:
     """
     Obtém servidor DNS de um cliente, a partir do ID de login
     """
@@ -111,7 +111,7 @@ async def get_dns_server(id_login: utils.IdLogin) -> schemas.DnsServerOut:
 
 
 @village_router.get(path="/sinal-fibra", summary="Obtém RX e TX do sinal da fibra")
-async def get_fiber_signal(id_login: utils.IdLogin) -> schemas.FiberSignalOutSchema:
+async def get_fiber_signal(id_login: utils.LoginID) -> schemas.FiberSignalOutSchema:
     """
     Obtém taxas de transmissão e de recepção do sinal da fibra, a partir do ID de login
     """
@@ -122,7 +122,7 @@ async def get_fiber_signal(id_login: utils.IdLogin) -> schemas.FiberSignalOutSch
     path="/status-conexao", summary="Obtém status da conexão de um cliente"
 )
 async def get_connection_status(
-    id_login: utils.IdLogin,
+    id_login: utils.LoginID,
 ) -> schemas.ConnectionStatusOutSchema:
     """
     Obtém status da conexão de um cliente, através do ID de login
@@ -131,7 +131,7 @@ async def get_connection_status(
 
 
 @village_router.get(path="/status-onu", summary="Obtém status da ONU de um cliente")
-async def get_onu_status(id_login: utils.IdLogin) -> schemas.OnuStatusOutSchema:
+async def get_onu_status(id_login: utils.LoginID) -> schemas.OnuStatusOutSchema:
     """
     Obtém status da ONU de um cliente, através do ID de login
     """
@@ -139,7 +139,7 @@ async def get_onu_status(id_login: utils.IdLogin) -> schemas.OnuStatusOutSchema:
 
 
 @village_router.get(path="/tem-ipv6", summary="Verifica se o cliente possui IPV6")
-async def get_has_ipv6(id_login: utils.IdLogin) -> schemas.HasIPV6OutSchema:
+async def get_has_ipv6(id_login: utils.LoginID) -> schemas.HasIPV6OutSchema:
     """
     Verifica se o cliente possui IPV6 ativo, a partir do ID de login
     """
@@ -147,7 +147,7 @@ async def get_has_ipv6(id_login: utils.IdLogin) -> schemas.HasIPV6OutSchema:
 
 
 @village_router.get(path="/uptime", summary="Obtém uptime de um dispositivo")
-async def get_uptime(id_login: utils.IdLogin) -> schemas.UptimeOutSchema:
+async def get_uptime(id_login: utils.LoginID) -> schemas.UptimeOutSchema:
     """
     Obtém uptime de um cliente, a partir do ID de login
     """

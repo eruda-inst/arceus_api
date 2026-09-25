@@ -64,9 +64,8 @@ class SalesService:
         # --- Post lead ---
         endpoint = "contato"
         payload = lead.model_dump()
-        """
-        "data_cadastro" é obrigatório na API do IXC, porém o que é mandado é descartado, e a data é gerada automaticamente
-        """
+        # "data_cadastro" is mandatory in the IXC API, but the value sent is
+        # discarded, and the date is generated automatically.
         payload["data_cadastro"] = "N/A"
         res = await clients.IxcClient.post(endpoint=endpoint, payload=payload)
         if not (id := res.get("id")):
