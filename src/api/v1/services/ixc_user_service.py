@@ -46,6 +46,7 @@ class IXCUserService:
             grid_param=grid_param,
             pagina=page,
             itens_por_pagina=items_per_page,
+            sort_name="usuarios.nome",
         )
         ixc_users = res.get("registros", [])
         total_items = res.get("total", 0)

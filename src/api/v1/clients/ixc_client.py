@@ -139,6 +139,7 @@ class IxcClient:
         pagina: PositiveInt | None = 1,
         itens_por_pagina: PositiveInt | None = 10,
         sort_order: utils.SortOrder | None = utils.SortOrder.ASC,
+        sort_name: str | None = None,
     ) -> Any:
         """
         Send a GET request to the IXC API with pagination and filtering.
@@ -149,6 +150,7 @@ class IxcClient:
             pagina: Page number (1-based).
             itens_por_pagina: Number of items per page.
             sort_order: Sort order (ASC or DESC).
+            sort_name: Attribute to sort.
 
         Returns:
             Parsed JSON response.
@@ -161,6 +163,8 @@ class IxcClient:
             "rp": str(itens_por_pagina),
             "sortorder": str(sort_order),
         }
+        if sort_name is not None:
+            payload["sortname"] = sort_name
         return await cls._make_request(
             endpoint=endpoint, payload=payload, include_ixcsoft=True
         )
