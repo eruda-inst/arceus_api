@@ -90,10 +90,7 @@ class LogMiddleware(BaseHTTPMiddleware):
 
         duration = end_time - start_time
 
-        # Extract and validate the protocol header (must match ^NWT\d{9}$)
         protocol = request.headers.get("x-protocolo")
-        if protocol and not re.search(pattern=r"^NWT\d{9}$", string=protocol):
-            protocol = None
 
         http_method = request.method
         status_code = res.status_code
