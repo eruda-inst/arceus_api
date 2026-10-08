@@ -31,6 +31,7 @@ MetricNames = Literal[
     "top_dias_semana",
     "top_endpoints",
     "top_endpoints_mais_lentos",
+    "top_endpoints_taxa_erro",
     "top_horas",
     "top_metodos_http",
     "top_piores_endpoints",
@@ -72,6 +73,7 @@ class ConnectionManager:
             "top_dias_semana": [],
             "top_endpoints": [],
             "top_endpoints_mais_lentos": [],
+            "top_endpoints_taxa_erro": [],
             "top_horas": [],
             "top_metodos_http": [],
             "top_piores_endpoints": [],
@@ -163,6 +165,9 @@ class ConnectionManager:
         if "top_endpoints_mais_lentos" in metric_names or metric_names == "all":
             res = await cruds.MetricCrud.get_top_slowest_endpoints(db=db)
             message["top_endpoints_mais_lentos"] = res.model_dump()
+        if "top_endpoints_taxa_erro" in metric_names or metric_names == "all":
+            res = await cruds.MetricCrud.get_top_error_rate_endpoints(db=db)
+            message["top_endpoints_taxa_erro"] = res.model_dump()
         if "top_horas" in metric_names or metric_names == "all":
             res = await cruds.MetricCrud.get_top_hours(db=db)
             message["top_horas"] = res.model_dump()
@@ -240,6 +245,16 @@ class ConnectionManager:
                     await connection.send_json(
                         {
                             "top_endpoints_mais_lentos": top_endpoints_mais_lentos.model_dump()
+                        }
+                    )
+            if self.active_connections["top_endpoints_taxa_erro"]:
+                top_endpoints_taxa_erro = (
+                    await cruds.MetricCrud.get_top_error_rate_endpoints(db=session)
+                )
+                for connection in self.active_connections["top_endpoints_taxa_erro"]:
+                    await connection.send_json(
+                        {
+                            "top_endpoints_taxa_erro": top_endpoints_taxa_erro.model_dump()
                         }
                     )
             if self.active_connections["top_horas"]:

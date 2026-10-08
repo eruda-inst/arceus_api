@@ -176,3 +176,29 @@ class TopClientNameSchema(BaseModel):
     total_requisicoes: NonNegativeInt = Field(
         description="Quantidade de requisições", ge=0, examples=[120]
     )
+
+
+class TopErrorRateEndpointSchema(BaseModel):
+    """
+    Schema for endpoints with the highest error rate (percentage).
+
+    Diferente de TopWorstEndpointSchema, que ordena pelo total absoluto
+    de erros, este schema expõe a proporção de erros do endpoint em
+    relação ao total de requisições que ele mesmo recebeu.
+    """
+
+    endpoint: str = Field(
+        description="Endpoint da requisição", examples=["/suporte/status_conexao"]
+    )
+    taxa_erro: Round2Schema = Field(
+        description="Percentual de requisições com erro em relação ao total do endpoint (0 a 100)",
+        ge=0,
+        le=100,
+        examples=[12.5],
+    )
+    total_erros: NonNegativeInt = Field(
+        description="Quantidade total de erros do endpoint", ge=0, examples=[12]
+    )
+    total_requisicoes: NonNegativeInt = Field(
+        description="Quantidade total de requisições do endpoint", ge=0, examples=[96]
+    )

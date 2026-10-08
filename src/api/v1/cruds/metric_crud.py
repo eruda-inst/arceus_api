@@ -931,3 +931,86 @@ class MetricCrud:
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Erro desconhecido no banco de dados",
             )
+
+    @staticmethod
+    async def get_top_error_rate_endpoints(
+        db: AsyncSession,
+        limit: int = 10,
+    ) -> schemas.TodayAlwaysOutSchema[list[schemas.TopErrorRateEndpointSchema]]:
+        """
+        Retorna os endpoints ordenados pela maior taxa percentual de erro,
+        para hoje e para todo o período.
+
+        A taxa é calculada como:
+            (requisições com código >= 400) / (total de requisições do endpoint) * 100
+
+        Args:
+            db: Async database session.
+            limit: Número máximo de endpoints retornados por período.
+
+        Returns:
+            TodayAlwaysOutSchema com listas de TopErrorRateEndpointSchema
+            ordenadas por taxa de erro desc.
+        """
+        try:
+            timezone = ZoneInfo(config.settings.timezone)
+            today = dt.datetime.now(tz=timezone).date()
+
+            def _build_stmt(*conditions):
+                error_count = func.sum(
+                    case((models.LogModel.codigo >= 400, 1), else_=0)
+                ).label("total_erros")
+                total_count = func.count(models.LogModel.id).label("total_requisicoes")
+                error_rate = (error_count * 100.0 / func.nullif(total_count, 0)).label(
+                    "taxa_erro"
+                )
+
+                stmt = select(
+                    models.LogModel.endpoint.label("endpoint"),
+                    error_count,
+                    total_count,
+                    error_rate,
+                )
+                if conditions:
+                    stmt = stmt.where(*conditions)
+
+                return (
+                    stmt.group_by(models.LogModel.endpoint)
+                    .order_by(error_rate.desc(), error_count.desc())
+                    .limit(limit)
+                )
+
+            # ---------- Hoje ----------
+            result_today = await db.execute(
+                _build_stmt(func.date(models.LogModel.criado_em) == today)
+            )
+            today_list = [
+                schemas.TopErrorRateEndpointSchema(
+                    endpoint=row.endpoint,
+                    taxa_erro=float(row.taxa_erro or 0.0),
+                    total_erros=row.total_erros,
+                    total_requisicoes=row.total_requisicoes,
+                )
+                for row in result_today.all()
+            ]
+
+            # ---------- Sempre ----------
+            result_always = await db.execute(_build_stmt())
+            always_list = [
+                schemas.TopErrorRateEndpointSchema(
+                    endpoint=row.endpoint,
+                    taxa_erro=float(row.taxa_erro or 0.0),
+                    total_erros=row.total_erros,
+                    total_requisicoes=row.total_requisicoes,
+                )
+                for row in result_always.all()
+            ]
+
+            return schemas.TodayAlwaysOutSchema[
+                list[schemas.TopErrorRateEndpointSchema]
+            ](hoje=today_list, sempre=always_list)
+        except SQLAlchemyError:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Erro desconhecido no banco de dados",
+            )
