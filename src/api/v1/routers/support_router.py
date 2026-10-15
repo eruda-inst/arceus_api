@@ -43,6 +43,18 @@ async def post_tickets(
     return await services.SupportService.post_tickets(ticket=atendimento)
 
 
+@support_router.get(path="/contratos-teste", summary="Obtém contratos de um cliente")
+async def get_contracts_test(
+    cnpj_cpf: utils.CnpjCpf | None = None,
+) -> schemas.ListOutSchema[schemas.ContractOutSchema]:
+    """
+    Obtém contratos de um cliente, através do CPF/CNPJ
+    """
+    return await services.SupportService.get_contracts(
+        protocol=None, cnpj_cpf=cnpj_cpf, page=1, items_per_page=10
+    )
+
+
 @support_router.get(path="/contratos", summary="Obtém contratos de um cliente")
 async def get_contracts(
     protocolo: utils.Protocol | None = None,
