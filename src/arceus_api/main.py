@@ -1,18 +1,11 @@
-"""
-Application entry point for the Arceus API.
-
-Configures FastAPI, registers routers, middleware, CORS, and manages
-lifespan events (startup/shutdown).
-"""
-
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import HttpUrl
 
-from .api import api_v1_router
-from .api.v1 import clients, middlewares, schemas
+from .v1 import clients, middlewares, schemas
+from .v1.api import api_v1_router
 
 
 @asynccontextmanager
@@ -39,7 +32,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="Arceus",
     description="Integra com sistemas IXC, IXC ACS, Opa e 7AZ. Oferece autenticação, gestão de usuários e permissões, operações comerciais (contratos, leads), financeiras (faturas, cobrança), suporte (atendimentos, status de conexão), além de logs e métricas para monitoramento",
-    version="1.11.6",
+    version="1.11.7",
     lifespan=lifespan,
 )
 
