@@ -124,10 +124,8 @@ class LogMiddleware(BaseHTTPMiddleware):
         status_code = res.status_code
 
         endpoint = request.url.path
-        if "route" in request.scope:
-            endpoint = request.scope["route"].path
-            for key in request.path_params:
-                endpoint = endpoint.replace(f"/{{{key}}}", "").replace(f"{{{key}}}", "")
+        for key in request.path_params:
+            endpoint = endpoint.replace(f"/{{{key}}}", "").replace(f"{{{key}}}", "")
 
         # Decode payload if present
         payload = payload.decode()
