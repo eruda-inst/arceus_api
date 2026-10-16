@@ -1,7 +1,3 @@
-"""
-Pydantic schemas for metric-related responses.
-"""
-
 from typing import Annotated
 
 from pydantic import BaseModel, Field, NonNegativeInt, PlainSerializer

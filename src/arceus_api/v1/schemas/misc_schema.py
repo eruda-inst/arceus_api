@@ -1,7 +1,3 @@
-"""
-Miscellaneous Pydantic schemas used across the API.
-"""
-
 from typing import TypeVar
 
 from pydantic import BaseModel, Field, NonNegativeInt, PositiveInt, computed_field

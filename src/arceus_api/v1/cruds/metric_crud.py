@@ -1,7 +1,3 @@
-"""
-CRUD operations for aggregated metrics based on Log model.
-"""
-
 import datetime as dt
 from zoneinfo import ZoneInfo
 
@@ -1009,6 +1005,87 @@ class MetricCrud:
             return schemas.TodayAlwaysOutSchema[
                 list[schemas.TopErrorRateEndpointSchema]
             ](hoje=today_list, sempre=always_list)
+        except SQLAlchemyError:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Erro desconhecido no banco de dados",
+            )
+
+    @staticmethod
+    async def get_least_accessed_endpoints(
+        db: AsyncSession,
+    ) -> schemas.TodayAlwaysOutSchema[list[schemas.TopEndpointSchema]]:
+        """
+        Get top 10 least requested endpoints for today and all time,
+        including endpoints with 0 requests.
+        """
+        try:
+            timezone = ZoneInfo(config.settings.timezone)
+            today = dt.datetime.now(tz=timezone).date()
+
+            endpoints_base = select(models.LogModel.endpoint).distinct().subquery()
+
+            # ---------- Today ----------
+            today_counts = (
+                select(
+                    models.LogModel.endpoint,
+                    func.count(models.LogModel.id).label("total_requisicoes"),
+                )
+                .where(func.date(models.LogModel.criado_em) == today)
+                .group_by(models.LogModel.endpoint)
+                .subquery()
+            )
+
+            stmt_today = (
+                select(
+                    endpoints_base.c.endpoint,
+                    func.coalesce(today_counts.c.total_requisicoes, 0).label(
+                        "total_requisicoes"
+                    ),
+                )
+                .outerjoin(
+                    today_counts,
+                    endpoints_base.c.endpoint == today_counts.c.endpoint,
+                )
+                .order_by(
+                    func.coalesce(today_counts.c.total_requisicoes, 0).asc(),
+                    endpoints_base.c.endpoint.asc(),
+                )
+                .limit(10)
+            )
+
+            result_today = await db.execute(stmt_today)
+            today_list = [
+                schemas.TopEndpointSchema(
+                    endpoint=row.endpoint, total_requisicoes=row.total_requisicoes
+                )
+                for row in result_today.all()
+            ]
+
+            # ---------- Always ----------
+            stmt_always = (
+                select(
+                    models.LogModel.endpoint,
+                    func.count(models.LogModel.id).label("total_requisicoes"),
+                )
+                .group_by(models.LogModel.endpoint)
+                .order_by(
+                    func.count(models.LogModel.id).asc(),
+                    models.LogModel.endpoint.asc(),
+                )
+                .limit(10)
+            )
+            result_always = await db.execute(stmt_always)
+            always_list = [
+                schemas.TopEndpointSchema(
+                    endpoint=row.endpoint, total_requisicoes=row.total_requisicoes
+                )
+                for row in result_always.all()
+            ]
+
+            return schemas.TodayAlwaysOutSchema[list[schemas.TopEndpointSchema]](
+                hoje=today_list, sempre=always_list
+            )
         except SQLAlchemyError:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
