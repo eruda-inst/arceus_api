@@ -1,12 +1,4 @@
-"""
-Middleware for logging API requests and responses.
-
-Captures request/response data for specific API prefixes, extracts metadata,
-and persists log entries asynchronously.
-"""
-
 import asyncio
-import re
 import time
 from collections.abc import Awaitable, Callable
 from typing import override
@@ -94,7 +86,12 @@ class LogMiddleware(BaseHTTPMiddleware):
 
         http_method = request.method
         status_code = res.status_code
+
         endpoint = request.url.path
+        if "route" in request.scope:
+            endpoint = request.scope["route"].path
+            for key in request.path_params:
+                endpoint = endpoint.replace(f"/{{{key}}}", "").replace(f"{{{key}}}", "")
 
         # Decode payload if present
         payload = payload.decode()
