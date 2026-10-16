@@ -26,15 +26,44 @@ class LogMiddleware(BaseHTTPMiddleware):
         """
         super().__init__(app)
         # API path prefixes that should be logged
-        self.include_prefixes = (
-            "/api/v1/cobranca",
-            "/api/v1/comercial",
-            "/api/v1/financeiro",
-            "/api/v1/suporte",
-            "/api/v1/triagem",
-            "/api/v1/upgrade",
-            "/api/v1/vila",
-        )
+        self.allowed_endpoints = {
+            "/api/v1/cobranca/faturas-vencidas",
+            "/api/v1/comercial/leads",
+            "/api/v1/comercial/status-acesso",
+            "/api/v1/financeiro/chave-pix",
+            "/api/v1/financeiro/credenciais",
+            "/api/v1/financeiro/desbloqueio-em-confianca",
+            "/api/v1/financeiro/faturas-abertas",
+            "/api/v1/financeiro/linha-digitavel",
+            "/api/v1/financeiro/tres-faturas-abertas",
+            "/api/v1/suporte/atendimentos",
+            "/api/v1/suporte/contratos-teste",
+            "/api/v1/suporte/contratos",
+            "/api/v1/suporte/dados-wifi",
+            "/api/v1/suporte/desconectar-cliente",
+            "/api/v1/suporte/ip",
+            "/api/v1/suporte/limpar-mac",
+            "/api/v1/suporte/servidor-dns",
+            "/api/v1/suporte/sinal-fibra",
+            "/api/v1/suporte/status-conexao",
+            "/api/v1/suporte/status-onu",
+            "/api/v1/suporte/tem-ipv6",
+            "/api/v1/suporte/uptime",
+            "/api/v1/triagem/contato-cliente",
+            "/api/v1/upgrade/planos-sugeridos",
+            "/api/v1/vila/atendimentos",
+            "/api/v1/vila/contrato/numero-residencia",
+            "/api/v1/vila/contrato/pppoe",
+            "/api/v1/vila/dados-wifi",
+            "/api/v1/vila/desconectar-cliente",
+            "/api/v1/vila/limpar-mac",
+            "/api/v1/vila/servidor-dns",
+            "/api/v1/vila/sinal-fibra",
+            "/api/v1/vila/status-conexao",
+            "/api/v1/vila/status-onu",
+            "/api/v1/vila/tem-ipv6",
+            "/api/v1/vila/uptime",
+        }
         # Department names corresponding to the prefixes
         self.departments = (
             "cobranca",
@@ -69,7 +98,14 @@ class LogMiddleware(BaseHTTPMiddleware):
             The HTTP response from the downstream application.
         """
         # Skip logging for paths that do not match the configured prefixes
-        if not request.url.path.startswith(self.include_prefixes):
+        there_is = False
+
+        for allowed_enpoint in self.allowed_endpoints:
+            if allowed_enpoint in request.url.path:
+                there_is = True
+                break
+
+        if not there_is:
             return await call_next(request)
 
         # Read the request body (will be consumed, so we need to re-attach later)
