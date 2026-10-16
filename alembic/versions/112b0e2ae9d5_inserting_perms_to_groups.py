@@ -11,8 +11,8 @@ from collections.abc import Sequence
 import sqlalchemy as sa
 
 from alembic import op
-from src.api.v1.utils.enums.group_enum import GroupNames
-from src.api.v1.utils.enums.perm_enum import PermCodes
+from src.arceus_api.v1.utils.enums.group_enum import GroupNames
+from src.arceus_api.v1.utils.enums.perm_enum import PermCodes
 
 # revision identifiers, used by Alembic.
 revision: str = "112b0e2ae9d5"

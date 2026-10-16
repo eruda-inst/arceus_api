@@ -11,7 +11,7 @@ from collections.abc import Sequence
 import sqlalchemy as sa
 
 from alembic import op
-from src.api.v1.config import settings
+from src.arceus_api.v1.config import settings
 
 # revision identifiers, used by Alembic.
 revision: str = "7a336d048eac"
