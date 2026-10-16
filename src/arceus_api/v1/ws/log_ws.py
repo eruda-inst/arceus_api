@@ -1,18 +1,12 @@
-"""
-WebSocket router for streaming log entries.
-
-Provides a WebSocket endpoint that allows clients to subscribe to log updates
-with optional filters and pagination.
-"""
-
 import datetime as dt
 from typing import Annotated, Any, TypedDict
+from zoneinfo import ZoneInfo
 
 from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect, status
 from pydantic import BaseModel, Field, PositiveInt, ValidationError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from .. import cruds, db, schemas
+from .. import config, cruds, db, schemas
 
 log_ws_router = APIRouter(prefix="/logs-ws", tags=["Logs WS"])
 
@@ -209,15 +203,20 @@ class ConnectionManager:
                         d for d in filtered if d["criado_em"].date() <= end_date
                     ]
                 # Apply time range filters
+                app_tz = ZoneInfo(config.settings.timezone)
                 if params.hora_inicio:
                     start_time = dt.time.fromisoformat(params.hora_inicio)
                     filtered = [
-                        d for d in filtered if d["criado_em"].time() >= start_time
+                        d
+                        for d in filtered
+                        if d["criado_em"].astimezone(app_tz).time() >= start_time
                     ]
                 if params.hora_fim:
                     end_time = dt.time.fromisoformat(params.hora_fim)
                     filtered = [
-                        d for d in filtered if d["criado_em"].time() <= end_time
+                        d
+                        for d in filtered
+                        if d["criado_em"].astimezone(app_tz).time() <= end_time
                     ]
 
                 # Paginate the filtered results

@@ -6,7 +6,7 @@ import datetime as dt
 from collections.abc import Sequence
 
 from pydantic import NonNegativeInt, PositiveInt
-from sqlalchemy import func
+from sqlalchemy import Time, cast, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
@@ -142,10 +142,10 @@ class LogCrud:
 
         if start_hour:
             start_hour_obj = dt.time.fromisoformat(start_hour)
-            stmt = stmt.where(func.time(models.LogModel.criado_em) >= start_hour_obj)
+            stmt = stmt.where(cast(models.LogModel.criado_em, Time) >= start_hour_obj)
         if end_hour:
             end_hour_obj = dt.time.fromisoformat(end_hour)
-            stmt = stmt.where(func.time(models.LogModel.criado_em) <= end_hour_obj)
+            stmt = stmt.where(cast(models.LogModel.criado_em, Time) <= end_hour_obj)
 
         if protocol:
             stmt = stmt.where(models.LogModel.protocolo.ilike(f"%{protocol}%"))
