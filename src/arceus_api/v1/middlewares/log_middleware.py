@@ -25,8 +25,7 @@ class LogMiddleware(BaseHTTPMiddleware):
             app: The ASGI application to wrap.
         """
         super().__init__(app)
-        # API path prefixes that should be logged
-        self.allowed_endpoints = {
+        self.ALLOWED_ENDPOINTS = (
             "/api/v1/cobranca/faturas-vencidas",
             "/api/v1/comercial/leads",
             "/api/v1/comercial/status-acesso",
@@ -63,9 +62,8 @@ class LogMiddleware(BaseHTTPMiddleware):
             "/api/v1/vila/status-onu",
             "/api/v1/vila/tem-ipv6",
             "/api/v1/vila/uptime",
-        }
-        # Department names corresponding to the prefixes
-        self.departments = (
+        )
+        self.DEPARTMENTS = (
             "cobranca",
             "comercial",
             "financeiro",
@@ -100,7 +98,7 @@ class LogMiddleware(BaseHTTPMiddleware):
         # Skip logging for paths that do not match the configured prefixes
         there_is = False
 
-        for allowed_enpoint in self.allowed_endpoints:
+        for allowed_enpoint in self.ALLOWED_ENDPOINTS:
             if allowed_enpoint in request.url.path:
                 there_is = True
                 break
@@ -124,8 +122,10 @@ class LogMiddleware(BaseHTTPMiddleware):
         status_code = res.status_code
 
         endpoint = request.url.path
-        for key in request.path_params:
-            endpoint = endpoint.replace(f"/{{{key}}}", "").replace(f"{{{key}}}", "")
+        for allowed_endpoint in self.ALLOWED_ENDPOINTS:
+            if allowed_endpoint in endpoint:
+                endpoint = allowed_endpoint
+                break
 
         # Decode payload if present
         payload = payload.decode()
@@ -133,9 +133,9 @@ class LogMiddleware(BaseHTTPMiddleware):
 
         # Determine the department based on the endpoint path
         setor = None
-        for d in self.departments:
-            if d in endpoint:
-                setor = str(d).capitalize()
+        for department in self.DEPARTMENTS:
+            if department in endpoint:
+                setor = str(department).capitalize()
                 if setor == "Cobranca":
                     setor = "Cobrança"
                 break
