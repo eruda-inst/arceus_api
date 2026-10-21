@@ -118,6 +118,10 @@ class LogMiddleware(BaseHTTPMiddleware):
 
         protocol = request.headers.get("x-protocolo")
 
+        if protocol is None:
+            query_params = request.query_params
+            protocol = query_params.get("protocolo")
+
         http_method = request.method
         status_code = res.status_code
 
@@ -150,7 +154,7 @@ class LogMiddleware(BaseHTTPMiddleware):
         # --- Cliente IXC ---
         # If a valid protocol exists, fetch the customer name from IXC
         nome_cliente = None
-        if protocol:
+        if protocol is not None:
             cliente = await services.CustomerService.get_ixc_customer(protocol=protocol)
             if cliente:
                 nome_cliente = cliente["razao"]
