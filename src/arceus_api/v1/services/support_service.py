@@ -325,9 +325,6 @@ class SupportService:
                 detail="Sinal ONU inexistente",
             )
 
-        print(f"{rx_signal = }")
-        print(f"{onu.get('mac') = }")
-
         return schemas.OnuStatusOutSchema(status_onu=rx_signal)
 
     @staticmethod
