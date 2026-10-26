@@ -3,7 +3,7 @@ import time
 from collections.abc import Awaitable, Callable
 from typing import override
 
-from fastapi import Request, Response
+from fastapi import HTTPException, Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.types import ASGIApp
 
@@ -155,9 +155,14 @@ class LogMiddleware(BaseHTTPMiddleware):
         # If a valid protocol exists, fetch the customer name from IXC
         nome_cliente = None
         if protocol is not None:
-            cliente = await services.CustomerService.get_ixc_customer(protocol=protocol)
-            if cliente:
-                nome_cliente = cliente["razao"]
+            try:
+                cliente = await services.CustomerService.get_ixc_customer(
+                    protocol=protocol
+                )
+                if cliente:
+                    nome_cliente = cliente["razao"]
+            except HTTPException:
+                pass
 
         # Persist the log entry in the database
         async with db.AsyncSessionLocal() as session:
