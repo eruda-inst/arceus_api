@@ -1,17 +1,9 @@
-"""
-Pydantic schemas for ONU status.
-"""
-
 from pydantic import BaseModel, Field, field_serializer
 
 from .. import utils
 
 
 class OnuStatusOutSchema(BaseModel):
-    """
-    Response schema for ONU status, serialized as a label based on signal level.
-    """
-
     status_onu: float = Field(
         description="Status da ONU",
         examples=[utils.OnuStatusLabel.EXCELLENT],
@@ -19,6 +11,9 @@ class OnuStatusOutSchema(BaseModel):
 
     @field_serializer("status_onu")
     def serialize_status_onu(self, v: float) -> utils.OnuStatusLabel:
+        if v == 0:
+            return utils.OnuStatusLabel.NO_STATUS  # 0 --- Sem status
+
         if v >= -8:  # Infinity --- -8.00: satured
             return utils.OnuStatusLabel.SATURATED
         elif v >= -21:  # -8.01 --- -21.00: excellent
