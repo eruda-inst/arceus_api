@@ -55,7 +55,9 @@ class CustomerService:
                 )
             ixc_customer = regs[0]
             return ixc_customer
-        elif cnpj_cpf is not None and not re.match(pattern=r"{{\w+}}", string=cnpj_cpf):
+        elif (cnpj_cpf is not None and cnpj_cpf.strip()) and not re.match(
+            pattern=r"{{\w+}}", string=cnpj_cpf
+        ):
             # --- IXC customer by cnpj_cpf ---
             formatted_cnpj_cpf = utils.Formatter.cnpj_cpf(cnpj_cpf=cnpj_cpf)
             grid_param = [utils.Param(TB="cliente.cnpj_cpf", P=formatted_cnpj_cpf)]
