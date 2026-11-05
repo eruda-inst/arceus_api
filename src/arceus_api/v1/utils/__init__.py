@@ -27,9 +27,11 @@ from .enums import (
 )
 from .helpers import Formatter
 from .ixc_types import Param, SortOrder
+from .misc import OPA_PLACEHOLDER_RE
 from .params import CnpjCpf, DbDep, ItemsPerPage, LoginID, Page, Protocol
 
 __all__ = [
+    "OPA_PLACEHOLDER_RE",
     "AddressOriginCode",
     "CnpjCpf",
     "ConnectionStatusCode",

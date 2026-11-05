@@ -1,10 +1,3 @@
-"""
-Service for customer-related operations.
-
-Provides methods to look up customers in IXC and OPA systems.
-"""
-
-import re
 from typing import Any
 
 from fastapi import HTTPException, status
@@ -14,10 +7,6 @@ from .. import clients, services, utils
 
 
 class CustomerService:
-    """
-    Provides static/class methods for customer retrieval.
-    """
-
     @staticmethod
     async def get_ixc_customer(
         # IDs NonNegativeInt, because IXC
@@ -55,11 +44,11 @@ class CustomerService:
                 )
             ixc_customer = regs[0]
             return ixc_customer
-        elif (cnpj_cpf is not None and cnpj_cpf.strip()) and not re.match(
-            pattern=r"{{\w+}}", string=cnpj_cpf
-        ):
+        elif (
+            cnpj_cpf is not None and cnpj_cpf.split()
+        ) and not utils.OPA_PLACEHOLDER_RE.match(string=cnpj_cpf):
             # --- IXC customer by cnpj_cpf ---
-            formatted_cnpj_cpf = utils.Formatter.cnpj_cpf(cnpj_cpf=cnpj_cpf)
+            formatted_cnpj_cpf = utils.Formatter.cnpj_cpf(cnpj_cpf=cnpj_cpf)  # type: ignore
             grid_param = [utils.Param(TB="cliente.cnpj_cpf", P=formatted_cnpj_cpf)]
             res = await clients.IxcClient.get(
                 endpoint=ixc_customer_endpoint, grid_param=grid_param
@@ -71,9 +60,9 @@ class CustomerService:
                 )
             ixc_customer = regs[0]
             return ixc_customer
-        elif (protocol is not None and protocol.strip()) and not re.match(
-            pattern=r"{{\w+}}", string=protocol
-        ):
+        elif (
+            protocol is not None and protocol.strip()
+        ) and not utils.OPA_PLACEHOLDER_RE.match(string=protocol):
             # --- Opa client by protocol ---
             endpoint = "atendimento"
             filter = {"protocolo": protocol}

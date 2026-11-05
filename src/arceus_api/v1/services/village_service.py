@@ -52,7 +52,9 @@ class VillageService:
             search_key = "login"
             # Village residences follow the pattern "res<number>"
             search_value = f"res{residence_number}"
-        elif pppoe is not None and not re.match(pattern=r"{{\w+}}", string=pppoe):
+        elif (
+            pppoe is not None and pppoe.strip()
+        ) and not utils.OPA_PLACEHOLDER_RE.match(string=pppoe):
             search_key = "login"
             search_value = pppoe
         else:

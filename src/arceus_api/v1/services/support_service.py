@@ -1,9 +1,4 @@
-"""
-Service for support operations (connection, ONU, tickets, WiFi, etc.).
-"""
-
 import datetime as dt
-import re
 from typing import Any
 
 from fastapi import HTTPException, status
@@ -14,10 +9,6 @@ from .. import clients, schemas, services, utils
 
 
 class SupportService:
-    """
-    Provides static/class methods for support operations.
-    """
-
     @staticmethod
     async def _get_login(
         # IDs NonNegativeInt, because IXC
@@ -296,9 +287,9 @@ class SupportService:
         query_value = None
 
         # MAC is priority, because computational costs is lower (less one request)
-        if (onu_mac is not None and onu_mac.strip()) and not re.match(
-            pattern=r"{{\w+}}", string=onu_mac
-        ):
+        if (
+            onu_mac is not None and onu_mac.strip()
+        ) and not utils.OPA_PLACEHOLDER_RE.match(string=onu_mac):
             query_value = onu_mac
         elif login_id is not None:
             # --- Get login ---
