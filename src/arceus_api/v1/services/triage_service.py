@@ -53,8 +53,15 @@ class TriageService:
             ContactOutSchema with the updated phone number.
 
         Raises:
+            HTTPException: 400 if the phone number is not valid.
             HTTPException: 500 if the update fails.
         """
+        if not phone_number.strip():
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Forneça um número de telefone válido",
+            )
+
         # --- Get customer ---
         old_customer = await services.CustomerService.get_ixc_customer(
             protocol=protocol, cnpj_cpf=cnpj_cpf

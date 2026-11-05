@@ -71,7 +71,9 @@ class CustomerService:
                 )
             ixc_customer = regs[0]
             return ixc_customer
-        elif protocol is not None and not re.match(pattern=r"{{\w+}}", string=protocol):
+        elif (protocol is not None and protocol.strip()) and not re.match(
+            pattern=r"{{\w+}}", string=protocol
+        ):
             # --- Opa client by protocol ---
             endpoint = "atendimento"
             filter = {"protocolo": protocol}

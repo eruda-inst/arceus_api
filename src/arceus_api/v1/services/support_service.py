@@ -296,7 +296,9 @@ class SupportService:
         query_value = None
 
         # MAC is priority, because computational costs is lower (less one request)
-        if onu_mac is not None and not re.match(pattern=r"{{\w+}}", string=onu_mac):
+        if (onu_mac is not None and onu_mac.strip()) and not re.match(
+            pattern=r"{{\w+}}", string=onu_mac
+        ):
             query_value = onu_mac
         elif login_id is not None:
             # --- Get login ---
@@ -489,7 +491,9 @@ class SupportService:
             HTTPException: 400 if neither parameter is provided.
             HTTPException: 500 if the update fails.
         """
-        if ip is None and pool_radius is None:
+        if (ip is None or not ip.strip()) and (
+            pool_radius is None or not pool_radius.strip()
+        ):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Forneça ip ou pool_radius",
@@ -615,12 +619,12 @@ class SupportService:
         payload_2g = {}
         payload_5g = {}
 
-        if ssid is not None:
+        if ssid is not None and ssid.strip():
             payload_2g["ssid"] = ssid
             # Append the 5G suffix to differentiate the 5G network
             payload_5g["ssid"] = f"{ssid}_5G"
 
-        if ssid_pass is not None:
+        if ssid_pass is not None and ssid_pass.strip():
             payload_2g["password"] = ssid_pass
             payload_5g["password"] = ssid_pass
 

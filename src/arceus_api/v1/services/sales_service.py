@@ -97,9 +97,16 @@ class SalesService:
             LeadOutSchema with the updated lead.
 
         Raises:
+            HTTPException: 404 if the cnpj_cpf is not valid.
             HTTPException: 404 if the lead does not exist.
             HTTPException: 500 if the update fails.
         """
+        if not cnpj_cpf.strip():
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Forneça um CNPJ/CPF válido",
+            )
+
         # --- Get lead ---
         endpoint = "contato"
         formatted_cnpj_cpf = utils.Formatter.cnpj_cpf(cnpj_cpf)

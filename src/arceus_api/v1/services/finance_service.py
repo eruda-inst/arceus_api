@@ -9,7 +9,7 @@ from zoneinfo import ZoneInfo
 
 from fastapi import HTTPException, status
 from pydantic import NonNegativeInt, PositiveInt
-from starlette.status import HTTP_404_NOT_FOUND
+from starlette.status import HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND
 
 from .. import clients, config, schemas, services, utils
 
@@ -465,8 +465,14 @@ class FinanceService:
             CredentialOutSchema with the updated credentials.
 
         Raises:
+            HTTPException: 400 if the password is not valid.
             HTTPException: 500 if the update fails.
         """
+        if not password.strip():
+            raise HTTPException(
+                status_code=HTTP_400_BAD_REQUEST, detail="Forneça uma senha válida"
+            )
+
         # --- Get customer ---
         old_customer = await services.CustomerService.get_ixc_customer(
             customer_id=customer_id
