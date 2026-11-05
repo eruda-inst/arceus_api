@@ -1,4 +1,5 @@
 import datetime as dt
+import re
 from typing import Any
 
 from fastapi import HTTPException, status
@@ -320,37 +321,49 @@ class SupportService:
 
         return schemas.OnuStatusOutSchema(status_onu=rx_signal)
 
-    @staticmethod
+    @classmethod
     async def post_disconnect_customer(
+        cls,
         # IDs NonNegativeInt, because IXC
         login_id: NonNegativeInt,
     ) -> schemas.MessageOutSchema:
         """
-        Send a disconnection signal to a customer's login.
+        Disconnect a customer, falling back to a device reboot if needed.
+
+        First attempts to disconnect the customer through the IXC
+        "desconectar_clientes" endpoint. If that call does not report success,
+        it looks up the customer's device and requests a reboot through the
+        IXC ACS API, treating the operation as successful when the ACS
+        confirms the reboot.
 
         Args:
-            login_id: Login ID in IXC.
+            login_id (NonNegativeInt): The customer's login ID in IXC.
 
         Returns:
-            MessageOutSchema indicating success.
-
-        Raises:
-            HTTPException: 500 if the disconnection fails.
+            schemas.MessageOutSchema: A message schema indicating whether the
+                disconnection was successful ("Desconexão bem-sucedida") or
+                not ("Desconexão malsucedida").
         """
-        # --- Post disconnection ---
-        payload = {"id": login_id}
-        endpoint = "desconectar_clientes"
-        res = await clients.IxcClient.post(endpoint=endpoint, payload=payload)
-        type = res["msg"][0]["type"]
-        if type == "error":
-            msgs = res.get("msg", [])
-            msg = msgs[0].get("message", "Desconexão malsucedida")
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=utils.Formatter.sanitize(string=msg),
-            )
+        # --- Post disconnection (IXC) ---
+        res = await clients.IxcClient.post(
+            endpoint="desconectar_clientes", payload={"id": login_id}
+        )
 
-        return schemas.MessageOutSchema(mensagem="Desconexão bem-sucedida")
+        if res["msg"][0]["type"] == "success":  # "error" or "success"
+            return schemas.MessageOutSchema(mensagem="Desconexão bem-sucedida")
+
+        # --- Get device (ACS) ---
+        device = await cls._get_device(login_id=login_id)
+
+        # --- Post disconnection (ACS) ---
+        endpoint = f"devices/{device['serialNumber']}/reboot"
+        res = await clients.IxcAcsClient.get(endpoint=endpoint)
+
+        success_pattern = r'Device "\S+\s+\S+" being rebooted.'
+        if re.match(pattern=success_pattern, string=res["message"]) is not None:
+            return schemas.MessageOutSchema(mensagem="Desconexão bem-sucedida")
+
+        return schemas.MessageOutSchema(mensagem="Desconexão malsucedida")
 
     @staticmethod
     async def get_tickets(
