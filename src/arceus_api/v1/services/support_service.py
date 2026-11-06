@@ -1,5 +1,4 @@
 import datetime as dt
-import re
 from typing import Any
 
 from fastapi import HTTPException, status
@@ -319,7 +318,7 @@ class SupportService:
                 detail="Sinal ONU inexistente",
             )
 
-        return schemas.OnuStatusOutSchema(status_onu=rx_signal)
+        return schemas.OnuStatusOutSchema(sinal_rx=rx_signal)
 
     @classmethod
     async def post_disconnect_customer(
