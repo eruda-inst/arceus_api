@@ -45,22 +45,6 @@ class CustomerService:
             ixc_customer = regs[0]
             return ixc_customer
         elif (
-            cnpj_cpf is not None and cnpj_cpf.split()
-        ) and not utils.OPA_PLACEHOLDER_RE.match(string=cnpj_cpf):
-            # --- IXC customer by cnpj_cpf ---
-            formatted_cnpj_cpf = utils.Formatter.cnpj_cpf(cnpj_cpf=cnpj_cpf)  # type: ignore
-            grid_param = [utils.Param(TB="cliente.cnpj_cpf", P=formatted_cnpj_cpf)]
-            res = await clients.IxcClient.get(
-                endpoint=ixc_customer_endpoint, grid_param=grid_param
-            )
-            if not (regs := res.get("registros", [])):
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail="Cliente inexistente no IXC",
-                )
-            ixc_customer = regs[0]
-            return ixc_customer
-        elif (
             protocol is not None and protocol.strip()
         ) and not utils.OPA_PLACEHOLDER_RE.match(string=protocol):
             # --- Opa client by protocol ---
@@ -87,6 +71,22 @@ class CustomerService:
 
             # --- IXC customer by ID ---
             grid_param = [utils.Param(TB="cliente.id", P=opa_customer["id"])]
+            res = await clients.IxcClient.get(
+                endpoint=ixc_customer_endpoint, grid_param=grid_param
+            )
+            if not (regs := res.get("registros", [])):
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Cliente inexistente no IXC",
+                )
+            ixc_customer = regs[0]
+            return ixc_customer
+        elif (
+            cnpj_cpf is not None and cnpj_cpf.split()
+        ) and not utils.OPA_PLACEHOLDER_RE.match(string=cnpj_cpf):
+            # --- IXC customer by cnpj_cpf ---
+            formatted_cnpj_cpf = utils.Formatter.cnpj_cpf(cnpj_cpf=cnpj_cpf)  # type: ignore
+            grid_param = [utils.Param(TB="cliente.cnpj_cpf", P=formatted_cnpj_cpf)]
             res = await clients.IxcClient.get(
                 endpoint=ixc_customer_endpoint, grid_param=grid_param
             )
