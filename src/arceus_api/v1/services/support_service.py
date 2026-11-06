@@ -12,29 +12,34 @@ class SupportService:
     @staticmethod
     async def _get_login(
         # IDs NonNegativeInt, because IXC
-        login_id: NonNegativeInt,
-    ) -> dict[str, Any]:
+        login_id: NonNegativeInt | None = None,
+        onu_mac: str | None = None,
+    ) -> dict[str, Any] | None:
         """
-        Retrieve a login (radusuarios) by ID from IXC.
+        Retrieve an IXC login record by IXC login ID or ONU MAC address.
 
         Args:
-            login_id: Login ID in IXC.
+            login_id (NonNegativeInt | None): IXC login ID to search for. Optional (default: None).
+            onu_mac (str | None): ONU MAC address to search for. Optional (default: None).
 
         Returns:
-            The login record as a dictionary.
-
-        Raises:
-            HTTPException: 404 if the login does not exist.
+            dict[str, Any] | None: First matching IXC login record, or None if no identifier is provided or no record is found.
         """
-        # --- Get login ---
+        if login_id is not None:
+            query_field = "id"
+            query_value = login_id
+        elif onu_mac is not None:
+            query_field = "onu_mac"
+            query_value = onu_mac
+        else:
+            return None
+
+        # --- Get login (IXC) ---
         endpoint = "radusuarios"
-        grid_param = [utils.Param(TB="radusuarios.id", P=login_id)]
+        grid_param = [utils.Param(TB=f"{endpoint}.{query_field}", P=query_value)]
         res = await clients.IxcClient.get(endpoint=endpoint, grid_param=grid_param)
-        if not (regs := res.get("registros", [])):
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="Login inexistente"
-            )
-        login = regs[0]
+        regs = res.get("registros", [])
+        login = regs[0] if regs else None
 
         return login
 
@@ -43,23 +48,23 @@ class SupportService:
         cls,
         # IDs NonNegativeInt, because IXC
         login_id: NonNegativeInt,
-    ) -> dict[str, Any]:
+    ) -> dict[str, Any] | None:
         """
-        Retrieve a device associated with a login from the IXC ACS system.
+        Retrieve the ACS device associated with an IXC login ID.
 
         Args:
-            login_id: Login ID in IXC.
+            login_id (NonNegativeInt): IXC login ID used to locate the login and its ACS device.
 
         Returns:
-            The device record as a dictionary.
-
-        Raises:
-            HTTPException: 404 if the device does not exist.
+            dict[str, Any] | None: First matching ACS device record, or None if the login or device cannot be found.
         """
-        # --- Get login ---
+        # --- Get login (IXC) ---
         login = await cls._get_login(login_id=login_id)
 
-        # --- Get device ---
+        if login is None:
+            return None
+
+        # --- Get device (ACS) ---
         endpoint = "devices/views/natural"
         query_params = QueryParams(
             {
@@ -70,11 +75,8 @@ class SupportService:
         res = await clients.IxcAcsClient.get(
             endpoint=endpoint, query_params=query_params
         )
-        if not (regs := res.get("registers", [])):
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="Dispositivo inexistente"
-            )
-        device = regs[0]
+        regs = res.get("registers", [])
+        device = regs[0] if regs else None
 
         return device
 
@@ -85,21 +87,26 @@ class SupportService:
         login_id: NonNegativeInt,
     ) -> schemas.DnsServerOut:
         """
-        Retrieve the DNS server configured on a login's device.
+        Get the DNS server configured on the WAN PPP interface of a customer's ACS device.
 
         Args:
-            login_id: Login ID in IXC.
+            login_id (NonNegativeInt): IXC login ID used to locate the customer's ACS device.
 
         Returns:
-            DnsServerOut with the DNS server.
+            schemas.DnsServerOut: DNS server configured on the first WAN PPP interface.
 
         Raises:
-            HTTPException: 404 if the WAN interface is not found.
+            HTTPException: 404 if the device does not exit; 404 if the WAN interface does not exist.
         """
-        # --- Get device ---
+        # --- Get device (ACS) ---
         device = await cls._get_device(login_id=login_id)
 
-        # --- Get WAN ---
+        if device is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Dispositivo inexistente"
+            )
+
+        # --- Get WAN (ACS) ---
         endpoint = f"devices/{device['serialNumber']}/ethernet/ppp"
         ethernet = await clients.IxcAcsClient.get(endpoint=endpoint)
         if ethernet is None or not len(ethernet):
@@ -116,22 +123,27 @@ class SupportService:
         login_id: NonNegativeInt,
     ) -> schemas.HasIPV6OutSchema:
         """
-        Check whether a login's device has IPv6 enabled.
+        Check whether a customer's ACS device reports IPv6 information.
 
         Args:
-            login_id: Login ID in IXC.
+            login_id (NonNegativeInt): IXC login ID used to locate the customer's ACS device.
 
         Returns:
-            HasIPV6OutSchema indicating IPv6 presence.
+            schemas.HasIPV6OutSchema: Whether the device reports non-empty IPv6 information.
 
         Raises:
-            HTTPException: 404 if the device info is not found.
+            HTTPException: 404 if the device does not exist; 404 if IPv6 device data cannot be found.
         """
-        # --- Get device ---
+        # --- Get device (ACS) ---
         device = await cls._get_device(login_id=login_id)
-        serial_number = device["serialNumber"]
 
-        # --- Get IPV6 ---
+        if device is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Dispositivo inexistente"
+            )
+
+        # --- Get device info (ACS) ---
+        serial_number = device["serialNumber"]
         endpoint = "devices/views/ipv6"
         query_params = QueryParams(
             {"search[column]": "serialNumber", "search[search]": serial_number}
@@ -139,15 +151,13 @@ class SupportService:
         res = await clients.IxcAcsClient.get(
             endpoint=endpoint, query_params=query_params
         )
-
         if not (regs := res.get("registers", [])):
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="Dispositivos inexistentes",
+                detail="Dados inexistentes",
             )
         info = regs[0]
-
-        tem_ipv6 = info["deviceInfo"]["ipv6"] != ""
+        tem_ipv6 = bool(info["deviceInfo"]["ipv6"].split())
 
         return schemas.HasIPV6OutSchema(tem_ipv6=tem_ipv6)
 
@@ -158,25 +168,31 @@ class SupportService:
         login_id: NonNegativeInt,
     ) -> schemas.UptimeOutSchema:
         """
-        Retrieve the uptime of a login's device.
+        Get the formatted uptime of a customer's ACS device.
 
         Args:
-            login_id: Login ID in IXC.
+            login_id (NonNegativeInt): IXC login ID used to locate the customer's ACS device.
 
         Returns:
-            UptimeOutSchema formatted as DD:HH:MM:SS.
+            schemas.UptimeOutSchema: Device uptime formatted as DD days, HH hours, MM minutes, and SS seconds.
+
+        Raises:
+            HTTPException: 404 if the device does not exist.
         """
-        # --- Get device ---
+        # --- Get device (ACS) ---
         device = await cls._get_device(login_id=login_id)
+
+        if device is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Dispositivo inexistente"
+            )
 
         uptime_seconds = device["deviceInfo"]["uptime"]
         uptime = dt.timedelta(seconds=uptime_seconds)
-
         days = uptime.days
         hours = uptime.seconds // 3600
         minutes = (uptime.seconds // 60) % 60
         seconds = uptime.seconds % 60
-
         uptime_out = f"{days:02}D {hours:02}H {minutes:02}M {seconds:02}S"
 
         return schemas.UptimeOutSchema(uptime=uptime_out)
@@ -188,16 +204,24 @@ class SupportService:
         login_id: NonNegativeInt,
     ) -> schemas.FiberSignalOutSchema:
         """
-        Retrieve the fiber signal (RX/TX) for a login's device.
+        Get the RX and TX fiber signal values reported by a customer's ACS device.
 
         Args:
-            login_id: Login ID in IXC.
+            login_id (NonNegativeInt): IXC login ID used to locate the customer's ACS device.
 
         Returns:
-            FiberSignalOutSchema with rx and tx values.
+            schemas.FiberSignalOutSchema: RX and TX fiber signal values.
+
+        Raises:
+            HTTPException: 404 if the device does not exist.
         """
-        # --- Get device ---
+        # --- Get device (ACS) ---
         device = await cls._get_device(login_id=login_id)
+
+        if device is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Dispositivo inexistente"
+            )
 
         rx = device["deviceInfo"]["rx"]
         tx = device["deviceInfo"]["tx"]
@@ -212,18 +236,18 @@ class SupportService:
         items_per_page: PositiveInt,
     ) -> schemas.ListOutSchema[schemas.ContractOutSchema]:
         """
-        Retrieve active contracts for a customer.
+        List active customer contracts with pagination metadata.
 
         Args:
-            protocol: OPA protocol.
-            cnpj_cpf: Customer document.
-            page: Page number.
-            items_per_page: Items per page.
+            protocol (str | None): Optional protocol filter.
+            cnpj_cpf (str | None): Optional CNPJ/CPF filter.
+            page (PositiveInt): Page number to retrieve.
+            items_per_page (PositiveInt): Number of items per page.
 
         Returns:
-            A ListOutSchema of ContractOutSchema.
+            schemas.ListOutSchema[schemas.ContractOutSchema]: Contract records and pagination metadata.
         """
-        # --- Get active contracts ---
+        # --- Get contracts (IXC) ---
         contracts = await services.CustomerService.get_active_contracts(
             protocol=protocol,
             cnpj_cpf=cnpj_cpf,
@@ -247,16 +271,25 @@ class SupportService:
         login_id: NonNegativeInt,
     ) -> schemas.ConnectionStatusOutSchema:
         """
-        Retrieve the connection status for a login.
+        Get the connection status from an IXC login record.
 
         Args:
-            login_id: Login ID in IXC.
+            login_id (NonNegativeInt): IXC login ID used to retrieve connection status.
 
         Returns:
-            ConnectionStatusOutSchema with the connection status.
+            schemas.ConnectionStatusOutSchema: Connection status from the IXC login record.
+
+        Raises:
+            HTTPException: 404 if the login does not exist.
         """
-        # --- Get login ---
+        # --- Get login (IXC) ---
         login = await cls._get_login(login_id=login_id)
+
+        if login is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Login inexistente"
+            )
+
         return schemas.ConnectionStatusOutSchema(status_conexao=login["online"])
 
     @classmethod
@@ -267,58 +300,77 @@ class SupportService:
         onu_mac: str | None = None,
     ) -> schemas.OnuStatusOutSchema:
         """
-        Retrieve the ONU RX signal status.
+        Retrieve the ONU RX signal status by IXC login ID or ONU MAC address.
 
-        Uses the MAC address if provided (cheaper), otherwise falls back to
-        fetching the login by ID to obtain the ONU MAC.
+        Attempts to read the RX signal form the ACS device first; if unavailable,
+        falls back to the IXC `radpop_radio_cliente_fibra` endpoint.
 
         Args:
-            login_id: Login ID in IXC.
-            onu_mac: ONU MAC address.
+            login_id (NonNegativeInt | None): IXC login ID used to locate the ONU.
+                Optional (default: None).
+            onu_mac (str | None): ONU MAC address used to locate the ONU.
+                Optional (default: None)
 
         Returns:
-            OnuStatusOutSchema with the ONU signal level.
+            schemas.OnuStatusOutSchema: ONU RX signal and its computed status.
 
         Raises:
-            HTTPException: 400 if neither parameter is provided.
-            HTTPException: 404 if the ONU or signal is not found.
+            HTTPException: 400 if neither `login_id` nor a valid `onu_mac` is provided;
+                404 if the login, device, or ONU signal cannot be found.
         """
-        # Justification for this approach: IXC
-        query_value = None
+        ixc_endpoint = "radpop_radio_cliente_fibra"
 
-        # MAC is priority, because computational costs is lower (less one request)
-        if (
+        if login_id is not None:
+            # --- Get device (ACS) ---
+            device = await cls._get_device(login_id=login_id)
+
+            if device is not None:
+                rx_signal = device["deviceInfo"].get("rx")
+                return schemas.OnuStatusOutSchema(sinal_rx=rx_signal)
+
+            # --- Get ONU (IXC) ---
+            grid_param = [utils.Param(TB=f"{ixc_endpoint}.id_login", P=login_id)]
+            res = await clients.IxcClient.get(
+                endpoint=ixc_endpoint, grid_param=grid_param
+            )
+            regs = res.get("registros", [])
+            rx_signal = regs[0].get("sinal_rx") if regs else None
+            if rx_signal is None or float(rx_signal) == 0:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND, detail="Sinal inexistente"
+                )
+            return schemas.OnuStatusOutSchema(sinal_rx=rx_signal)
+        elif (
             onu_mac is not None and onu_mac.strip()
-        ) and not utils.OPA_PLACEHOLDER_RE.match(string=onu_mac):
-            query_value = onu_mac
-        elif login_id is not None:
-            # --- Get login ---
-            login = await cls._get_login(login_id=login_id)
+        ) and not utils.OPA_PLACEHOLDER_RE.search(string=onu_mac) is not None:
+            # --- Get login (IXC) ---
+            login = await cls._get_login(onu_mac=onu_mac)
 
-            query_value = login["onu_mac"]
+            if login is not None:
+                # --- Get device (ACS) ---
+                device = await cls._get_device(login_id=login["id"])
+
+                if device is not None:
+                    rx_signal = device["deviceInfo"].get("rx")
+                    return schemas.OnuStatusOutSchema(sinal_rx=rx_signal)
+
+            # --- Get ONU (IXC) ---
+            grid_param = [utils.Param(TB=f"{ixc_endpoint}.mac", P=onu_mac)]
+            res = await clients.IxcClient.get(
+                endpoint=ixc_endpoint, grid_param=grid_param
+            )
+            regs = res.get("registros", [])
+            rx_signal = regs[0].get("sinal_rx") if regs else None
+            if rx_signal is None or float(rx_signal) == 0:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND, detail="Sinal inexistente"
+                )
+            return schemas.OnuStatusOutSchema(sinal_rx=rx_signal)
         else:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Forneça id_login ou mac_onu",
             )
-
-        # --- Get ONU by MAC ---
-        endpoint = "radpop_radio_cliente_fibra"
-        grid_param = [utils.Param(TB="radpop_radio_cliente_fibra.mac", P=query_value)]
-        res = await clients.IxcClient.get(endpoint=endpoint, grid_param=grid_param)
-        if not (regs := res.get("registros", [])):
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="ONU inexistente"
-            )
-        onu = regs[0]
-
-        if not (rx_signal := onu.get("sinal_rx")):
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Sinal ONU inexistente",
-            )
-
-        return schemas.OnuStatusOutSchema(sinal_rx=rx_signal)
 
     @classmethod
     async def post_disconnect_customer(
@@ -327,47 +379,36 @@ class SupportService:
         login_id: NonNegativeInt,
     ) -> schemas.MessageOutSchema:
         """
-        Disconnect a customer, falling back from IXC to an ACS device reboot.
-
-        Attempts to disconnect the customer's connection through IXC first. If
-        IXC reports a non-success status, retrieves the customer's device from
-        ACS by ``login_id`` and triggers a reboot of that device (via its
-        ``serialNumber``). If neither path confirms a disconnection, an
-        ``HTTPException`` is raised.
+        Disconnect a customer through IXC, falling back to an ACS reboot if needed.
 
         Args:
-            login_id (NonNegativeInt): Customer login/contract identifier used
-                to look up the customer in IXC and to resolve the associated
-                device in ACS. Must be non-negative (IXC identifier constraint).
+            login_id (NonNegativeInt): IXC login ID used to disconnect the customer.
 
         Returns:
-            schemas.MessageOutSchema: Success payload with the message
-                ``"Desconexão bem-sucedida"`` when the customer was disconnected
-                via IXC or the ACS reboot was accepted.
+            schemas.MessageOutSchema: Success message after disconnecting the customer.
 
         Raises:
-            HTTPException: ``500 Internal Server Error`` when IXC does not
-                report success and the ACS reboot request also fails to confirm
-                the device is being rebooted; ``detail`` contains the ACS
-                response message.
+            HTTPException: 404 if the ACS device does not exist when fallback is required; 500 if the ACS reboot fails.
         """
-        # --- Post disconnection (IXC) ---
+        # --- Post disconnect (IXC) ---
         res = await clients.IxcClient.post(
             endpoint="desconectar_clientes", payload={"id": login_id}
         )
-
         if res["msg"][0]["type"] == "success":  # "error" or "success"
             print("Customer disconnected through IXC")
             return schemas.MessageOutSchema(mensagem="Desconexão bem-sucedida")
 
         # --- Get device (ACS) ---
         device = await cls._get_device(login_id=login_id)
+        if device is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Dispositivo inexistente"
+            )
 
-        # --- Post disconnection (ACS) ---
+        # --- Post disconnect (ACS) ---
         endpoint = f"devices/{device['serialNumber']}/reboot"
         res = await clients.IxcAcsClient.get(endpoint=endpoint)
         acs_message = res["message"]
-
         if "being rebooted" in acs_message:
             print("Customer disconnected through ACS")
             return schemas.MessageOutSchema(mensagem="Desconexão bem-sucedida")
@@ -384,17 +425,17 @@ class SupportService:
         items_per_page: PositiveInt,
     ) -> schemas.ListOutSchema[schemas.TicketOutSchema]:
         """
-        Retrieve open tickets for a login.
+        List non-finalized support tickets for an IXC login with pagination metadata.
 
         Args:
-            login_id: Login ID in IXC.
-            page: Page number.
-            items_per_page: Items per page.
+            login_id (NonNegativeInt): IXC login ID used to retrieve support tickets.
+            page (PositiveInt): Page number to retrieve.
+            items_per_page (PositiveInt): Number of items per page.
 
         Returns:
-            A ListOutSchema of TicketOutSchema.
+            schemas.ListOutSchema[schemas.TicketOutSchema]: Support ticket records and pagination metadata.
         """
-        # --- Get tickets ---
+        # --- Get tickets (IXC) ---
         endpoint = "su_ticket"
         grid_param = [
             utils.Param(TB="su_ticket.id_login", P=login_id),
@@ -409,13 +450,11 @@ class SupportService:
         )
         tickets = res.get("registros", [])
         total = res.get("total", 0)
-
         partial_tickets: list[schemas.TicketOutSchema] = []
 
         for ticket in tickets:
             creation_datetime = ticket["data_criacao"]
             creation_date = creation_datetime.split(" ")[0]
-
             partial_tickets.append(
                 schemas.TicketOutSchema(
                     id=ticket["id"],
@@ -441,18 +480,18 @@ class SupportService:
         ticket: schemas.TicketInSchema,
     ) -> schemas.TicketOutSchema:
         """
-        Create a new support ticket.
+        Create a support ticket in IXC and return the created ticket.
 
         Args:
-            ticket: Ticket input data.
+            ticket (schemas.TicketInSchema): Support ticket data to create.
 
         Returns:
-            TicketOutSchema with the created ticket.
+            schemas.TicketOutSchema: Created support ticket.
 
         Raises:
-            HTTPException: 500 if creation fails.
+            HTTPException: 500 if IXC does not return a created ticket ID.
         """
-        # --- Post ticket ---
+        # --- Post ticket (IXC) ---
         endpoint = "su_ticket"
         payload = ticket.model_dump()
         menssagem = payload["mensagem"]
@@ -465,12 +504,11 @@ class SupportService:
                 detail="Cadastro malsucedido",
             )
 
-        # --- Get ticket ---
+        # --- Get ticket (IXC) ---
         grid_param = [utils.Param(TB="su_ticket.id", P=id)]
         res = await clients.IxcClient.get(endpoint=endpoint, grid_param=grid_param)
         regs = res.get("registros", [])
         created_ticket = regs[0]
-
         creation_datetime = created_ticket["data_criacao"]
         creation_date = creation_datetime.split(" ")[0]
 
@@ -492,19 +530,18 @@ class SupportService:
         pool_radius: str | None = None,
     ) -> schemas.IpOutSchema:
         """
-        Update IP and/or radius pool for a login.
+        Update the IP address and/or RADIUS pool for an IXC login.
 
         Args:
-            login_id: Login ID in IXC.
-            ip: New IP (optional).
-            pool_radius: New radius pool (optional).
+            login_id (NonNegativeInt): IXC login ID to update.
+            ip (str | None): New IP address. Optional (default: None).
+            pool_radius (str | None): New RADIUS pool. Optional (default: None).
 
         Returns:
-            IpOutSchema with the updated values.
+            schemas.IpOutSchema: Updated IP address and RADIUS pool.
 
         Raises:
-            HTTPException: 400 if neither parameter is provided.
-            HTTPException: 500 if the update fails.
+            HTTPException: 400 if neither IP nor RADIUS pool is provided; 404 if the login does not exist; 500 if the update fails.
         """
         if (ip is None or not ip.strip()) and (
             pool_radius is None or not pool_radius.strip()
@@ -514,8 +551,12 @@ class SupportService:
                 detail="Forneça ip ou pool_radius",
             )
 
-        # --- Get login ---
+        # --- Get login (IXC) ---
         old_login = await cls._get_login(login_id=login_id)
+        if old_login is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Login inexistente"
+            )
 
         new_ip = ip if ip else old_login["ip"]
         new_radius = pool_radius if pool_radius else old_login["pool_radius"]
@@ -526,7 +567,7 @@ class SupportService:
         }
         del updated_login["id"]
 
-        # --- Put login ---
+        # --- Put login (IXC) ---
         endpoint = "radusuarios"
         res = await clients.IxcClient.put(
             endpoint=f"{endpoint}/{login_id}", payload=updated_login
@@ -545,18 +586,18 @@ class SupportService:
         login_id: NonNegativeInt,
     ) -> schemas.MessageOutSchema:
         """
-        Clear the MAC address of a login.
+        Clear the MAC address associated with an IXC login.
 
         Args:
-            login_id: Login ID in IXC.
+            login_id (NonNegativeInt): IXC login ID whose MAC address should be cleared.
 
         Returns:
-            MessageOutSchema indicating success.
+            schemas.MessageOutSchema: Success message after clearing the MAC address.
 
         Raises:
-            HTTPException: 500 if the operation fails.
+            HTTPException: 500 if IXC returns an error, using a sanitized error message.
         """
-        # --- Post MAC clearing ---
+        # --- Post clear mack (IXC) ---
         endpoint = "radusuarios_25452"
         payload = {"get_id": login_id}
         res = await clients.IxcClient.post(endpoint=endpoint, payload=payload)
@@ -576,16 +617,23 @@ class SupportService:
         login_id: NonNegativeInt,
     ) -> schemas.WifiOutSchema:
         """
-        Retrieve WiFi configuration (2G and 5G) for a login.
+        Get WIFI SSID and password data from an IXC login record.
 
         Args:
-            login_id: Login ID in IXC.
+            login_id (NonNegativeInt): IXC login ID used to retrieve WiFi data.
 
         Returns:
-            WifiOutSchema with SSIDs and passwords.
+            schemas.WifiOutSchema: 2.4 GHz and 5 GHz WiFi SSIDs and passwords.
+
+        Raises:
+            HTTPException: 404 if the login does not exist.
         """
-        # --- Get login ---
+        # --- Get login (IXC) ---
         login = await cls._get_login(login_id=login_id)
+        if login is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Login inexistente"
+            )
 
         return schemas.WifiOutSchema(
             ssid_wifi_2g=login["ssid_router_wifi"] or None,
@@ -603,53 +651,51 @@ class SupportService:
         ssid_pass: str | None = None,
     ) -> schemas.MessageOutSchema:
         """
-        Update WiFi SSID and/or password on both 2G and 5G interfaces.
+        Update WiFi SSID and/or password on an ACS device for both enabled 2.4 GHz and 5.8 GHz interfaces.
 
         Args:
-            login_id: Login ID in IXC.
-            ssid: New SSID (optional).
-            ssid_pass: New password (optional).
+            login_id (NonNegativeInt): IXC login ID used to locate the customer's ACS device.
+            ssid (str | None): New SSID for the 2.4 GHz interface; the 5GHz SSID is set to this value with _5G suffix. Optional (default: None).
+            ssid_pass (str | None): New WiFi password for both interfaces. Optional (default: None).
 
         Returns:
-            MessageOutSchema indicating success.
+            schemas.MessageOutSchema: Success message after updating WiFi data.
 
         Raises:
-            HTTPException: 404 if the WiFi data or enabled interfaces are missing.
+            HTTPException: 404 if the device does not exist; 404 if WiFi data does not exist.
         """
-        # --- Get device ---
+        # --- Get device (ACS) ---
         device = await cls._get_device(login_id=login_id)
+        if device is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Dispositivo inexistente"
+            )
+
         serial_number = device["serialNumber"]
 
-        # --- Get wifi ---
+        # --- Get wifi data (ACS) ---
         endpoint = f"devices/{device['serialNumber']}/wifi"
         wifi = await clients.IxcAcsClient.get(endpoint=endpoint)
         if wifi is None:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Wifi inexistente"
             )
-
         interface_2g = next(i for i in wifi["2.4"] if i["enable"])
         interface_5g = next(i for i in wifi["5.8"] if i["enable"])
-
         payload_2g = {}
         payload_5g = {}
-
         if ssid is not None and ssid.strip():
             payload_2g["ssid"] = ssid
-            # Append the 5G suffix to differentiate the 5G network
             payload_5g["ssid"] = f"{ssid}_5G"
-
         if ssid_pass is not None and ssid_pass.strip():
             payload_2g["password"] = ssid_pass
             payload_5g["password"] = ssid_pass
 
-        # --- Patch wifi 2 G ---
+        # --- Patch wifi data (ACS) ---
         await clients.IxcAcsClient.patch(
             endpoint=f"devices/{serial_number}/wifi/{interface_2g['id']}",
             payload=payload_2g,
         )
-
-        # --- Patch wifi 5 G ---
         await clients.IxcAcsClient.patch(
             endpoint=f"devices/{serial_number}/wifi/{interface_5g['id']}",
             payload=payload_5g,

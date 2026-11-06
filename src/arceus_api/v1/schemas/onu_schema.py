@@ -4,14 +4,16 @@ from .. import utils
 
 
 class OnuStatusOutSchema(BaseModel):
-    sinal_rx: float = Field(description="Sinal RX do dispositivo", examples=[-12.34])
+    sinal_rx: float | None = Field(
+        description="Sinal RX do dispositivo", examples=[-12.34]
+    )
 
     @computed_field(
         description="Status da ONU", examples=[utils.OnuStatusLabel.EXCELLENT]
     )
     @property
     def status_onu(self) -> utils.OnuStatusLabel:
-        if self.sinal_rx == 0:
+        if self.sinal_rx == 0 or self.sinal_rx is None:
             return utils.OnuStatusLabel.NO_STATUS  # 0 --- Sem status
 
         if self.sinal_rx >= -8:  # Infinity --- -8.00: satured
