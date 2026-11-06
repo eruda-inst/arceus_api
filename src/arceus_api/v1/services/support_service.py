@@ -328,21 +328,29 @@ class SupportService:
         login_id: NonNegativeInt,
     ) -> schemas.MessageOutSchema:
         """
-        Disconnect a customer, falling back to a device reboot if needed.
+        Disconnect a customer, falling back from IXC to an ACS device reboot.
 
-        First attempts to disconnect the customer through the IXC
-        "desconectar_clientes" endpoint. If that call does not report success,
-        it looks up the customer's device and requests a reboot through the
-        IXC ACS API, treating the operation as successful when the ACS
-        confirms the reboot.
+        Attempts to disconnect the customer's connection through IXC first. If
+        IXC reports a non-success status, retrieves the customer's device from
+        ACS by ``login_id`` and triggers a reboot of that device (via its
+        ``serialNumber``). If neither path confirms a disconnection, an
+        ``HTTPException`` is raised.
 
         Args:
-            login_id (NonNegativeInt): The customer's login ID in IXC.
+            login_id (NonNegativeInt): Customer login/contract identifier used
+                to look up the customer in IXC and to resolve the associated
+                device in ACS. Must be non-negative (IXC identifier constraint).
 
         Returns:
-            schemas.MessageOutSchema: A message schema indicating whether the
-                disconnection was successful ("Desconexão bem-sucedida") or
-                not ("Desconexão malsucedida").
+            schemas.MessageOutSchema: Success payload with the message
+                ``"Desconexão bem-sucedida"`` when the customer was disconnected
+                via IXC or the ACS reboot was accepted.
+
+        Raises:
+            HTTPException: ``500 Internal Server Error`` when IXC does not
+                report success and the ACS reboot request also fails to confirm
+                the device is being rebooted; ``detail`` contains the ACS
+                response message.
         """
         # --- Post disconnection (IXC) ---
         res = await clients.IxcClient.post(
@@ -350,6 +358,7 @@ class SupportService:
         )
 
         if res["msg"][0]["type"] == "success":  # "error" or "success"
+            print("Customer disconnected through IXC")
             return schemas.MessageOutSchema(mensagem="Desconexão bem-sucedida")
 
         # --- Get device (ACS) ---
@@ -358,12 +367,15 @@ class SupportService:
         # --- Post disconnection (ACS) ---
         endpoint = f"devices/{device['serialNumber']}/reboot"
         res = await clients.IxcAcsClient.get(endpoint=endpoint)
+        acs_message = res["message"]
 
-        success_pattern = r'Device "\S+\s+\S+" being rebooted.'
-        if re.match(pattern=success_pattern, string=res["message"]) is not None:
+        if "being rebooted" in acs_message:
+            print("Customer disconnected through ACS")
             return schemas.MessageOutSchema(mensagem="Desconexão bem-sucedida")
 
-        return schemas.MessageOutSchema(mensagem="Desconexão malsucedida")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=acs_message
+        )
 
     @staticmethod
     async def get_tickets(
